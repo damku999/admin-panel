@@ -1,0 +1,248 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Customer;
+use Illuminate\Http\Request;
+use App\Exports\CustomersExport;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Validator;
+
+class CustomerController extends Controller
+{
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware('permission:customer-list|customer-create|customer-edit|customer-delete', ['only' => ['index']]);
+        $this->middleware('permission:customer-create', ['only' => ['create', 'store', 'updateStatus']]);
+        $this->middleware('permission:customer-edit', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:customer-delete', ['only' => ['delete']]);
+    }
+
+
+    /**
+     * List Customer 
+     * @param Nill
+     * @return Array $customer
+     * @author Shani Singh
+     */
+    public function index(Request $request)
+    {
+        $customer_obj = Customer::select('*');
+        // dd($request->toArray());
+        if (!empty($request->search)) {
+            $customer_obj->where('name', 'LIKE', '%' . trim($request->search) . '%')->orWhere('email', 'LIKE', '%' . trim($request->search) . '%')->orWhere('mobile_number', 'LIKE', '%' . trim($request->search) . '%');
+        }
+
+        $customers = $customer_obj->paginate(10);
+        return view('customers.index', ['customers' => $customers]);
+    }
+
+    /**
+     * Create Customer 
+     * @param Nill
+     * @return Array $customer
+     * @author Shani Singh
+     */
+    public function create()
+    {
+        return view('customers.add');
+    }
+
+    /**
+     * Store Customer
+     * @param Request $request
+     * @return View Customers
+     * @author Shani Singh
+     */
+    public function store(Request $request)
+    {
+        // Validations
+        $validation_array = [
+            'name' => 'required',
+            'email' => 'required|unique:customers,email',
+            'mobile_number' => 'required|numeric|digits:10',
+            'status' => 'required|numeric|in:0,1',
+        ];
+
+        if (!empty($request->date_of_birth)) {
+            $validation_array['date_of_birth'] = 'date_format:Y-m-d';
+        }
+
+        if (!empty($request->wedding_anniversary_date)) {
+            $validation_array['wedding_anniversary_date'] = 'date_format:Y-m-d';
+        }
+        if (!empty($request->engagement_anniversary_date)) {
+            $validation_array['engagement_anniversary_date'] = 'date_format:Y-m-d';
+        }
+        $request->validate($validation_array);
+        DB::beginTransaction();
+
+        try {
+            // Store Data
+            $customer = Customer::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'mobile_number' => $request->mobile_number,
+                'status' => $request->status,
+                'wedding_anniversary_date' => $request->wedding_anniversary_date,
+                'engagement_anniversary_date' => $request->engagement_anniversary_date,
+                'date_of_birth' => $request->date_of_birth,
+            ]);
+
+            // Commit And Redirected To Listing
+            DB::commit();
+            return redirect()->route('customers.index')->with('success', 'Customer Created Successfully.');
+        } catch (\Throwable $th) {
+            // Rollback and return with Error
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', $th->getMessage());
+        }
+    }
+
+    /**
+     * Update Status Of Customer
+     * @param Integer $status
+     * @return List Page With Success
+     * @author Shani Singh
+     */
+    public function updateStatus($customer_id, $status)
+    {
+        // Validation
+        $validate = Validator::make([
+            'customer_id'   => $customer_id,
+            'status' => $status
+        ], [
+            'customer_id'   =>  'required|exists:customers,id',
+            'status' =>  'required|in:0,1',
+        ]);
+
+        // If Validations Fails
+        if ($validate->fails()) {
+            return redirect()->route('customers.index')->with('error', $validate->errors()->first());
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Update Status
+            Customer::whereId($customer_id)->update(['status' => $status]);
+
+            // Commit And Redirect on index with Success Message
+            DB::commit();
+            return redirect()->route('customers.index')->with('success', 'Customer Status Updated Successfully!');
+        } catch (\Throwable $th) {
+
+            // Rollback & Return Error Message
+            DB::rollBack();
+            return redirect()->back()->with('error', $th->getMessage());
+        }
+    }
+
+    /**
+     * Edit Customer
+     * @param Integer $customer
+     * @return Collection $customer
+     * @author Shani Singh
+     */
+    public function edit(Customer $customer)
+    {
+        return view('customers.edit')->with([
+            'customer'  => $customer
+        ]);
+    }
+
+    /**
+     * Update Customer
+     * @param Request $request, Customer $customer
+     * @return View Customers
+     * @author Shani Singh
+     */
+    public function update(Request $request, Customer $customer)
+    {
+        // Validations
+        $validation_array = [
+            'name' => 'required',
+            'email' => 'required|unique:customers,email,' . $customer->id . ',id',
+            'mobile_number' => 'required|numeric|digits:10',
+            'status' => 'required|numeric|in:0,1',
+        ];
+
+        if (!empty($request->date_of_birth)) {
+            $validation_array['date_of_birth'] = 'date_format:Y-m-d';
+        }
+
+        if (!empty($request->wedding_anniversary_date)) {
+            $validation_array['wedding_anniversary_date'] = 'date_format:Y-m-d';
+        }
+        if (!empty($request->engagement_anniversary_date)) {
+            $validation_array['engagement_anniversary_date'] = 'date_format:Y-m-d';
+        }
+
+        $request->validate($validation_array);
+
+        DB::beginTransaction($validation_array);
+        try {
+            // Store Data
+            $customer_updated = Customer::whereId($customer->id)->update([
+                'name' => $request->name,
+                'email' => $request->email,
+                'mobile_number' => $request->mobile_number,
+                'status' => $request->status,
+                'wedding_anniversary_date' => $request->wedding_anniversary_date,
+                'engagement_anniversary_date' => $request->engagement_anniversary_date,
+                'date_of_birth' => $request->date_of_birth,
+            ]);
+            // Commit And Redirected To Listing
+            DB::commit();
+            return redirect()->route('customers.index')->with('success', 'Customer Updated Successfully.');
+        } catch (\Throwable $th) {
+            // Rollback and return with Error
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', $th->getMessage());
+        }
+    }
+
+    /**
+     * Delete Customer
+     * @param Customer $customer
+     * @return Index Customers
+     * @author Shani Singh
+     */
+    public function delete(Customer $customer)
+    {
+        DB::beginTransaction();
+        try {
+            // Delete Customer
+            Customer::whereId($customer->id)->delete();
+
+            DB::commit();
+            return redirect()->route('customers.index')->with('success', 'Customer Deleted Successfully!.');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()->back()->with('error', $th->getMessage());
+        }
+    }
+
+    /**
+     * Import Customers 
+     * @param Null
+     * @return View File
+     */
+    public function importCustomers()
+    {
+        return view('customers.import');
+    }
+
+
+    public function export()
+    {
+        return Excel::download(new CustomersExport, 'customers.xlsx');
+    }
+}

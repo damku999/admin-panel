@@ -35,7 +35,6 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $customer_obj = Customer::select('*');
-        // dd($request->toArray());
         if (!empty($request->search)) {
             $customer_obj->where('name', 'LIKE', '%' . trim($request->search) . '%')->orWhere('email', 'LIKE', '%' . trim($request->search) . '%')->orWhere('mobile_number', 'LIKE', '%' . trim($request->search) . '%');
         }

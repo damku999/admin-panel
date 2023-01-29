@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\CustomerInsurance;
+use App\Models\Branch;
+use App\Models\Broker;
+use App\Models\Customer;
 use Illuminate\Http\Request;
-use App\Exports\CustomerInsurancesExport;
+use App\Models\InsuranceCompany;
+use App\Models\CustomerInsurance;
 use Illuminate\Support\Facades\DB;
+use App\Models\RelationshipManager;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\CustomerInsurancesExport;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerInsuranceController extends Controller
@@ -34,8 +39,11 @@ class CustomerInsuranceController extends Controller
      */
     public function index(Request $request)
     {
-        $customer_insurance_obj = CustomerInsurance::select('*');
-        // dd($request->toArray());
+        $customer_insurance_obj = CustomerInsurance::select(['customer_insurances.*', 'customers.name as customer_name', 'branches.name as branch_name', 'brokers.name as broker_name', 'relationship_managers.name as relationship_manager_name'])
+            ->join('customers', 'customers.id', 'customer_insurances.customer_id')
+            ->leftJoin('branches', 'branches.id', 'customer_insurances.branch_id')
+            ->leftJoin('brokers', 'brokers.id', 'customer_insurances.broker_id')
+            ->leftJoin('relationship_managers', 'relationship_managers.id', 'customer_insurances.relationship_manager_id');
         if (!empty($request->search)) {
             $customer_insurance_obj->where('name', 'LIKE', '%' . trim($request->search) . '%')->orWhere('email', 'LIKE', '%' . trim($request->search) . '%')->orWhere('mobile_number', 'LIKE', '%' . trim($request->search) . '%');
         }
@@ -52,7 +60,14 @@ class CustomerInsuranceController extends Controller
      */
     public function create()
     {
-        return view('customer_insurances.add');
+        $response  = [
+            'customers' => Customer::select('id', 'name')->get(),
+            'brokers' => Broker::select('id', 'name')->get(),
+            'relationship_managers' => RelationshipManager::select('id', 'name')->get(),
+            'branches' => Branch::select('id', 'name')->get(),
+            'insurance_companies' => InsuranceCompany::select('id', 'name')->get(),
+        ];
+        return view('customer_insurances.add', $response);
     }
 
     /**
@@ -65,40 +80,100 @@ class CustomerInsuranceController extends Controller
     {
         // Validations
         $validation_array = [
-            'name' => 'required',
-            'email' => 'required|unique:customer_insurances,email',
-            'mobile_number' => 'required|numeric|digits:10',
-            'status' => 'required|numeric|in:0,1',
+            'customer_id' => 'required',
+            'branch_id' => 'required',
+            'broker_id' => 'required',
+            'relationship_manager_id' => 'required',
+            'insurance_company_id' => 'required',
+            'registration_no' => 'required'
         ];
 
-        if (!empty($request->date_of_birth)) {
-            $validation_array['date_of_birth'] = 'date_format:Y-m-d';
+        if (!empty($request->issue_date)) {
+            $validation_array['issue_date'] = 'date_format:Y-m-d';
         }
 
-        if (!empty($request->wedding_anniversary_date)) {
-            $validation_array['wedding_anniversary_date'] = 'date_format:Y-m-d';
+        if (!empty($request->start_date)) {
+            $validation_array['start_date'] = 'date_format:Y-m-d';
         }
-        if (!empty($request->engagement_anniversary_date)) {
-            $validation_array['engagement_anniversary_date'] = 'date_format:Y-m-d';
+        if (!empty($request->expired_date)) {
+            $validation_array['expired_date'] = 'date_format:Y-m-d';
         }
         $request->validate($validation_array);
         DB::beginTransaction();
 
         try {
-            // Store Data
-            $customer_insurance = CustomerInsurance::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'mobile_number' => $request->mobile_number,
-                'status' => $request->status,
-                'wedding_anniversary_date' => $request->wedding_anniversary_date,
-                'engagement_anniversary_date' => $request->engagement_anniversary_date,
-                'date_of_birth' => $request->date_of_birth,
-            ]);
+            $data_to_store = [];
+            $data_to_store['customer_id'] = $request->customer_id;
+            $data_to_store['branch_id'] = $request->branch_id;
+            $data_to_store['broker_id'] = $request->broker_id;
+            $data_to_store['relationship_manager_id'] = $request->relationship_manager_id;
+            $data_to_store['insurance_company_id'] = $request->insurance_company_id;
 
+            if (isset($request->issue_date))
+                $data_to_store['issue_date'] = $request->issue_date;
+
+            if (isset($request->bus_type))
+                $data_to_store['bus_type'] = $request->bus_type;
+
+            if (isset($request->type_of_policy))
+                $data_to_store['type_of_policy'] = $request->type_of_policy;
+
+            if (isset($request->policy_no))
+                $data_to_store['policy_no'] = $request->policy_no;
+
+            if (isset($request->registration_no))
+                $data_to_store['registration_no'] = $request->registration_no;
+
+            if (isset($request->rto))
+                $data_to_store['rto'] = $request->rto;
+
+            if (isset($request->make_model))
+                $data_to_store['make_model'] = $request->make_model;
+
+            if (isset($request->fuel_type))
+                $data_to_store['fuel_type'] = $request->fuel_type;
+
+            if (isset($request->start_date))
+                $data_to_store['start_date'] = $request->start_date;
+
+            if (isset($request->expired_date))
+                $data_to_store['expired_date'] = $request->expired_date;
+
+            if (isset($request->od_premium))
+                $data_to_store['od_premium'] = $request->od_premium;
+
+            if (isset($request->tp_premium))
+                $data_to_store['tp_premium'] = $request->tp_premium;
+
+            if (isset($request->rsa))
+                $data_to_store['rsa'] = $request->rsa;
+
+            if (isset($request->net_premium))
+                $data_to_store['net_premium'] = $request->net_premium;
+
+            if (isset($request->gst))
+                $data_to_store['gst'] = $request->gst;
+
+            if (isset($request->final_premium_with_gst))
+                $data_to_store['final_premium_with_gst'] = $request->final_premium_with_gst;
+
+            if (isset($request->mode_of_payment))
+                $data_to_store['mode_of_payment'] = $request->mode_of_payment;
+
+            if (isset($request->cheque_no))
+                $data_to_store['cheque_no'] = $request->cheque_no;
+
+            if (isset($request->premium))
+                $data_to_store['premium'] = $request->premium;
+
+            if (isset($request->issued_by))
+                $data_to_store['issued_by'] = $request->issued_by;
+
+            // Store Data
+            $customer_insurance = CustomerInsurance::create($data_to_store);
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('customer_insurances.index')->with('success', 'CustomerInsurance Created Successfully.');
+            return redirect()->route('customer_insurances.index')->with('success', 'Customer Insurance Created Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -153,9 +228,16 @@ class CustomerInsuranceController extends Controller
      */
     public function edit(CustomerInsurance $customer_insurance)
     {
-        return view('customer_insurances.edit')->with([
+        $response  = [
+            'customers' => Customer::select('id', 'name')->get(),
+            'brokers' => Broker::select('id', 'name')->get(),
+            'relationship_managers' => RelationshipManager::select('id', 'name')->get(),
+            'branches' => Branch::select('id', 'name')->get(),
+            'insurance_companies' => InsuranceCompany::select('id', 'name')->get(),
             'customer_insurance'  => $customer_insurance
-        ]);
+        ];
+        // dd($response);
+        return view('customer_insurances.edit')->with($response);
     }
 
     /**
@@ -166,39 +248,97 @@ class CustomerInsuranceController extends Controller
      */
     public function update(Request $request, CustomerInsurance $customer_insurance)
     {
-        // Validations
         $validation_array = [
-            'name' => 'required',
-            'email' => 'required|unique:customer_insurances,email,' . $customer_insurance->id . ',id',
-            'mobile_number' => 'required|numeric|digits:10',
-            'status' => 'required|numeric|in:0,1',
+            'customer_id' => 'required',
+            'branch_id' => 'required',
+            'broker_id' => 'required',
+            'relationship_manager_id' => 'required',
+            'insurance_company_id' => 'required',
+            'registration_no' => 'required'
         ];
 
-        if (!empty($request->date_of_birth)) {
-            $validation_array['date_of_birth'] = 'date_format:Y-m-d';
+        if (!empty($request->issue_date)) {
+            $validation_array['issue_date'] = 'date_format:Y-m-d';
         }
 
-        if (!empty($request->wedding_anniversary_date)) {
-            $validation_array['wedding_anniversary_date'] = 'date_format:Y-m-d';
+        if (!empty($request->start_date)) {
+            $validation_array['start_date'] = 'date_format:Y-m-d';
         }
-        if (!empty($request->engagement_anniversary_date)) {
-            $validation_array['engagement_anniversary_date'] = 'date_format:Y-m-d';
+        if (!empty($request->expired_date)) {
+            $validation_array['expired_date'] = 'date_format:Y-m-d';
         }
-
         $request->validate($validation_array);
-
         DB::beginTransaction($validation_array);
         try {
+            $data_to_store = [];
+            $data_to_store['customer_id'] = $request->customer_id;
+            $data_to_store['branch_id'] = $request->branch_id;
+            $data_to_store['broker_id'] = $request->broker_id;
+            $data_to_store['relationship_manager_id'] = $request->relationship_manager_id;
+            $data_to_store['insurance_company_id'] = $request->insurance_company_id;
+            if (isset($request->bus_type))
+                $data_to_store['bus_type'] = $request->bus_type;
+
+            if (isset($request->issue_date))
+                $data_to_store['issue_date'] = $request->issue_date;
+
+            if (isset($request->type_of_policy))
+                $data_to_store['type_of_policy'] = $request->type_of_policy;
+
+            if (isset($request->policy_no))
+                $data_to_store['policy_no'] = $request->policy_no;
+
+            if (isset($request->registration_no))
+                $data_to_store['registration_no'] = $request->registration_no;
+
+            if (isset($request->rto))
+                $data_to_store['rto'] = $request->rto;
+
+            if (isset($request->make_model))
+                $data_to_store['make_model'] = $request->make_model;
+
+            if (isset($request->fuel_type))
+                $data_to_store['fuel_type'] = $request->fuel_type;
+
+            if (isset($request->start_date))
+                $data_to_store['start_date'] = $request->start_date;
+
+            if (isset($request->expired_date))
+                $data_to_store['expired_date'] = $request->expired_date;
+
+            if (isset($request->od_premium))
+                $data_to_store['od_premium'] = $request->od_premium;
+
+            if (isset($request->tp_premium))
+                $data_to_store['tp_premium'] = $request->tp_premium;
+
+            if (isset($request->rsa))
+                $data_to_store['rsa'] = $request->rsa;
+
+            if (isset($request->net_premium))
+                $data_to_store['net_premium'] = $request->net_premium;
+
+            if (isset($request->gst))
+                $data_to_store['gst'] = $request->gst;
+
+            if (isset($request->final_premium_with_gst))
+                $data_to_store['final_premium_with_gst'] = $request->final_premium_with_gst;
+
+            if (isset($request->mode_of_payment))
+                $data_to_store['mode_of_payment'] = $request->mode_of_payment;
+
+            if (isset($request->cheque_no))
+                $data_to_store['cheque_no'] = $request->cheque_no;
+
+            if (isset($request->premium))
+                $data_to_store['premium'] = $request->premium;
+
+            if (isset($request->issued_by))
+                $data_to_store['issued_by'] = $request->issued_by;
+
+            // dd($data_to_store);
             // Store Data
-            $customer_insurance_updated = CustomerInsurance::whereId($customer_insurance->id)->update([
-                'name' => $request->name,
-                'email' => $request->email,
-                'mobile_number' => $request->mobile_number,
-                'status' => $request->status,
-                'wedding_anniversary_date' => $request->wedding_anniversary_date,
-                'engagement_anniversary_date' => $request->engagement_anniversary_date,
-                'date_of_birth' => $request->date_of_birth,
-            ]);
+            $customer_insurance_updated = CustomerInsurance::whereId($customer_insurance->id)->update($data_to_store);
             // Commit And Redirected To Listing
             DB::commit();
             return redirect()->route('customer_insurances.index')->with('success', 'CustomerInsurance Updated Successfully.');

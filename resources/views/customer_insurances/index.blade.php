@@ -49,9 +49,9 @@
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th width="20%">Name</th>
-                                <th width="25%">Email</th>
-                                <th width="15%">Mobile</th>
+                                <th width="20%">Customer Name</th>
+                                <th width="25%">POLICY NO.</th>
+                                <th width="15%">Registration NO.</th>
                                 <th width="15%">Status</th>
                                 <th width="10%">Action</th>
                             </tr>
@@ -59,9 +59,9 @@
                         <tbody>
                             @forelse($customer_insurances as $customer_insurance)
                                 <tr>
-                                    <td>{{ $customer_insurance->name }}</td>
-                                    <td>{{ $customer_insurance->email }}</td>
-                                    <td>{{ $customer_insurance->mobile_number }}</td>
+                                    <td>{{ $customer_insurance->customer_name }}</td>
+                                    <td>{{ $customer_insurance->policy_no }}</td>
+                                    <td>{{ $customer_insurance->registration_no }}</td>
                                     <td>
                                         @if ($customer_insurance->status == 0)
                                             <span class="badge badge-danger">Inactive</span>
@@ -85,10 +85,10 @@
                                             class="btn btn-primary m-2">
                                             <i class="fa fa-pen"></i>
                                         </a>
-                                        <a class="btn btn-danger m-2" href="#" data-toggle="modal"
+                                        {{-- <a class="btn btn-danger m-2" href="#" data-toggle="modal"
                                             data-target="#deleteModal">
                                             <i class="fas fa-trash"></i>
-                                        </a>
+                                        </a> --}}
                                     </td>
                                 </tr>
                             @empty

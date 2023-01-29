@@ -23,14 +23,4 @@ class Broker extends Authenticatable
         'email',
         'mobile_number',
     ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
 }

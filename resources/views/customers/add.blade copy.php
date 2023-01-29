@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Add Customer Insurance')
+@section('title', 'Add Customers')
 
 @section('content')
 
@@ -8,9 +8,8 @@
 
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Add Customer Insurance</h1>
-            <a href="{{ route('customer_insurances.index') }}"
-                class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+            <h1 class="h3 mb-0 text-gray-800">Add Customers</h1>
+            <a href="{{ route('customers.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                     class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
         </div>
 
@@ -20,21 +19,114 @@
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Add New Customer Insurance</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Add New Customer</h6>
             </div>
-            <form method="POST" action="{{ route('customer_insurances.store') }}">
+            <form method="POST" action="{{ route('customers.store') }}">
                 @csrf
                 <div class="card-body">
                     <div class="form-group row">
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0"><span style="color: red;">*</span>Customer
-                            <select name="customer_id" class="form-control" id="customer_id">
-                                <option selected="selected" disabled="disabled">Select Customer</option>
-                                @foreach ($customers as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}">{{ $item->name }}
-                                    </option>
-                                @endforeach
+                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                            <span style="color:red;">*</span>Name</label>
+                            <input type="text"
+                                class="form-control form-control-customer @error('name') is-invalid @enderror"
+                                id="exampleFirstName" placeholder="Name" name="name" value="{{ old('name') }}">
+
+                            @error('name')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Email --}}
+                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                            <span style="color:red;">*</span>Email</label>
+                            <input type="email"
+                                class="form-control form-control-customer @error('email') is-invalid @enderror"
+                                id="exampleEmail" placeholder="Email" name="email" value="{{ old('email') }}">
+
+                            @error('email')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Mobile Number --}}
+                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                            <span style="color:red;">*</span>Mobile Number</label>
+                            <input type="text"
+                                class="form-control form-control-customer @error('mobile_number') is-invalid @enderror"
+                                id="exampleMobile" placeholder="Mobile Number" name="mobile_number"
+                                value="{{ old('mobile_number') }}">
+
+                            @error('mobile_number')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Status --}}
+                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                            <span style="color:red;">*</span>Status</label>
+                            <select class="form-control form-control-customer @error('status') is-invalid @enderror"
+                                name="status">
+                                <option selected disabled>Select Status</option>
+                                <option value="1" selected>Active</option>
+                                <option value="0">Inactive</option>
                             </select>
-                            @error('customer_id')
+                            @error('status')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+
+                        {{-- Date Of Birth --}}
+                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                            <span style="color:red;"></span>Date Of Birth</label>
+                            <div class="input-group date" id="datepicker">
+                                <input type="text" class="form-control @error('date_of_birth') is-invalid @enderror"
+                                    id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth') }}" />
+                                <span class="input-group-append">
+                                    <span class="input-group-text bg-light d-block">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </span>
+                            </div>
+                            @error('date_of_birth')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Date Of Engagement Anniversary --}}
+                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                            <span style="color:red;"></span>Date Of Engagement Anniversary</label>
+                            <div class="input-group date" id="datepicker">
+                                <input type="text"
+                                    class="form-control @error('engagement_anniversary_date') is-invalid @enderror"
+                                    id="engagement_anniversary_date" name="engagement_anniversary_date"
+                                    value="{{ old('engagement_anniversary_date') }}" />
+                                <span class="input-group-append">
+                                    <span class="input-group-text bg-light d-block">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </span>
+                            </div>
+                            @error('engagement_anniversary_date')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Date Of Wedding Anniversary --}}
+                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                            <span style="color:red;"></span>Date Of Wedding Anniversary</label>
+                            <div class="input-group date" id="datepicker">
+                                <input type="text"
+                                    class="form-control @error('wedding_anniversary_date') is-invalid @enderror"
+                                    id="wedding_anniversary_date" name="wedding_anniversary_date"
+                                    value="{{ old('wedding_anniversary_date') }}" />
+                                <span class="input-group-append">
+                                    <span class="input-group-text bg-light d-block">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </span>
+                            </div>
+                            @error('wedding_anniversary_date')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
@@ -46,9 +138,9 @@
                                 <input type="date" class="form-control @error('issue_date') is-invalid @enderror"
                                     id="issue_date" name="issue_date" value="{{ old('issue_date') }}" />
                                 <span class="input-group-append">
-                                    {{-- <span class="input-group-text bg-light d-block">
+                                    <span class="input-group-text bg-light d-block">
                                         <i class="fa fa-calendar"></i>
-                                    </span> --}}
+                                    </span>
                                 </span>
                             </div>
                             @error('issue_date')
@@ -62,6 +154,7 @@
                             <input type="text"
                                 class="form-control form-control-customer @error('bus_type') is-invalid @enderror"
                                 id="bus_type" placeholder="Bus Type" name="bus_type" value="{{ old('bus_type') }}">
+
                             @error('bus_type')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
@@ -70,14 +163,11 @@
                         {{-- Branch --}}
                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
                             <label>Branch</label>
-                            <select name="branch_id" class="form-control" id="branch_id">
-                                <option selected="selected" disabled="disabled">Select Branch</option>
-                                @foreach ($branches as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}">{{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('branch_id')
+                            <input type="text"
+                                class="form-control form-control-customer @error('branch') is-invalid @enderror"
+                                id="branch" placeholder="Branch" name="branch" value="{{ old('branch') }}">
+
+                            @error('branch')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
@@ -85,46 +175,50 @@
                         {{-- Broker --}}
                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
                             <label>Broker</label>
-                            <select name="broker_id" class="form-control" id="broker_id">
-                                <option selected="selected" disabled="disabled">Select Broker</option>
-                                @foreach ($brokers as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}">{{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('broker_id')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        {{-- RM --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
-                            <label>Relationship Manager</label>
-                            <select name="relationship_manager_id" class="form-control" id="relationship_manager_id">
-                                <option selected="selected" disabled="disabled">Select Broker</option>
-                                @foreach ($brokers as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}">{{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('relationship_manager_id')
+                            <input type="text"
+                                class="form-control form-control-customer @error('broker') is-invalid @enderror"
+                                id="broker" placeholder="Broker" name="broker" value="{{ old('broker') }}">
+
+                            @error('broker')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
 
-                        {{-- Insurance Company Name --}}
+                        {{-- RM --}}
                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
-                            <label>Insurance Company Name</label>
-                            <select name="insurance_company_id" class="form-control" id="insurance_company_id">
-                                <option selected="selected" disabled="disabled">Select Broker</option>
-                                @foreach ($insurance_companies as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}">{{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('insurance_company_id')
+                            <label>RM</label>
+                            <input type="text"
+                                class="form-control form-control-customer @error('rm') is-invalid @enderror"
+                                id="rm" placeholder="RM" name="rm" value="{{ old('rm') }}">
+
+                            @error('rm')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
+
+                        <!-- {{-- Customer Name --}}
+                            <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                                <label>Customer Name</label>
+                                <input type="text" class="form-control form-control-customer @error('customer_name') is-invalid @enderror" id="customer_name" placeholder="Customer Name" name="customer_name" value="{{ old('customer_name') }}">
+
+                                @error('customer_name')
+        <span class="text-danger">{{ $message }}</span>
+    @enderror
+                            </div> -->
+
+                        {{-- Company Name --}}
+                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                            <label>Company Name</label>
+                            <input type="text"
+                                class="form-control form-control-customer @error('company_name') is-invalid @enderror"
+                                id="company_name" placeholder="Company Name" name="company_name"
+                                value="{{ old('company_name') }}">
+
+                            @error('company_name')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
                         {{-- Type OF Policy --}}
                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
                             <label>Type Of Policy</label>
@@ -137,18 +231,7 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
-                         {{-- Policy No. --}}
-                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
-                            <label>Policy No.</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('policy_no') is-invalid @enderror"
-                                id="policy_no" placeholder="Registration No." name="policy_no"
-                                value="{{ old('policy_no') }}">
 
-                            @error('policy_no')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
                         {{-- Registration No. --}}
                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
                             <label>Registration No.</label>
@@ -166,8 +249,8 @@
                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
                             <label>RTO</label>
                             <input type="text"
-                                class="form-control form-control-customer @error('rto') is-invalid @enderror" id="rto"
-                                placeholder="RTO" name="rto" value="{{ old('rto') }}">
+                                class="form-control form-control-customer @error('rto') is-invalid @enderror"
+                                id="rto" placeholder="RTO" name="rto" value="{{ old('rto') }}">
 
                             @error('rto')
                                 <span class="text-danger">{{ $message }}</span>
@@ -232,6 +315,27 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
+
+                        <!-- {{-- Mobile Number --}}
+                            <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                                <label>Mobile Number</label>
+                                <input type="text" class="form-control form-control-customer @error('mobile_number') is-invalid @enderror" id="exampleMobile" placeholder="Mobile Number" name="mobile_number" value="{{ old('mobile_number') }}">
+
+                                @error('mobile_number')
+        <span class="text-danger">{{ $message }}</span>
+    @enderror
+                            </div>
+
+                            {{-- Email --}}
+                            <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                                <label>Email</label>
+                                <input type="email" class="form-control form-control-customer @error('email') is-invalid @enderror" id="exampleEmail" placeholder="Email" name="email" value="{{ old('email') }}">
+
+                                @error('email')
+        <span class="text-danger">{{ $message }}</span>
+    @enderror
+                            </div> -->
+
                         {{-- OD Premium --}}
                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
                             <label>OD Premium</label>
@@ -345,6 +449,21 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
+
+                        {{-- Status --}}
+                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                            <span style="color:red;">*</span>Status</label>
+                            <select class="form-control form-control-customer @error('status') is-invalid @enderror"
+                                name="status">
+                                <option selected disabled>Select Status</option>
+                                <option value="1" selected>Active</option>
+                                <option value="0">Inactive</option>
+                            </select>
+                            @error('status')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
                         {{-- Issued By --}}
                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
                             <label>Issued By</label>
@@ -356,13 +475,13 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
+
                     </div>
                 </div>
 
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-customer_insurance float-right mb-3">Save</button>
-                    <a class="btn btn-primary float-right mr-3 mb-3"
-                        href="{{ route('customer_insurances.index') }}">Cancel</a>
+                    <button type="submit" class="btn btn-success btn-customer float-right mb-3">Save</button>
+                    <a class="btn btn-primary float-right mr-3 mb-3" href="{{ route('customers.index') }}">Cancel</a>
                 </div>
             </form>
         </div>
@@ -372,13 +491,27 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"
+        integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
-        $(document).ready(function() {
-            $('#customer_id').select2();
+        $('#date_of_birth').datepicker({
+            format: 'yyyy-mm-dd',
+        });
+
+        $('#wedding_anniversary_date').datepicker({
+            format: 'yyyy-mm-dd',
+        });
+
+        $('#engagement_anniversary_date').datepicker({
+            format: 'yyyy-mm-dd',
         });
     </script>
+
 @endsection
 @section('stylesheets')
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css"
+        integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 @endsection

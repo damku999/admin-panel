@@ -19,7 +19,7 @@
                         <i class="fas fa-check"></i> Export To Excel
                     </a>
                 </div>
-                
+
             </div>
 
         </div>
@@ -76,9 +76,9 @@
                                             class="btn btn-primary m-2">
                                             <i class="fa fa-pen"></i>
                                         </a>
-                                        <a class="btn btn-danger m-2" href="#" data-toggle="modal" data-target="#deleteModal">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
+                                        <a class="btn btn-danger m-2" href="javascript:void(0);"
+                                            onclick="delete_conf_common('{{ $user['id'] }}','User','User', '{{ route('users.index') }}');"><i
+                                                class="fa fa-trash-alt "></i></a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -92,10 +92,10 @@
 
     </div>
 
-    @include('users.delete-modal')
+    {{-- @include('users.delete-modal') --}}
 
 @endsection
 
 @section('scripts')
-    
+
 @endsection

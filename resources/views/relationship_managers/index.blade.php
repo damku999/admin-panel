@@ -85,10 +85,9 @@
                                             class="btn btn-primary m-2">
                                             <i class="fa fa-pen"></i>
                                         </a>
-                                        <a class="btn btn-danger m-2" href="#" data-toggle="modal"
-                                            data-target="#deleteModal">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
+                                        <a class="btn btn-danger m-2" href="javascript:void(0);"
+                                            onclick="delete_conf_common('{{ $relationship_manager['id'] }}','RelationshipManager','Relationship Manager', '{{ route('relationship_managers.index') }}');"><i
+                                                class="fa fa-trash-alt "></i></a>
                                     </td>
                                 </tr>
                             @empty
@@ -105,9 +104,6 @@
         </div>
 
     </div>
-    @if (!$relationship_managers->isEmpty())
-        @include('relationship_managers.delete-modal')
-    @endif
 
 @endsection
 

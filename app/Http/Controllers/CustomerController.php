@@ -153,7 +153,8 @@ class CustomerController extends Controller
     public function edit(Customer $customer)
     {
         return view('customers.edit')->with([
-            'customer'  => $customer
+            'customer'  => $customer,
+            'customer_insurances'  => $customer->insurance
         ]);
     }
 

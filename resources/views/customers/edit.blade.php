@@ -152,7 +152,46 @@
                 </div>
             </form>
         </div>
+        <div class="card-body table-responsive p-0">
+            <table class="table table-head-fixed text-nowrap">
+                <thead>
+                    <tr>
+                        <th>Added Date</th>
+                        <th>Issue Date</th>
+                        <th>Policy Number</th>
+                        <th>Registration Number</th>
+                        <th>Type of Policy</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!empty($customer_insurances))
+                        @foreach ($customer_insurances as $customer_insurance)
+                            <tr>
+                                <td>{{ $customer_insurance->created_at }}</td>
+                                <td>{{ $customer_insurance->issue_date }}</td>
+                                <td>{{ $customer_insurance->policy_no }}</td>
+                                <td>{{ $customer_insurance->registration_no }}</td>
+                                <td>{{ $customer_insurance->type_of_policy }}</td>
 
+                                <td class="text-center">
+                                    <a
+                                        href="{{ url(\Config::get('app.url')) }}customer_insurances/edit/{{ $customer_insurance->id }}"><i
+                                            class="fa fa-edit"></i></a> &nbsp;
+                                    <a href="javascript:void(0);"
+                                        onclick="delete_conf_common('{{ $customer_insurance->id }}','CustomerInsurance', 'Customer Insurance', '{{ url(\Config::get('app.url')) }}customers/edit/{{ $customer_insurance->customer_id }}');"><i
+                                            class="fa fa-trash-alt text-danger"></i></a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td colspan="6" class="center">No Record found.</td>
+                        </tr>
+                    @endif
+                </tbody>
+            </table>
+        </div>
     </div>
 
 @endsection

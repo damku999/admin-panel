@@ -24,6 +24,8 @@
     <!-- Custom styles for this template-->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <link href="{{ asset('admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('admin/toastr/toastr.css') }}">
+
     @yield('stylesheets')
 
 </head>

@@ -81,17 +81,9 @@
                                                 <i class="fa fa-ban"></i>
                                             </a>
                                         @endif
-                                        <a href="{{ route('customers.edit', ['customer' => $customer->id]) }}"
-                                            class="btn btn-primary m-2">
-                                            <i class="fa fa-pen"></i>
-                                        </a>
-                                        {{-- <a class="btn btn-danger m-2" href="javascript:void(0);"
-                                            onclick="delete_conf_common('{{ $customer['id'] }}','User','users','Customer','list_customer','URL');"><i
-                                                class=" fas fa-trash"></i></a>
-                                        <a class="btn btn-danger m-2" href="#" data-toggle="modal"
-                                            data-target="#deleteModal">
-                                            <i class="fas fa-trash"></i>
-                                        </a> --}}
+                                        <a class="btn btn-danger m-2" href="javascript:void(0);"
+                                            onclick="delete_conf_common('{{ $customer['id'] }}','Customer','Customer', '{{ route('customers.index') }}');"><i
+                                                class="fa fa-trash-alt "></i></a>
                                     </td>
                                 </tr>
                             @empty
@@ -108,9 +100,6 @@
         </div>
 
     </div>
-    @if (!$customers->isEmpty())
-        @include('customers.delete-modal')
-    @endif
 
 @endsection
 

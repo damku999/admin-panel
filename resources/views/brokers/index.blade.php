@@ -85,10 +85,10 @@
                                             class="btn btn-primary m-2">
                                             <i class="fa fa-pen"></i>
                                         </a>
-                                        <a class="btn btn-danger m-2" href="#" data-toggle="modal"
-                                            data-target="#deleteModal">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
+
+                                        <a class="btn btn-danger m-2" href="javascript:void(0);"
+                                            onclick="delete_conf_common('{{ $broker->id }}','Broker', 'Broker', '{{ route('brokers.index') }}');"><i
+                                                class="fas fa-trash"></i></a>
                                     </td>
                                 </tr>
                             @empty
@@ -105,9 +105,9 @@
         </div>
 
     </div>
-    @if (!$brokers->isEmpty())
+    {{-- @if (!$brokers->isEmpty())
         @include('brokers.delete-modal')
-    @endif
+    @endif --}}
 
 @endsection
 

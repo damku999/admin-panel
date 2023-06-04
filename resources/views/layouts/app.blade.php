@@ -54,6 +54,7 @@
 
     <!-- Custom scripts for all pages-->
     <script src="{{ asset('admin/js/sb-admin-2.min.js') }}"></script>
+    <script src="{{ asset('admin/toastr/toastr.min.js') }}"></script>
 
     @yield('scripts')
     <script>
@@ -89,6 +90,62 @@
                     $('#cover-spin').hide();
                 }
             });
+        }
+
+        function delete_conf_common(record_id, model, display_title, table_id_or_url = '') {
+            $('.module_action').html('Delete');
+            $('#module_title').html(" " + display_title);
+            $('#delete-btn').attr('onclick', 'delete_common("' + record_id + '","' + model + '","' + table_id_or_url +
+                '","' + display_title + '")');
+            $('#delete_confirm').modal('show');
+            return true;
+        }
+
+        function delete_common(record_id, model, table_id_or_url = '', display_title = '') {
+            var token = "{{ csrf_token() }}";
+            $.ajax({
+                type: "POST",
+                url: "{{ url(\Config::get('app.url')) }}delete_common",
+                data: {
+                    _token: token,
+                    record_id: record_id,
+                    model: model,
+                    table_id_or_url: table_id_or_url,
+                    display_title: display_title
+                },
+                dataType: "json",
+                success: function(data) {
+                    console.log(data);
+                    $('#delete_confirm').modal('hide');
+                    if (data.status == 'success') {
+                        show_notification(data.status, data.message);
+                        $('#cover-spin').hide();
+                        setTimeout(function() {
+                            window.location.href = table_id_or_url;
+                        }, 1000);
+                    } else {
+                        show_notification(data.status, data.message);
+                    }
+                },
+                complete: function(e) {
+
+                },
+                error: function(e) {
+                    $('#cover-spin').hide();
+                }
+            });
+        }
+
+        function show_notification(type, message) {
+            if (type == 'success') {
+                toastr.success(message);
+            } else if (type == 'error') {
+                toastr.error(message);
+            } else if (type == 'warning') {
+                toastr.warning(message);
+            } else if (type == 'information') {
+                toastr.info(message);
+            }
         }
     </script>
 </body>

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BrokerController;
+use App\Http\Controllers\CommonController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerInsuranceController;
 use App\Http\Controllers\RelationshipManagerController;
@@ -49,7 +50,7 @@ Route::middleware('auth')->prefix('customers')->name('customers.')->group(functi
     Route::post('/store', [CustomerController::class, 'store'])->name('store');
     Route::get('/edit/{customer}', [CustomerController::class, 'edit'])->name('edit');
     Route::put('/update/{customer}', [CustomerController::class, 'update'])->name('update');
-    Route::delete('/delete/{customer}', [CustomerController::class, 'delete'])->name('destroy');
+    // Route::delete('/delete/{customer}', [CustomerController::class, 'delete'])->name('destroy');
     Route::get('/update/status/{customer_id}/{status}', [CustomerController::class, 'updateStatus'])->name('status');
     Route::get('export/', [CustomerController::class, 'export'])->name('export');
 });
@@ -61,7 +62,7 @@ Route::middleware('auth')->prefix('brokers')->name('brokers.')->group(function (
     Route::post('/store', [BrokerController::class, 'store'])->name('store');
     Route::get('/edit/{broker}', [BrokerController::class, 'edit'])->name('edit');
     Route::put('/update/{broker}', [BrokerController::class, 'update'])->name('update');
-    Route::delete('/delete/{broker}', [BrokerController::class, 'delete'])->name('destroy');
+    // Route::delete('/delete/{broker}', [BrokerController::class, 'delete'])->name('destroy');
     Route::get('/update/status/{broker_id}/{status}', [BrokerController::class, 'updateStatus'])->name('status');
     Route::get('export/', [BrokerController::class, 'export'])->name('export');
 });
@@ -73,7 +74,7 @@ Route::middleware('auth')->prefix('relationship_managers')->name('relationship_m
     Route::post('/store', [RelationshipManagerController::class, 'store'])->name('store');
     Route::get('/edit/{relationship_manager}', [RelationshipManagerController::class, 'edit'])->name('edit');
     Route::put('/update/{relationship_manager}', [RelationshipManagerController::class, 'update'])->name('update');
-    Route::delete('/delete/{relationship_manager}', [RelationshipManagerController::class, 'delete'])->name('destroy');
+    // Route::delete('/delete/{relationship_manager}', [RelationshipManagerController::class, 'delete'])->name('destroy');
     Route::get('/update/status/{relationship_manager_id}/{status}', [RelationshipManagerController::class, 'updateStatus'])->name('status');
     Route::get('export/', [RelationshipManagerController::class, 'export'])->name('export');
 });
@@ -85,7 +86,7 @@ Route::middleware('auth')->prefix('customer_insurances')->name('customer_insuran
     Route::post('/store', [CustomerInsuranceController::class, 'store'])->name('store');
     Route::get('/edit/{customer_insurance}', [CustomerInsuranceController::class, 'edit'])->name('edit');
     Route::put('/update/{customer_insurance}', [CustomerInsuranceController::class, 'update'])->name('update');
-    Route::delete('/delete/{customer_insurance}', [CustomerInsuranceController::class, 'delete'])->name('destroy');
+    // Route::delete('/delete/{customer_insurance}', [CustomerInsuranceController::class, 'delete'])->name('destroy');
     Route::get('/update/status/{customer_insurance_id}/{status}', [CustomerInsuranceController::class, 'updateStatus'])->name('status');
     Route::get('export/', [CustomerInsuranceController::class, 'export'])->name('export');
 });
@@ -97,7 +98,7 @@ Route::middleware('auth')->prefix('users')->name('users.')->group(function () {
     Route::post('/store', [UserController::class, 'store'])->name('store');
     Route::get('/edit/{user}', [UserController::class, 'edit'])->name('edit');
     Route::put('/update/{user}', [UserController::class, 'update'])->name('update');
-    Route::delete('/delete/{user}', [UserController::class, 'delete'])->name('destroy');
+    // Route::delete('/delete/{user}', [UserController::class, 'delete'])->name('destroy');
     Route::get('/update/status/{user_id}/{status}', [UserController::class, 'updateStatus'])->name('status');
 
 
@@ -105,4 +106,8 @@ Route::middleware('auth')->prefix('users')->name('users.')->group(function () {
     Route::post('/upload-users', [UserController::class, 'uploadUsers'])->name('upload');
 
     Route::get('export/', [UserController::class, 'export'])->name('export');
+});
+
+Route::middleware('auth')->name('delete_common')->group(function () {
+    Route::post('delete_common', [CommonController::class, 'deleteCommon']);
 });

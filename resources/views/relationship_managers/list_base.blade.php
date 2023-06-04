@@ -28,7 +28,7 @@
                                         <i class="fas fa-redo"></i>
                                     </button>
 
-                                    <a href="{{ url(Config::get('constants.ADMIN_URL') . 'relationship_manager/create') }}"
+                                    <a href="{{ url(Config::get('app.url') . 'relationship_manager/create') }}"
                                         class="btn btn-default ml15" style="max-width: 125px;">
                                         <i class="fas fa-plus"></i> &nbsp; Add {{ $module_name }}
                                     </a>

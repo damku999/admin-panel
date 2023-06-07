@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\BrokerController;
 use App\Http\Controllers\CommonController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\FuelTypeController;
 use App\Http\Controllers\PolicyTypeController;
 use App\Http\Controllers\CustomerInsuranceController;
 use App\Http\Controllers\RelationshipManagerController;
@@ -122,4 +123,16 @@ Route::middleware('auth')->prefix('policy_type')->name('policy_type.')->group(fu
     Route::put('/update/{policy_type}', [PolicyTypeController::class, 'update'])->name('update');
     Route::get('/update/status/{policy_type_id}/{status}', [PolicyTypeController::class, 'updateStatus'])->name('status');
     Route::get('export/', [PolicyTypeController::class, 'export'])->name('export');
+});
+
+
+// Fuel Type
+Route::middleware('auth')->prefix('fuel_type')->name('fuel_type.')->group(function () {
+    Route::get('/', [FuelTypeController::class, 'index'])->name('index');
+    Route::get('/create', [FuelTypeController::class, 'create'])->name('create');
+    Route::post('/store', [FuelTypeController::class, 'store'])->name('store');
+    Route::get('/edit/{fuel_type}', [FuelTypeController::class, 'edit'])->name('edit');
+    Route::put('/update/{fuel_type}', [FuelTypeController::class, 'update'])->name('update');
+    Route::get('/update/status/{fuel_type_id}/{status}', [FuelTypeController::class, 'updateStatus'])->name('status');
+    Route::get('export/', [FuelTypeController::class, 'export'])->name('export');
 });

@@ -78,7 +78,7 @@ class PolicyTypeController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('policy_type.index')->with('success', 'PolicyType Created Successfully.');
+            return redirect()->route('policy_type.index')->with('success', 'Policy Type Created Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -116,7 +116,7 @@ class PolicyTypeController extends Controller
 
             // Commit And Redirect on index with Success Message
             DB::commit();
-            return redirect()->route('policy_type.index')->with('success', 'PolicyType Status Updated Successfully!');
+            return redirect()->route('policy_type.index')->with('success', 'Policy Type Status Updated Successfully!');
         } catch (\Throwable $th) {
 
             // Rollback & Return Error Message
@@ -161,7 +161,7 @@ class PolicyTypeController extends Controller
             ]);
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('policy_type.index')->with('success', 'PolicyType Updated Successfully.');
+            return redirect()->route('policy_type.index')->with('success', 'Policy Type Updated Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -183,7 +183,7 @@ class PolicyTypeController extends Controller
             PolicyType::whereId($policy_type->id)->delete();
 
             DB::commit();
-            return redirect()->route('policy_type.index')->with('success', 'PolicyType Deleted Successfully!.');
+            return redirect()->route('policy_type.index')->with('success', 'Policy Type Deleted Successfully!.');
         } catch (\Throwable $th) {
             DB::rollBack();
             return redirect()->back()->with('error', $th->getMessage());
@@ -199,7 +199,6 @@ class PolicyTypeController extends Controller
     {
         return view('policy_type.import');
     }
-
 
     public function export()
     {

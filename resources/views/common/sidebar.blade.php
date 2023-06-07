@@ -117,7 +117,8 @@
             <i class="fas fa-user-alt"></i>
             <span>Policy Type</span>
         </a>
-        <div id="taTpDropDownPolicyType" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div id="taTpDropDownPolicyType" class="collapse" aria-labelledby="headingTwo"
+            data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Policy Type:</h6>
                 <a class="collapse-item" href="{{ route('policy_type.index') }}">List</a>
@@ -126,6 +127,21 @@
         </div>
     </li>
 
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#taTpDropDownFuelType"
+            aria-expanded="true" aria-controls="taTpDropDownFuelType">
+            <i class="fas fa-user-alt"></i>
+            <span>Fuel Type</span>
+        </a>
+        <div id="taTpDropDownFuelType" class="collapse" aria-labelledby="headingTwo"
+            data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Fuel Type:</h6>
+                <a class="collapse-item" href="{{ route('fuel_type.index') }}">List</a>
+                <a class="collapse-item" href="{{ route('fuel_type.create') }}">Add New</a>
+            </div>
+        </div>
+    </li>
 
     <!-- Divider -->
     <hr class="sidebar-divider">

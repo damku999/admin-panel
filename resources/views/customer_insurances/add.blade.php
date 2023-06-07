@@ -167,12 +167,12 @@
                             @enderror
                         </div>
 
-                        {{-- RTO --}}
+                        {{-- Location --}}
                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
-                            <label>RTO</label>
+                            <label>Location</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('rto') is-invalid @enderror" id="rto"
-                                placeholder="RTO" name="rto" value="{{ old('rto') }}">
+                                placeholder="Location" name="rto" value="{{ old('rto') }}">
 
                             @error('rto')
                                 <span class="text-danger">{{ $message }}</span>

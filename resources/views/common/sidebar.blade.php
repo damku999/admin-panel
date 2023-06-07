@@ -110,6 +110,21 @@
         </div>
     </li>
 
+    <!-- Nav Item - Pages Collapse Menu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#taTpDropDownPolicyType"
+            aria-expanded="true" aria-controls="taTpDropDownPolicyType">
+            <i class="fas fa-user-alt"></i>
+            <span>Policy Type</span>
+        </a>
+        <div id="taTpDropDownPolicyType" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Policy Type:</h6>
+                <a class="collapse-item" href="{{ route('policy_type.index') }}">List</a>
+                <a class="collapse-item" href="{{ route('policy_type.create') }}">Add New</a>
+            </div>
+        </div>
+    </li>
 
 
     <!-- Divider -->

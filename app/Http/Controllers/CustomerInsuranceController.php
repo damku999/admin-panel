@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\RelationshipManager;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CustomerInsurancesExport;
+use App\Models\PolicyType;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerInsuranceController extends Controller
@@ -35,7 +36,7 @@ class CustomerInsuranceController extends Controller
      * List CustomerInsurance 
      * @param Nill
      * @return Array $customer_insurance
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function index(Request $request)
     {
@@ -56,7 +57,7 @@ class CustomerInsuranceController extends Controller
      * Create CustomerInsurance 
      * @param Nill
      * @return Array $customer_insurance
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function create()
     {
@@ -66,6 +67,7 @@ class CustomerInsuranceController extends Controller
             'relationship_managers' => RelationshipManager::select('id', 'name')->get(),
             'branches' => Branch::select('id', 'name')->get(),
             'insurance_companies' => InsuranceCompany::select('id', 'name')->get(),
+            'policy_type' => PolicyType::select('id', 'name')->get(),
         ];
         return view('customer_insurances.add', $response);
     }
@@ -74,17 +76,18 @@ class CustomerInsuranceController extends Controller
      * Store CustomerInsurance
      * @param Request $request
      * @return View CustomerInsurances
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function store(Request $request)
     {
         // Validations
         $validation_array = [
-            'customer_id' => 'required',
-            'branch_id' => 'required',
-            'broker_id' => 'required',
-            'relationship_manager_id' => 'required',
-            'insurance_company_id' => 'required',
+            'customer_id' => 'required|exists:brokers,id',
+            'branch_id' => 'required|exists:branches,id',
+            'broker_id' => 'required|exists:brokers,id',
+            'relationship_manager_id' => 'required|exists:relationship_managers,id',
+            'insurance_company_id' => 'required|exists:insurance_companies,id',
+            'policy_type_id' => 'required|exists:policy_types,id',
             'registration_no' => 'required'
         ];
 
@@ -112,8 +115,8 @@ class CustomerInsuranceController extends Controller
             if (isset($request->issue_date))
                 $data_to_store['issue_date'] = $request->issue_date;
 
-            if (isset($request->bus_type))
-                $data_to_store['bus_type'] = $request->bus_type;
+            if (isset($request->policy_type_id))
+                $data_to_store['policy_type_id'] = $request->policy_type_id;
 
             if (isset($request->type_of_policy))
                 $data_to_store['type_of_policy'] = $request->type_of_policy;
@@ -185,7 +188,7 @@ class CustomerInsuranceController extends Controller
      * Update Status Of CustomerInsurance
      * @param Integer $status
      * @return List Page With Success
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function updateStatus($customer_insurance_id, $status)
     {
@@ -224,7 +227,7 @@ class CustomerInsuranceController extends Controller
      * Edit CustomerInsurance
      * @param Integer $customer_insurance
      * @return Collection $customer_insurance
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function edit(CustomerInsurance $customer_insurance)
     {
@@ -234,7 +237,8 @@ class CustomerInsuranceController extends Controller
             'relationship_managers' => RelationshipManager::select('id', 'name')->get(),
             'branches' => Branch::select('id', 'name')->get(),
             'insurance_companies' => InsuranceCompany::select('id', 'name')->get(),
-            'customer_insurance'  => $customer_insurance
+            'customer_insurance'  => $customer_insurance,
+            'policy_type' => PolicyType::select('id', 'name')->get(),
         ];
         // dd($response);
         return view('customer_insurances.edit')->with($response);
@@ -244,16 +248,17 @@ class CustomerInsuranceController extends Controller
      * Update CustomerInsurance
      * @param Request $request, CustomerInsurance $customer_insurance
      * @return View CustomerInsurances
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function update(Request $request, CustomerInsurance $customer_insurance)
     {
         $validation_array = [
-            'customer_id' => 'required',
-            'branch_id' => 'required',
-            'broker_id' => 'required',
-            'relationship_manager_id' => 'required',
-            'insurance_company_id' => 'required',
+            'customer_id' => 'required|exists:customers,id',
+            'branch_id' => 'required|exists:branches,id',
+            'broker_id' => 'required|exists:brokers,id',
+            'relationship_manager_id' => 'required|exists:relationship_managers,id',
+            'insurance_company_id' => 'required|exists:insurance_companies,id',
+            'policy_type_id' => 'required|exists:policy_types,id',
             'registration_no' => 'required'
         ];
 
@@ -276,8 +281,8 @@ class CustomerInsuranceController extends Controller
             $data_to_store['broker_id'] = $request->broker_id;
             $data_to_store['relationship_manager_id'] = $request->relationship_manager_id;
             $data_to_store['insurance_company_id'] = $request->insurance_company_id;
-            if (isset($request->bus_type))
-                $data_to_store['bus_type'] = $request->bus_type;
+            if (isset($request->policy_type_id))
+                $data_to_store['policy_type_id'] = $request->policy_type_id;
 
             if (isset($request->issue_date))
                 $data_to_store['issue_date'] = $request->issue_date;
@@ -353,7 +358,7 @@ class CustomerInsuranceController extends Controller
      * Delete CustomerInsurance
      * @param CustomerInsurance $customer_insurance
      * @return Index CustomerInsurances
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function delete(CustomerInsurance $customer_insurance)
     {

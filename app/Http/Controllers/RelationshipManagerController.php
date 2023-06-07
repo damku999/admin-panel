@@ -30,7 +30,7 @@ class RelationshipManagerController extends Controller
      * List RelationshipManager 
      * @param Nill
      * @return Array $relationship_manager
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function index(Request $request)
     {
@@ -47,7 +47,7 @@ class RelationshipManagerController extends Controller
      * Create RelationshipManager 
      * @param Nill
      * @return Array $relationship_manager
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function create()
     {
@@ -58,7 +58,7 @@ class RelationshipManagerController extends Controller
      * Store RelationshipManager
      * @param Request $request
      * @return View RelationshipManagers
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function store(Request $request)
     {
@@ -93,7 +93,7 @@ class RelationshipManagerController extends Controller
      * Update Status Of RelationshipManager
      * @param Integer $status
      * @return List Page With Success
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function updateStatus($relationship_manager_id, $status)
     {
@@ -132,7 +132,7 @@ class RelationshipManagerController extends Controller
      * Edit RelationshipManager
      * @param Integer $relationship_manager
      * @return Collection $relationship_manager
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function edit(RelationshipManager $relationship_manager)
     {
@@ -145,7 +145,7 @@ class RelationshipManagerController extends Controller
      * Update RelationshipManager
      * @param Request $request, RelationshipManager $relationship_manager
      * @return View RelationshipManagers
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function update(Request $request, RelationshipManager $relationship_manager)
     {
@@ -178,7 +178,7 @@ class RelationshipManagerController extends Controller
      * Delete RelationshipManager
      * @param RelationshipManager $relationship_manager
      * @return Index RelationshipManagers
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function delete(RelationshipManager $relationship_manager)
     {

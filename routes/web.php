@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\BrokerController;
 use App\Http\Controllers\CommonController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\PolicyTypeController;
 use App\Http\Controllers\CustomerInsuranceController;
 use App\Http\Controllers\RelationshipManagerController;
 
@@ -110,4 +111,15 @@ Route::middleware('auth')->prefix('users')->name('users.')->group(function () {
 
 Route::middleware('auth')->name('delete_common')->group(function () {
     Route::post('delete_common', [CommonController::class, 'deleteCommon']);
+});
+
+// Policy Type
+Route::middleware('auth')->prefix('policy_type')->name('policy_type.')->group(function () {
+    Route::get('/', [PolicyTypeController::class, 'index'])->name('index');
+    Route::get('/create', [PolicyTypeController::class, 'create'])->name('create');
+    Route::post('/store', [PolicyTypeController::class, 'store'])->name('store');
+    Route::get('/edit/{policy_type}', [PolicyTypeController::class, 'edit'])->name('edit');
+    Route::put('/update/{policy_type}', [PolicyTypeController::class, 'update'])->name('update');
+    Route::get('/update/status/{policy_type_id}/{status}', [PolicyTypeController::class, 'updateStatus'])->name('status');
+    Route::get('export/', [PolicyTypeController::class, 'export'])->name('export');
 });

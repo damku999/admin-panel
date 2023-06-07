@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Broker;
+use App\Models\PolicyType;
 use Illuminate\Http\Request;
-use App\Exports\BrokersExport;
+use App\Exports\PolicyTypesExport;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 
-class BrokerController extends Controller
+class PolicyTypeController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -19,45 +19,45 @@ class BrokerController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('permission:broker-list|broker-create|broker-edit|broker-delete', ['only' => ['index']]);
-        $this->middleware('permission:broker-create', ['only' => ['create', 'store', 'updateStatus']]);
-        $this->middleware('permission:broker-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:broker-delete', ['only' => ['delete']]);
+        $this->middleware('permission:policy-type-list|policy-type-create|policy-type-edit|policy-type-delete', ['only' => ['index']]);
+        $this->middleware('permission:policy-type-create', ['only' => ['create', 'store', 'updateStatus']]);
+        $this->middleware('permission:policy-type-edit', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:policy-type-delete', ['only' => ['delete']]);
     }
 
 
     /**
-     * List Broker 
+     * List PolicyType 
      * @param Nill
-     * @return Array $broker
+     * @return Array $policy_type
      * @author Darshan Baraiya
      */
     public function index(Request $request)
     {
-        $broker_obj = Broker::select('*');
+        $policy_type_obj = PolicyType::select('*');
         if (!empty($request->search)) {
-            $broker_obj->where('name', 'LIKE', '%' . trim($request->search) . '%')->orWhere('email', 'LIKE', '%' . trim($request->search) . '%')->orWhere('mobile_number', 'LIKE', '%' . trim($request->search) . '%');
+            $policy_type_obj->where('name', 'LIKE', '%' . trim($request->search) . '%');
         }
 
-        $brokers = $broker_obj->paginate(10);
-        return view('brokers.index', ['brokers' => $brokers]);
+        $policy_type = $policy_type_obj->paginate(10);
+        return view('policy_type.index', ['policy_type' => $policy_type]);
     }
 
     /**
-     * Create Broker 
+     * Create PolicyType 
      * @param Nill
-     * @return Array $broker
+     * @return Array $policy_type
      * @author Darshan Baraiya
      */
     public function create()
     {
-        return view('brokers.add');
+        return view('policy_type.add');
     }
 
     /**
-     * Store Broker
+     * Store PolicyType
      * @param Request $request
-     * @return View Brokers
+     * @return View PolicyTypes
      * @author Darshan Baraiya
      */
     public function store(Request $request)
@@ -67,21 +67,18 @@ class BrokerController extends Controller
             'name' => 'required',
         ];
 
-
         $request->validate($validation_array);
         DB::beginTransaction();
 
         try {
             // Store Data
-            $broker = Broker::create([
+            PolicyType::create([
                 'name' => $request->name,
-                'email' => $request->email,
-                'mobile_number' => $request->mobile_number,
             ]);
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('brokers.index')->with('success', 'Broker Created Successfully.');
+            return redirect()->route('policy_type.index')->with('success', 'PolicyType Created Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -90,36 +87,36 @@ class BrokerController extends Controller
     }
 
     /**
-     * Update Status Of Broker
+     * Update Status Of PolicyType
      * @param Integer $status
      * @return List Page With Success
      * @author Darshan Baraiya
      */
-    public function updateStatus($broker_id, $status)
+    public function updateStatus($policy_type_id, $status)
     {
         // Validation
         $validate = Validator::make([
-            'broker_id'   => $broker_id,
+            'policy_type_id'   => $policy_type_id,
             'status' => $status
         ], [
-            'broker_id'   =>  'required|exists:brokers,id',
+            'policy_type_id'   =>  'required|exists:policy_types,id',
             'status' =>  'required|in:0,1',
         ]);
 
         // If Validations Fails
         if ($validate->fails()) {
-            return redirect()->route('brokers.index')->with('error', $validate->errors()->first());
+            return redirect()->route('policy_type.index')->with('error', $validate->errors()->first());
         }
 
         try {
             DB::beginTransaction();
 
             // Update Status
-            Broker::whereId($broker_id)->update(['status' => $status]);
+            PolicyType::whereId($policy_type_id)->update(['status' => $status]);
 
             // Commit And Redirect on index with Success Message
             DB::commit();
-            return redirect()->route('brokers.index')->with('success', 'Broker Status Updated Successfully!');
+            return redirect()->route('policy_type.index')->with('success', 'PolicyType Status Updated Successfully!');
         } catch (\Throwable $th) {
 
             // Rollback & Return Error Message
@@ -129,25 +126,25 @@ class BrokerController extends Controller
     }
 
     /**
-     * Edit Broker
-     * @param Integer $broker
-     * @return Collection $broker
+     * Edit PolicyType
+     * @param Integer $policy_type
+     * @return Collection $policy_type
      * @author Darshan Baraiya
      */
-    public function edit(Broker $broker)
+    public function edit(PolicyType $policy_type)
     {
-        return view('brokers.edit')->with([
-            'broker'  => $broker
+        return view('policy_type.edit')->with([
+            'policy_type'  => $policy_type
         ]);
     }
 
     /**
-     * Update Broker
-     * @param Request $request, Broker $broker
-     * @return View Brokers
+     * Update PolicyType
+     * @param Request $request, PolicyType $policy_type
+     * @return View PolicyTypes
      * @author Darshan Baraiya
      */
-    public function update(Request $request, Broker $broker)
+    public function update(Request $request, PolicyType $policy_type)
     {
         // Validations
         $validation_array = [
@@ -159,14 +156,12 @@ class BrokerController extends Controller
         DB::beginTransaction($validation_array);
         try {
             // Store Data
-            $broker_updated = Broker::whereId($broker->id)->update([
+            PolicyType::whereId($policy_type->id)->update([
                 'name' => $request->name,
-                'email' => $request->email,
-                'mobile_number' => $request->mobile_number,
             ]);
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('brokers.index')->with('success', 'Broker Updated Successfully.');
+            return redirect()->route('policy_type.index')->with('success', 'PolicyType Updated Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -175,20 +170,20 @@ class BrokerController extends Controller
     }
 
     /**
-     * Delete Broker
-     * @param Broker $broker
-     * @return Index Brokers
+     * Delete PolicyType
+     * @param PolicyType $policy_type
+     * @return Index PolicyTypes
      * @author Darshan Baraiya
      */
-    public function delete(Broker $broker)
+    public function delete(PolicyType $policy_type)
     {
         DB::beginTransaction();
         try {
-            // Delete Broker
-            Broker::whereId($broker->id)->delete();
+            // Delete PolicyType
+            PolicyType::whereId($policy_type->id)->delete();
 
             DB::commit();
-            return redirect()->route('brokers.index')->with('success', 'Broker Deleted Successfully!.');
+            return redirect()->route('policy_type.index')->with('success', 'PolicyType Deleted Successfully!.');
         } catch (\Throwable $th) {
             DB::rollBack();
             return redirect()->back()->with('error', $th->getMessage());
@@ -196,18 +191,18 @@ class BrokerController extends Controller
     }
 
     /**
-     * Import Brokers 
+     * Import PolicyTypes 
      * @param Null
      * @return View File
      */
-    public function importBrokers()
+    public function importPolicyTypes()
     {
-        return view('brokers.import');
+        return view('policy_type.import');
     }
 
 
     public function export()
     {
-        return Excel::download(new BrokersExport, 'brokers.xlsx');
+        return Excel::download(new PolicyTypesExport, 'policy_type.xlsx');
     }
 }

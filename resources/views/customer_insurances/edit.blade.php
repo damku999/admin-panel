@@ -71,14 +71,14 @@
                                 @enderror
                             </div>
 
-                            {{-- Bus Type --}}
+                            {{-- Policy Type --}}
                             <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
-                                <label>Bus Type</label>
+                                <label>Policy Type</label>
                                 <input type="text"
-                                    class="form-control form-control-customer @error('bus_type') is-invalid @enderror"
-                                    id="bus_type" placeholder="Bus Type" name="bus_type"
-                                    value="{{ old('bus_type') ? old('bus_type') : $customer_insurance->bus_type }}">
-                                @error('bus_type')
+                                    class="form-control form-control-customer @error('policy_type_id') is-invalid @enderror"
+                                    id="policy_type_id" placeholder="Policy Type" name="policy_type_id"
+                                    value="{{ old('policy_type_id') ? old('policy_type_id') : $customer_insurance->policy_type_id }}">
+                                @error('policy_type_id')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>

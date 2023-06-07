@@ -30,7 +30,7 @@ class CustomerController extends Controller
      * List Customer 
      * @param Nill
      * @return Array $customer
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function index(Request $request)
     {
@@ -47,7 +47,7 @@ class CustomerController extends Controller
      * Create Customer 
      * @param Nill
      * @return Array $customer
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function create()
     {
@@ -58,7 +58,7 @@ class CustomerController extends Controller
      * Store Customer
      * @param Request $request
      * @return View Customers
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function store(Request $request)
     {
@@ -109,7 +109,7 @@ class CustomerController extends Controller
      * Update Status Of Customer
      * @param Integer $status
      * @return List Page With Success
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function updateStatus($customer_id, $status)
     {
@@ -148,7 +148,7 @@ class CustomerController extends Controller
      * Edit Customer
      * @param Integer $customer
      * @return Collection $customer
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function edit(Customer $customer)
     {
@@ -162,7 +162,7 @@ class CustomerController extends Controller
      * Update Customer
      * @param Request $request, Customer $customer
      * @return View Customers
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function update(Request $request, Customer $customer)
     {
@@ -213,7 +213,7 @@ class CustomerController extends Controller
      * Delete Customer
      * @param Customer $customer
      * @return Index Customers
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function delete(Customer $customer)
     {

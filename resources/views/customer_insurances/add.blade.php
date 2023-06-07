@@ -56,13 +56,18 @@
                             @enderror
                         </div>
 
-                        {{-- Bus Type --}}
+                        {{-- Policy Type --}}
                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
-                            <label>Bus Type</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('bus_type') is-invalid @enderror"
-                                id="bus_type" placeholder="Bus Type" name="bus_type" value="{{ old('bus_type') }}">
-                            @error('bus_type')
+                            <label>Policy Type</label>
+
+                            <select name="policy_type_id" class="form-control" id="policy_type_id">
+                                <option selected="selected" disabled="disabled">Select Policy Type</option>
+                                @foreach ($policy_type as $item)
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}">{{ $item->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('policy_type_id')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>

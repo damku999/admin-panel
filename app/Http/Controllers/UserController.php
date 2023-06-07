@@ -34,7 +34,7 @@ class UserController extends Controller
      * List User 
      * @param Nill
      * @return Array $user
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function index()
     {
@@ -46,7 +46,7 @@ class UserController extends Controller
      * Create User 
      * @param Nill
      * @return Array $user
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function create()
     {
@@ -59,7 +59,7 @@ class UserController extends Controller
      * Store User
      * @param Request $request
      * @return View Users
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function store(Request $request)
     {
@@ -108,7 +108,7 @@ class UserController extends Controller
      * Update Status Of User
      * @param Integer $status
      * @return List Page With Success
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function updateStatus($user_id, $status)
     {
@@ -147,7 +147,7 @@ class UserController extends Controller
      * Edit User
      * @param Integer $user
      * @return Collection $user
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function edit(User $user)
     {
@@ -162,7 +162,7 @@ class UserController extends Controller
      * Update User
      * @param Request $request, User $user
      * @return View Users
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function update(Request $request, User $user)
     {
@@ -210,7 +210,7 @@ class UserController extends Controller
      * Delete User
      * @param User $user
      * @return Index Users
-     * @author Shani Singh
+     * @author Darshan Baraiya
      */
     public function delete(User $user)
     {

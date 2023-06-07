@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('month')->nullable();
             $table->string('sr_no')->nullable();
             $table->date('issue_date')->nullable();
-            $table->string('bus_type')->nullable();
+            $table->string('policy_type_id')->nullable();
             $table->string('branch')->nullable();
             $table->unsignedBigInteger('broker_id')->nullable();
             $table->unsignedBigInteger('relationship_manager_id')->nullable();

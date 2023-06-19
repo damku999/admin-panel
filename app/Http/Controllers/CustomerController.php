@@ -25,7 +25,6 @@ class CustomerController extends Controller
         $this->middleware('permission:customer-delete', ['only' => ['delete']]);
     }
 
-
     /**
      * List Customer 
      * @param Nill

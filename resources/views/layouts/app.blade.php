@@ -95,6 +95,7 @@
         function delete_conf_common(record_id, model, display_title, table_id_or_url = '') {
             $('.module_action').html('Delete');
             $('#module_title').html(" " + display_title);
+            table_id_or_url = window.location.href;
             $('#delete-btn').attr('onclick', 'delete_common("' + record_id + '","' + model + '","' + table_id_or_url +
                 '","' + display_title + '")');
             $('#delete_confirm').modal('show');

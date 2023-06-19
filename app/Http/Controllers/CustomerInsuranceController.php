@@ -46,11 +46,19 @@ class CustomerInsuranceController extends Controller
             ->leftJoin('brokers', 'brokers.id', 'customer_insurances.broker_id')
             ->leftJoin('relationship_managers', 'relationship_managers.id', 'customer_insurances.relationship_manager_id');
         if (!empty($request->search)) {
-            $customer_insurance_obj->where('name', 'LIKE', '%' . trim($request->search) . '%')->orWhere('email', 'LIKE', '%' . trim($request->search) . '%')->orWhere('mobile_number', 'LIKE', '%' . trim($request->search) . '%');
+            $customer_insurance_obj->where('registration_no', 'LIKE', '%' . trim($request->search) . '%')
+                ->orWhere('policy_no', 'LIKE', '%' . trim($request->search) . '%')
+                ->orWhere('customers.name', 'LIKE', '%' . trim($request->search) . '%')
+                ->orWhere('customers.mobile_number', 'LIKE', '%' . trim($request->search) . '%');
+        }
+        if (!empty($request->customer_id)) {
+            $customer_insurance_obj->where('customer_insurances.customer_id', $request->customer_id);
         }
 
         $customer_insurances = $customer_insurance_obj->paginate(10);
-        return view('customer_insurances.index', ['customer_insurances' => $customer_insurances]);
+        $customers = Customer::select('id', 'name')->get();
+
+        return view('customer_insurances.index', ['customer_insurances' => $customer_insurances, 'customers' => $customers]);
     }
 
     /**
@@ -214,7 +222,8 @@ class CustomerInsuranceController extends Controller
 
             // Commit And Redirect on index with Success Message
             DB::commit();
-            return redirect()->route('customer_insurances.index')->with('success', 'CustomerInsurance Status Updated Successfully!');
+            // return redirect()->route('customer_insurances.index')->with('success', 'CustomerInsurance Status Updated Successfully!');
+            return redirect()->back()->with('success', 'CustomerInsurance Status Updated Successfully!');
         } catch (\Throwable $th) {
 
             // Rollback & Return Error Message

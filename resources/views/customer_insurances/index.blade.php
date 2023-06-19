@@ -35,6 +35,14 @@
                     <div class="input-group-append">
                         <input type="text" placeholder="Search" name="search"
                             class="form-control float-right filter_by_key" value="{{ request('search') }}">
+                        <select name="customer_id" class="form-control" id="customer_id">
+                            <option selected="selected" disabled="disabled">Select Customer</option>
+                            @foreach ($customers as $item)
+                                <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                    {{ request('customer_id') == $item->id ? 'selected' : '' }}>
+                                    {{ $item->name }}</option>
+                            @endforeach
+                        </select>
                         <button type="submit" class="btn btn-default filter_by_click">
                             <i class="fas fa-search"></i>
                         </button>
@@ -85,9 +93,8 @@
                                             class="btn btn-primary m-2">
                                             <i class="fa fa-pen"></i>
                                         </a>
-                                        <a class="btn btn-danger m-2" href="javascript:void(0);"
-                                            onclick="delete_conf_common('{{ $customer_insurance->id }}','CustomerInsurance', 'CustomerInsurance', '{{ route('customer_insurances.index') }}');"><i
-                                                class="fas fa-trash"></i></a>
+                                        <a class="btn btn-danger m-2" href="javascript:void(0);" onclick="delete_conf_common('{{ $customer_insurance->id }}','CustomerInsurance', 'Customer Insurance', '{{ route('customer_insurances.index') }}');"><i class="fas fa-trash"></i></a>
+                                        {{-- <a class="btn btn-danger m-2" href="javascript:void(0);" onclick="delete_conf_common('{{ $customer_insurance->id }}','CustomerInsurance', 'CustomerInsurance', '{{ route('customer_insurances.index') }}');"><i class="fas fa-trash"></i></a> --}}
                                     </td>
                                 </tr>
                             @empty
@@ -107,5 +114,13 @@
 @endsection
 
 @section('scripts')
-    <script></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#customer_id').select2();
+        });
+    </script>
+@endsection
+@section('stylesheets')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 @endsection

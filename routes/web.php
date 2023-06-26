@@ -9,6 +9,7 @@ use App\Http\Controllers\CommonController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\FuelTypeController;
 use App\Http\Controllers\PolicyTypeController;
+use App\Http\Controllers\InsuranceCompanyController;
 use App\Http\Controllers\CustomerInsuranceController;
 use App\Http\Controllers\RelationshipManagerController;
 
@@ -79,6 +80,18 @@ Route::middleware('auth')->prefix('relationship_managers')->name('relationship_m
     // Route::delete('/delete/{relationship_manager}', [RelationshipManagerController::class, 'delete'])->name('destroy');
     Route::get('/update/status/{relationship_manager_id}/{status}', [RelationshipManagerController::class, 'updateStatus'])->name('status');
     Route::get('export/', [RelationshipManagerController::class, 'export'])->name('export');
+});
+
+// Insurance Company
+Route::middleware('auth')->prefix('insurance_companies')->name('insurance_companies.')->group(function () {
+    Route::get('/', [InsuranceCompanyController::class, 'index'])->name('index');
+    Route::get('/create', [InsuranceCompanyController::class, 'create'])->name('create');
+    Route::post('/store', [InsuranceCompanyController::class, 'store'])->name('store');
+    Route::get('/edit/{insurance_company}', [InsuranceCompanyController::class, 'edit'])->name('edit');
+    Route::put('/update/{insurance_company}', [InsuranceCompanyController::class, 'update'])->name('update');
+    // Route::delete('/delete/{insurance_company}', [InsuranceCompanyController::class, 'delete'])->name('destroy');
+    Route::get('/update/status/{insurance_company_id}/{status}', [InsuranceCompanyController::class, 'updateStatus'])->name('status');
+    Route::get('export/', [InsuranceCompanyController::class, 'export'])->name('export');
 });
 
 // Customer Insurances

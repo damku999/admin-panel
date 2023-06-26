@@ -78,6 +78,22 @@
     </li>
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#taTpDropDownInsuranceCompany"
+            aria-expanded="true" aria-controls="taTpDropDownInsuranceCompany">
+            <i class="fas fa-user-alt"></i>
+            <span>Insurance Company</span>
+        </a>
+        <div id="taTpDropDownInsuranceCompany" class="collapse" aria-labelledby="headingTwo"
+            data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Insurance Company:</h6>
+                <a class="collapse-item" href="{{ route('insurance_companies.index') }}">List</a>
+                <a class="collapse-item" href="{{ route('insurance_companies.create') }}">Add New</a>
+            </div>
+        </div>
+    </li>
+    <!-- Nav Item - Pages Collapse Menu -->
+    <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#taTpDropDownCustomerInsurance"
             aria-expanded="true" aria-controls="taTpDropDownCustomerInsurance">
             <i class="fas fa-user-alt"></i>

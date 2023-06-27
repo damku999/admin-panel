@@ -96,7 +96,7 @@ class CustomerController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('customers.index')->with('success', 'Customer Created Successfully.');
+            return redirect()->back()->with('success', 'Customer Created Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -123,7 +123,7 @@ class CustomerController extends Controller
 
         // If Validations Fails
         if ($validate->fails()) {
-            return redirect()->route('customers.index')->with('error', $validate->errors()->first());
+            return redirect()->back()->with('error', $validate->errors()->first());
         }
 
         try {
@@ -134,7 +134,7 @@ class CustomerController extends Controller
 
             // Commit And Redirect on index with Success Message
             DB::commit();
-            return redirect()->route('customers.index')->with('success', 'Customer Status Updated Successfully!');
+            return redirect()->back()->with('success', 'Customer Status Updated Successfully!');
         } catch (\Throwable $th) {
 
             // Rollback & Return Error Message
@@ -200,7 +200,7 @@ class CustomerController extends Controller
             ]);
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('customers.index')->with('success', 'Customer Updated Successfully.');
+            return redirect()->back()->with('success', 'Customer Updated Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -222,7 +222,7 @@ class CustomerController extends Controller
             Customer::whereId($customer->id)->delete();
 
             DB::commit();
-            return redirect()->route('customers.index')->with('success', 'Customer Deleted Successfully!.');
+            return redirect()->back()->with('success', 'Customer Deleted Successfully!.');
         } catch (\Throwable $th) {
             DB::rollBack();
             return redirect()->back()->with('error', $th->getMessage());

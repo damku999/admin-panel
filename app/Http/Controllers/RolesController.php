@@ -67,7 +67,7 @@ class RolesController extends Controller
             Role::create($request->all());
 
             DB::commit();
-            return redirect()->route('roles.index')->with('success','Roles created successfully.');
+            return redirect()->back()->with('success','Roles created successfully.');
         } catch (\Throwable $th) {
             DB::rollback();
             return redirect()->route('roles.add')->with('error',$th->getMessage());
@@ -130,7 +130,7 @@ class RolesController extends Controller
             $role->syncPermissions($permissions);
             
             DB::commit();
-            return redirect()->route('roles.index')->with('success','Roles updated successfully.');
+            return redirect()->back()->with('success','Roles updated successfully.');
         } catch (\Throwable $th) {
             DB::rollback();
             return redirect()->route('roles.edit',['role' => $role])->with('error',$th->getMessage());
@@ -151,10 +151,10 @@ class RolesController extends Controller
             Role::whereId($id)->delete();
             
             DB::commit();
-            return redirect()->route('roles.index')->with('success','Roles deleted successfully.');
+            return redirect()->back()->with('success','Roles deleted successfully.');
         } catch (\Throwable $th) {
             DB::rollback();
-            return redirect()->route('roles.index')->with('error',$th->getMessage());
+            return redirect()->back()->with('error',$th->getMessage());
         }
     }
 }

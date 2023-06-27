@@ -17,8 +17,8 @@ class PermissionsController extends Controller
     {
         $this->middleware('auth');
         $this->middleware('permission:permission-list|permission-create|permission-edit|permission-delete', ['only' => ['index']]);
-        $this->middleware('permission:permission-create', ['only' => ['create','store']]);
-        $this->middleware('permission:permission-edit', ['only' => ['edit','update']]);
+        $this->middleware('permission:permission-create', ['only' => ['create', 'store']]);
+        $this->middleware('permission:permission-edit', ['only' => ['edit', 'update']]);
         $this->middleware('permission:permission-delete', ['only' => ['destroy']]);
     }
 
@@ -60,16 +60,15 @@ class PermissionsController extends Controller
                 'name' => 'required',
                 'guard_name' => 'required'
             ]);
-    
+
             Permission::create($request->all());
 
             DB::commit();
-            return redirect()->route('permissions.index')->with('success','Permissions created successfully.');
+            return redirect()->back()->with('success', 'Permissions created successfully.');
         } catch (\Throwable $th) {
             DB::rollback();
-            return redirect()->route('permissions.add')->with('error',$th->getMessage());
+            return redirect()->route('permissions.add')->with('error', $th->getMessage());
         }
-        
     }
 
     /**
@@ -111,19 +110,18 @@ class PermissionsController extends Controller
                 'name' => 'required',
                 'guard_name' => 'required'
             ]);
-            
-            $permission = Permission::whereId($id)->first();
 
+            $permission = Permission::whereId($id)->first();
             $permission->name = $request->name;
             $permission->guard_name = $request->guard_name;
             $permission->save();
-            
-            
+
+
             DB::commit();
-            return redirect()->route('permissions.index')->with('success','Permissions updated successfully.');
+            return redirect()->back()->with('success', 'Permissions updated successfully.');
         } catch (\Throwable $th) {
             DB::rollback();
-            return redirect()->route('permissions.edit',['permission' => $permission])->with('error',$th->getMessage());
+            return redirect()->route('permissions.edit', ['permission' => $permission])->with('error', $th->getMessage());
         }
     }
 
@@ -137,14 +135,14 @@ class PermissionsController extends Controller
     {
         DB::beginTransaction();
         try {
-    
+
             Permission::whereId($id)->delete();
-            
+
             DB::commit();
-            return redirect()->route('permissions.index')->with('success','Permissions deleted successfully.');
+            return redirect()->back()->with('success', 'Permissions deleted successfully.');
         } catch (\Throwable $th) {
             DB::rollback();
-            return redirect()->route('permissions.index')->with('error',$th->getMessage());
+            return redirect()->back()->with('error', $th->getMessage());
         }
     }
 }

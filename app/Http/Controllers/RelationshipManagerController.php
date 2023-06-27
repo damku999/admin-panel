@@ -81,7 +81,7 @@ class RelationshipManagerController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('relationship_managers.index')->with('success', 'RelationshipManager Created Successfully.');
+            return redirect()->back()->with('success', 'RelationshipManager Created Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -108,7 +108,7 @@ class RelationshipManagerController extends Controller
 
         // If Validations Fails
         if ($validate->fails()) {
-            return redirect()->route('relationship_managers.index')->with('error', $validate->errors()->first());
+            return redirect()->back()->with('error', $validate->errors()->first());
         }
 
         try {
@@ -119,7 +119,7 @@ class RelationshipManagerController extends Controller
 
             // Commit And Redirect on index with Success Message
             DB::commit();
-            return redirect()->route('relationship_managers.index')->with('success', 'RelationshipManager Status Updated Successfully!');
+            return redirect()->back()->with('success', 'RelationshipManager Status Updated Successfully!');
         } catch (\Throwable $th) {
 
             // Rollback & Return Error Message
@@ -166,7 +166,7 @@ class RelationshipManagerController extends Controller
             ]);
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('relationship_managers.index')->with('success', 'RelationshipManager Updated Successfully.');
+            return redirect()->back()->with('success', 'RelationshipManager Updated Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -188,7 +188,7 @@ class RelationshipManagerController extends Controller
             RelationshipManager::whereId($relationship_manager->id)->delete();
 
             DB::commit();
-            return redirect()->route('relationship_managers.index')->with('success', 'RelationshipManager Deleted Successfully!.');
+            return redirect()->back()->with('success', 'RelationshipManager Deleted Successfully!.');
         } catch (\Throwable $th) {
             DB::rollBack();
             return redirect()->back()->with('error', $th->getMessage());

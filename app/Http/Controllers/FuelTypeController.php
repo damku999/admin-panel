@@ -76,7 +76,7 @@ class FuelTypeController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('fuel_type.index')->with('success', 'Fuel Type Created Successfully.');
+            return redirect()->back()->with('success', 'Fuel Type Created Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -103,14 +103,14 @@ class FuelTypeController extends Controller
 
         // If Validations Fails
         if ($validate->fails()) {
-            return redirect()->route('fuel_type.index')->with('error', $validate->errors()->first());
+            return redirect()->back()->with('error', $validate->errors()->first());
         }
 
         try {
             DB::beginTransaction();
             FuelType::whereId($fuel_type_id)->update(['status' => $status]);
             DB::commit();
-            return redirect()->route('fuel_type.index')->with('success', 'Fuel Type Status Updated Successfully!');
+            return redirect()->back()->with('success', 'Fuel Type Status Updated Successfully!');
         } catch (\Throwable $th) {
             DB::rollBack();
             return redirect()->back()->with('error', $th->getMessage());
@@ -150,7 +150,7 @@ class FuelTypeController extends Controller
                 'name' => $request->name,
             ]);
             DB::commit();
-            return redirect()->route('fuel_type.index')->with('success', 'Fuel Type Updated Successfully.');
+            return redirect()->back()->with('success', 'Fuel Type Updated Successfully.');
         } catch (\Throwable $th) {
             DB::rollBack();
             return redirect()->back()->withInput()->with('error', $th->getMessage());
@@ -169,7 +169,7 @@ class FuelTypeController extends Controller
         try {
             FuelType::whereId($fuel_type->id)->delete();
             DB::commit();
-            return redirect()->route('fuel_type.index')->with('success', 'Fuel Type Deleted Successfully!.');
+            return redirect()->back()->with('success', 'Fuel Type Deleted Successfully!.');
         } catch (\Throwable $th) {
             DB::rollBack();
             return redirect()->back()->with('error', $th->getMessage());

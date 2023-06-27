@@ -9,6 +9,7 @@ use App\Http\Controllers\CommonController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\FuelTypeController;
 use App\Http\Controllers\PolicyTypeController;
+use App\Http\Controllers\PremiumTypeController;
 use App\Http\Controllers\InsuranceCompanyController;
 use App\Http\Controllers\CustomerInsuranceController;
 use App\Http\Controllers\RelationshipManagerController;
@@ -136,6 +137,17 @@ Route::middleware('auth')->prefix('policy_type')->name('policy_type.')->group(fu
     Route::put('/update/{policy_type}', [PolicyTypeController::class, 'update'])->name('update');
     Route::get('/update/status/{policy_type_id}/{status}', [PolicyTypeController::class, 'updateStatus'])->name('status');
     Route::get('export/', [PolicyTypeController::class, 'export'])->name('export');
+});
+
+// Premium Type
+Route::middleware('auth')->prefix('premium_type')->name('premium_type.')->group(function () {
+    Route::get('/', [PremiumTypeController::class, 'index'])->name('index');
+    Route::get('/create', [PremiumTypeController::class, 'create'])->name('create');
+    Route::post('/store', [PremiumTypeController::class, 'store'])->name('store');
+    Route::get('/edit/{premium_type}', [PremiumTypeController::class, 'edit'])->name('edit');
+    Route::put('/update/{premium_type}', [PremiumTypeController::class, 'update'])->name('update');
+    Route::get('/update/status/{premium_type_id}/{status}', [PremiumTypeController::class, 'updateStatus'])->name('status');
+    Route::get('export/', [PremiumTypeController::class, 'export'])->name('export');
 });
 
 

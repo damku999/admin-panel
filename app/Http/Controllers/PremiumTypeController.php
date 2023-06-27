@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Broker;
+use App\Models\PremiumType;
 use Illuminate\Http\Request;
-use App\Exports\BrokersExport;
+use App\Exports\PremiumTypesExport;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 
-class BrokerController extends Controller
+class PremiumTypeController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -19,69 +19,68 @@ class BrokerController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('permission:broker-list|broker-create|broker-edit|broker-delete', ['only' => ['index']]);
-        $this->middleware('permission:broker-create', ['only' => ['create', 'store', 'updateStatus']]);
-        $this->middleware('permission:broker-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:broker-delete', ['only' => ['delete']]);
+        $this->middleware('permission:premium-type-list|premium-type-create|premium-type-edit|premium-type-delete', ['only' => ['index']]);
+        $this->middleware('permission:premium-type-create', ['only' => ['create', 'store', 'updateStatus']]);
+        $this->middleware('permission:premium-type-edit', ['only' => ['edit', 'update']]);
+        $this->middleware('permission:premium-type-delete', ['only' => ['delete']]);
     }
 
 
     /**
-     * List Broker 
+     * List PremiumType 
      * @param Nill
-     * @return Array $broker
+     * @return Array $premium_type
      * @author Darshan Baraiya
      */
     public function index(Request $request)
     {
-        $broker_obj = Broker::select('*');
+        $premium_type_obj = PremiumType::select('*');
         if (!empty($request->search)) {
-            $broker_obj->where('name', 'LIKE', '%' . trim($request->search) . '%')->orWhere('email', 'LIKE', '%' . trim($request->search) . '%')->orWhere('mobile_number', 'LIKE', '%' . trim($request->search) . '%');
+            $premium_type_obj->where('name', 'LIKE', '%' . trim($request->search) . '%');
         }
 
-        $brokers = $broker_obj->paginate(10);
-        return view('brokers.index', ['brokers' => $brokers]);
+        $premium_type = $premium_type_obj->paginate(10);
+        return view('premium_type.index', ['premium_type' => $premium_type]);
     }
 
     /**
-     * Create Broker 
+     * Create PremiumType 
      * @param Nill
-     * @return Array $broker
+     * @return Array $premium_type
      * @author Darshan Baraiya
      */
     public function create()
     {
-        return view('brokers.add');
+        return view('premium_type.add');
     }
 
     /**
-     * Store Broker
+     * Store PremiumType
      * @param Request $request
-     * @return View Brokers
+     * @return View PremiumTypes
      * @author Darshan Baraiya
      */
     public function store(Request $request)
     {
         // Validations
         $validation_array = [
-            'name' => 'required',
+            'name' => 'required|unique:premium_types,email,{$this->id}',
+            'is_vehicle' => 'required',
         ];
-
 
         $request->validate($validation_array);
         DB::beginTransaction();
 
         try {
             // Store Data
-            $broker = Broker::create([
+            PremiumType::create([
                 'name' => $request->name,
-                'email' => $request->email,
-                'mobile_number' => $request->mobile_number,
+                'is_vehicle' => $request->is_vehicle,
             ]);
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->back()->with('success', 'Broker Created Successfully.');
+            return redirect()->back()->with('success', 'Policy Type Created Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -90,19 +89,19 @@ class BrokerController extends Controller
     }
 
     /**
-     * Update Status Of Broker
+     * Update Status Of PremiumType
      * @param Integer $status
      * @return List Page With Success
      * @author Darshan Baraiya
      */
-    public function updateStatus($broker_id, $status)
+    public function updateStatus($premium_type_id, $status)
     {
         // Validation
         $validate = Validator::make([
-            'broker_id'   => $broker_id,
+            'premium_type_id'   => $premium_type_id,
             'status' => $status
         ], [
-            'broker_id'   =>  'required|exists:brokers,id',
+            'premium_type_id'   =>  'required|exists:premium_types,id',
             'status' =>  'required|in:0,1',
         ]);
 
@@ -115,11 +114,11 @@ class BrokerController extends Controller
             DB::beginTransaction();
 
             // Update Status
-            Broker::whereId($broker_id)->update(['status' => $status]);
+            PremiumType::whereId($premium_type_id)->update(['status' => $status]);
 
             // Commit And Redirect on index with Success Message
             DB::commit();
-            return redirect()->back()->with('success', 'Broker Status Updated Successfully!');
+            return redirect()->back()->with('success', 'Policy Type Status Updated Successfully!');
         } catch (\Throwable $th) {
 
             // Rollback & Return Error Message
@@ -129,29 +128,30 @@ class BrokerController extends Controller
     }
 
     /**
-     * Edit Broker
-     * @param Integer $broker
-     * @return Collection $broker
+     * Edit PremiumType
+     * @param Integer $premium_type
+     * @return Collection $premium_type
      * @author Darshan Baraiya
      */
-    public function edit(Broker $broker)
+    public function edit(PremiumType $premium_type)
     {
-        return view('brokers.edit')->with([
-            'broker'  => $broker
+        return view('premium_type.edit')->with([
+            'premium_type'  => $premium_type
         ]);
     }
 
     /**
-     * Update Broker
-     * @param Request $request, Broker $broker
-     * @return View Brokers
+     * Update PremiumType
+     * @param Request $request, PremiumType $premium_type
+     * @return View PremiumTypes
      * @author Darshan Baraiya
      */
-    public function update(Request $request, Broker $broker)
+    public function update(Request $request, PremiumType $premium_type)
     {
         // Validations
         $validation_array = [
-            'name' => 'required',
+            'name' => 'required|unique:premium_types,name,' . $premium_type->id,
+            'is_vehicle' => 'required',
         ];
 
         $request->validate($validation_array);
@@ -159,14 +159,13 @@ class BrokerController extends Controller
         DB::beginTransaction($validation_array);
         try {
             // Store Data
-            $broker_updated = Broker::whereId($broker->id)->update([
+            PremiumType::whereId($premium_type->id)->update([
+                'is_vehicle' => $request->is_vehicle,
                 'name' => $request->name,
-                'email' => $request->email,
-                'mobile_number' => $request->mobile_number,
             ]);
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->back()->with('success', 'Broker Updated Successfully.');
+            return redirect()->back()->with('success', 'Policy Type Updated Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -175,20 +174,20 @@ class BrokerController extends Controller
     }
 
     /**
-     * Delete Broker
-     * @param Broker $broker
-     * @return Index Brokers
+     * Delete PremiumType
+     * @param PremiumType $premium_type
+     * @return Index PremiumTypes
      * @author Darshan Baraiya
      */
-    public function delete(Broker $broker)
+    public function delete(PremiumType $premium_type)
     {
         DB::beginTransaction();
         try {
-            // Delete Broker
-            Broker::whereId($broker->id)->delete();
+            // Delete PremiumType
+            PremiumType::whereId($premium_type->id)->delete();
 
             DB::commit();
-            return redirect()->back()->with('success', 'Broker Deleted Successfully!.');
+            return redirect()->back()->with('success', 'Policy Type Deleted Successfully!.');
         } catch (\Throwable $th) {
             DB::rollBack();
             return redirect()->back()->with('error', $th->getMessage());
@@ -196,18 +195,17 @@ class BrokerController extends Controller
     }
 
     /**
-     * Import Brokers 
+     * Import PremiumTypes 
      * @param Null
      * @return View File
      */
-    public function importBrokers()
+    public function importPremiumTypes()
     {
-        return view('brokers.import');
+        return view('premium_type.import');
     }
-
 
     public function export()
     {
-        return Excel::download(new BrokersExport, 'brokers.xlsx');
+        return Excel::download(new PremiumTypesExport, 'premium_type.xlsx');
     }
 }

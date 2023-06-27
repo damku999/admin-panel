@@ -159,6 +159,22 @@
         </div>
     </li>
 
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#taTpDropDownPremiumType"
+            aria-expanded="true" aria-controls="taTpDropDownPremiumType">
+            <i class="fas fa-user-alt"></i>
+            <span>Premium Type</span>
+        </a>
+        <div id="taTpDropDownPremiumType" class="collapse" aria-labelledby="headingTwo"
+            data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Premium Type:</h6>
+                <a class="collapse-item" href="{{ route('premium_type.index') }}">List</a>
+                <a class="collapse-item" href="{{ route('premium_type.create') }}">Add New</a>
+            </div>
+        </div>
+    </li>
+
     <!-- Divider -->
     <hr class="sidebar-divider">
 

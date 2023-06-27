@@ -158,14 +158,16 @@
                             </div>
                             {{-- Type OF Policy --}}
                             <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
-                                <label>Type Of Policy</label>
-                                <input type="text"
-                                    class="form-control form-control-customer @error('type_of_policy') is-invalid @enderror"
-                                    id="type_of_policy" placeholder="Type of policy" name="type_of_policy"
-                                    value="{{ old('type_of_policy') ? old('type_of_policy') : $customer_insurance->type_of_policy }}">
-                                @error('type_of_policy')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
+                                <label>Premium Type</label>
+                                <select name="premium_type_id" class="form-control" id="premium_type_id">
+                                    <option selected="selected" disabled="disabled">Select Premium Type</option>
+                                    @foreach ($premium_types as $item)
+                                        <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                            {{ old('premium_type_id') ? (old('premium_type_id') == $item->id ? 'selected' : '') : ($customer_insurance->premium_type_id == $item->id ? 'selected' : '') }}>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                             {{-- Policy NO --}}
                             <div class="col-sm-6 mb-3 mt-3 mb-sm-0">

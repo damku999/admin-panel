@@ -64,7 +64,7 @@ class PremiumTypeController extends Controller
     {
         // Validations
         $validation_array = [
-            'name' => 'required|unique:premium_types,email,{$this->id}',
+            'name' => 'required|unique:premium_types',
             'is_vehicle' => 'required',
         ];
 

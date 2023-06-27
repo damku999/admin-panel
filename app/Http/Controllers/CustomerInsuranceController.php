@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CustomerInsurancesExport;
 use App\Models\FuelType;
 use App\Models\PolicyType;
+use App\Models\PremiumType;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerInsuranceController extends Controller
@@ -78,6 +79,7 @@ class CustomerInsuranceController extends Controller
             'insurance_companies' => InsuranceCompany::select('id', 'name')->get(),
             'policy_type' => PolicyType::select('id', 'name')->get(),
             'fuel_type' => FuelType::select('id', 'name')->get(),
+            'premium_types' => PremiumType::select('id', 'name')->get(),
         ];
         return view('customer_insurances.add', $response);
     }
@@ -99,7 +101,8 @@ class CustomerInsuranceController extends Controller
             'insurance_company_id' => 'required|exists:insurance_companies,id',
             'policy_type_id' => 'required|exists:policy_types,id',
             'fuel_type_id' => 'required|exists:fuel_types,id',
-            'registration_no' => 'required'
+            'registration_no' => 'required',
+            'premium_type_id' => 'required|exists:premium_types,id',
         ];
 
         if (!empty($request->issue_date)) {
@@ -128,6 +131,9 @@ class CustomerInsuranceController extends Controller
 
             if (isset($request->policy_type_id))
                 $data_to_store['policy_type_id'] = $request->policy_type_id;
+
+            if (isset($request->premium_type_id))
+                $data_to_store['premium_type_id'] = $request->premium_type_id;
 
             if (isset($request->fuel_type_id))
                 $data_to_store['fuel_type_id'] = $request->fuel_type_id;
@@ -249,6 +255,7 @@ class CustomerInsuranceController extends Controller
             'customer_insurance'  => $customer_insurance,
             'policy_type' => PolicyType::select('id', 'name')->get(),
             'fuel_type' => FuelType::select('id', 'name')->get(),
+            'premium_types' => PremiumType::select('id', 'name')->get(),
         ];
         // dd($response);
         return view('customer_insurances.edit')->with($response);
@@ -268,6 +275,7 @@ class CustomerInsuranceController extends Controller
             'broker_id' => 'required|exists:brokers,id',
             'relationship_manager_id' => 'required|exists:relationship_managers,id',
             'insurance_company_id' => 'required|exists:insurance_companies,id',
+            'premium_type_id' => 'required|exists:premium_types,id',
             'policy_type_id' => 'required|exists:policy_types,id',
             'registration_no' => 'required',
             'fuel_type_id' => 'required|exists:fuel_types,id',
@@ -294,6 +302,9 @@ class CustomerInsuranceController extends Controller
             $data_to_store['insurance_company_id'] = $request->insurance_company_id;
             if (isset($request->policy_type_id))
                 $data_to_store['policy_type_id'] = $request->policy_type_id;
+                
+            if (isset($request->premium_type_id))
+                $data_to_store['premium_type_id'] = $request->premium_type_id;
 
             if (isset($request->fuel_type_id))
                 $data_to_store['fuel_type_id'] = $request->fuel_type_id;

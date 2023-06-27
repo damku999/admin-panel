@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\RelationshipManager;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CustomerInsurancesExport;
+use App\Models\FuelType;
 use App\Models\PolicyType;
 use Illuminate\Support\Facades\Validator;
 
@@ -76,6 +77,7 @@ class CustomerInsuranceController extends Controller
             'branches' => Branch::select('id', 'name')->get(),
             'insurance_companies' => InsuranceCompany::select('id', 'name')->get(),
             'policy_type' => PolicyType::select('id', 'name')->get(),
+            'fuel_type' => FuelType::select('id', 'name')->get(),
         ];
         return view('customer_insurances.add', $response);
     }
@@ -96,6 +98,7 @@ class CustomerInsuranceController extends Controller
             'relationship_manager_id' => 'required|exists:relationship_managers,id',
             'insurance_company_id' => 'required|exists:insurance_companies,id',
             'policy_type_id' => 'required|exists:policy_types,id',
+            'fuel_type_id' => 'required|exists:fuel_types,id',
             'registration_no' => 'required'
         ];
 
@@ -126,8 +129,8 @@ class CustomerInsuranceController extends Controller
             if (isset($request->policy_type_id))
                 $data_to_store['policy_type_id'] = $request->policy_type_id;
 
-            if (isset($request->type_of_policy))
-                $data_to_store['type_of_policy'] = $request->type_of_policy;
+            if (isset($request->fuel_type_id))
+                $data_to_store['fuel_type_id'] = $request->fuel_type_id;
 
             if (isset($request->policy_no))
                 $data_to_store['policy_no'] = $request->policy_no;
@@ -140,9 +143,6 @@ class CustomerInsuranceController extends Controller
 
             if (isset($request->make_model))
                 $data_to_store['make_model'] = $request->make_model;
-
-            if (isset($request->fuel_type))
-                $data_to_store['fuel_type'] = $request->fuel_type;
 
             if (isset($request->start_date))
                 $data_to_store['start_date'] = $request->start_date;
@@ -184,7 +184,7 @@ class CustomerInsuranceController extends Controller
             $customer_insurance = CustomerInsurance::create($data_to_store);
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('customer_insurances.index')->with('success', 'Customer Insurance Created Successfully.');
+            return redirect()->back()->with('success', 'Customer Insurance Created Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -211,7 +211,7 @@ class CustomerInsuranceController extends Controller
 
         // If Validations Fails
         if ($validate->fails()) {
-            return redirect()->route('customer_insurances.index')->with('error', $validate->errors()->first());
+            return redirect()->back()->with('error', $validate->errors()->first());
         }
 
         try {
@@ -222,7 +222,7 @@ class CustomerInsuranceController extends Controller
 
             // Commit And Redirect on index with Success Message
             DB::commit();
-            // return redirect()->route('customer_insurances.index')->with('success', 'CustomerInsurance Status Updated Successfully!');
+            // return redirect()->back()->with('success', 'CustomerInsurance Status Updated Successfully!');
             return redirect()->back()->with('success', 'CustomerInsurance Status Updated Successfully!');
         } catch (\Throwable $th) {
 
@@ -248,6 +248,7 @@ class CustomerInsuranceController extends Controller
             'insurance_companies' => InsuranceCompany::select('id', 'name')->get(),
             'customer_insurance'  => $customer_insurance,
             'policy_type' => PolicyType::select('id', 'name')->get(),
+            'fuel_type' => FuelType::select('id', 'name')->get(),
         ];
         // dd($response);
         return view('customer_insurances.edit')->with($response);
@@ -268,7 +269,8 @@ class CustomerInsuranceController extends Controller
             'relationship_manager_id' => 'required|exists:relationship_managers,id',
             'insurance_company_id' => 'required|exists:insurance_companies,id',
             'policy_type_id' => 'required|exists:policy_types,id',
-            'registration_no' => 'required'
+            'registration_no' => 'required',
+            'fuel_type_id' => 'required|exists:fuel_types,id',
         ];
 
         if (!empty($request->issue_date)) {
@@ -293,11 +295,11 @@ class CustomerInsuranceController extends Controller
             if (isset($request->policy_type_id))
                 $data_to_store['policy_type_id'] = $request->policy_type_id;
 
+            if (isset($request->fuel_type_id))
+                $data_to_store['fuel_type_id'] = $request->fuel_type_id;
+
             if (isset($request->issue_date))
                 $data_to_store['issue_date'] = $request->issue_date;
-
-            if (isset($request->type_of_policy))
-                $data_to_store['type_of_policy'] = $request->type_of_policy;
 
             if (isset($request->policy_no))
                 $data_to_store['policy_no'] = $request->policy_no;
@@ -310,9 +312,6 @@ class CustomerInsuranceController extends Controller
 
             if (isset($request->make_model))
                 $data_to_store['make_model'] = $request->make_model;
-
-            if (isset($request->fuel_type))
-                $data_to_store['fuel_type'] = $request->fuel_type;
 
             if (isset($request->start_date))
                 $data_to_store['start_date'] = $request->start_date;
@@ -355,7 +354,7 @@ class CustomerInsuranceController extends Controller
             $customer_insurance_updated = CustomerInsurance::whereId($customer_insurance->id)->update($data_to_store);
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('customer_insurances.index')->with('success', 'CustomerInsurance Updated Successfully.');
+            return redirect()->back()->with('success', 'CustomerInsurance Updated Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -377,7 +376,7 @@ class CustomerInsuranceController extends Controller
             CustomerInsurance::whereId($customer_insurance->id)->delete();
 
             DB::commit();
-            return redirect()->route('customer_insurances.index')->with('success', 'CustomerInsurance Deleted Successfully!.');
+            return redirect()->back()->with('success', 'CustomerInsurance Deleted Successfully!.');
         } catch (\Throwable $th) {
             DB::rollBack();
             return redirect()->back()->with('error', $th->getMessage());

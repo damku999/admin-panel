@@ -60,10 +60,15 @@
                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
                             <label>Policy Type</label>
 
+                            @php
+                                $policy_type_id = old('policy_type_id') ? old('policy_type_id') : 0;
+                            @endphp
                             <select name="policy_type_id" class="form-control" id="policy_type_id">
                                 <option selected="selected" disabled="disabled">Select Policy Type</option>
                                 @foreach ($policy_type as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}">{{ $item->name }}
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        @if ($policy_type_id == $item->id) @selected(true) @endif>
+                                        {{ $item->name }}>{{ $item->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -142,8 +147,8 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
-                         {{-- Policy No. --}}
-                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        {{-- Policy No. --}}
+                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
                             <label>Policy No.</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('policy_no') is-invalid @enderror"
@@ -171,8 +176,8 @@
                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
                             <label>Location</label>
                             <input type="text"
-                                class="form-control form-control-customer @error('rto') is-invalid @enderror" id="rto"
-                                placeholder="Location" name="rto" value="{{ old('rto') }}">
+                                class="form-control form-control-customer @error('rto') is-invalid @enderror"
+                                id="rto" placeholder="Location" name="rto" value="{{ old('rto') }}">
 
                             @error('rto')
                                 <span class="text-danger">{{ $message }}</span>
@@ -194,12 +199,19 @@
 
                         {{-- Fuel Type --}}
                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
-                            <label>Fuel Type</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('fuel_type') is-invalid @enderror"
-                                id="fuel_type" placeholder="Fuel Type" name="fuel_type" value="{{ old('fuel_type') }}">
-
-                            @error('fuel_type')
+                            <label>Feaul Type</label>
+                            @php
+                                $fuel_type_id = old('fuel_type_id') ? old('fuel_type_id') : 0;
+                            @endphp
+                            <select name="fuel_type_id" class="form-control" id="fuel_type_id">
+                                <option selected="selected" disabled="disabled">Select Feaul Type</option>
+                                @foreach ($fuel_type as $item)
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        @if ($fuel_type_id == $item->id) @selected(true) @endif>{{ $item->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('fuel_type_id')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>

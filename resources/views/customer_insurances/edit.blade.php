@@ -73,11 +73,19 @@
 
                             {{-- Policy Type --}}
                             <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                                @php
+                                    $policy_type_id = old('policy_type_id') ? old('policy_type_id') : $customer_insurance->policy_type_id;
+                                @endphp
                                 <label>Policy Type</label>
-                                <input type="text"
-                                    class="form-control form-control-customer @error('policy_type_id') is-invalid @enderror"
-                                    id="policy_type_id" placeholder="Policy Type" name="policy_type_id"
-                                    value="{{ old('policy_type_id') ? old('policy_type_id') : $customer_insurance->policy_type_id }}">
+                                <select name="policy_type_id" class="form-control" id="policy_type_id">
+                                    <option selected="selected" disabled="disabled">Select Policy Type</option>
+                                    @foreach ($policy_type as $item)
+                                        <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                            @if ($policy_type_id == $item->id) @selected(true) @endif>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
                                 @error('policy_type_id')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
@@ -209,13 +217,20 @@
 
                             {{-- Fuel Type --}}
                             <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                                @php
+                                    $fuel_type_id = old('fuel_type_id') ? old('fuel_type_id') : $customer_insurance->fuel_type_id;
+                                @endphp
                                 <label>Fuel Type</label>
-                                <input type="text"
-                                    class="form-control form-control-customer @error('fuel_type') is-invalid @enderror"
-                                    id="fuel_type" placeholder="Fuel Type" name="fuel_type"
-                                    value="{{ old('fuel_type') ? old('fuel_type') : $customer_insurance->fuel_type }}">
-
-                                @error('fuel_type')
+                                <select name="fuel_type_id" class="form-control" id="fuel_type_id">
+                                    <option selected="selected" disabled="disabled">Select Feaul Type</option>
+                                    @foreach ($fuel_type as $item)
+                                        <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                            @if ($fuel_type_id == $item->id) @selected(true) @endif>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('fuel_type_id')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>

@@ -138,10 +138,12 @@
                         {{-- Type OF Policy --}}
                         <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
                             <label>Premium Type</label>
-                            <select name="premium_type_id" class="form-control" id="premium_type_id">
+                            <select name="premium_type_id" class="form-control" id="premium_type_id"
+                                onchange="premiumTypeChanged()">
                                 <option selected="selected" disabled="disabled">Select Premium Type</option>
                                 @foreach ($premium_types as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}">{{ $item->name }}
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        data-is_vehicle={{ $item->is_vehicle }}>{{ $item->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -397,6 +399,13 @@
         $(document).ready(function() {
             $('#customer_id').select2();
         });
+
+        function premiumTypeChanged() {
+            var dataid = $("#premium_type_id option:selected").attr('data-is_vehicle');
+            if(dataid){
+                
+            }
+        }
     </script>
 @endsection
 @section('stylesheets')

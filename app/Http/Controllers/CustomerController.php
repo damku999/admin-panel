@@ -34,13 +34,32 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $customer_obj = Customer::select('*');
+        // Sorting
+        $sortField = $request->input('sort_field', 'name'); // Default sort by name
+        $sortOrder = $request->input('sort_order', 'asc'); // Default sort order ascending
+
+        $customer_obj->orderBy($sortField, $sortOrder);
+        // Apply search filter
         if (!empty($request->search)) {
-            $customer_obj->where('name', 'LIKE', '%' . trim($request->search) . '%')->orWhere('email', 'LIKE', '%' . trim($request->search) . '%')->orWhere('mobile_number', 'LIKE', '%' . trim($request->search) . '%');
+            $customer_obj->where('name', 'LIKE', '%' . trim($request->search) . '%')
+                ->orWhere('email', 'LIKE', '%' . trim($request->search) . '%')
+                ->orWhere('mobile_number', 'LIKE', '%' . trim($request->search) . '%');
+        }
+
+        // Apply type filter
+        if (!empty($request->type)) {
+            $customer_obj->where('type', $request->type);
+        }
+
+        // Apply date range filter
+        if (!empty($request->from_date) && !empty($request->to_date)) {
+            $customer_obj->whereBetween('created_at', [$request->from_date, $request->to_date]);
         }
 
         $customers = $customer_obj->paginate(10);
-        return view('customers.index', ['customers' => $customers]);
+        return view('customers.index', ['customers' => $customers, 'sortField' => $sortField, 'sortOrder' => $sortOrder]);
     }
+
 
     /**
      * Create Customer 
@@ -101,12 +120,39 @@ class CustomerController extends Controller
                 'date_of_birth' => $request->date_of_birth,
                 'type' => $request->type,
                 'pan_card_number' => $request->pan_card_number,
-                'pan_card_path' => $request->pan_card_path,
                 'aadhar_card_number' => $request->aadhar_card_number,
-                'aadhar_card_path' => $request->aadhar_card_path,
                 'gst_number' => $request->gst_number,
-                'gst_path' => $request->gst_path,
             ]);
+
+            // Handle file uploads
+            if ($request->hasFile('pan_card_path')) {
+                $panCardPath = $request->file('pan_card_path')->storeAs(
+                    'customers/' . $customer->id . '/pan_card_path',
+                    $request->file('pan_card_path')->getClientOriginalName(),
+                    'public'
+                );
+                $customer->pan_card_path = $panCardPath;
+            }
+
+            if ($request->hasFile('aadhar_card_path')) {
+                $aadharCardPath = $request->file('aadhar_card_path')->storeAs(
+                    'customers/' . $customer->id . '/aadhar_card_path',
+                    $request->file('aadhar_card_path')->getClientOriginalName(),
+                    'public'
+                );
+                $customer->aadhar_card_path = $aadharCardPath;
+            }
+
+            if ($request->hasFile('gst_path')) {
+                $gstPath = $request->file('gst_path')->storeAs(
+                    'customers/' . $customer->id . '/gst_path',
+                    $request->file('gst_path')->getClientOriginalName(),
+                    'public'
+                );
+                $customer->gst_path = $gstPath;
+            }
+
+            $customer->save();
 
             // Commit And Redirected To Listing
             DB::commit();
@@ -226,6 +272,37 @@ class CustomerController extends Controller
                 'gst_number' => $request->gst_number,
                 'gst_path' => $request->gst_path,
             ]);
+
+            // Handle file uploads
+            if ($request->hasFile('pan_card_path')) {
+                $panCardPath = $request->file('pan_card_path')->storeAs(
+                    'customers/' . $customer->id . '/pan_card_path',
+                    $request->file('pan_card_path')->getClientOriginalName(),
+                    'public'
+                );
+                $customer->pan_card_path = $panCardPath;
+            }
+
+            if ($request->hasFile('aadhar_card_path')) {
+                $aadharCardPath = $request->file('aadhar_card_path')->storeAs(
+                    'customers/' . $customer->id . '/aadhar_card_path',
+                    $request->file('aadhar_card_path')->getClientOriginalName(),
+                    'public'
+                );
+                $customer->aadhar_card_path = $aadharCardPath;
+            }
+
+            if ($request->hasFile('gst_path')) {
+                $gstPath = $request->file('gst_path')->storeAs(
+                    'customers/' . $customer->id . '/gst_path',
+                    $request->file('gst_path')->getClientOriginalName(),
+                    'public'
+                );
+                $customer->gst_path = $gstPath;
+            }
+
+            $customer->save();
+
             // Commit And Redirected To Listing
             DB::commit();
             return redirect()->back()->with('success', 'Customer Updated Successfully.');

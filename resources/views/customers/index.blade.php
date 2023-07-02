@@ -30,38 +30,113 @@
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
-                {{-- <h6 class="m-0 font-weight-bold text-primary"></h6> --}}
                 <form action="{{ route('customers.index') }}" method="GET" role="search">
-                    <div class="input-group-append">
+                    <div class="input-group">
                         <input type="text" placeholder="Search" name="search"
-                            class="form-control float-right filter_by_key" value="{{ request('search') }}">
-                        <button type="submit" class="btn btn-default filter_by_click">
-                            <i class="fas fa-search"></i>
-                        </button>
-                        <a href="{{ route('customers.index') }}" class="btn btn-default filter_by_click">
-                            <i class="fas fa-redo"></i>
-                        </a>
+                            class="form-control float-right filter_by_key" value="{{ request('search') }}"
+                            style="margin-right: 10px;">
+                        <select name="type" class="form-control" onchange="this.form.submit()"
+                            style="margin-right: 10px;">
+                            <option value="">All Types</option>
+                            <option value="Retail" {{ request('type') == 'Retail' ? 'selected' : '' }}>Retail</option>
+                            <option value="Corporate" {{ request('type') == 'Corporate' ? 'selected' : '' }}>Corporate
+                            </option>
+                        </select>
+
+                        {{--  <input type="text" placeholder="From Date" name="from_date" id="from_date"
+                            class="form-control datepicker" value="{{ request('from_date') }}" style="margin-right: 10px;">
+                        <input type="text" placeholder="To Date" name="to_date" id="to_date"
+                            class="form-control datepicker" value="{{ request('to_date') }}" style="margin-right: 10px;"> --}}
+
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-default filter_by_click">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <a href="{{ route('customers.index') }}" class="btn btn-default filter_by_click">
+                                <i class="fas fa-redo"></i>
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>
+
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th width="20%">Name</th>
-                                <th width="25%">Email</th>
-                                <th width="15%">Mobile</th>
+                                <th width="20%">
+                                    <a
+                                        href="{{ route('customers.index', ['sort_field' => 'name', 'sort_order' => $sortField == 'name' && $sortOrder == 'asc' ? 'desc' : 'asc']) }}">
+                                        Name
+                                        @if ($sortField == 'name')
+                                            @if ($sortOrder == 'asc')
+                                                <i class="fas fa-sort-up"></i>
+                                            @else
+                                                <i class="fas fa-sort-down"></i>
+                                            @endif
+                                        @else
+                                            <i class="fas fa-sort"></i>
+                                        @endif
+                                    </a>
+                                </th>
+                                <th width="25%">
+                                    <a
+                                        href="{{ route('customers.index', ['sort_field' => 'email', 'sort_order' => $sortField == 'email' && $sortOrder == 'asc' ? 'desc' : 'asc']) }}">
+                                        Email
+                                        @if ($sortField == 'email')
+                                            @if ($sortOrder == 'asc')
+                                                <i class="fas fa-sort-up"></i>
+                                            @else
+                                                <i class="fas fa-sort-down"></i>
+                                            @endif
+                                        @else
+                                            <i class="fas fa-sort"></i>
+                                        @endif
+                                    </a>
+                                </th>
+                                <th width="15%">
+                                    <a
+                                        href="{{ route('customers.index', ['sort_field' => 'mobile_number', 'sort_order' => $sortField == 'mobile_number' && $sortOrder == 'asc' ? 'desc' : 'asc']) }}">
+                                        Mobile
+                                        @if ($sortField == 'mobile_number')
+                                            @if ($sortOrder == 'asc')
+                                                <i class="fas fa-sort-up"></i>
+                                            @else
+                                                <i class="fas fa-sort-down"></i>
+                                            @endif
+                                        @else
+                                            <i class="fas fa-sort"></i>
+                                        @endif
+                                    </a>
+                                </th>
+                                <th width="15%">
+                                    <a
+                                        href="{{ route('customers.index', ['sort_field' => 'type', 'sort_order' => $sortField == 'type' && $sortOrder == 'asc' ? 'desc' : 'asc']) }}">
+                                        Type
+                                        @if ($sortField == 'type')
+                                            @if ($sortOrder == 'asc')
+                                                <i class="fas fa-sort-up"></i>
+                                            @else
+                                                <i class="fas fa-sort-down"></i>
+                                            @endif
+                                        @else
+                                            <i class="fas fa-sort"></i>
+                                        @endif
+                                    </a>
+                                </th>
                                 <th width="15%">Status</th>
                                 <th width="10%">Action</th>
                             </tr>
                         </thead>
+
                         <tbody>
                             @forelse($customers as $customer)
                                 <tr>
                                     <td>{{ $customer->name }}</td>
                                     <td>{{ $customer->email }}</td>
                                     <td>{{ $customer->mobile_number }}</td>
+                                    <td>{{ $customer->type }}</td>
                                     <td>
                                         @if ($customer->status == 0)
                                             <span class="badge badge-danger">Inactive</span>
@@ -108,5 +183,41 @@
 @endsection
 
 @section('scripts')
-    <script></script>
+    {{-- <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css"
+        rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Other CSS files -->
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <!-- Bootstrap Datepicker JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.datepicker').datepicker({
+                format: 'yyyy-mm-dd',
+                autoclose: true,
+                todayHighlight: true
+            });
+
+            // Validate the selected dates
+            $('#from_date, #to_date').change(function() {
+                var fromDate = $('#from_date').datepicker('getDate');
+                var toDate = $('#to_date').datepicker('getDate');
+
+                if (fromDate && toDate) {
+                    if (fromDate > toDate) {
+                        alert('Start date must be before the end date.');
+                        $('#from_date').val('');
+                        $('#to_date').val('');
+                    }
+                }
+            });
+        });
+    </script> --}}
 @endsection

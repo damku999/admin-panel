@@ -25,7 +25,7 @@
                 @csrf
                 <div class="card-body">
                     <div class="form-group row">
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <span style="color:red;">*</span>Name</label>
                             <input type="text"
                                 class="form-control form-control-relationship_manager @error('name') is-invalid @enderror"
@@ -37,7 +37,7 @@
                         </div>
 
                         {{-- Email --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             Email</label>
                             <input type="email"
                                 class="form-control form-control-relationship_manager @error('email') is-invalid @enderror"
@@ -49,7 +49,7 @@
                         </div>
 
                         {{-- Mobile Number --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             Mobile Number</label>
                             <input type="text"
                                 class="form-control form-control-relationship_manager @error('mobile_number') is-invalid @enderror"

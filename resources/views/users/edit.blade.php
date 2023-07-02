@@ -29,7 +29,7 @@
                 <div class="form-group row">
 
                     {{-- First Name --}}
-                    <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                    <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                         <span style="color:red;">*</span>First Name</label>
                         <input 
                             type="text" 
@@ -45,7 +45,7 @@
                     </div>
 
                     {{-- Last Name --}}
-                    <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                    <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                         <span style="color:red;">*</span>Last Name</label>
                         <input 
                             type="text" 
@@ -61,7 +61,7 @@
                     </div>
 
                     {{-- Email --}}
-                    <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                    <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                         <span style="color:red;">*</span>Email</label>
                         <input 
                             type="email" 
@@ -77,7 +77,7 @@
                     </div>
 
                     {{-- Mobile Number --}}
-                    <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                    <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                         <span style="color:red;">*</span>Mobile Number</label>
                         <input 
                             type="text" 
@@ -93,7 +93,7 @@
                     </div>
 
                     {{-- Role --}}
-                    <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                    <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                         <span style="color:red;">*</span>Role</label>
                         <select class="form-control form-control-user @error('role_id') is-invalid @enderror" name="role_id">
                             <option selected disabled>Select Role</option>
@@ -110,7 +110,7 @@
                     </div>
 
                     {{-- Status --}}
-                    <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                    <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                         <span style="color:red;">*</span>Status</label>
                         <select class="form-control form-control-user @error('status') is-invalid @enderror" name="status">
                             <option selected disabled>Select Status</option>

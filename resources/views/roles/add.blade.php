@@ -27,7 +27,7 @@
                 <div class="form-group row">
 
                     {{-- Name --}}
-                    <div class="col-sm-6 mb-3 mb-sm-0">
+                    <div class="col-sm-6 col-md-4 mb-3 mb-sm-0">
                         <span style="color:red;">*</span>Name</label>
                         <input 
                             type="text" 
@@ -44,7 +44,7 @@
 
 
                     {{-- Email --}}
-                    <div class="col-sm-6 mb-3 mb-sm-0">
+                    <div class="col-sm-6 col-md-4 mb-3 mb-sm-0">
                         <span style="color:red;">*</span>Guard Name</label>
                         <select class="form-control form-control-user @error('guard_name') is-invalid @enderror" name="guard_name">
                             <option selected disabled>Select Guard Name</option>

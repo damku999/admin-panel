@@ -29,7 +29,7 @@
                     <div class="form-group row">
 
                         {{-- First Name --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             Name</label>
                             <input type="text"
                                 class="form-control form-control-policy_type @error('name') is-invalid @enderror"

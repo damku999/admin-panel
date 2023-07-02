@@ -67,6 +67,13 @@ class CustomerController extends Controller
             'email' => 'required|unique:customers,email',
             'mobile_number' => 'required|numeric|digits:10',
             'status' => 'required|numeric|in:0,1',
+            'type' => 'required|in:Retail,Corporate',
+            'pan_card_number' => 'required_if:type,Retail',
+            'pan_card_path' => 'nullable|file|max:1024|mimetypes:application/pdf,image/jpeg,image/png',
+            'aadhar_card_number' => 'required_if:type,Retail',
+            'aadhar_card_path' => 'nullable|file|max:1024|mimetypes:application/pdf,image/jpeg,image/png',
+            'gst_number' => 'required_if:type,Corporate',
+            'gst_path' => 'nullable|file|max:1024|mimetypes:application/pdf,image/jpeg,image/png',
         ];
 
         if (!empty($request->date_of_birth)) {
@@ -92,6 +99,13 @@ class CustomerController extends Controller
                 'wedding_anniversary_date' => $request->wedding_anniversary_date,
                 'engagement_anniversary_date' => $request->engagement_anniversary_date,
                 'date_of_birth' => $request->date_of_birth,
+                'type' => $request->type,
+                'pan_card_number' => $request->pan_card_number,
+                'pan_card_path' => $request->pan_card_path,
+                'aadhar_card_number' => $request->aadhar_card_number,
+                'aadhar_card_path' => $request->aadhar_card_path,
+                'gst_number' => $request->gst_number,
+                'gst_path' => $request->gst_path,
             ]);
 
             // Commit And Redirected To Listing
@@ -171,6 +185,13 @@ class CustomerController extends Controller
             'email' => 'required|unique:customers,email,' . $customer->id . ',id',
             'mobile_number' => 'required|numeric|digits:10',
             'status' => 'required|numeric|in:0,1',
+            'type' => 'required|in:Retail,Corporate',
+            'pan_card_number' => 'required_if:type,Retail',
+            'pan_card_path' => 'nullable|file|max:1024|mimetypes:application/pdf,image/jpeg,image/png',
+            'aadhar_card_number' => 'required_if:type,Retail',
+            'aadhar_card_path' => 'nullable|file|max:1024|mimetypes:application/pdf,image/jpeg,image/png',
+            'gst_number' => 'required_if:type,Corporate',
+            'gst_path' => 'nullable|file|max:1024|mimetypes:application/pdf,image/jpeg,image/png',
         ];
 
         if (!empty($request->date_of_birth)) {
@@ -197,6 +218,13 @@ class CustomerController extends Controller
                 'wedding_anniversary_date' => $request->wedding_anniversary_date,
                 'engagement_anniversary_date' => $request->engagement_anniversary_date,
                 'date_of_birth' => $request->date_of_birth,
+                'type' => $request->type,
+                'pan_card_number' => $request->pan_card_number,
+                'pan_card_path' => $request->pan_card_path,
+                'aadhar_card_number' => $request->aadhar_card_number,
+                'aadhar_card_path' => $request->aadhar_card_path,
+                'gst_number' => $request->gst_number,
+                'gst_path' => $request->gst_path,
             ]);
             // Commit And Redirected To Listing
             DB::commit();

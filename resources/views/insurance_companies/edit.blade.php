@@ -31,7 +31,7 @@
                     <div class="form-group row">
 
                         {{-- First Name --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             Name</label>
                             <input type="text"
                                 class="form-control form-control-insurance_company @error('name') is-invalid @enderror"
@@ -44,7 +44,7 @@
                         </div>
 
                         {{-- Email --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             Email</label>
                             <input type="email"
                                 class="form-control form-control-insurance_company @error('email') is-invalid @enderror"
@@ -57,7 +57,7 @@
                         </div>
 
                         {{-- Mobile Number --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             Mobile Number</label>
                             <input type="text"
                                 class="form-control form-control-insurance_company @error('mobile_number') is-invalid @enderror"

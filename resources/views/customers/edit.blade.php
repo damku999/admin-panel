@@ -29,7 +29,7 @@
                     <div class="form-group row">
 
                         {{-- First Name --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <span style="color:red;">*</span>First Name</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('name') is-invalid @enderror"
@@ -43,7 +43,7 @@
 
 
                         {{-- Email --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <span style="color:red;">*</span>Email</label>
                             <input type="email"
                                 class="form-control form-control-customer @error('email') is-invalid @enderror"
@@ -56,7 +56,7 @@
                         </div>
 
                         {{-- Mobile Number --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <span style="color:red;">*</span>Mobile Number</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('mobile_number') is-invalid @enderror"
@@ -67,10 +67,100 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <span style="color:red;">*</span>Customer Type</label>
+                            <select class="form-control form-control-customer @error('type') is-invalid @enderror"
+                                name="type" id="customerType">
+                                <option selected disabled>Select Customer Type</option>
+                                <option value="Retail" @if (old('type', $customer->type) == 'Retail') selected @endif>Retail</option>
+                                <option value="Corporate" @if (old('type', $customer->type) == 'Corporate') selected @endif>Corporate
+                                </option>
+                            </select>
+                            @error('type')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
 
+                        {{-- Pan Card Number --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="panCardSection"
+                            style="{{ old('type', $customer->type) !== 'Retail' ? 'display:none' : '' }}">
+                            <label for="pan_card_number">Pan Card Number</label>
+                            <input type="text"
+                                class="form-control form-control-customer @error('pan_card_number') is-invalid @enderror"
+                                id="pan_card_number" placeholder="Pan Card Number" name="pan_card_number"
+                                value="{{ old('pan_card_number', $customer->pan_card_number) }}">
+                            @error('pan_card_number')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Pan Card Document --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="panCardDocumentSection"
+                            style="{{ old('type', $customer->type) !== 'Retail' ? 'display:none' : '' }}">
+                            <label for="pan_card_path">Pan Card Document</label>
+                            <input type="file"
+                                class="form-control form-control-customer @error('pan_card_path') is-invalid @enderror"
+                                id="pan_card_path" placeholder="Pan Card Document" name="pan_card_path"
+                                value="{{ old('pan_card_path') }}">
+                            @error('pan_card_path')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Aadhar Card Number --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="aadharCardSection"
+                            style="{{ old('type', $customer->type) !== 'Retail' ? 'display:none' : '' }}">
+                            <label for="aadhar_card_number">Aadhar Card Number</label>
+                            <input type="text"
+                                class="form-control form-control-customer @error('aadhar_card_number') is-invalid @enderror"
+                                id="aadhar_card_number" placeholder="Aadhar Card Number" name="aadhar_card_number"
+                                value="{{ old('aadhar_card_number', $customer->aadhar_card_number) }}">
+                            @error('aadhar_card_number')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Aadhar Card Document --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="aadharCardDocumentSection"
+                            style="{{ old('type', $customer->type) !== 'Retail' ? 'display:none' : '' }}">
+                            <label for="aadhar_card_path">Aadhar Card Document</label>
+                            <input type="file"
+                                class="form-control form-control-customer @error('aadhar_card_path') is-invalid @enderror"
+                                id="aadhar_card_path" placeholder="Aadhar Card Document" name="aadhar_card_path"
+                                value="{{ old('aadhar_card_path') }}">
+                            @error('aadhar_card_path')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- GST Number --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="gstNumberSection"
+                            style="{{ old('type', $customer->type) !== 'Corporate' ? 'display:none' : '' }}">
+                            <label for="gst_number">GST Number</label>
+                            <input type="text"
+                                class="form-control form-control-customer @error('gst_number') is-invalid @enderror"
+                                id="gst_number" placeholder="GST Number" name="gst_number"
+                                value="{{ old('gst_number', $customer->gst_number) }}">
+                            @error('gst_number')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- GST Document --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="gstDocumentSection"
+                            style="{{ old('type', $customer->type) !== 'Corporate' ? 'display:none' : '' }}">
+                            <label for="gst_path">GST Document</label>
+                            <input type="file"
+                                class="form-control form-control-customer @error('gst_path') is-invalid @enderror"
+                                id="gst_path" placeholder="GST Document" name="gst_path"
+                                value="{{ old('gst_path') }}">
+                            @error('gst_path')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
 
                         {{-- Status --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <span style="color:red;">*</span>Status</label>
                             <select class="form-control form-control-customer @error('status') is-invalid @enderror"
                                 name="status">
@@ -88,17 +178,12 @@
                         </div>
 
                         {{-- Date Of Birth --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <span style="color:red;"></span>Date Of Birth</label>
                             <div class="input-group date" id="datepicker">
-                                <input type="text" class="form-control @error('date_of_birth') is-invalid @enderror"
+                                <input type="date" class="form-control @error('date_of_birth') is-invalid @enderror"
                                     id="date_of_birth" name="date_of_birth"
                                     value="{{ old('date_of_birth') ? old('date_of_birth') : $customer->date_of_birth }}" />
-                                <span class="input-group-append">
-                                    <span class="input-group-text bg-light d-block">
-                                        <i class="fa fa-calendar"></i>
-                                    </span>
-                                </span>
                             </div>
                             @error('date_of_birth')
                                 <span class="text-danger">{{ $message }}</span>
@@ -106,18 +191,13 @@
                         </div>
 
                         {{-- Date Of Engagement Anniversary --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <span style="color:red;"></span>Date Of Engagement Anniversary</label>
                             <div class="input-group date" id="datepicker">
-                                <input type="text"
+                                <input type="date"
                                     class="form-control @error('engagement_anniversary_date') is-invalid @enderror"
                                     id="engagement_anniversary_date" name="engagement_anniversary_date"
                                     value="{{ old('engagement_anniversary_date') ? old('engagement_anniversary_date') : $customer->engagement_anniversary_date }}" />
-                                <span class="input-group-append">
-                                    <span class="input-group-text bg-light d-block">
-                                        <i class="fa fa-calendar"></i>
-                                    </span>
-                                </span>
                             </div>
                             @error('engagement_anniversary_date')
                                 <span class="text-danger">{{ $message }}</span>
@@ -125,18 +205,13 @@
                         </div>
 
                         {{-- Date Of Wedding Anniversary --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <span style="color:red;"></span>Date Of Wedding Anniversary</label>
                             <div class="input-group date" id="datepicker">
-                                <input type="text"
+                                <input type="date"
                                     class="form-control @error('wedding_anniversary_date') is-invalid @enderror"
                                     id="wedding_anniversary_date" name="wedding_anniversary_date"
                                     value="{{ old('wedding_anniversary_date') ? old('wedding_anniversary_date') : $customer->wedding_anniversary_date }}" />
-                                <span class="input-group-append">
-                                    <span class="input-group-text bg-light d-block">
-                                        <i class="fa fa-calendar"></i>
-                                    </span>
-                                </span>
                             </div>
                             @error('wedding_anniversary_date')
                                 <span class="text-danger">{{ $message }}</span>
@@ -196,27 +271,57 @@
 
 @endsection
 @section('scripts')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"
-        integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
-        $('#date_of_birth').datepicker({
-            format: 'yyyy-mm-dd',
-        });
+        // Get the customer type select element
+        const customerTypeSelect = document.getElementById('customerType');
 
-        $('#wedding_anniversary_date').datepicker({
-            format: 'yyyy-mm-dd',
-        });
+        // Get the sections related to pan card and aadhar card
+        const panCardSection = document.getElementById('panCardSection');
+        const panCardDocumentSection = document.getElementById('panCardDocumentSection');
+        const aadharCardSection = document.getElementById('aadharCardSection');
+        const aadharCardDocumentSection = document.getElementById('aadharCardDocumentSection');
 
-        $('#engagement_anniversary_date').datepicker({
-            format: 'yyyy-mm-dd',
+        // Get the sections related to GST
+        const gstNumberSection = document.getElementById('gstNumberSection');
+        const gstDocumentSection = document.getElementById('gstDocumentSection');
+
+        // Function to hide the sections
+        const hideSections = () => {
+            panCardSection.style.display = 'none';
+            panCardDocumentSection.style.display = 'none';
+            aadharCardSection.style.display = 'none';
+            aadharCardDocumentSection.style.display = 'none';
+            gstNumberSection.style.display = 'none';
+            gstDocumentSection.style.display = 'none';
+        };
+
+        // Function to show the sections
+        const showSections = () => {
+            const customerType = customerTypeSelect.value;
+
+            if (customerType === 'Retail') {
+                panCardSection.style.display = 'block';
+                panCardDocumentSection.style.display = 'block';
+                aadharCardSection.style.display = 'block';
+                aadharCardDocumentSection.style.display = 'block';
+            } else if (customerType === 'Corporate') {
+                gstNumberSection.style.display = 'block';
+                gstDocumentSection.style.display = 'block';
+            }
+        };
+
+        // Hide all sections initially
+        hideSections();
+
+        // Show sections based on the selected customer type
+        showSections();
+
+        // Event listener for customer type change
+        customerTypeSelect.addEventListener('change', () => {
+            hideSections();
+            showSections();
         });
     </script>
-
 @endsection
 @section('stylesheets')
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css"
-        integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
 @endsection

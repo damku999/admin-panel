@@ -26,7 +26,7 @@
                 @csrf
                 <div class="card-body">
                     <div class="form-group row">
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0"><span style="color: red;">*</span>Customer
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0"><span style="color: red;">*</span>Customer
                             <select name="customer_id" class="form-control" id="customer_id">
                                 <option selected="selected" disabled="disabled">Select Customer</option>
                                 @foreach ($customers as $item)
@@ -40,16 +40,11 @@
                         </div>
 
                         {{-- Issue Date --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Issue Date</label>
                             <div class="input-group date" id="issue_date">
                                 <input type="date" class="form-control @error('issue_date') is-invalid @enderror"
                                     id="issue_date" name="issue_date" value="{{ old('issue_date') }}" />
-                                <span class="input-group-append">
-                                    {{-- <span class="input-group-text bg-light d-block">
-                                        <i class="fa fa-calendar"></i>
-                                    </span> --}}
-                                </span>
                             </div>
                             @error('issue_date')
                                 <span class="text-danger">{{ $message }}</span>
@@ -57,7 +52,7 @@
                         </div>
 
                         {{-- Policy Type --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Policy Type</label>
 
                             @php
@@ -78,7 +73,7 @@
                         </div>
 
                         {{-- Branch --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Branch</label>
                             <select name="branch_id" class="form-control" id="branch_id">
                                 <option selected="selected" disabled="disabled">Select Branch</option>
@@ -93,7 +88,7 @@
                         </div>
 
                         {{-- Broker --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Broker</label>
                             <select name="broker_id" class="form-control" id="broker_id">
                                 <option selected="selected" disabled="disabled">Select Broker</option>
@@ -107,7 +102,7 @@
                             @enderror
                         </div>
                         {{-- RM --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Relationship Manager</label>
                             <select name="relationship_manager_id" class="form-control" id="relationship_manager_id">
                                 <option selected="selected" disabled="disabled">Select Broker</option>
@@ -122,7 +117,7 @@
                         </div>
 
                         {{-- Insurance Company Name --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Insurance Company Name</label>
                             <select name="insurance_company_id" class="form-control" id="insurance_company_id">
                                 <option selected="selected" disabled="disabled">Select Broker</option>
@@ -136,7 +131,7 @@
                             @enderror
                         </div>
                         {{-- Type OF Policy --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Premium Type</label>
                             <select name="premium_type_id" class="form-control" id="premium_type_id"
                                 onchange="premiumTypeChanged()">
@@ -153,7 +148,7 @@
                         </div>
 
                         {{-- Policy No. --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Policy No.</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('policy_no') is-invalid @enderror"
@@ -165,7 +160,7 @@
                             @enderror
                         </div>
                         {{-- Registration No. --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Registration No.</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('registration_no') is-invalid @enderror"
@@ -178,7 +173,7 @@
                         </div>
 
                         {{-- Location --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Location</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('rto') is-invalid @enderror"
@@ -190,7 +185,7 @@
                         </div>
 
                         {{-- Make & Model --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Make & Model</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('make_model') is-invalid @enderror"
@@ -203,7 +198,7 @@
                         </div>
 
                         {{-- Fuel Type --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Feaul Type</label>
                             @php
                                 $fuel_type_id = old('fuel_type_id') ? old('fuel_type_id') : 0;
@@ -222,16 +217,11 @@
                         </div>
 
                         {{-- Start Date --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Start Date</label>
                             <div class="input-group date" id="start_date">
                                 <input type="date" class="form-control @error('start_date') is-invalid @enderror"
                                     id="start_date" name="start_date" value="{{ old('start_date') }}" />
-                                <span class="input-group-append">
-                                    <span class="input-group-text bg-light d-block">
-                                        <i class="fa fa-calendar"></i>
-                                    </span>
-                                </span>
                             </div>
                             @error('start_date')
                                 <span class="text-danger">{{ $message }}</span>
@@ -239,23 +229,18 @@
                         </div>
 
                         {{-- Expired Date --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Expired Date</label>
                             <div class="input-group date" id="expired_date">
                                 <input type="date" class="form-control @error('expired_date') is-invalid @enderror"
                                     id="expired_date" name="expired_date" value="{{ old('expired_date') }}" />
-                                <span class="input-group-append">
-                                    <span class="input-group-text bg-light d-block">
-                                        <i class="fa fa-calendar"></i>
-                                    </span>
-                                </span>
                             </div>
                             @error('expired_date')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
                         {{-- OD Premium --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>OD Premium</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('od_premium') is-invalid @enderror"
@@ -268,7 +253,7 @@
                         </div>
 
                         {{-- TP Premium --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>TP Premium</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('tp_premium') is-invalid @enderror"
@@ -281,7 +266,7 @@
                         </div>
 
                         {{-- RSA --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>RSA</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('rsa') is-invalid @enderror"
@@ -293,7 +278,7 @@
                         </div>
 
                         {{-- Net Premium --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Net Premium</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('net_premium') is-invalid @enderror"
@@ -306,7 +291,7 @@
                         </div>
 
                         {{-- GST --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>GST</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('gst') is-invalid @enderror"
@@ -318,7 +303,7 @@
                         </div>
 
                         {{-- Final Premium With GST --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Final Premium With GST</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('final_premium_with_gst') is-invalid @enderror"
@@ -331,7 +316,7 @@
                         </div>
 
                         {{-- Mode of Payment --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Mode of Payment</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('mode_of_payment') is-invalid @enderror"
@@ -344,7 +329,7 @@
                         </div>
 
                         {{-- Cheque No. --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Cheque No.</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('cheque_no') is-invalid @enderror"
@@ -357,7 +342,7 @@
                         </div>
 
                         {{-- Premium --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Premium</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('premium') is-invalid @enderror"
@@ -368,7 +353,7 @@
                             @enderror
                         </div>
                         {{-- Issued By --}}
-                        <div class="col-sm-6 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Issued By</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('issued_by') is-invalid @enderror"

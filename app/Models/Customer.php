@@ -28,6 +28,12 @@ class Customer extends Authenticatable
         'wedding_anniversary_date',
         'date_of_birth',
         'engagement_anniversary_date',
+        'pan_card_number',
+        'aadhar_card_number',
+        'gst_number',
+        'pan_card_path',
+        'aadhar_card_path',
+        'gst_path'
     ];
 
     /**

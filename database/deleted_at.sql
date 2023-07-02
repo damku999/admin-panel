@@ -187,3 +187,37 @@ ADD
     COLUMN `deleted_at` TIMESTAMP NULL DEFAULT NULL
 AFTER
     `updated_at`;
+
+ALTER TABLE
+    `customers`
+ADD
+    COLUMN `type` ENUM('Corporate', 'Retail') NULL DEFAULT NULL
+AFTER
+    `engagement_anniversary_date`;
+
+ALTER TABLE
+    `customers`
+ADD
+    COLUMN `pan_card_number` VARCHAR(50) NULL DEFAULT NULL
+AFTER
+    `status`,
+ADD
+    COLUMN `aadhar_card_number` VARCHAR(50) NULL DEFAULT NULL
+AFTER
+    `pan_card_number`,
+ADD
+    COLUMN `gst_number` VARCHAR(50) NULL DEFAULT NULL
+AFTER
+    `aadhar_card_number`,
+ADD
+    COLUMN `pan_card_path` VARCHAR(150) NULL DEFAULT NULL
+AFTER
+    `gst_number`,
+ADD
+    COLUMN `aadhar_card_path` VARCHAR(150) NULL DEFAULT NULL
+AFTER
+    `pan_card_path`,
+ADD
+    COLUMN `gst_path` VARCHAR(150) NULL DEFAULT NULL
+AFTER
+    `aadhar_card_path`;

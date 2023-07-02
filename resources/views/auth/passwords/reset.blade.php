@@ -6,7 +6,8 @@
     <div class="row justify-content-center">
 
         <div class="text-center m-5">
-            <h1 class="text-white">WebMonks Technologies - Laravel Admin Panel</h1>
+            {{-- <h1 class="text-white">WebMonks Technologies - Laravel Admin Panel</h1> --}}
+            <img src=" {{ asset('images/parth_logo.png') }}" style="max-width: 50%;">
         </div>
 
         <div class="col-xl-10 col-lg-12 col-md-9">

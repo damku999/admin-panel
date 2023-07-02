@@ -6,7 +6,8 @@
 <div class="row justify-content-center">
 
     <div class="text-center mt-5">
-        <h1 class="text-white">WebMonks Technologies - Admin Panel</h1>
+        <img src=" {{ asset('images/parth_logo.png') }}" style="max-width: 50%;">
+        {{-- <h1 class="text-white">WebMonks Technologies - Admin Panel</h1> --}}
     </div>
 
     <div class="col-xl-10 col-lg-12 col-md-9">

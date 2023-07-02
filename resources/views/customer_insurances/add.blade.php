@@ -68,7 +68,7 @@
                                 @foreach ($policy_type as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
                                         @if ($policy_type_id == $item->id) @selected(true) @endif>
-                                        {{ $item->name }}>{{ $item->name }}
+                                        {{ $item->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -111,7 +111,7 @@
                             <label>Relationship Manager</label>
                             <select name="relationship_manager_id" class="form-control" id="relationship_manager_id">
                                 <option selected="selected" disabled="disabled">Select Broker</option>
-                                @foreach ($brokers as $item)
+                                @foreach ($relationship_managers as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}">{{ $item->name }}
                                     </option>
                                 @endforeach
@@ -402,8 +402,8 @@
 
         function premiumTypeChanged() {
             var dataid = $("#premium_type_id option:selected").attr('data-is_vehicle');
-            if(dataid){
-                
+            if (dataid) {
+
             }
         }
     </script>

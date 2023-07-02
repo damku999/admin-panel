@@ -128,7 +128,7 @@
                                 <label>Relationship Manager</label>
                                 <select name="relationship_manager_id" class="form-control" id="relationship_manager_id">
                                     <option selected="selected" disabled="disabled">Select Broker</option>
-                                    @foreach ($brokers as $item)
+                                    @foreach ($relationship_managers as $item)
                                         <option id="{{ $item->id }}" value="{{ $item->id }}"
                                             {{ old('relationship_manager_id') ? (old('relationship_manager_id') == $item->id ? 'selected' : '') : ($customer_insurance->relationship_manager_id == $item->id ? 'selected' : '') }}>
                                             {{ $item->name }}

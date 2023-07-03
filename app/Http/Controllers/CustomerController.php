@@ -123,36 +123,8 @@ class CustomerController extends Controller
                 'aadhar_card_number' => $request->aadhar_card_number,
                 'gst_number' => $request->gst_number,
             ]);
-
             // Handle file uploads
-            if ($request->hasFile('pan_card_path')) {
-                $panCardPath = $request->file('pan_card_path')->storeAs(
-                    'customers/' . $customer->id . '/pan_card_path',
-                    $request->file('pan_card_path')->getClientOriginalName(),
-                    'public'
-                );
-                $customer->pan_card_path = $panCardPath;
-            }
-
-            if ($request->hasFile('aadhar_card_path')) {
-                $aadharCardPath = $request->file('aadhar_card_path')->storeAs(
-                    'customers/' . $customer->id . '/aadhar_card_path',
-                    $request->file('aadhar_card_path')->getClientOriginalName(),
-                    'public'
-                );
-                $customer->aadhar_card_path = $aadharCardPath;
-            }
-
-            if ($request->hasFile('gst_path')) {
-                $gstPath = $request->file('gst_path')->storeAs(
-                    'customers/' . $customer->id . '/gst_path',
-                    $request->file('gst_path')->getClientOriginalName(),
-                    'public'
-                );
-                $customer->gst_path = $gstPath;
-            }
-
-            $customer->save();
+            $this->handleFileUpload($request, $customer);
 
             // Commit And Redirected To Listing
             DB::commit();
@@ -162,6 +134,46 @@ class CustomerController extends Controller
             DB::rollBack();
             return redirect()->back()->withInput()->with('error', $th->getMessage());
         }
+    }
+
+
+    /**
+     * Handle file upload.
+     * @param Request $request
+     * @param Customer $customer
+     * @return void
+     */
+    private function handleFileUpload(Request $request, Customer $customer)
+    {
+        // Handle file uploads
+        if ($request->hasFile('pan_card_path')) {
+            $panCardPath = $request->file('pan_card_path')->storeAs(
+                'customers/' . $customer->id . '/pan_card_path',
+                $request->file('pan_card_path')->getClientOriginalName(),
+                'public'
+            );
+            $customer->pan_card_path = $panCardPath;
+        }
+
+        if ($request->hasFile('aadhar_card_path')) {
+            $aadharCardPath = $request->file('aadhar_card_path')->storeAs(
+                'customers/' . $customer->id . '/aadhar_card_path',
+                $request->file('aadhar_card_path')->getClientOriginalName(),
+                'public'
+            );
+            $customer->aadhar_card_path = $aadharCardPath;
+        }
+
+        if ($request->hasFile('gst_path')) {
+            $gstPath = $request->file('gst_path')->storeAs(
+                'customers/' . $customer->id . '/gst_path',
+                $request->file('gst_path')->getClientOriginalName(),
+                'public'
+            );
+            $customer->gst_path = $gstPath;
+        }
+
+        $customer->save();
     }
 
     /**
@@ -266,42 +278,11 @@ class CustomerController extends Controller
                 'date_of_birth' => $request->date_of_birth,
                 'type' => $request->type,
                 'pan_card_number' => $request->pan_card_number,
-                'pan_card_path' => $request->pan_card_path,
                 'aadhar_card_number' => $request->aadhar_card_number,
-                'aadhar_card_path' => $request->aadhar_card_path,
                 'gst_number' => $request->gst_number,
-                'gst_path' => $request->gst_path,
             ]);
 
-            // Handle file uploads
-            if ($request->hasFile('pan_card_path')) {
-                $panCardPath = $request->file('pan_card_path')->storeAs(
-                    'customers/' . $customer->id . '/pan_card_path',
-                    $request->file('pan_card_path')->getClientOriginalName(),
-                    'public'
-                );
-                $customer->pan_card_path = $panCardPath;
-            }
-
-            if ($request->hasFile('aadhar_card_path')) {
-                $aadharCardPath = $request->file('aadhar_card_path')->storeAs(
-                    'customers/' . $customer->id . '/aadhar_card_path',
-                    $request->file('aadhar_card_path')->getClientOriginalName(),
-                    'public'
-                );
-                $customer->aadhar_card_path = $aadharCardPath;
-            }
-
-            if ($request->hasFile('gst_path')) {
-                $gstPath = $request->file('gst_path')->storeAs(
-                    'customers/' . $customer->id . '/gst_path',
-                    $request->file('gst_path')->getClientOriginalName(),
-                    'public'
-                );
-                $customer->gst_path = $gstPath;
-            }
-
-            $customer->save();
+            $this->handleFileUpload($request, $customer);
 
             // Commit And Redirected To Listing
             DB::commit();

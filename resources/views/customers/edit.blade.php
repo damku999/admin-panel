@@ -21,7 +21,8 @@
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Edit Customer</h6>
             </div>
-            <form method="POST" action="{{ route('customers.update', ['customer' => $customer->id]) }}">
+            <form method="POST" action="{{ route('customers.update', ['customer' => $customer->id]) }}"
+                enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -93,11 +94,17 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
-
                         {{-- Pan Card Document --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="panCardDocumentSection"
                             style="{{ old('type', $customer->type) !== 'Retail' ? 'display:none' : '' }}">
                             <label for="pan_card_path">Pan Card Document</label>
+                            @if ($customer->pan_card_path)
+                                <div>
+                                    <a href="{{ asset('storage/' . $customer->pan_card_path) }}" target="_blank">Download
+                                        Pan
+                                        Card</a>
+                                </div>
+                            @endif
                             <input type="file"
                                 class="form-control form-control-customer @error('pan_card_path') is-invalid @enderror"
                                 id="pan_card_path" placeholder="Pan Card Document" name="pan_card_path"
@@ -124,6 +131,13 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="aadharCardDocumentSection"
                             style="{{ old('type', $customer->type) !== 'Retail' ? 'display:none' : '' }}">
                             <label for="aadhar_card_path">Aadhar Card Document</label>
+                            @if ($customer->aadhar_card_path)
+                                <div>
+                                    <a href="{{ asset('storage/' . $customer->aadhar_card_path) }}"
+                                        target="_blank">Download
+                                        Aadhar Card</a>
+                                </div>
+                            @endif
                             <input type="file"
                                 class="form-control form-control-customer @error('aadhar_card_path') is-invalid @enderror"
                                 id="aadhar_card_path" placeholder="Aadhar Card Document" name="aadhar_card_path"
@@ -150,10 +164,20 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="gstDocumentSection"
                             style="{{ old('type', $customer->type) !== 'Corporate' ? 'display:none' : '' }}">
                             <label for="gst_path">GST Document</label>
-                            <input type="file"
-                                class="form-control form-control-customer @error('gst_path') is-invalid @enderror"
-                                id="gst_path" placeholder="GST Document" name="gst_path"
-                                value="{{ old('gst_path') }}">
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <input type="file"
+                                        class="custom-file-input @error('gst_path') is-invalid @enderror" id="gst_path"
+                                        placeholder="GST Document" name="gst_path" value="{{ old('gst_path') }}">
+                                    <label class="custom-file-label" for="gst_path">Choose file</label>
+                                </div>
+                                <div class="input-group-append">
+                                    @if ($customer->gst_path)
+                                        <a href="{{ asset('storage/' . $customer->gst_path) }}" class="btn btn-primary"
+                                            download>Download</a>
+                                    @endif
+                                </div>
+                            </div>
                             @error('gst_path')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror

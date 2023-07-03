@@ -21,8 +21,17 @@
         <div class="card shadow mb-4">
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Add New Customer Insurance</h6>
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
             </div>
-            <form method="POST" action="{{ route('customer_insurances.store') }}">
+            <form method="POST" action="{{ route('customer_insurances.store') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="card-body">
                     <div class="form-group row">
@@ -30,7 +39,8 @@
                             <select name="customer_id" class="form-control" id="customer_id">
                                 <option selected="selected" disabled="disabled">Select Customer</option>
                                 @foreach ($customers as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}">{{ $item->name }}
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        {{ old('customer_id') == $item->id ? 'selected' : '' }}>{{ $item->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -41,7 +51,7 @@
 
                         {{-- Issue Date --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Issue Date</label>
+                            <label><span style="color: red;">*</span>Issue Date</label>
                             <div class="input-group date" id="issue_date">
                                 <input type="date" class="form-control @error('issue_date') is-invalid @enderror"
                                     id="issue_date" name="issue_date" value="{{ old('issue_date') }}" />
@@ -53,16 +63,13 @@
 
                         {{-- Policy Type --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Policy Type</label>
+                            <label><span style="color: red;">*</span>Policy Type</label>
 
-                            @php
-                                $policy_type_id = old('policy_type_id') ? old('policy_type_id') : 0;
-                            @endphp
                             <select name="policy_type_id" class="form-control" id="policy_type_id">
                                 <option selected="selected" disabled="disabled">Select Policy Type</option>
                                 @foreach ($policy_type as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        @if ($policy_type_id == $item->id) @selected(true) @endif>
+                                        {{ old('policy_type_id') == $item->id ? 'selected' : '' }}>
                                         {{ $item->name }}
                                     </option>
                                 @endforeach
@@ -74,11 +81,12 @@
 
                         {{-- Branch --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Branch</label>
+                            <label><span style="color: red;">*</span>Branch</label>
                             <select name="branch_id" class="form-control" id="branch_id">
                                 <option selected="selected" disabled="disabled">Select Branch</option>
                                 @foreach ($branches as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}">{{ $item->name }}
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        {{ old('branch_id') == $item->id ? 'selected' : '' }}>{{ $item->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -89,11 +97,12 @@
 
                         {{-- Broker --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Broker</label>
+                            <label><span style="color: red;">*</span>Broker</label>
                             <select name="broker_id" class="form-control" id="broker_id">
                                 <option selected="selected" disabled="disabled">Select Broker</option>
                                 @foreach ($brokers as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}">{{ $item->name }}
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        {{ old('broker_id') == $item->id ? 'selected' : '' }}>{{ $item->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -103,11 +112,13 @@
                         </div>
                         {{-- RM --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Relationship Manager</label>
+                            <label><span style="color: red;">*</span>Relationship Manager</label>
                             <select name="relationship_manager_id" class="form-control" id="relationship_manager_id">
                                 <option selected="selected" disabled="disabled">Select Broker</option>
                                 @foreach ($relationship_managers as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}">{{ $item->name }}
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        {{ old('relationship_manager_id') == $item->id ? 'selected' : '' }}>
+                                        {{ $item->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -118,11 +129,13 @@
 
                         {{-- Insurance Company Name --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Insurance Company Name</label>
+                            <label><span style="color: red;">*</span>Insurance Company Name</label>
                             <select name="insurance_company_id" class="form-control" id="insurance_company_id">
-                                <option selected="selected" disabled="disabled">Select Broker</option>
+                                <option selected="selected" disabled="disabled">Select Company</option>
                                 @foreach ($insurance_companies as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}">{{ $item->name }}
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        {{ old('insurance_company_id') == $item->id ? 'selected' : '' }}>
+                                        {{ $item->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -130,38 +143,20 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
-                        {{-- Type OF Policy --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Premium Type</label>
-                            <select name="premium_type_id" class="form-control" id="premium_type_id"
-                                onchange="premiumTypeChanged()">
-                                <option selected="selected" disabled="disabled">Select Premium Type</option>
-                                @foreach ($premium_types as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        data-is_vehicle={{ $item->is_vehicle }}>{{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('premium_type_id')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
                         {{-- Policy No. --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Policy No.</label>
+                            <label><span style="color: red;">*</span>Policy No.</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('policy_no') is-invalid @enderror"
-                                id="policy_no" placeholder="Registration No." name="policy_no"
-                                value="{{ old('policy_no') }}">
+                                id="policy_no" placeholder="Policy No." name="policy_no" value="{{ old('policy_no') }}">
 
                             @error('policy_no')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
                         {{-- Registration No. --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Registration No.</label>
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                            <label><span style="color: red;">*</span>Registration No.</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('registration_no') is-invalid @enderror"
                                 id="registration_no" placeholder="Registration No." name="registration_no"
@@ -171,9 +166,49 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
-
-                        {{-- Location --}}
+                        {{-- Start Date --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <label><span style="color: red;">*</span>Start Date</label>
+                            <div class="input-group date">
+                                <input type="date" class="form-control @error('start_date') is-invalid @enderror"
+                                    id="start_date" name="start_date" value="{{ old('start_date') }}"
+                                    onblur="setExpiredDate()" />
+                            </div>
+                            @error('start_date')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Expired Date --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <label><span style="color: red;">*</span>Expired Date</label>
+                            <div class="input-group date">
+                                <input type="date" class="form-control @error('expired_date') is-invalid @enderror"
+                                    id="expired_date" name="expired_date" value="{{ old('expired_date') }}" />
+                            </div>
+                            @error('expired_date')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        {{-- Type OF Policy --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <label><span style="color: red;">*</span>Premium Type</label>
+                            <select name="premium_type_id" class="form-control" id="premium_type_id"
+                                onchange="premiumTypeChanged()">
+                                <option selected="selected" disabled="disabled">Select Premium Type</option>
+                                @foreach ($premium_types as $item)
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        data-is_vehicle={{ $item->is_vehicle }}
+                                        {{ old('premium_type_id') == $item->id ? 'selected' : '' }}>{{ $item->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('premium_type_id')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        {{-- Location --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                             <label>Location</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('rto') is-invalid @enderror"
@@ -185,7 +220,7 @@
                         </div>
 
                         {{-- Make & Model --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                             <label>Make & Model</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('make_model') is-invalid @enderror"
@@ -198,16 +233,13 @@
                         </div>
 
                         {{-- Fuel Type --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Feaul Type</label>
-                            @php
-                                $fuel_type_id = old('fuel_type_id') ? old('fuel_type_id') : 0;
-                            @endphp
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                            <label>Fuel Type</label>
                             <select name="fuel_type_id" class="form-control" id="fuel_type_id">
-                                <option selected="selected" disabled="disabled">Select Feaul Type</option>
+                                <option selected="selected" disabled="disabled">Select Fuel Type</option>
                                 @foreach ($fuel_type as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        @if ($fuel_type_id == $item->id) @selected(true) @endif>{{ $item->name }}
+                                        {{ old('fuel_type_id') == $item->id ? 'selected' : '' }}>{{ $item->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -216,33 +248,10 @@
                             @enderror
                         </div>
 
-                        {{-- Start Date --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Start Date</label>
-                            <div class="input-group date" id="start_date">
-                                <input type="date" class="form-control @error('start_date') is-invalid @enderror"
-                                    id="start_date" name="start_date" value="{{ old('start_date') }}" />
-                            </div>
-                            @error('start_date')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Expired Date --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Expired Date</label>
-                            <div class="input-group date" id="expired_date">
-                                <input type="date" class="form-control @error('expired_date') is-invalid @enderror"
-                                    id="expired_date" name="expired_date" value="{{ old('expired_date') }}" />
-                            </div>
-                            @error('expired_date')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
                         {{-- OD Premium --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                             <label>OD Premium</label>
-                            <input type="text"
+                            <input type="number"
                                 class="form-control form-control-customer @error('od_premium') is-invalid @enderror"
                                 id="od_premium" placeholder="OD Premium" name="od_premium"
                                 value="{{ old('od_premium') }}">
@@ -253,9 +262,9 @@
                         </div>
 
                         {{-- TP Premium --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                             <label>TP Premium</label>
-                            <input type="text"
+                            <input type="number"
                                 class="form-control form-control-customer @error('tp_premium') is-invalid @enderror"
                                 id="tp_premium" placeholder="TP Premium" name="tp_premium"
                                 value="{{ old('tp_premium') }}">
@@ -265,22 +274,10 @@
                             @enderror
                         </div>
 
-                        {{-- RSA --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>RSA</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('rsa') is-invalid @enderror"
-                                id="rsa" placeholder="RSA" name="rsa" value="{{ old('rsa') }}">
-
-                            @error('rsa')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
                         {{-- Net Premium --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Net Premium</label>
-                            <input type="text"
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 net_premium_div">
+                            <label><span style="color: red;">*</span>Net Premium</label>
+                            <input type="number"
                                 class="form-control form-control-customer @error('net_premium') is-invalid @enderror"
                                 id="net_premium" placeholder="Net Premium" name="net_premium"
                                 value="{{ old('net_premium') }}">
@@ -291,9 +288,9 @@
                         </div>
 
                         {{-- GST --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>GST</label>
-                            <input type="text"
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 net_premium_div">
+                            <label><span style="color: red;">*</span>GST</label>
+                            <input type="number"
                                 class="form-control form-control-customer @error('gst') is-invalid @enderror"
                                 id="gst" placeholder="GST" name="gst" value="{{ old('gst') }}">
 
@@ -302,13 +299,60 @@
                             @enderror
                         </div>
 
+                        {{-- CGST --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgst1 premium-fields">
+                            <label><span style="color: red;">*</span>CGST 1</label>
+                            <input type="number"
+                                class="form-control form-control-customer @error('cgst1') is-invalid @enderror"
+                                id="cgst1" placeholder="CGST" name="cgst1" value="{{ old('cgst1') }}">
+
+                            @error('cgst1')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        {{-- SGST --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgst1 premium-fields">
+                            <label><span style="color: red;">*</span>SGST 1</label>
+                            <input type="number"
+                                class="form-control form-control-customer @error('sgst1') is-invalid @enderror"
+                                id="sgst1" placeholder="SGST" name="sgst1" value="{{ old('sgst1') }}">
+
+                            @error('sgst1')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- CGST 2 --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
+                            <label><span style="color: red;">*</span>CGST 2 </label>
+                            <input type="number"
+                                class="form-control form-control-customer @error('cgst2') is-invalid @enderror"
+                                id="cgst2" placeholder="CGST 2" name="cgst2" value="{{ old('cgst2') }}">
+
+                            @error('cgst2')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- SGST 2 --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
+                            <label><span style="color: red;">*</span>SGST 2 </label>
+                            <input type="number"
+                                class="form-control form-control-customer @error('sgst2') is-invalid @enderror"
+                                id="sgst2" placeholder="SGST 2" name="sgst2" value="{{ old('sgst2') }}">
+
+                            @error('sgst2')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
                         {{-- Final Premium With GST --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Final Premium With GST</label>
-                            <input type="text"
+                            <label><span style="color: red;">*</span>Final Premium With GST</label>
+                            <input type="number"
                                 class="form-control form-control-customer @error('final_premium_with_gst') is-invalid @enderror"
                                 id="final_premium_with_gst" placeholder="Final Premium With GST"
-                                name="final_premium_with_gst" value="{{ old('final_premium_with_gst') }}">
+                                name="final_premium_with_gst" value="{{ old('final_premium_with_gst') }}" readonly>
 
                             @error('final_premium_with_gst')
                                 <span class="text-danger">{{ $message }}</span>
@@ -341,25 +385,14 @@
                             @enderror
                         </div>
 
-                        {{-- Premium --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Premium</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('premium') is-invalid @enderror"
-                                id="premium" placeholder="Premium" name="premium" value="{{ old('premium') }}">
-
-                            @error('premium')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        {{-- Issued By --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Issued By</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('issued_by') is-invalid @enderror"
-                                id="issued_by" placeholder="Issued By" name="issued_by" value="{{ old('issued_by') }}">
-
-                            @error('issued_by')
+                        {{-- Policy Document --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="gstDocumentSection">
+                            <label for="policy_document_path">Policy Document</label>
+                            <input type="file"
+                                class="form-control form-control-customer @error('policy_document_path') is-invalid @enderror"
+                                id="policy_document_path" placeholder="Policy Document" name="policy_document_path"
+                                value="{{ old('policy_document_path') }}">
+                            @error('policy_document_path')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
@@ -373,9 +406,7 @@
                 </div>
             </form>
         </div>
-
     </div>
-
 @endsection
 
 @section('scripts')
@@ -385,11 +416,129 @@
             $('#customer_id').select2();
         });
 
-        function premiumTypeChanged() {
-            var dataid = $("#premium_type_id option:selected").attr('data-is_vehicle');
-            if (dataid) {
+        var netPremiumInput = document.getElementById('net_premium');
+        var gstInput = document.getElementById('gst');
+        var odPremiumInput = document.getElementById('od_premium');
+        var tpPremiumInput = document.getElementById('tp_premium');
+        var cgst1Input = document.getElementById('cgst1');
+        var cgst2Input = document.getElementById('cgst2');
+        var sgst1Input = document.getElementById('sgst1');
+        var sgst2Input = document.getElementById('sgst2');
+        var finalPremiumInput = document.getElementById('final_premium_with_gst');
 
+        var premiumTypeSelect = document.getElementById('premium_type_id');
+
+        function calculateFinalPremium() {
+            var netPremium = parseFloat(netPremiumInput.value) || 0;
+            var gst = parseFloat(gstInput.value) || 0;
+            var odPremium = parseFloat(odPremiumInput.value) || 0;
+            var tpPremium = parseFloat(tpPremiumInput.value) || 0;
+            var cgst1 = parseFloat(cgst1Input.value) || 0;
+            var cgst2 = parseFloat(cgst2Input.value) || 0;
+            var sgst1 = parseFloat(sgst1Input.value) || 0;
+            var sgst2 = parseFloat(sgst2Input.value) || 0;
+
+            var selectedOption = premiumTypeSelect.options[premiumTypeSelect.selectedIndex];
+            var isVehicle = selectedOption.getAttribute('data-is_vehicle');
+            var selectedOptionText = selectedOption.text;
+
+            if (isVehicle === 'true' || isVehicle === '1') {
+                netPremium = 0;
+                gst = 0;
+                netPremiumInput.value = 0;
+                gstInput.value = 0;
             }
+
+            if (
+                selectedOptionText !== 'COMMERCIAL VEHICLE COMP' ||
+                selectedOptionText !== 'COMMERCIAL VEHICLE SATP'
+            ) {
+                cgst2 = 0;
+                sgst2 = 0;
+                cgst2Input.value = 0;
+                sgst2Input.value = 0;
+            }
+
+            var finalPremium = netPremium + gst + odPremium + tpPremium + cgst1 + cgst2 + sgst1 + sgst2;
+
+            if (!isNaN(finalPremium)) {
+                finalPremiumInput.value = finalPremium.toFixed(2);
+            } else {
+                finalPremiumInput.value = '';
+            }
+        }
+
+        netPremiumInput.addEventListener('input', calculateFinalPremium);
+        gstInput.addEventListener('input', calculateFinalPremium);
+        odPremiumInput.addEventListener('input', calculateFinalPremium);
+        tpPremiumInput.addEventListener('input', calculateFinalPremium);
+        cgst1Input.addEventListener('input', calculateFinalPremium);
+        cgst2Input.addEventListener('input', calculateFinalPremium);
+        sgst1Input.addEventListener('input', calculateFinalPremium);
+        sgst2Input.addEventListener('input', calculateFinalPremium);
+        premiumTypeSelect.addEventListener('change', calculateFinalPremium);
+
+        function premiumTypeChanged() {
+            var premiumTypeSelect = document.getElementById('premium_type_id');
+            var premiumFields = document.getElementsByClassName('premium-fields');
+            var sgst2Field = document.getElementsByClassName('cgst_sgt2');
+            var netPremiumField = document.getElementsByClassName('net_premium_div');
+            // Get the selected option value
+            var selectedOption = premiumTypeSelect.options[premiumTypeSelect.selectedIndex];
+            var isVehicle = selectedOption.getAttribute('data-is_vehicle');
+
+            // Show/hide fields based on the selected option value
+            if (isVehicle === 'true' || isVehicle === '1') {
+                for (var i = 0; i < premiumFields.length; i++) {
+                    premiumFields[i].style.display = 'block';
+                }
+                // Show sgct2 field for COMMERCIAL VEHICLE COMP and COMMERCIAL VEHICLE SATP
+                if (selectedOption.text === 'COMMERCIAL VEHICLE COMP' || selectedOption.text ===
+                    'COMMERCIAL VEHICLE SATP') {
+                    for (var i = 0; i < sgst2Field.length; i++) {
+                        sgst2Field[i].style.display = 'block';
+                    }
+                } else {
+                    for (var i = 0; i < sgst2Field.length; i++) {
+                        sgst2Field[i].style.display = 'none';
+                    }
+                }
+                for (var i = 0; i < netPremiumField.length; i++) {
+                    netPremiumField[i].style.display = 'none';
+                }
+            } else {
+                for (var i = 0; i < premiumFields.length; i++) {
+                    premiumFields[i].style.display = 'none';
+                }
+                for (var i = 0; i < sgst2Field.length; i++) {
+                    sgst2Field[i].style.display = 'none';
+                }
+                for (var i = 0; i < netPremiumField.length; i++) {
+                    netPremiumField[i].style.display = 'block';
+                }
+            }
+        }
+
+        // Call the function on page load to initially show/hide fields
+        premiumTypeChanged();
+
+
+        function setExpiredDate() {
+            // Get the selected start date
+            var startDate = new Date(document.getElementById("start_date").value);
+            // Calculate the expired date by adding 1 year - 1 day to the start date
+            var expiredDate = new Date(startDate.getFullYear() + 1, startDate.getMonth(), startDate.getDate() - 1);
+
+            // Adjust the expired date if necessary
+            if (startDate.getDate() === 29 && startDate.getMonth() === 1 && expiredDate.getDate() !== 28) {
+                expiredDate.setDate(expiredDate.getDate() - 1);
+            }
+
+            // Format the expired date as "YYYY-MM-DD"
+            var formattedExpiredDate = expiredDate.toISOString().split('T')[0];
+
+            // Set the value of the expired date input field
+            document.getElementById("expired_date").value = formattedExpiredDate;
         }
     </script>
 @endsection

@@ -100,94 +100,68 @@ class CustomerInsuranceController extends Controller
             'relationship_manager_id' => 'required|exists:relationship_managers,id',
             'insurance_company_id' => 'required|exists:insurance_companies,id',
             'policy_type_id' => 'required|exists:policy_types,id',
-            'fuel_type_id' => 'required|exists:fuel_types,id',
-            'registration_no' => 'required',
+            'fuel_type_id' => 'nullable|exists:fuel_types,id',
             'premium_type_id' => 'required|exists:premium_types,id',
+            'issue_date' => 'required|date_format:Y-m-d',
+            'expired_date' => 'required|date_format:Y-m-d',
+            'start_date' => 'required|date_format:Y-m-d',
+            'policy_no' => 'required',
+            'net_premium' => 'nullable|numeric',
+            'gst' => 'nullable|numeric',
+            'final_premium_with_gst' => 'required|numeric',
+            'mode_of_payment' => 'nullable|string',
+            'cheque_no' => 'nullable|string',
+            'rto' => 'nullable|string',
+            'registration_no' => 'nullable|string',
+            'make_model' => 'nullable|string',
+            'od_premium' => 'nullable|numeric',
+            'tp_premium' => 'nullable|numeric',
+            'cgst1' => 'nullable|numeric',
+            'sgst1' => 'nullable|numeric',
+            'cgst2' => 'nullable|numeric',
+            'sgst2' => 'nullable|numeric',
         ];
-
-        if (!empty($request->issue_date)) {
-            $validation_array['issue_date'] = 'date_format:Y-m-d';
-        }
-
-        if (!empty($request->start_date)) {
-            $validation_array['start_date'] = 'date_format:Y-m-d';
-        }
-        if (!empty($request->expired_date)) {
-            $validation_array['expired_date'] = 'date_format:Y-m-d';
-        }
         $request->validate($validation_array);
+
         DB::beginTransaction();
 
         try {
-            $data_to_store = [];
-            $data_to_store['customer_id'] = $request->customer_id;
-            $data_to_store['branch_id'] = $request->branch_id;
-            $data_to_store['broker_id'] = $request->broker_id;
-            $data_to_store['relationship_manager_id'] = $request->relationship_manager_id;
-            $data_to_store['insurance_company_id'] = $request->insurance_company_id;
-
-            if (isset($request->issue_date))
-                $data_to_store['issue_date'] = $request->issue_date;
-
-            if (isset($request->policy_type_id))
-                $data_to_store['policy_type_id'] = $request->policy_type_id;
-
-            if (isset($request->premium_type_id))
-                $data_to_store['premium_type_id'] = $request->premium_type_id;
-
-            if (isset($request->fuel_type_id))
-                $data_to_store['fuel_type_id'] = $request->fuel_type_id;
-
-            if (isset($request->policy_no))
-                $data_to_store['policy_no'] = $request->policy_no;
-
-            if (isset($request->registration_no))
-                $data_to_store['registration_no'] = $request->registration_no;
-
-            if (isset($request->rto))
-                $data_to_store['rto'] = $request->rto;
-
-            if (isset($request->make_model))
-                $data_to_store['make_model'] = $request->make_model;
-
-            if (isset($request->start_date))
-                $data_to_store['start_date'] = $request->start_date;
-
-            if (isset($request->expired_date))
-                $data_to_store['expired_date'] = $request->expired_date;
-
-            if (isset($request->od_premium))
-                $data_to_store['od_premium'] = $request->od_premium;
-
-            if (isset($request->tp_premium))
-                $data_to_store['tp_premium'] = $request->tp_premium;
-
-            if (isset($request->rsa))
-                $data_to_store['rsa'] = $request->rsa;
-
-            if (isset($request->net_premium))
-                $data_to_store['net_premium'] = $request->net_premium;
-
-            if (isset($request->gst))
-                $data_to_store['gst'] = $request->gst;
-
-            if (isset($request->final_premium_with_gst))
-                $data_to_store['final_premium_with_gst'] = $request->final_premium_with_gst;
-
-            if (isset($request->mode_of_payment))
-                $data_to_store['mode_of_payment'] = $request->mode_of_payment;
-
-            if (isset($request->cheque_no))
-                $data_to_store['cheque_no'] = $request->cheque_no;
-
-            if (isset($request->premium))
-                $data_to_store['premium'] = $request->premium;
-
-            if (isset($request->issued_by))
-                $data_to_store['issued_by'] = $request->issued_by;
+            // Retrieve only the validated fields from the request
+            $data_to_store = $request->only([
+                'customer_id',
+                'branch_id',
+                'broker_id',
+                'relationship_manager_id',
+                'insurance_company_id',
+                'premium_type_id',
+                'policy_type_id',
+                'fuel_type_id',
+                'issue_date',
+                'expired_date',
+                'start_date',
+                'policy_no',
+                'net_premium',
+                'gst',
+                'final_premium_with_gst',
+                'mode_of_payment',
+                'cheque_no',
+                'rto',
+                'registration_no',
+                'make_model',
+                'od_premium',
+                'tp_premium',
+                'cgst1',
+                'sgst1',
+                'cgst2',
+                'sgst2',
+            ]);
 
             // Store Data
             $customer_insurance = CustomerInsurance::create($data_to_store);
+
+            // Handle file uploads
+            $this->handleFileUpload($request, $customer_insurance);
+
             // Commit And Redirected To Listing
             DB::commit();
             return redirect()->back()->with('success', 'Customer Insurance Created Successfully.');
@@ -195,6 +169,22 @@ class CustomerInsuranceController extends Controller
             // Rollback and return with Error
             DB::rollBack();
             return redirect()->back()->withInput()->with('error', $th->getMessage());
+        }
+    }
+
+    /**
+     * Handle file upload.
+     * @param Request $request
+     * @param CustomerInsurance $customer_insurance
+     * @return void
+     */
+    private function handleFileUpload(Request $request, CustomerInsurance $customer_insurance)
+    {
+        if ($request->hasFile('policy_document_path')) {
+            $file = $request->file('policy_document_path');
+            $path = $file->store('customer_insurances/' . $customer_insurance->id . '/policy_document_path', 'public');
+            $customer_insurance->policy_document_path = $path;
+            $customer_insurance->save();
         }
     }
 
@@ -270,99 +260,71 @@ class CustomerInsuranceController extends Controller
     public function update(Request $request, CustomerInsurance $customer_insurance)
     {
         $validation_array = [
-            'customer_id' => 'required|exists:customers,id',
+            'id' => 'required|exists:customers,id',
+            'customer_id' => 'required|exists:brokers,id',
             'branch_id' => 'required|exists:branches,id',
             'broker_id' => 'required|exists:brokers,id',
             'relationship_manager_id' => 'required|exists:relationship_managers,id',
             'insurance_company_id' => 'required|exists:insurance_companies,id',
-            'premium_type_id' => 'required|exists:premium_types,id',
             'policy_type_id' => 'required|exists:policy_types,id',
-            'registration_no' => 'required',
-            'fuel_type_id' => 'required|exists:fuel_types,id',
+            'fuel_type_id' => 'nullable|exists:fuel_types,id',
+            'premium_type_id' => 'required|exists:premium_types,id',
+            'issue_date' => 'required|date_format:Y-m-d',
+            'expired_date' => 'required|date_format:Y-m-d',
+            'start_date' => 'required|date_format:Y-m-d',
+            'policy_no' => 'required',
+            'net_premium' => 'nullable|numeric',
+            'gst' => 'nullable|numeric',
+            'final_premium_with_gst' => 'required|numeric',
+            'mode_of_payment' => 'nullable|string',
+            'cheque_no' => 'nullable|string',
+            'rto' => 'nullable|string',
+            'registration_no' => 'nullable|string',
+            'make_model' => 'nullable|string',
+            'od_premium' => 'nullable|numeric',
+            'tp_premium' => 'nullable|numeric',
+            'cgst1' => 'nullable|numeric',
+            'sgst1' => 'nullable|numeric',
+            'cgst2' => 'nullable|numeric',
+            'sgst2' => 'nullable|numeric',
         ];
-
-        if (!empty($request->issue_date)) {
-            $validation_array['issue_date'] = 'date_format:Y-m-d';
-        }
-
-        if (!empty($request->start_date)) {
-            $validation_array['start_date'] = 'date_format:Y-m-d';
-        }
-        if (!empty($request->expired_date)) {
-            $validation_array['expired_date'] = 'date_format:Y-m-d';
-        }
         $request->validate($validation_array);
-        DB::beginTransaction($validation_array);
+        DB::beginTransaction();
         try {
-            $data_to_store = [];
-            $data_to_store['customer_id'] = $request->customer_id;
-            $data_to_store['branch_id'] = $request->branch_id;
-            $data_to_store['broker_id'] = $request->broker_id;
-            $data_to_store['relationship_manager_id'] = $request->relationship_manager_id;
-            $data_to_store['insurance_company_id'] = $request->insurance_company_id;
-            if (isset($request->policy_type_id))
-                $data_to_store['policy_type_id'] = $request->policy_type_id;
-
-            if (isset($request->premium_type_id))
-                $data_to_store['premium_type_id'] = $request->premium_type_id;
-
-            if (isset($request->fuel_type_id))
-                $data_to_store['fuel_type_id'] = $request->fuel_type_id;
-
-            if (isset($request->issue_date))
-                $data_to_store['issue_date'] = $request->issue_date;
-
-            if (isset($request->policy_no))
-                $data_to_store['policy_no'] = $request->policy_no;
-
-            if (isset($request->registration_no))
-                $data_to_store['registration_no'] = $request->registration_no;
-
-            if (isset($request->rto))
-                $data_to_store['rto'] = $request->rto;
-
-            if (isset($request->make_model))
-                $data_to_store['make_model'] = $request->make_model;
-
-            if (isset($request->start_date))
-                $data_to_store['start_date'] = $request->start_date;
-
-            if (isset($request->expired_date))
-                $data_to_store['expired_date'] = $request->expired_date;
-
-            if (isset($request->od_premium))
-                $data_to_store['od_premium'] = $request->od_premium;
-
-            if (isset($request->tp_premium))
-                $data_to_store['tp_premium'] = $request->tp_premium;
-
-            if (isset($request->rsa))
-                $data_to_store['rsa'] = $request->rsa;
-
-            if (isset($request->net_premium))
-                $data_to_store['net_premium'] = $request->net_premium;
-
-            if (isset($request->gst))
-                $data_to_store['gst'] = $request->gst;
-
-            if (isset($request->final_premium_with_gst))
-                $data_to_store['final_premium_with_gst'] = $request->final_premium_with_gst;
-
-            if (isset($request->mode_of_payment))
-                $data_to_store['mode_of_payment'] = $request->mode_of_payment;
-
-            if (isset($request->cheque_no))
-                $data_to_store['cheque_no'] = $request->cheque_no;
-
-            if (isset($request->premium))
-                $data_to_store['premium'] = $request->premium;
-
-            if (isset($request->issued_by))
-                $data_to_store['issued_by'] = $request->issued_by;
-
-            // dd($data_to_store);
+            // Retrieve only the validated fields from the request
+            $data_to_store = $request->only([
+                'customer_id',
+                'branch_id',
+                'broker_id',
+                'relationship_manager_id',
+                'insurance_company_id',
+                'premium_type_id',
+                'policy_type_id',
+                'fuel_type_id',
+                'issue_date',
+                'expired_date',
+                'start_date',
+                'policy_no',
+                'net_premium',
+                'gst',
+                'final_premium_with_gst',
+                'mode_of_payment',
+                'cheque_no',
+                'rto',
+                'registration_no',
+                'make_model',
+                'od_premium',
+                'tp_premium',
+                'cgst1',
+                'sgst1',
+                'cgst2',
+                'sgst2',
+            ]);
+            dd($data_to_store);
             // Store Data
-            $customer_insurance_updated = CustomerInsurance::whereId($customer_insurance->id)->update($data_to_store);
+            CustomerInsurance::whereId($customer_insurance->id)->update($data_to_store);
+            // Handle file uploads
+            $this->handleFileUpload($request, $customer_insurance);
             // Commit And Redirected To Listing
             DB::commit();
             return redirect()->back()->with('success', 'CustomerInsurance Updated Successfully.');

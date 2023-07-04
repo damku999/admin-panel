@@ -105,6 +105,7 @@ class CustomerInsuranceController extends Controller
             'issue_date' => 'required|date_format:Y-m-d',
             'expired_date' => 'required|date_format:Y-m-d',
             'start_date' => 'required|date_format:Y-m-d',
+            'tp_expiry_date' => 'nullable|date_format:Y-m-d',
             'policy_no' => 'required',
             'net_premium' => 'nullable|numeric',
             'gst' => 'nullable|numeric',
@@ -120,6 +121,12 @@ class CustomerInsuranceController extends Controller
             'sgst1' => 'nullable|numeric',
             'cgst2' => 'nullable|numeric',
             'sgst2' => 'nullable|numeric',
+            'commission_on' => 'nullable|in:net_premium,od_premium,tp_premium',
+            'my_commission_percentage' => 'nullable|numeric',
+            'my_commission_amount' => 'nullable|numeric',
+            'transfer_commission_percentage' => 'nullable|numeric',
+            'transfer_commission_amount' => 'nullable|numeric',
+            'actual_earnings' => 'nullable|numeric',
         ];
         $request->validate($validation_array);
 
@@ -139,6 +146,7 @@ class CustomerInsuranceController extends Controller
                 'issue_date',
                 'expired_date',
                 'start_date',
+                'tp_expiry_date',
                 'policy_no',
                 'net_premium',
                 'gst',
@@ -154,6 +162,12 @@ class CustomerInsuranceController extends Controller
                 'sgst1',
                 'cgst2',
                 'sgst2',
+                'commission_on',
+                'my_commission_percentage',
+                'my_commission_amount',
+                'transfer_commission_percentage',
+                'transfer_commission_amount',
+                'actual_earnings'
             ]);
 
             // Store Data
@@ -260,7 +274,6 @@ class CustomerInsuranceController extends Controller
     public function update(Request $request, CustomerInsurance $customer_insurance)
     {
         $validation_array = [
-            'id' => 'required|exists:customers,id',
             'customer_id' => 'required|exists:brokers,id',
             'branch_id' => 'required|exists:branches,id',
             'broker_id' => 'required|exists:brokers,id',
@@ -272,6 +285,7 @@ class CustomerInsuranceController extends Controller
             'issue_date' => 'required|date_format:Y-m-d',
             'expired_date' => 'required|date_format:Y-m-d',
             'start_date' => 'required|date_format:Y-m-d',
+            'tp_expiry_date' => 'nullable|date_format:Y-m-d',
             'policy_no' => 'required',
             'net_premium' => 'nullable|numeric',
             'gst' => 'nullable|numeric',
@@ -287,6 +301,12 @@ class CustomerInsuranceController extends Controller
             'sgst1' => 'nullable|numeric',
             'cgst2' => 'nullable|numeric',
             'sgst2' => 'nullable|numeric',
+            'commission_on' => 'nullable|in:net_premium,od_premium,tp_premium',
+            'my_commission_percentage' => 'nullable|numeric',
+            'my_commission_amount' => 'nullable|numeric',
+            'transfer_commission_percentage' => 'nullable|numeric',
+            'transfer_commission_amount' => 'nullable|numeric',
+            'actual_earnings' => 'nullable|numeric',
         ];
         $request->validate($validation_array);
         DB::beginTransaction();
@@ -304,6 +324,7 @@ class CustomerInsuranceController extends Controller
                 'issue_date',
                 'expired_date',
                 'start_date',
+                'tp_expiry_date',
                 'policy_no',
                 'net_premium',
                 'gst',
@@ -319,8 +340,13 @@ class CustomerInsuranceController extends Controller
                 'sgst1',
                 'cgst2',
                 'sgst2',
+                'commission_on',
+                'my_commission_percentage',
+                'my_commission_amount',
+                'transfer_commission_percentage',
+                'transfer_commission_amount',
+                'actual_earnings'
             ]);
-            dd($data_to_store);
             // Store Data
             CustomerInsurance::whereId($customer_insurance->id)->update($data_to_store);
             // Handle file uploads
@@ -365,7 +391,6 @@ class CustomerInsuranceController extends Controller
     {
         return view('customer_insurances.import');
     }
-
 
     public function export()
     {

@@ -12,7 +12,7 @@
     <li class="nav-item {{ Route::currentRouteName() == 'home' ? 'active' : '' }}">
         <a class="nav-link" href="{{ route('home') }}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard {{ Route::currentRouteName() }}</span></a>
+            <span>Dashboard</span></a>
     </li>
 
     <!-- Divider -->

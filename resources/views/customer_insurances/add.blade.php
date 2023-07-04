@@ -34,7 +34,7 @@
             <form method="POST" action="{{ route('customer_insurances.store') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="card-body">
-                    <div class="form-group row">
+                    <div class="form-group row mb-12">
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0"><span style="color: red;">*</span>Customer
                             <select name="customer_id" class="form-control" id="customer_id">
                                 <option selected="selected" disabled="disabled">Select Customer</option>
@@ -232,133 +232,17 @@
                             @enderror
                         </div>
 
-                        {{-- Fuel Type --}}
+                        {{-- TP Expiry Date --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
-                            <label>Fuel Type</label>
-                            <select name="fuel_type_id" class="form-control" id="fuel_type_id">
-                                <option selected="selected" disabled="disabled">Select Fuel Type</option>
-                                @foreach ($fuel_type as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ old('fuel_type_id') == $item->id ? 'selected' : '' }}>{{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('fuel_type_id')
+                            <label><span style="color: red;">*</span>TP Expiry Date</label>
+                            <div class="input-group date">
+                                <input type="date" class="form-control @error('tp_expiry_date') is-invalid @enderror"
+                                    id="tp_expiry_date" name="tp_expiry_date" value="{{ old('tp_expiry_date') }}" />
+                            </div>
+                            @error('tp_expiry_date')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
-
-                        {{-- OD Premium --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
-                            <label>OD Premium</label>
-                            <input type="number"
-                                class="form-control form-control-customer @error('od_premium') is-invalid @enderror"
-                                id="od_premium" placeholder="OD Premium" name="od_premium"
-                                value="{{ old('od_premium') }}">
-
-                            @error('od_premium')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- TP Premium --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
-                            <label>TP Premium</label>
-                            <input type="number"
-                                class="form-control form-control-customer @error('tp_premium') is-invalid @enderror"
-                                id="tp_premium" placeholder="TP Premium" name="tp_premium"
-                                value="{{ old('tp_premium') }}">
-
-                            @error('tp_premium')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Net Premium --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 net_premium_div">
-                            <label><span style="color: red;">*</span>Net Premium</label>
-                            <input type="number"
-                                class="form-control form-control-customer @error('net_premium') is-invalid @enderror"
-                                id="net_premium" placeholder="Net Premium" name="net_premium"
-                                value="{{ old('net_premium') }}">
-
-                            @error('net_premium')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- GST --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 net_premium_div">
-                            <label><span style="color: red;">*</span>GST</label>
-                            <input type="number"
-                                class="form-control form-control-customer @error('gst') is-invalid @enderror"
-                                id="gst" placeholder="GST" name="gst" value="{{ old('gst') }}">
-
-                            @error('gst')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- CGST --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgst1 premium-fields">
-                            <label><span style="color: red;">*</span>CGST 1</label>
-                            <input type="number"
-                                class="form-control form-control-customer @error('cgst1') is-invalid @enderror"
-                                id="cgst1" placeholder="CGST" name="cgst1" value="{{ old('cgst1') }}">
-
-                            @error('cgst1')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        {{-- SGST --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgst1 premium-fields">
-                            <label><span style="color: red;">*</span>SGST 1</label>
-                            <input type="number"
-                                class="form-control form-control-customer @error('sgst1') is-invalid @enderror"
-                                id="sgst1" placeholder="SGST" name="sgst1" value="{{ old('sgst1') }}">
-
-                            @error('sgst1')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- CGST 2 --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
-                            <label><span style="color: red;">*</span>CGST 2 </label>
-                            <input type="number"
-                                class="form-control form-control-customer @error('cgst2') is-invalid @enderror"
-                                id="cgst2" placeholder="CGST 2" name="cgst2" value="{{ old('cgst2') }}">
-
-                            @error('cgst2')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- SGST 2 --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
-                            <label><span style="color: red;">*</span>SGST 2 </label>
-                            <input type="number"
-                                class="form-control form-control-customer @error('sgst2') is-invalid @enderror"
-                                id="sgst2" placeholder="SGST 2" name="sgst2" value="{{ old('sgst2') }}">
-
-                            @error('sgst2')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Final Premium With GST --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Final Premium With GST</label>
-                            <input type="number"
-                                class="form-control form-control-customer @error('final_premium_with_gst') is-invalid @enderror"
-                                id="final_premium_with_gst" placeholder="Final Premium With GST"
-                                name="final_premium_with_gst" value="{{ old('final_premium_with_gst') }}" readonly>
-
-                            @error('final_premium_with_gst')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
                         {{-- Mode of Payment --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Mode of Payment</label>
@@ -386,7 +270,7 @@
                         </div>
 
                         {{-- Policy Document --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="gstDocumentSection">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label for="policy_document_path">Policy Document</label>
                             <input type="file"
                                 class="form-control form-control-customer @error('policy_document_path') is-invalid @enderror"
@@ -395,6 +279,215 @@
                             @error('policy_document_path')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
+                        </div>
+                    </div>
+
+                    <div class="card mb-12 col-md-12 border-left-success">
+                        <div class="form-group row">
+
+                            {{-- Fuel Type --}}
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                                <label>Fuel Type</label>
+                                <select name="fuel_type_id" class="form-control" id="fuel_type_id">
+                                    <option selected="selected" disabled="disabled">Select Fuel Type</option>
+                                    @foreach ($fuel_type as $item)
+                                        <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                            {{ old('fuel_type_id') == $item->id ? 'selected' : '' }}>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('fuel_type_id')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            {{-- OD Premium --}}
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                                <label>OD Premium</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('od_premium') is-invalid @enderror"
+                                    id="od_premium" placeholder="OD Premium" name="od_premium"
+                                    value="{{ old('od_premium') }}">
+
+                                @error('od_premium')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            {{-- TP Premium --}}
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                                <label>TP Premium</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('tp_premium') is-invalid @enderror"
+                                    id="tp_premium" placeholder="TP Premium" name="tp_premium"
+                                    value="{{ old('tp_premium') }}">
+
+                                @error('tp_premium')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            {{-- Net Premium --}}
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 net_premium_div">
+                                <label><span style="color: red;">*</span>Net Premium</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('net_premium') is-invalid @enderror"
+                                    id="net_premium" placeholder="Net Premium" name="net_premium"
+                                    value="{{ old('net_premium') }}">
+
+                                @error('net_premium')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            {{-- GST --}}
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 net_premium_div">
+                                <label><span style="color: red;">*</span>GST</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('gst') is-invalid @enderror"
+                                    id="gst" placeholder="GST" name="gst" value="{{ old('gst') }}">
+
+                                @error('gst')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            {{-- CGST --}}
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgst1 premium-fields">
+                                <label><span style="color: red;">*</span>CGST 1</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('cgst1') is-invalid @enderror"
+                                    id="cgst1" placeholder="CGST" name="cgst1" value="{{ old('cgst1') }}">
+
+                                @error('cgst1')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            {{-- SGST --}}
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgst1 premium-fields">
+                                <label><span style="color: red;">*</span>SGST 1</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('sgst1') is-invalid @enderror"
+                                    id="sgst1" placeholder="SGST" name="sgst1" value="{{ old('sgst1') }}">
+
+                                @error('sgst1')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            {{-- CGST 2 --}}
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
+                                <label><span style="color: red;">*</span>CGST 2 </label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('cgst2') is-invalid @enderror"
+                                    id="cgst2" placeholder="CGST 2" name="cgst2" value="{{ old('cgst2') }}">
+
+                                @error('cgst2')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            {{-- SGST 2 --}}
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
+                                <label><span style="color: red;">*</span>SGST 2 </label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('sgst2') is-invalid @enderror"
+                                    id="sgst2" placeholder="SGST 2" name="sgst2" value="{{ old('sgst2') }}">
+
+                                @error('sgst2')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            {{-- Final Premium With GST --}}
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <label><span style="color: red;">*</span>Final Premium With GST</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('final_premium_with_gst') is-invalid @enderror"
+                                    id="final_premium_with_gst" placeholder="Final Premium With GST"
+                                    name="final_premium_with_gst" value="{{ old('final_premium_with_gst') }}" readonly>
+
+                                @error('final_premium_with_gst')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="card mt-12 col-md-12 border-left-dark">
+                        <div class="form-group row">
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <label>Commission On</label>
+                                <select name="commission_on" class="form-control" id="commission_on">
+                                    <option value="net_premium" @if (old('commission_on') == 'net_premium') selected @endif> Net
+                                        Premium </option>
+                                    <option value="od_premium" @if (old('commission_on') == 'od_premium') selected @endif>OD
+                                        Premium </option>
+                                    <option value="tp_premium" @if (old('commission_on') == 'tp_premium') selected @endif>TP
+                                        Premium </option>
+                                </select>
+                                @error('commission_on')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <label>My Commission Percentage</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('my_commission_percentage') is-invalid @enderror"
+                                    id="my_commission_percentage" placeholder="My Commission Percentage"
+                                    name="my_commission_percentage" value="{{ old('my_commission_percentage') }}">
+                                @error('my_commission_percentage')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <label>My Commission Amount</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('my_commission_amount') is-invalid @enderror"
+                                    id="my_commission_amount" placeholder="My Commission Amount"
+                                    name="my_commission_amount" value="{{ old('my_commission_amount') }}" readonly>
+                                @error('my_commission_amount')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <label><span style="color: red;">*</span>Transfer Commission Percentage</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('transfer_commission_percentage') is-invalid @enderror"
+                                    id="transfer_commission_percentage" placeholder="Transfer Commission Percentage"
+                                    name="transfer_commission_percentage"
+                                    value="{{ old('transfer_commission_percentage') }}">
+                                @error('transfer_commission_percentage')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <label><span style="color: red;">*</span>Transfer Commission Amount</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('transfer_commission_amount') is-invalid @enderror"
+                                    id="transfer_commission_amount" placeholder="Transfer Commission Amount"
+                                    name="transfer_commission_amount" value="{{ old('transfer_commission_amount') }}"
+                                    readonly>
+                                @error('transfer_commission_amount')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgst1 ">
+                                <label><span style="color: red;">*</span>Actual Earnings</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('actual_earnings') is-invalid @enderror"
+                                    id="actual_earnings" placeholder="Actual Earnings" name="actual_earnings"
+                                    value="{{ old('actual_earnings') }}" readonly>
+                                @error('actual_earnings')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -414,7 +507,49 @@
     <script>
         $(document).ready(function() {
             $('#customer_id').select2();
+            // Calculate and update commission fields
+            function calculateCommission() {
+                var commissionOn = $('#commission_on').val();
+                var baseRate = parseFloat($('input[name=' + commissionOn + ']').val()) || 0;
+                var myCommissionPercentage = parseFloat($('#my_commission_percentage').val().replace(",", ".")) ||
+                    0;
+                var transferCommissionPercentage = parseFloat($('#transfer_commission_percentage').val().replace(
+                    ",", ".")) || 0;
+
+                // Validate percentage values
+                myCommissionPercentage = Math.min(myCommissionPercentage, 100);
+                transferCommissionPercentage = Math.min(transferCommissionPercentage, 100);
+
+                var myCommissionAmount = (baseRate * myCommissionPercentage) / 100;
+                var transferCommissionAmount = (baseRate * transferCommissionPercentage) / 100;
+                var actualEarnings = myCommissionAmount - transferCommissionAmount;
+
+                $('#my_commission_amount').val(myCommissionAmount.toFixed(2));
+                $('#transfer_commission_amount').val(transferCommissionAmount.toFixed(2));
+                $('#actual_earnings').val(actualEarnings.toFixed(2));
+            }
+
+            // Validate decimal input
+            $('.decimal-input').on('input', function() {
+                var value = $(this).val();
+                var regex = /^\d+(\.\d{0,2})?$/;
+
+                if (!regex.test(value)) {
+                    value = value.substring(0, value.length - 1);
+                    $(this).val(value);
+                }
+            });
+
+            // Calculate on change of commission fields
+            $('#commission_on, #my_commission_percentage, #transfer_commission_percentage').on('change',
+                function() {
+                    calculateCommission();
+                });
+
+            // Initial calculation on page load
+            calculateCommission();
         });
+
 
         var netPremiumInput = document.getElementById('net_premium');
         var gstInput = document.getElementById('gst');
@@ -445,8 +580,8 @@
             if (isVehicle === 'true' || isVehicle === '1') {
                 netPremium = 0;
                 gst = 0;
-                netPremiumInput.value = 0;
-                gstInput.value = 0;
+                // netPremiumInput.value = 0;
+                // gstInput.value = 0;
             }
 
             if (
@@ -455,8 +590,8 @@
             ) {
                 cgst2 = 0;
                 sgst2 = 0;
-                cgst2Input.value = 0;
-                sgst2Input.value = 0;
+                // cgst2Input.value = 0;
+                // sgst2Input.value = 0;
             }
 
             var finalPremium = netPremium + gst + odPremium + tpPremium + cgst1 + cgst2 + sgst1 + sgst2;
@@ -521,7 +656,6 @@
 
         // Call the function on page load to initially show/hide fields
         premiumTypeChanged();
-
 
         function setExpiredDate() {
             // Get the selected start date

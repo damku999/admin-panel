@@ -20,6 +20,15 @@
         <div class="card shadow mb-4">
             <div class="card-header py-3">
                 <h6 class="m-0 font-weight-bold text-primary">Edit Customer</h6>
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
             </div>
             <form method="POST" action="{{ route('customers.update', ['customer' => $customer->id]) }}"
                 enctype="multipart/form-data">
@@ -299,22 +308,12 @@
         // Get the customer type select element
         const customerTypeSelect = document.getElementById('customerType');
 
-        // Get the sections related to pan card and aadhar card
-        const panCardSection = document.getElementById('panCardSection');
-        const panCardDocumentSection = document.getElementById('panCardDocumentSection');
-        const aadharCardSection = document.getElementById('aadharCardSection');
-        const aadharCardDocumentSection = document.getElementById('aadharCardDocumentSection');
-
         // Get the sections related to GST
         const gstNumberSection = document.getElementById('gstNumberSection');
         const gstDocumentSection = document.getElementById('gstDocumentSection');
 
         // Function to hide the sections
         const hideSections = () => {
-            panCardSection.style.display = 'none';
-            panCardDocumentSection.style.display = 'none';
-            aadharCardSection.style.display = 'none';
-            aadharCardDocumentSection.style.display = 'none';
             gstNumberSection.style.display = 'none';
             gstDocumentSection.style.display = 'none';
         };
@@ -323,12 +322,7 @@
         const showSections = () => {
             const customerType = customerTypeSelect.value;
 
-            if (customerType === 'Retail') {
-                panCardSection.style.display = 'block';
-                panCardDocumentSection.style.display = 'block';
-                aadharCardSection.style.display = 'block';
-                aadharCardDocumentSection.style.display = 'block';
-            } else if (customerType === 'Corporate') {
+            if (customerType === 'Corporate') {
                 gstNumberSection.style.display = 'block';
                 gstDocumentSection.style.display = 'block';
             }

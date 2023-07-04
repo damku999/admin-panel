@@ -221,3 +221,42 @@ ADD
     COLUMN `gst_path` VARCHAR(150) NULL DEFAULT NULL
 AFTER
     `aadhar_card_path`;
+
+ALTER TABLE
+    `customer_insurances`
+ADD
+    COLUMN `tp_expiry_date` DATE NULL DEFAULT NULL
+AFTER
+    `expired_date`;
+
+ALTER TABLE
+    `customer_insurances`
+ADD
+    COLUMN `commission_on` ENUM('net_premium', 'od_premium', 'tp_premium') NULL DEFAULT NULL
+AFTER
+    `make_model`,
+ADD
+    COLUMN `my_commission_percentage` DOUBLE NULL DEFAULT NULL
+AFTER
+    `sgst2`,
+ADD
+    COLUMN `my_commission_amount` DOUBLE NULL DEFAULT NULL
+AFTER
+    `my_commission_percentage`,
+ADD
+    COLUMN `transfer_commission_percentage` DOUBLE UNSIGNED NULL DEFAULT NULL
+AFTER
+    `my_commission_amount`,
+ADD
+    COLUMN `transfer_commission_amount` DOUBLE NULL DEFAULT NULL
+AFTER
+    `transfer_commission_percentage`,
+ADD
+    COLUMN `actual_earnings` DOUBLE NULL DEFAULT NULL
+AFTER
+    `transfer_commission_amount`;
+
+ALTER TABLE
+    `customer_insurances` CHANGE COLUMN `extra6` `policy_document_path` VARCHAR(500) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci'
+AFTER
+    `insurance_status`;

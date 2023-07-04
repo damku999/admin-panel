@@ -80,7 +80,6 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        // Validations
         $validation_array = [
             'name' => 'required',
             'email' => 'required|unique:customers,email',
@@ -184,7 +183,6 @@ class CustomerController extends Controller
      */
     public function updateStatus($customer_id, $status)
     {
-        // Validation
         $validate = Validator::make([
             'customer_id'   => $customer_id,
             'status' => $status
@@ -237,7 +235,6 @@ class CustomerController extends Controller
      */
     public function update(Request $request, Customer $customer)
     {
-        // Validations
         $validation_array = [
             'name' => 'required',
             'email' => 'required|unique:customers,email,' . $customer->id . ',id',

@@ -283,9 +283,10 @@
                                 <td>{{ $customer_insurance->type_of_policy }}</td>
 
                                 <td class="text-center">
-                                    <a
-                                        href="{{ url(\Config::get('app.url')) }}customer_insurances/edit/{{ $customer_insurance->id }}"><i
-                                            class="fa fa-edit"></i></a> &nbsp;
+                                    <a href="{{ route('customer_insurances.edit', ['customer_insurance' => $customer_insurance->id]) }}"
+                                        class="btn btn-primary m-2">
+                                        <i class="fa fa-pen"></i>
+                                    </a> &nbsp;
                                     <a href="javascript:void(0);"
                                         onclick="delete_conf_common('{{ $customer_insurance->id }}','CustomerInsurance', 'Customer Insurance', '{{ url(\Config::get('app.url')) }}customers/edit/{{ $customer_insurance->customer_id }}');"><i
                                             class="fa fa-trash-alt text-danger"></i></a>

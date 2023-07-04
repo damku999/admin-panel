@@ -5,16 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Branch;
 use App\Models\Broker;
 use App\Models\Customer;
+use App\Models\FuelType;
+use App\Models\PolicyType;
+use App\Models\PremiumType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use App\Models\InsuranceCompany;
 use App\Models\CustomerInsurance;
 use Illuminate\Support\Facades\DB;
 use App\Models\RelationshipManager;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CustomerInsurancesExport;
-use App\Models\FuelType;
-use App\Models\PolicyType;
-use App\Models\PremiumType;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerInsuranceController extends Controller
@@ -56,11 +57,25 @@ class CustomerInsuranceController extends Controller
         if (!empty($request->customer_id)) {
             $customer_insurance_obj->where('customer_insurances.customer_id', $request->customer_id);
         }
+        // New code for expiring date range filter
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $start_date = Carbon::parse($request->input('start_date'))->startOfDay();
+            $end_date = Carbon::parse($request->input('end_date'))->endOfDay();
+            $customer_insurance_obj->whereBetween('expired_date', [$start_date, $end_date]);
+        }
 
+        $sort = $request->input('sort', 'updated_at');
+        $direction = $request->input('direction', 'desc');
+        $customer_insurance_obj->orderBy($sort, $direction);
         $customer_insurances = $customer_insurance_obj->paginate(10);
         $customers = Customer::select('id', 'name')->get();
 
-        return view('customer_insurances.index', ['customer_insurances' => $customer_insurances, 'customers' => $customers]);
+        return view('customer_insurances.index', [
+            'customer_insurances' => $customer_insurances,
+            'customers' => $customers,
+            'sort' => $sort,
+            'direction' => $direction,
+        ]);
     }
 
     /**

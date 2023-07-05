@@ -45,11 +45,19 @@ class HomeController extends Controller
             return $date->month == $date1->month && $date->year == $date1->year;
         })->count();
 
+        $life_time_final_premium_with_gst = $customer_insurances->sum('final_premium_with_gst');
+        $life_time_my_commission_amount = $customer_insurances->sum('my_commission_amount');
+        $life_time_transfer_commission_amount = $customer_insurances->sum('transfer_commission_amount');
+        $life_time_actual_earnings = $customer_insurances->sum('actual_earnings');
+
         return view('home', [
             'total_customer' => $total_customer,
             'active_customer' => $active_customer,
             'inactive_customer' => $inactive_customer,
-
+            'life_time_final_premium_with_gst' => $life_time_final_premium_with_gst,
+            'life_time_my_commission_amount' => $life_time_my_commission_amount,
+            'life_time_transfer_commission_amount' => $life_time_transfer_commission_amount,
+            'life_time_actual_earnings' => $life_time_actual_earnings,
             'total_customer_insurance' => $total_customer_insurance,
             'active_customer_insurance' => $active_customer_insurance,
             'inactive_customer_insurance' => $inactive_customer_insurance,

@@ -109,7 +109,7 @@ class CustomerInsuranceController extends Controller
     {
         // Validations
         $validation_array = [
-            'customer_id' => 'required|exists:brokers,id',
+            'customer_id' => 'required|exists:customers,id',
             'branch_id' => 'required|exists:branches,id',
             'broker_id' => 'required|exists:brokers,id',
             'relationship_manager_id' => 'required|exists:relationship_managers,id',
@@ -289,7 +289,7 @@ class CustomerInsuranceController extends Controller
     public function update(Request $request, CustomerInsurance $customer_insurance)
     {
         $validation_array = [
-            'customer_id' => 'required|exists:brokers,id',
+            'customer_id' => 'required|exists:customers,id',
             'branch_id' => 'required|exists:branches,id',
             'broker_id' => 'required|exists:brokers,id',
             'relationship_manager_id' => 'required|exists:relationship_managers,id',

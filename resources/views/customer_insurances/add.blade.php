@@ -639,7 +639,7 @@
         function setExpiredDate() {
             var startDate = new Date(document.getElementById("start_date").value);
             // Calculate the expired date by adding 1 year - 1 day to the start date
-            var expiredDate = new Date(startDate.getFullYear() + 1, startDate.getMonth(), startDate.getDate() - 1);
+            var expiredDate = new Date(startDate.getFullYear() + 1, startDate.getMonth(), startDate.getDate());
 
             // Adjust the expired date if necessary
             if (startDate.getDate() === 29 && startDate.getMonth() === 1 && expiredDate.getDate() !== 28) {

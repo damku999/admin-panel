@@ -88,7 +88,85 @@
             </div>
 
         </div>
-        <br>
+        <hr>
+        <!-- Content Row -->
+        <div class="row">
+            <div class="col-xl-3 col-md-4 b-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Life Time - Turn Over (with GST)</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    &#8377; {{ number_format($life_time_final_premium_with_gst, 2) }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-4 b-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Life Time - Commission Received</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    &#8377; {{ number_format($life_time_my_commission_amount, 2) }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-4 b-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    Life Time - Commission Transferred</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    &#8377; {{ number_format($life_time_transfer_commission_amount, 2) }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-4 b-4">
+                <div class="card border-left-danger shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                    Life Time - Actual Earning</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    &#8377; {{ number_format($life_time_actual_earnings, 2) }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <hr>
         <!-- Content Row -->
         <div class="row">
             <div class="col-xl-2 col-md-3 b-4">

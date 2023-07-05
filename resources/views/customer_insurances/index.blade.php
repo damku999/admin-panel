@@ -204,7 +204,7 @@
                                         </a>
                                         @if ($customer_insurance->policy_document_path)
                                             <a href="{{ asset('storage/' . $customer_insurance->policy_document_path) }}"
-                                                class="btn btn-info m-2" download><i class="fa fa-download"></i></a>
+                                                class="btn btn-info m-2" target="__blank"><i class="fa fa-download"></i></a>
                                         @endif
 
                                         {{-- <a class="btn btn-danger m-2" href="javascript:void(0);"

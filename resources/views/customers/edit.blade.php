@@ -117,7 +117,7 @@
                                 <div class="input-group-append">
                                     @if ($customer->pan_card_path)
                                         <a href="{{ asset('storage/' . $customer->pan_card_path) }}"
-                                            class="btn btn-primary" download>Download</a>
+                                            class="btn btn-primary" target="__blank">Download</a>
                                     @endif
                                 </div>
                             </div>
@@ -152,7 +152,7 @@
                                 <div class="input-group-append">
                                     @if ($customer->aadhar_card_path)
                                         <a href="{{ asset('storage/' . $customer->aadhar_card_path) }}"
-                                            class="btn btn-primary" download>Download</a>
+                                            class="btn btn-primary" target="__blank">Download</a>
                                     @endif
                                 </div>
                             </div>
@@ -186,7 +186,7 @@
                                 <div class="input-group-append">
                                     @if ($customer->gst_path)
                                         <a href="{{ asset('storage/' . $customer->gst_path) }}" class="btn btn-primary"
-                                            download>Download</a>
+                                            target="__blank">Download</a>
                                     @endif
                                 </div>
                             </div>
@@ -300,7 +300,7 @@
                                     @endif
                                     @if ($customer_insurance->policy_document_path)
                                         <a href="{{ asset('storage/' . $customer_insurance->policy_document_path) }}"
-                                            class="btn btn-info m-2" download><i class="fa fa-download"></i></a>
+                                            class="btn btn-info m-2" target="__blank"><i class="fa fa-download"></i></a>
                                     @endif
                                 </td>
                             </tr>

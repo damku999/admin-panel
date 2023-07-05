@@ -309,7 +309,7 @@
                                 <div class="input-group-append">
                                     @if ($customer_insurance->policy_document_path)
                                         <a href="{{ asset('storage/' . $customer_insurance->policy_document_path) }}"
-                                            class="btn btn-primary" download>Download</a>
+                                            class="btn btn-primary" target="__blank">Download</a>
                                     @endif
                                 </div>
                             </div>

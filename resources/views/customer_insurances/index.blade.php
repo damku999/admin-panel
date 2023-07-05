@@ -202,9 +202,14 @@
                                             class="btn btn-primary m-2">
                                             <i class="fa fa-pen"></i>
                                         </a>
-                                        <a class="btn btn-danger m-2" href="javascript:void(0);"
+                                        @if ($customer_insurance->policy_document_path)
+                                            <a href="{{ asset('storage/' . $customer_insurance->policy_document_path) }}"
+                                                class="btn btn-info m-2" download><i class="fa fa-download"></i></a>
+                                        @endif
+
+                                        {{-- <a class="btn btn-danger m-2" href="javascript:void(0);"
                                             onclick="delete_conf_common('{{ $customer_insurance->id }}','CustomerInsurance', 'Customer Insurance', '{{ route('customer_insurances.index') }}');"><i
-                                                class="fas fa-trash"></i></a>
+                                                class="fas fa-trash"></i></a> --}}
                                         {{-- <a class="btn btn-danger m-2" href="javascript:void(0);" onclick="delete_conf_common('{{ $customer_insurance->id }}','CustomerInsurance', 'CustomerInsurance', '{{ route('customer_insurances.index') }}');"><i class="fas fa-trash"></i></a> --}}
                                     </td>
                                 </tr>

@@ -92,8 +92,7 @@
                         </div>
 
                         {{-- Pan Card Number --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="panCardSection"
-                            style="{{ old('type', $customer->type) !== 'Retail' ? 'display:none' : '' }}">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label for="pan_card_number">Pan Card Number</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('pan_card_number') is-invalid @enderror"
@@ -104,28 +103,31 @@
                             @enderror
                         </div>
                         {{-- Pan Card Document --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="panCardDocumentSection"
-                            style="{{ old('type', $customer->type) !== 'Retail' ? 'display:none' : '' }}">
-                            <label for="pan_card_path">Pan Card Document</label>
-                            @if ($customer->pan_card_path)
-                                <div>
-                                    <a href="{{ asset('storage/' . $customer->pan_card_path) }}" target="_blank">Download
-                                        Pan
-                                        Card</a>
+
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <label for="gst_path">Pan Card Document</label>
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <input type="file"
+                                        class="custom-file-input @error('pan_card_path') is-invalid @enderror"
+                                        id="pan_card_path" placeholder="GST Document" name="pan_card_path"
+                                        value="{{ old('pan_card_path') }}">
+                                    <label class="custom-file-label" for="pan_card_path">Choose file</label>
                                 </div>
-                            @endif
-                            <input type="file"
-                                class="form-control form-control-customer @error('pan_card_path') is-invalid @enderror"
-                                id="pan_card_path" placeholder="Pan Card Document" name="pan_card_path"
-                                value="{{ old('pan_card_path') }}">
+                                <div class="input-group-append">
+                                    @if ($customer->pan_card_path)
+                                        <a href="{{ asset('storage/' . $customer->pan_card_path) }}"
+                                            class="btn btn-primary" download>Download</a>
+                                    @endif
+                                </div>
+                            </div>
                             @error('pan_card_path')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
 
                         {{-- Aadhar Card Number --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="aadharCardSection"
-                            style="{{ old('type', $customer->type) !== 'Retail' ? 'display:none' : '' }}">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label for="aadhar_card_number">Aadhar Card Number</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('aadhar_card_number') is-invalid @enderror"
@@ -137,28 +139,30 @@
                         </div>
 
                         {{-- Aadhar Card Document --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="aadharCardDocumentSection"
-                            style="{{ old('type', $customer->type) !== 'Retail' ? 'display:none' : '' }}">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label for="aadhar_card_path">Aadhar Card Document</label>
-                            @if ($customer->aadhar_card_path)
-                                <div>
-                                    <a href="{{ asset('storage/' . $customer->aadhar_card_path) }}"
-                                        target="_blank">Download
-                                        Aadhar Card</a>
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <input type="file"
+                                        class="custom-file-input @error('aadhar_card_path') is-invalid @enderror"
+                                        id="aadhar_card_path" placeholder="Aadhar Card Document" name="aadhar_card_path"
+                                        value="{{ old('aadhar_card_path') }}">
+                                    <label class="custom-file-label" for="aadhar_card_path">Choose file</label>
                                 </div>
-                            @endif
-                            <input type="file"
-                                class="form-control form-control-customer @error('aadhar_card_path') is-invalid @enderror"
-                                id="aadhar_card_path" placeholder="Aadhar Card Document" name="aadhar_card_path"
-                                value="{{ old('aadhar_card_path') }}">
+                                <div class="input-group-append">
+                                    @if ($customer->aadhar_card_path)
+                                        <a href="{{ asset('storage/' . $customer->aadhar_card_path) }}"
+                                            class="btn btn-primary" download>Download</a>
+                                    @endif
+                                </div>
+                            </div>
                             @error('aadhar_card_path')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
 
                         {{-- GST Number --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="gstNumberSection"
-                            style="{{ old('type', $customer->type) !== 'Corporate' ? 'display:none' : '' }}">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label for="gst_number">GST Number</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('gst_number') is-invalid @enderror"
@@ -170,8 +174,7 @@
                         </div>
 
                         {{-- GST Document --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="gstDocumentSection"
-                            style="{{ old('type', $customer->type) !== 'Corporate' ? 'display:none' : '' }}">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label for="gst_path">GST Document</label>
                             <div class="input-group">
                                 <div class="custom-file">

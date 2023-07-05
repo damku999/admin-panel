@@ -84,7 +84,7 @@
                         </div>
 
                         {{-- Pan Card Number --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="panCardSection">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label for="pan_card_number">Pan Card Number</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('pan_card_number') is-invalid @enderror"
@@ -96,7 +96,7 @@
                         </div>
 
                         {{-- Pan Card Document --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="panCardDocumentSection">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label for="pan_card_path">Pan Card Document</label>
                             <input type="file"
                                 class="form-control form-control-customer @error('pan_card_path') is-invalid @enderror"
@@ -108,7 +108,7 @@
                         </div>
 
                         {{-- Aadhar Card Number --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="aadharCardSection">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label for="aadhar_card_number">Aadhar Card Number</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('aadhar_card_number') is-invalid @enderror"
@@ -120,7 +120,7 @@
                         </div>
 
                         {{-- Aadhar Card Document --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0" id="aadharCardDocumentSection">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label for="aadhar_card_path">Aadhar Card Document</label>
                             <input type="file"
                                 class="form-control form-control-customer @error('aadhar_card_path') is-invalid @enderror"

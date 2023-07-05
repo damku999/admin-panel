@@ -232,6 +232,23 @@
                             @enderror
                         </div>
 
+                        {{-- Fuel Type --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                            <label>Fuel Type</label>
+                            <select name="fuel_type_id" class="form-control" id="fuel_type_id">
+                                <option selected="selected" disabled="disabled">Select Fuel Type</option>
+                                @foreach ($fuel_type as $item)
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        {{ old('fuel_type_id') == $item->id ? 'selected' : '' }}>
+                                        {{ $item->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('fuel_type_id')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
                         {{-- TP Expiry Date --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                             <label><span style="color: red;">*</span>TP Expiry Date</label>
@@ -284,20 +301,15 @@
 
                     <div class="card mb-12 col-md-12 border-left-success">
                         <div class="form-group row">
+                            {{-- Net Premium --}}
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <label><span style="color: red;">*</span>Net Premium</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('net_premium') is-invalid @enderror"
+                                    id="net_premium" placeholder="Net Premium" name="net_premium"
+                                    value="{{ old('net_premium') }}">
 
-                            {{-- Fuel Type --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
-                                <label>Fuel Type</label>
-                                <select name="fuel_type_id" class="form-control" id="fuel_type_id">
-                                    <option selected="selected" disabled="disabled">Select Fuel Type</option>
-                                    @foreach ($fuel_type as $item)
-                                        <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                            {{ old('fuel_type_id') == $item->id ? 'selected' : '' }}>
-                                            {{ $item->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('fuel_type_id')
+                                @error('net_premium')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
@@ -328,33 +340,8 @@
                                 @enderror
                             </div>
 
-                            {{-- Net Premium --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 net_premium_div">
-                                <label><span style="color: red;">*</span>Net Premium</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('net_premium') is-invalid @enderror"
-                                    id="net_premium" placeholder="Net Premium" name="net_premium"
-                                    value="{{ old('net_premium') }}">
-
-                                @error('net_premium')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-
-                            {{-- GST --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 net_premium_div">
-                                <label><span style="color: red;">*</span>GST</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('gst') is-invalid @enderror"
-                                    id="gst" placeholder="GST" name="gst" value="{{ old('gst') }}">
-
-                                @error('gst')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-
                             {{-- CGST --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgst1 premium-fields">
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                                 <label><span style="color: red;">*</span>CGST 1</label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('cgst1') is-invalid @enderror"
@@ -365,7 +352,7 @@
                                 @enderror
                             </div>
                             {{-- SGST --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgst1 premium-fields">
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                                 <label><span style="color: red;">*</span>SGST 1</label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('sgst1') is-invalid @enderror"
@@ -478,7 +465,7 @@
                                 @enderror
                             </div>
 
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgst1 ">
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
                                 <label><span style="color: red;">*</span>Actual Earnings</label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('actual_earnings') is-invalid @enderror"
@@ -550,9 +537,7 @@
             calculateCommission();
         });
 
-
         var netPremiumInput = document.getElementById('net_premium');
-        var gstInput = document.getElementById('gst');
         var odPremiumInput = document.getElementById('od_premium');
         var tpPremiumInput = document.getElementById('tp_premium');
         var cgst1Input = document.getElementById('cgst1');
@@ -565,7 +550,6 @@
 
         function calculateFinalPremium() {
             var netPremium = parseFloat(netPremiumInput.value) || 0;
-            var gst = parseFloat(gstInput.value) || 0;
             var odPremium = parseFloat(odPremiumInput.value) || 0;
             var tpPremium = parseFloat(tpPremiumInput.value) || 0;
             var cgst1 = parseFloat(cgst1Input.value) || 0;
@@ -577,24 +561,15 @@
             var isVehicle = selectedOption.getAttribute('data-is_vehicle');
             var selectedOptionText = selectedOption.text;
 
-            if (isVehicle === 'true' || isVehicle === '1') {
-                netPremium = 0;
-                gst = 0;
-                // netPremiumInput.value = 0;
-                // gstInput.value = 0;
-            }
-
             if (
                 selectedOptionText !== 'COMMERCIAL VEHICLE COMP' ||
                 selectedOptionText !== 'COMMERCIAL VEHICLE SATP'
             ) {
                 cgst2 = 0;
                 sgst2 = 0;
-                // cgst2Input.value = 0;
-                // sgst2Input.value = 0;
             }
 
-            var finalPremium = netPremium + gst + odPremium + tpPremium + cgst1 + cgst2 + sgst1 + sgst2;
+            var finalPremium = netPremium + odPremium + tpPremium + cgst1 + cgst2 + sgst1 + sgst2;
 
             if (!isNaN(finalPremium)) {
                 finalPremiumInput.value = finalPremium.toFixed(2);
@@ -604,7 +579,6 @@
         }
 
         netPremiumInput.addEventListener('input', calculateFinalPremium);
-        gstInput.addEventListener('input', calculateFinalPremium);
         odPremiumInput.addEventListener('input', calculateFinalPremium);
         tpPremiumInput.addEventListener('input', calculateFinalPremium);
         cgst1Input.addEventListener('input', calculateFinalPremium);
@@ -615,10 +589,8 @@
 
         function premiumTypeChanged() {
             var premiumTypeSelect = document.getElementById('premium_type_id');
-            var commissionOnSelect = document.getElementById('commission_on');
             var premiumFields = document.getElementsByClassName('premium-fields');
             var sgst2Field = document.getElementsByClassName('cgst_sgt2');
-            var netPremiumField = document.getElementsByClassName('net_premium_div');
             // Get the selected option value
             var selectedOption = premiumTypeSelect.options[premiumTypeSelect.selectedIndex];
             var isVehicle = selectedOption.getAttribute('data-is_vehicle');
@@ -639,11 +611,6 @@
                         sgst2Field[i].style.display = 'none';
                     }
                 }
-                for (var i = 0; i < netPremiumField.length; i++) {
-                    netPremiumField[i].style.display = 'none';
-                }
-                // Enable the 'net_premium' option
-                commissionOnSelect.querySelector('option[value="net_premium"]').disabled = false;
             } else {
                 for (var i = 0; i < premiumFields.length; i++) {
                     premiumFields[i].style.display = 'none';
@@ -651,20 +618,13 @@
                 for (var i = 0; i < sgst2Field.length; i++) {
                     sgst2Field[i].style.display = 'none';
                 }
-                for (var i = 0; i < netPremiumField.length; i++) {
-                    netPremiumField[i].style.display = 'block';
-                }
-                // Disable the 'net_premium' option
-                commissionOnSelect.querySelector('option[value="net_premium"]').disabled = true;
             }
         }
-
 
         // Call the function on page load to initially show/hide fields
         premiumTypeChanged();
 
         function setExpiredDate() {
-            // Get the selected start date
             var startDate = new Date(document.getElementById("start_date").value);
             // Calculate the expired date by adding 1 year - 1 day to the start date
             var expiredDate = new Date(startDate.getFullYear() + 1, startDate.getMonth(), startDate.getDate() - 1);
@@ -673,11 +633,7 @@
             if (startDate.getDate() === 29 && startDate.getMonth() === 1 && expiredDate.getDate() !== 28) {
                 expiredDate.setDate(expiredDate.getDate() - 1);
             }
-
-            // Format the expired date as "YYYY-MM-DD"
             var formattedExpiredDate = expiredDate.toISOString().split('T')[0];
-
-            // Set the value of the expired date input field
             document.getElementById("expired_date").value = formattedExpiredDate;
         }
     </script>

@@ -643,6 +643,7 @@
 
         function premiumTypeChanged() {
             var premiumTypeSelect = document.getElementById('premium_type_id');
+            var commissionOnSelect = document.getElementById('commission_on');
             var premiumFields = document.getElementsByClassName('premium-fields');
             var sgst2Field = document.getElementsByClassName('cgst_sgt2');
             var netPremiumField = document.getElementsByClassName('net_premium_div');
@@ -669,6 +670,8 @@
                 for (var i = 0; i < netPremiumField.length; i++) {
                     netPremiumField[i].style.display = 'none';
                 }
+                // Enable the 'net_premium' option
+                commissionOnSelect.querySelector('option[value="net_premium"]').disabled = false;
             } else {
                 for (var i = 0; i < premiumFields.length; i++) {
                     premiumFields[i].style.display = 'none';
@@ -679,6 +682,8 @@
                 for (var i = 0; i < netPremiumField.length; i++) {
                     netPremiumField[i].style.display = 'block';
                 }
+                // Disable the 'net_premium' option
+                commissionOnSelect.querySelector('option[value="net_premium"]').disabled = true;
             }
         }
 

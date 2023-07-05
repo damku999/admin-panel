@@ -271,7 +271,6 @@
                         <th>Issue Date</th>
                         <th>Policy Number</th>
                         <th>Registration Number</th>
-                        <th>Type of Policy</th>
                         <th class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -283,16 +282,26 @@
                                 <td>{{ $customer_insurance->issue_date }}</td>
                                 <td>{{ $customer_insurance->policy_no }}</td>
                                 <td>{{ $customer_insurance->registration_no }}</td>
-                                <td>{{ $customer_insurance->type_of_policy }}</td>
-
                                 <td class="text-center">
                                     <a href="{{ route('customer_insurances.edit', ['customer_insurance' => $customer_insurance->id]) }}"
                                         class="btn btn-primary m-2">
                                         <i class="fa fa-pen"></i>
                                     </a> &nbsp;
-                                    <a href="javascript:void(0);"
-                                        onclick="delete_conf_common('{{ $customer_insurance->id }}','CustomerInsurance', 'Customer Insurance', '{{ url(\Config::get('app.url')) }}customers/edit/{{ $customer_insurance->customer_id }}');"><i
-                                            class="fa fa-trash-alt text-danger"></i></a>
+                                    @if ($customer_insurance->status == 0)
+                                        <a href="{{ route('customer_insurances.status', ['customer_insurance_id' => $customer_insurance->id, 'status' => 1]) }}"
+                                            class="btn btn-success m-2">
+                                            <i class="fa fa-check"></i>
+                                        </a>
+                                    @elseif ($customer_insurance->status == 1)
+                                        <a href="{{ route('customer_insurances.status', ['customer_insurance_id' => $customer_insurance->id, 'status' => 0]) }}"
+                                            class="btn btn-danger m-2">
+                                            <i class="fa fa-ban"></i>
+                                        </a>
+                                    @endif
+                                    @if ($customer_insurance->policy_document_path)
+                                        <a href="{{ asset('storage/' . $customer_insurance->policy_document_path) }}"
+                                            class="btn btn-info m-2" download><i class="fa fa-download"></i></a>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach

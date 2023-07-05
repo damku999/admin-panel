@@ -321,18 +321,7 @@
 
                     <div class="card mb-12 col-md-12 border-left-success">
                         <div class="form-group row">
-                            {{-- Net Premium --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                                <label><span style="color: red;">*</span>Net Premium</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('net_premium') is-invalid @enderror"
-                                    id="net_premium" placeholder="Net Premium" name="net_premium"
-                                    value="{{ old('net_premium', $customer_insurance->net_premium) }}">
 
-                                @error('net_premium')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
                             {{-- OD Premium --}}
                             <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                                 <label>OD Premium</label>
@@ -355,6 +344,19 @@
                                     value="{{ old('tp_premium', $customer_insurance->tp_premium) }}">
 
                                 @error('tp_premium')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            {{-- Net Premium --}}
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <label><span style="color: red;">*</span>Net Premium</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('net_premium') is-invalid @enderror"
+                                    id="net_premium" placeholder="Net Premium" name="net_premium"
+                                    value="{{ old('net_premium', $customer_insurance->net_premium) }}">
+
+                                @error('net_premium')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
@@ -589,15 +591,11 @@
             var isVehicle = selectedOption.getAttribute('data-is_vehicle');
             var selectedOptionText = selectedOption.text;
 
-            if (
-                selectedOptionText !== 'COMMERCIAL VEHICLE COMP' ||
-                selectedOptionText !== 'COMMERCIAL VEHICLE SATP'
-            ) {
-                cgst2 = 0;
-                sgst2 = 0;
+            if (isVehicle === 'true' || isVehicle === '1') {
+                netPremium = odPremium + tpPremium;
             }
 
-            var finalPremium = netPremium + odPremium + tpPremium + cgst1 + cgst2 + sgst1 + sgst2;
+            var finalPremium = netPremium + cgst1 + cgst2 + sgst1 + sgst2;
 
             if (!isNaN(finalPremium)) {
                 finalPremiumInput.value = finalPremium.toFixed(2);
@@ -639,6 +637,8 @@
                         sgst2Field[i].style.display = 'none';
                     }
                 }
+                // Set netPremiumInput as readonly
+                netPremiumInput.readOnly = true;
             } else {
                 for (var i = 0; i < premiumFields.length; i++) {
                     premiumFields[i].style.display = 'none';
@@ -646,7 +646,21 @@
                 for (var i = 0; i < sgst2Field.length; i++) {
                     sgst2Field[i].style.display = 'none';
                 }
+                netPremiumInput.readOnly = false;
             }
+        }
+
+        // Event handler for OD premium change
+        odPremiumInput.addEventListener('input', calculateNetPremium);
+
+        // Event handler for TP premium change
+        tpPremiumInput.addEventListener('input', calculateNetPremium);
+
+        function calculateNetPremium() {
+            var odValue = parseFloat(odPremiumInput.value) || 0;
+            var tpValue = parseFloat(tpPremiumInput.value) || 0;
+            var netPremium = odValue + tpValue;
+            netPremiumInput.value = netPremium.toFixed(2);
         }
 
         // Call the function on page load to initially show/hide fields

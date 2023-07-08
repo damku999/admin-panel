@@ -161,18 +161,7 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
-                        {{-- Registration No. --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
-                            <label><span style="color: red;">*</span>Registration No.</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('registration_no') is-invalid @enderror"
-                                id="registration_no" placeholder="Registration No." name="registration_no"
-                                value="{{ old('registration_no', $customer_insurance->registration_no) }}">
 
-                            @error('registration_no')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
                         {{-- Start Date --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label><span style="color: red;">*</span>Start Date</label>
@@ -217,6 +206,18 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
+                        {{-- Registration No. --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                            <label><span style="color: red;">*</span>Registration No.</label>
+                            <input type="text"
+                                class="form-control form-control-customer @error('registration_no') is-invalid @enderror"
+                                id="registration_no" placeholder="Registration No." name="registration_no"
+                                value="{{ old('registration_no', $customer_insurance->registration_no) }}">
+
+                            @error('registration_no')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
                         {{-- Location --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                             <label>Location</label>
@@ -258,6 +259,7 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
+
                         {{-- TP Expiry Date --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                             <label><span style="color: red;">*</span>TP Expiry Date</label>
@@ -270,6 +272,47 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
+
+                        {{-- MFG Year --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                            <label><span style="color: red;">*</span>MFG Year</label>
+                            <div class="input-group date">
+                                <input type="number" min="1900" max="2099" step="1"
+                                    class="form-control @error('mfg_year') is-invalid @enderror" id="mfg_year"
+                                    name="mfg_year" value="{{ old('mfg_year', $customer_insurance->mfg_year) }}" />
+                            </div>
+                            @error('mfg_year')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- NCB % --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                            <label><span style="color: red;">*</span>NCB %</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control @error('ncb_percentage') is-invalid @enderror"
+                                    id="ncb_percentage" name="ncb_percentage"
+                                    value="{{ old('ncb_percentage', $customer_insurance->ncb_percentage) }}"
+                                    placeholder="NCB %" />
+                            </div>
+                            @error('ncb_percentage')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- GVW --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
+                            <label><span style="color: red;">*</span>GVW </label>
+                            <input type="text"
+                                class="decimal-input form-control form-control-customer @error('gross_vehicle_weight') is-invalid @enderror"
+                                id="gross_vehicle_weight" placeholder="GVW" name="gross_vehicle_weight"
+                                value="{{ old('gross_vehicle_weight', $customer_insurance->gross_vehicle_weight) }}">
+
+                            @error('gross_vehicle_weight')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
                         {{-- Mode of Payment --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Mode of Payment</label>
@@ -321,7 +364,6 @@
 
                     <div class="card mb-12 col-md-12 border-left-success">
                         <div class="form-group row">
-
                             {{-- OD Premium --}}
                             <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                                 <label>OD Premium</label>

@@ -138,9 +138,9 @@
                                     </a>
                                 </th>
                                 <th width="15%">
-                                    <a href="{{ route('customer_insurances.index', ['sort' => 'updated_at', 'direction' => $direction === 'asc' ? 'desc' : 'asc']) }}"
-                                        class="{{ $sort === 'updated_at' ? 'active' : '' }}">Updated Date
-                                        @if ($sort === 'updated_at')
+                                    <a href="{{ route('customer_insurances.index', ['sort' => 'policy_types.name', 'direction' => $direction === 'asc' ? 'desc' : 'asc']) }}"
+                                        class="{{ $sort === 'policy_types.name' ? 'active' : '' }}">Updated Date
+                                        @if ($sort === 'policy_types.name')
                                             @if ($direction === 'asc')
                                                 <i class="fas fa-sort-up"></i>
                                             @else
@@ -178,7 +178,7 @@
                                     <td>{{ $customer_insurance->registration_no }}</td>
                                     <td>{{ $customer_insurance->start_date }}</td>
                                     <td>{{ $customer_insurance->expired_date }}</td>
-                                    <td>{{ $customer_insurance->updated_at }}</td>
+                                    <td>{{ $customer_insurance->policy_type_name }}</td>
                                     <td>
                                         @if ($customer_insurance->status == 0)
                                             <span class="badge badge-danger">Inactive</span>

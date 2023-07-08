@@ -82,7 +82,8 @@ class CustomerController extends Controller
     {
         $validation_array = [
             'name' => 'required',
-            'email' => 'required|unique:customers,email',
+            // 'email' => 'required|unique:customers,email',
+            'email' => 'required',
             'mobile_number' => 'required|numeric|digits:10',
             'status' => 'required|numeric|in:0,1',
             'type' => 'required|in:Retail,Corporate',
@@ -237,7 +238,8 @@ class CustomerController extends Controller
     {
         $validation_array = [
             'name' => 'required',
-            'email' => 'required|unique:customers,email,' . $customer->id . ',id',
+            'email' => 'required',
+            // 'email' => 'required|unique:customers,email,' . $customer->id . ',id',
             'mobile_number' => 'required|numeric|digits:10',
             'status' => 'required|numeric|in:0,1',
             'type' => 'required|in:Retail,Corporate',

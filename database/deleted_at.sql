@@ -260,3 +260,10 @@ ALTER TABLE
     `customer_insurances` CHANGE COLUMN `extra6` `policy_document_path` VARCHAR(500) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci'
 AFTER
     `insurance_status`;
+
+
+    ALTER TABLE `customer_insurances`
+	ADD COLUMN `ncb_percentage` DOUBLE NULL DEFAULT NULL AFTER `actual_earnings`;
+
+    ALTER TABLE `customer_insurances`
+	CHANGE COLUMN `extra7` `mfg_year` VARCHAR(125) NULL DEFAULT NULL COLLATE 'utf8mb4_unicode_ci' AFTER `policy_document_path`;

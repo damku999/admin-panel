@@ -43,10 +43,10 @@ class CustomerInsuranceController extends Controller
      */
     public function index(Request $request)
     {
-        $customer_insurance_obj = CustomerInsurance::select(['customer_insurances.*', 'customers.name as customer_name', 'branches.name as branch_name', 'brokers.name as broker_name', 'relationship_managers.name as relationship_manager_name', 'policy_types.name AS policy_type_name'])
+        $customer_insurance_obj = CustomerInsurance::select(['customer_insurances.*', 'customers.name as customer_name', 'branches.name as branch_name', 'brokers.name as broker_name', 'relationship_managers.name as relationship_manager_name', 'premium_types.name AS policy_type_name'])
             ->join('customers', 'customers.id', 'customer_insurances.customer_id')
             ->leftJoin('branches', 'branches.id', 'customer_insurances.branch_id')
-            ->leftJoin('policy_types', 'policy_types.id', 'customer_insurances.premium_type_id')
+            ->leftJoin('premium_types', 'premium_types.id', 'customer_insurances.premium_type_id')
             ->leftJoin('brokers', 'brokers.id', 'customer_insurances.broker_id')
             ->leftJoin('relationship_managers', 'relationship_managers.id', 'customer_insurances.relationship_manager_id');
         if (!empty($request->search)) {

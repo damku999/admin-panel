@@ -73,7 +73,6 @@
                             <span style="color:red;">*</span>Customer Type</label>
                             <select class="form-control form-control-customer @error('type') is-invalid @enderror"
                                 name="type" id="customerType">
-                                <option selected disabled>Select Customer Type</option>
                                 <option value="Retail" @if (old('type') == 'Retail') selected @endif>Retail</option>
                                 <option value="Corporate" @if (old('type') == 'Corporate') selected @endif>Corporate
                                 </option>

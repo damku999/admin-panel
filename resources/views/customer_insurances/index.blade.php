@@ -138,9 +138,9 @@
                                     </a>
                                 </th>
                                 <th width="15%">
-                                    <a href="{{ route('customer_insurances.index', ['sort' => 'policy_types.name', 'direction' => $direction === 'asc' ? 'desc' : 'asc']) }}"
-                                        class="{{ $sort === 'policy_types.name' ? 'active' : '' }}">Updated Date
-                                        @if ($sort === 'policy_types.name')
+                                    <a href="{{ route('customer_insurances.index', ['sort' => 'premium_types.name', 'direction' => $direction === 'asc' ? 'desc' : 'asc']) }}"
+                                        class="{{ $sort === 'premium_types.name' ? 'active' : '' }}">Premium Type
+                                        @if ($sort === 'premium_types.name')
                                             @if ($direction === 'asc')
                                                 <i class="fas fa-sort-up"></i>
                                             @else

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\CustomerInsurance;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -20,4 +21,9 @@ class PolicyType extends Authenticatable
     protected $fillable = [
         'name',
     ];
+
+    public function customerInsurances()
+    {
+        return $this->hasMany(CustomerInsurance::class, 'policy_type_id');
+    }
 }

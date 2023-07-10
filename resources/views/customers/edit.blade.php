@@ -200,7 +200,6 @@
                             <span style="color:red;">*</span>Status</label>
                             <select class="form-control form-control-customer @error('status') is-invalid @enderror"
                                 name="status">
-                                <option selected disabled>Select Status</option>
                                 <option value="1"
                                     {{ old('role_id') ? (old('role_id') == 1 ? 'selected' : '') : ($customer->status == 1 ? 'selected' : '') }}>
                                     Active</option>

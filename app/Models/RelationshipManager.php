@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\CustomerInsurance;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
@@ -24,4 +25,9 @@ class RelationshipManager extends Authenticatable
         'mobile_number',
         'status',
     ];
+
+    public function customerInsurances()
+    {
+        return $this->hasMany(CustomerInsurance::class, 'relationship_manager_id');
+    }
 }

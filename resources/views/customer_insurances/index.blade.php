@@ -176,8 +176,8 @@
                                     <td>{{ $customer_insurance->customer_name }}</td>
                                     <td>{{ $customer_insurance->policy_no }}</td>
                                     <td>{{ $customer_insurance->registration_no }}</td>
-                                    <td>{{ $customer_insurance->start_date }}</td>
-                                    <td>{{ $customer_insurance->expired_date }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($customer_insurance->start_date)->format('d/m/Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($customer_insurance->expired_date)->format('d/m/Y') }}</td>
                                     <td>{{ $customer_insurance->policy_type_name }}</td>
                                     <td>
                                         @if ($customer_insurance->status == 0)

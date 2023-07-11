@@ -33,7 +33,8 @@ class Customer extends Authenticatable
         'gst_number',
         'pan_card_path',
         'aadhar_card_path',
-        'gst_path'
+        'gst_path',
+        'type'
     ];
 
     /**

@@ -9,7 +9,7 @@
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Edit Premium Type</h1>
-            <a href="{{ route('premium_type.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"
+            <a href="{{ route('premium_type.index') }}" onclick="window.history.go(-1); return false;" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"
                 onclick="window.history.go(-1); return false;"><i class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
         </div>
 

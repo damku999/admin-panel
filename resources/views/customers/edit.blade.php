@@ -9,7 +9,8 @@
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Edit Customers</h1>
-            <a href="{{ route('customers.index') }}" onclick="window.history.go(-1); return false;" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+            <a href="{{ route('customers.index') }}" onclick="window.history.go(-1); return false;"
+                class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                     class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
         </div>
 
@@ -268,8 +269,10 @@
                     <tr>
                         <th>Added Date</th>
                         <th>Issue Date</th>
+                        <th>Expired Date</th>
                         <th>Policy Number</th>
                         <th>Registration Number</th>
+                        <th>Premium Type</th>
                         <th class="text-center">Action</th>
                     </tr>
                 </thead>
@@ -277,10 +280,12 @@
                     @if (!empty($customer_insurances))
                         @foreach ($customer_insurances as $customer_insurance)
                             <tr>
-                                <td>{{ $customer_insurance->created_at }}</td>
-                                <td>{{ $customer_insurance->issue_date }}</td>
+                                <td>{{ \Carbon\Carbon::parse($customer_insurance->created_at)->format('d/m/Y') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($customer_insurance->issue_date)->format('d/m/Y') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($customer_insurance->expired_date)->format('d/m/Y') }}</td>
                                 <td>{{ $customer_insurance->policy_no }}</td>
                                 <td>{{ $customer_insurance->registration_no }}</td>
+                                <td>{{ $customer_insurance->premiumType->name }}</td>
                                 <td class="text-center">
                                     <a href="{{ route('customer_insurances.edit', ['customer_insurance' => $customer_insurance->id]) }}"
                                         class="btn btn-primary m-2">

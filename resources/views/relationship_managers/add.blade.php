@@ -9,7 +9,8 @@
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Add Relationship Managers</h1>
-            <a href="{{ route('relationship_managers.index') }}"  onclick="window.history.go(-1); return false;" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+            <a href="{{ route('relationship_managers.index') }}" onclick="window.history.go(-1); return false;"
+                class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
                     class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
         </div>
 
@@ -65,11 +66,26 @@
 
                 <div class="card-footer">
                     <button type="submit" class="btn btn-success btn-relationship_manager float-right mb-3">Save</button>
-                    <a class="btn btn-primary float-right mr-3 mb-3" href="{{ route('relationship_managers.index') }}">Cancel</a>
+                    <a class="btn btn-primary float-right mr-3 mb-3"
+                        href="{{ route('relationship_managers.index') }}">Cancel</a>
                 </div>
             </form>
         </div>
 
     </div>
 
+@endsection
+
+@section('scripts')
+    <script>
+        const inputElements = document.querySelectorAll('input[type="text"]');
+
+        function convertToUppercase(event) {
+            const input = event.target;
+            input.value = input.value.toUpperCase();
+        }
+        inputElements.forEach(input => {
+            input.addEventListener('input', convertToUppercase);
+        });
+    </script>
 @endsection

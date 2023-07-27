@@ -5,7 +5,9 @@
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Add Fuel Type</h1>
-            <a href="{{ route('fuel_type.index') }}" onclick="window.history.go(-1); return false;" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
+            <a href="{{ route('fuel_type.index') }}" onclick="window.history.go(-1); return false;"
+                class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                    class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
         </div>
         @include('common.alert')
         <div class="card shadow mb-4">
@@ -35,4 +37,18 @@
             </form>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+    <script>
+        const inputElements = document.querySelectorAll('input[type="text"]');
+
+        function convertToUppercase(event) {
+            const input = event.target;
+            input.value = input.value.toUpperCase();
+        }
+        inputElements.forEach(input => {
+            input.addEventListener('input', convertToUppercase);
+        });
+    </script>
 @endsection

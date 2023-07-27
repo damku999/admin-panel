@@ -75,3 +75,17 @@
     </div>
 
 @endsection
+
+@section('scripts')
+    <script>
+        const inputElements = document.querySelectorAll('input[type="text"]');
+
+        function convertToUppercase(event) {
+            const input = event.target;
+            input.value = input.value.toUpperCase();
+        }
+        inputElements.forEach(input => {
+            input.addEventListener('input', convertToUppercase);
+        });
+    </script>
+@endsection

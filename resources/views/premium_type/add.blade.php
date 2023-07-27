@@ -54,11 +54,26 @@
 
                 <div class="card-footer">
                     <button type="submit" class="btn btn-success btn-premium_type float-right mb-3">Save</button>
-                    <a class="btn btn-primary float-right mr-3 mb-3" href="{{ route('premium_type.index') }}" onclick="window.history.go(-1); return false;">Cancel</a>
+                    <a class="btn btn-primary float-right mr-3 mb-3" href="{{ route('premium_type.index') }}"
+                        onclick="window.history.go(-1); return false;">Cancel</a>
                 </div>
             </form>
         </div>
 
     </div>
 
+@endsection
+
+@section('scripts')
+    <script>
+        const inputElements = document.querySelectorAll('input[type="text"]');
+
+        function convertToUppercase(event) {
+            const input = event.target;
+            input.value = input.value.toUpperCase();
+        }
+        inputElements.forEach(input => {
+            input.addEventListener('input', convertToUppercase);
+        });
+    </script>
 @endsection

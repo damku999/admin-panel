@@ -28,42 +28,142 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
+
     public function index()
     {
-        $customers = Customer::all();
-        $total_customer = $customers->count();
-        $active_customer = $customers->where('status', 1)->count();
-        $inactive_customer =  $customers->where('status', 0)->count();
+        // Get counts for customers based on status
+        $total_customer = Customer::count();
+        $active_customer = Customer::where('status', 1)->count();
+        $inactive_customer = $total_customer - $active_customer;
 
-        $customer_insurances = CustomerInsurance::all();
-        $total_customer_insurance = $customer_insurances->count();
-        $active_customer_insurance = $customer_insurances->where('status', 1)->count();
-        $inactive_customer_insurance =  $customer_insurances->where('status', 0)->count();
-        $expiring_customer_insurance =  $customer_insurances->where('status', 0)->filter(function ($user) {
-            $date = Carbon::parse($user->expired_date);
-            $date1 = Carbon::now();
-            return $date->month == $date1->month && $date->year == $date1->year;
-        })->count();
+        // Get counts for customer insurances based on status
+        $total_customer_insurance = CustomerInsurance::count();
+        $active_customer_insurance = CustomerInsurance::where('status', 1)->count();
+        $inactive_customer_insurance = $total_customer_insurance - $active_customer_insurance;
 
-        $life_time_final_premium_with_gst = $customer_insurances->sum('final_premium_with_gst');
-        $life_time_my_commission_amount = $customer_insurances->sum('my_commission_amount');
-        $life_time_transfer_commission_amount = $customer_insurances->sum('transfer_commission_amount');
-        $life_time_actual_earnings = $customer_insurances->sum('actual_earnings');
+        // Get the current month and last month
+        $current_month = Carbon::now()->startOfMonth();
+        $last_month = Carbon::now()->subMonth()->startOfMonth();
 
-        return view('home', [
-            'total_customer' => $total_customer,
-            'active_customer' => $active_customer,
-            'inactive_customer' => $inactive_customer,
-            'life_time_final_premium_with_gst' => $life_time_final_premium_with_gst,
-            'life_time_my_commission_amount' => $life_time_my_commission_amount,
-            'life_time_transfer_commission_amount' => $life_time_transfer_commission_amount,
-            'life_time_actual_earnings' => $life_time_actual_earnings,
-            'total_customer_insurance' => $total_customer_insurance,
-            'active_customer_insurance' => $active_customer_insurance,
-            'inactive_customer_insurance' => $inactive_customer_insurance,
-            'expiring_customer_insurance' => $expiring_customer_insurance,
-        ]);
+        // Get the sum of final premium with GST and commission amounts for the entire life
+        $life_time_final_premium_with_gst = CustomerInsurance::sum('final_premium_with_gst');
+        $life_time_my_commission_amount = CustomerInsurance::sum('my_commission_amount');
+        $life_time_transfer_commission_amount = CustomerInsurance::sum('transfer_commission_amount');
+        $life_time_actual_earnings = CustomerInsurance::sum('actual_earnings');
+
+        // Calculate sums for customer insurances in the current month
+        $current_month_final_premium_with_gst = CustomerInsurance::whereBetween('issue_date', [
+            Carbon::now()->startOfMonth()->format('Y-m-d'),
+            Carbon::now()->startOfMonth()->endOfMonth()->format('Y-m-d')
+        ])->sum('final_premium_with_gst');
+
+        $current_month_my_commission_amount = CustomerInsurance::whereBetween('issue_date', [
+            Carbon::now()->startOfMonth()->format('Y-m-d'),
+            Carbon::now()->startOfMonth()->endOfMonth()->format('Y-m-d')
+        ])->sum('my_commission_amount');
+
+        $current_month_transfer_commission_amount = CustomerInsurance::whereBetween('issue_date', [
+            Carbon::now()->startOfMonth()->format('Y-m-d'),
+            Carbon::now()->startOfMonth()->endOfMonth()->format('Y-m-d')
+        ])->sum('transfer_commission_amount');
+
+        $current_month_actual_earnings = CustomerInsurance::whereBetween('issue_date', [
+            Carbon::now()->startOfMonth()->format('Y-m-d'),
+            Carbon::now()->startOfMonth()->endOfMonth()->format('Y-m-d')
+        ])->sum('actual_earnings');
+
+        // Calculate sums for customer insurances in the last month
+        $last_month_final_premium_with_gst = CustomerInsurance::whereBetween('issue_date', [
+            Carbon::now()->subMonth()->startOfMonth()->format('Y-m-d'),
+            Carbon::now()->subMonth()->startOfMonth()->endOfMonth()->format('Y-m-d')
+        ])->sum('final_premium_with_gst');
+
+        $last_month_my_commission_amount = CustomerInsurance::whereBetween('issue_date', [
+            Carbon::now()->subMonth()->startOfMonth()->format('Y-m-d'),
+            Carbon::now()->subMonth()->startOfMonth()->endOfMonth()->format('Y-m-d')
+        ])->sum('my_commission_amount');
+
+        $last_month_transfer_commission_amount = CustomerInsurance::whereBetween('issue_date', [
+            Carbon::now()->subMonth()->startOfMonth()->format('Y-m-d'),
+            Carbon::now()->subMonth()->startOfMonth()->endOfMonth()->format('Y-m-d')
+        ])->sum('transfer_commission_amount');
+
+        $last_month_actual_earnings = CustomerInsurance::whereBetween('issue_date', [
+            Carbon::now()->subMonth()->startOfMonth()->format('Y-m-d'),
+            Carbon::now()->subMonth()->startOfMonth()->endOfMonth()->format('Y-m-d')
+        ])->sum('actual_earnings');
+
+        // Calculate count of expiring customer insurances for the current month
+        $expiring_customer_insurance = CustomerInsurance::where('status', 0)
+            ->whereMonth('expired_date', Carbon::now()->month)
+            ->whereYear('expired_date', Carbon::now()->year)
+            ->count();
+
+
+        // Get the financial year start and end dates
+        $current_month = Carbon::now()->month;
+        $current_year = Carbon::now()->year;
+
+        // Determine the financial year
+        if ($current_month >= 4) {
+            // Financial year starts from April of the current year
+            $financial_year_start = Carbon::create($current_year, 4, 1, 0, 0, 0);
+            $financial_year_end = Carbon::create($current_year + 1, 3, 31, 23, 59, 59);
+        } else {
+            // Financial year starts from April of the previous year
+            $financial_year_start = Carbon::create($current_year - 1, 4, 1, 0, 0, 0);
+            $financial_year_end = Carbon::create($current_year, 3, 31, 23, 59, 59);
+        }
+
+        // Get the data for the financial year
+        $financial_year_data = CustomerInsurance::whereBetween('issue_date', [
+            $financial_year_start->format('Y-m-d'),
+            $financial_year_end->format('Y-m-d')
+        ])->get();
+
+        // Group data by month and year for the financial year
+        $financial_year_grouped_data = $financial_year_data->groupBy(function ($item) {
+            $issue_date = Carbon::parse($item->issue_date);
+            return $issue_date->format('Y-m');
+        });
+
+        // Loop through each group and calculate sums for each month
+        foreach ($financial_year_grouped_data as $month => $grouped_data) {
+            // Extract the month and year from the $month variable
+            $parsed_month = Carbon::createFromFormat('Y-m', $month)->format('M'); // Format: May, Jun, etc.
+            $parsed_year = Carbon::createFromFormat('Y-m', $month)->year;
+
+            // Use the extracted month and year as keys in the arrays
+            $result[$parsed_month . '-' . $parsed_year]['final_premium_with_gst'] = $grouped_data->sum('final_premium_with_gst');
+            $result[$parsed_month . '-' . $parsed_year]['my_commission_amount'] = $grouped_data->sum('my_commission_amount');
+            $result[$parsed_month . '-' . $parsed_year]['transfer_commission_amount'] = $grouped_data->sum('transfer_commission_amount');
+            $result[$parsed_month . '-' . $parsed_year]['actual_earnings'] = $grouped_data->sum('actual_earnings');
+        }
+        $json_data = json_encode($result);
+        return view('home', compact(
+            'total_customer',
+            'active_customer',
+            'inactive_customer',
+            'life_time_final_premium_with_gst',
+            'life_time_my_commission_amount',
+            'life_time_transfer_commission_amount',
+            'life_time_actual_earnings',
+            'total_customer_insurance',
+            'active_customer_insurance',
+            'inactive_customer_insurance',
+            'expiring_customer_insurance',
+            'current_month_final_premium_with_gst',
+            'current_month_my_commission_amount',
+            'current_month_transfer_commission_amount',
+            'current_month_actual_earnings',
+            'last_month_final_premium_with_gst',
+            'last_month_my_commission_amount',
+            'last_month_transfer_commission_amount',
+            'last_month_actual_earnings',
+            'json_data'
+        ));
     }
+
 
     /**
      * User Profile

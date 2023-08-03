@@ -17,14 +17,18 @@ class CreateUsersTable extends Migration
             $table->id();
             $table->string('first_name');
             $table->string('last_name')->nullable();
-            $table->string('email')->unique();
+            $table->string('email')->unique('users_email_unique');
             $table->string('mobile_number')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->integer('role_id')->default(2)->comment('1=Admin, 2=TA/TP');
-            $table->tinyInteger('status')->default(1);
+            $table->integer('role_id')->default(2)->comment("1=Admin, 2=TA/TP");
+            $table->boolean('status')->default(1);
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->integer('deleted_by')->nullable();
         });
     }
 

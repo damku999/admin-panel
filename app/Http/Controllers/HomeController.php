@@ -130,7 +130,7 @@ class HomeController extends Controller
         // Loop through each group and calculate sums for each month
         foreach ($financial_year_grouped_data as $month => $grouped_data) {
             // Extract the month and year from the $month variable
-            $parsed_month = Carbon::createFromFormat('Y-m', $month)->format('M'); // Format: May, Jun, etc.
+            $parsed_month = Carbon::createFromFormat('Y-m', $month)->format('m'); // Format: May, Jun, etc.
             $parsed_year = Carbon::createFromFormat('Y-m', $month)->year;
 
             // Use the extracted month and year as keys in the arrays
@@ -139,6 +139,7 @@ class HomeController extends Controller
             $result[$parsed_month . '-' . $parsed_year]['transfer_commission_amount'] = $grouped_data->sum('transfer_commission_amount');
             $result[$parsed_month . '-' . $parsed_year]['actual_earnings'] = $grouped_data->sum('actual_earnings');
         }
+        ksort($result);
         $json_data = json_encode($result);
         return view('home', compact(
             'total_customer',

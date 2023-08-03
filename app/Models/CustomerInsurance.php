@@ -10,18 +10,22 @@ use App\Models\PolicyType;
 use App\Models\PremiumType;
 use App\Models\InsuranceCompany;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Activitylog\LogOptions;
 use App\Models\RelationshipManager;
+use App\Traits\TableRecordObserver;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class CustomerInsurance extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
     protected $guarded = [];
-
+    protected static $logAttributes = ['*'];
+    protected static $logOnlyDirty = true;
     // Define the relationships here
     public function branch()
     {
@@ -61,5 +65,10 @@ class CustomerInsurance extends Authenticatable
     public function fuelType()
     {
         return $this->belongsTo(FuelType::class, 'fuel_type_id');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults();
     }
 }

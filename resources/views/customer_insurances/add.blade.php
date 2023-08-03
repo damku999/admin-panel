@@ -143,12 +143,30 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
+                        {{-- Type OF Policy --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <label><span style="color: red;">*</span>Premium Type</label>
+                            <select name="premium_type_id" class="form-control" id="premium_type_id"
+                                onchange="premiumTypeChanged()">
+                                <option selected="selected" disabled="disabled">Select Premium Type</option>
+                                @foreach ($premium_types as $item)
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        data-is_vehicle={{ $item->is_vehicle }}
+                                        {{ old('premium_type_id') == $item->id ? 'selected' : '' }}>{{ $item->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('premium_type_id')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
                         {{-- Policy No. --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label><span style="color: red;">*</span>Policy No.</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('policy_no') is-invalid @enderror"
-                                id="policy_no" placeholder="Policy No." name="policy_no" value="{{ old('policy_no') }}">
+                                id="policy_no" placeholder="Policy No." name="policy_no"
+                                value="{{ old('policy_no') }}">
 
                             @error('policy_no')
                                 <span class="text-danger">{{ $message }}</span>
@@ -179,23 +197,7 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
-                        {{-- Type OF Policy --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Premium Type</label>
-                            <select name="premium_type_id" class="form-control" id="premium_type_id"
-                                onchange="premiumTypeChanged()">
-                                <option selected="selected" disabled="disabled">Select Premium Type</option>
-                                @foreach ($premium_types as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        data-is_vehicle={{ $item->is_vehicle }}
-                                        {{ old('premium_type_id') == $item->id ? 'selected' : '' }}>{{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('premium_type_id')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
+
                         {{-- Registration No. --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                             <label><span style="color: red;">*</span>Registration No.</label>
@@ -689,6 +691,7 @@
             document.getElementById("expired_date").value = formattedExpiredDate;
         }
         const inputElements = document.querySelectorAll('input[type="text"]');
+
         function convertToUppercase(event) {
             const input = event.target;
             input.value = input.value.toUpperCase();

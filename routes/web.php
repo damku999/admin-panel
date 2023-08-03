@@ -10,6 +10,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\FuelTypeController;
 use App\Http\Controllers\PolicyTypeController;
 use App\Http\Controllers\PremiumTypeController;
+use App\Http\Controllers\ReferenceUsersController;
 use App\Http\Controllers\InsuranceCompanyController;
 use App\Http\Controllers\CustomerInsuranceController;
 use App\Http\Controllers\RelationshipManagerController;
@@ -69,6 +70,18 @@ Route::middleware('auth')->prefix('brokers')->name('brokers.')->group(function (
     // Route::delete('/delete/{broker}', [BrokerController::class, 'delete'])->name('destroy');
     Route::get('/update/status/{broker_id}/{status}', [BrokerController::class, 'updateStatus'])->name('status');
     Route::get('export/', [BrokerController::class, 'export'])->name('export');
+});
+
+// Broker
+Route::middleware('auth')->prefix('reference_users')->name('reference_users.')->group(function () {
+    Route::get('/', [ReferenceUsersController::class, 'index'])->name('index');
+    Route::get('/create', [ReferenceUsersController::class, 'create'])->name('create');
+    Route::post('/store', [ReferenceUsersController::class, 'store'])->name('store');
+    Route::get('/edit/{reference_user}', [ReferenceUsersController::class, 'edit'])->name('edit');
+    Route::put('/update/{reference_user}', [ReferenceUsersController::class, 'update'])->name('update');
+    // Route::delete('/delete/{reference_user}', [ReferenceUsersController::class, 'delete'])->name('destroy');
+    Route::get('/update/status/{reference_user_id}/{status}', [ReferenceUsersController::class, 'updateStatus'])->name('status');
+    Route::get('export/', [ReferenceUsersController::class, 'export'])->name('export');
 });
 
 // Relationship Manager

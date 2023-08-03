@@ -4,16 +4,21 @@ namespace App\Models;
 
 use App\Models\CustomerInsurance;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Activitylog\LogOptions;
+use App\Traits\TableRecordObserver;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Branch extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
     protected $table = 'branches';
+    protected static $logAttributes = ['*'];
+    protected static $logOnlyDirty = true;
     /**
      * The attributes that are mass assignable.
      *
@@ -28,5 +33,10 @@ class Branch extends Authenticatable
     public function customerInsurances()
     {
         return $this->hasMany(CustomerInsurance::class, 'branch_id');
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults();
     }
 }

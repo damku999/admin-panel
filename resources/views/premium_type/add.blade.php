@@ -40,13 +40,29 @@
                             <br>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input permission-input" type="radio" name="is_vehicle"
-                                    value="1">
-                                <label class="form-check-label" for="inlineCheckbox">Yes</label>
+                                    value="1" id="vehicle_yes">
+                                <label class="form-check-label" for="vehicle_yes">Yes</label>
                                 &nbsp;
                                 &nbsp;
                                 <input class="form-check-input permission-input" type="radio" name="is_vehicle"
-                                    value="0" checked>
-                                <label class="form-check-label" for="inlineCheckbox">No</label>
+                                    value="0" checked id="vehicle_no">
+                                <label class="form-check-label" for="vehicle_no">No</label>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <span style="color:red;">*</span> Is Life Insurance Policies ? like(LIC,Endowment Plans, Term
+                            plans, Ulip plans)</label>
+                            <br>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input permission-input" type="radio"
+                                    name="is_life_insurance_policies" value="1" id="life_insurance_yes">
+                                <label class="form-check-label" for="life_insurance_yes">Yes</label>
+                                &nbsp;
+                                &nbsp;
+                                <input class="form-check-input permission-input" type="radio"
+                                    name="is_life_insurance_policies" value="0" checked id="life_insurance_no">
+                                <label class="form-check-label" for="life_insurance_no">No</label>
                             </div>
                         </div>
                     </div>
@@ -67,13 +83,28 @@
 @section('scripts')
     <script>
         const inputElements = document.querySelectorAll('input[type="text"]');
+        const vehicleYesInput = document.getElementById('vehicle_yes');
+        const vehicleNoInput = document.getElementById('vehicle_no');
+        const lifeInsuranceYesInput = document.getElementById('life_insurance_yes');
+        const lifeInsuranceNoInput = document.getElementById('life_insurance_no');
 
         function convertToUppercase(event) {
             const input = event.target;
             input.value = input.value.toUpperCase();
         }
+
         inputElements.forEach(input => {
             input.addEventListener('input', convertToUppercase);
         });
+
+        function validateForm(event) {
+            if (vehicleYesInput.checked && lifeInsuranceYesInput.checked) {
+                alert("You cannot select 'Yes' for both options.");
+                event.preventDefault();
+            }
+        }
+
+        const form = document.querySelector('form');
+        form.addEventListener('submit', validateForm);
     </script>
 @endsection

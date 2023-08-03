@@ -3,20 +3,18 @@
 namespace App\Models;
 
 use App\Models\CustomerInsurance;
-use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use App\Traits\TableRecordObserver;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Customer extends Authenticatable
+class ReferenceUser extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
+    use HasFactory, Notifiable, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
     protected static $logAttributes = ['*'];
     protected static $logOnlyDirty = true;
     /**
@@ -28,25 +26,11 @@ class Customer extends Authenticatable
         'name',
         'email',
         'mobile_number',
-        'status',
-        'wedding_anniversary_date',
-        'date_of_birth',
-        'engagement_anniversary_date',
-        'pan_card_number',
-        'aadhar_card_number',
-        'gst_number',
-        'pan_card_path',
-        'aadhar_card_path',
-        'gst_path',
-        'type'
     ];
 
-    /**
-     * Get the insurance for the customer.
-     */
-    public function insurance(): HasMany
+    public function customerInsurances()
     {
-        return $this->hasMany(CustomerInsurance::class);
+        return $this->hasMany(CustomerInsurance::class, 'reference_user_id');
     }
 
     public function getActivitylogOptions(): LogOptions

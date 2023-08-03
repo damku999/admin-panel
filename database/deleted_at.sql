@@ -279,3 +279,183 @@ ADD
     COLUMN `gross_vehicle_weight` VARCHAR(500) NULL DEFAULT NULL
 AFTER
     `policy_document_path`;
+
+
+
+
+
+
+
+
+
+ALTER TABLE
+    `branches`
+ADD
+    COLUMN `created_by` INT NULL DEFAULT NULL
+AFTER
+    `deleted_at`,
+ADD
+    COLUMN `updated_by` INT NULL DEFAULT NULL
+AFTER
+    `created_by`,
+ADD
+    COLUMN `deleted_by` INT NULL DEFAULT NULL
+AFTER
+    `updated_by`;
+
+ALTER TABLE
+    `brokers`
+ADD
+    COLUMN `created_by` INT NULL DEFAULT NULL
+AFTER
+    `deleted_at`,
+ADD
+    COLUMN `updated_by` INT NULL DEFAULT NULL
+AFTER
+    `created_by`,
+ADD
+    COLUMN `deleted_by` INT NULL DEFAULT NULL
+AFTER
+    `updated_by`;
+
+ALTER TABLE
+    `customers`
+ADD
+    COLUMN `created_by` INT NULL DEFAULT NULL
+AFTER
+    `deleted_at`,
+ADD
+    COLUMN `updated_by` INT NULL DEFAULT NULL
+AFTER
+    `created_by`,
+ADD
+    COLUMN `deleted_by` INT NULL DEFAULT NULL
+AFTER
+    `updated_by`;
+
+ALTER TABLE
+    `customer_insurances`
+ADD
+    COLUMN `created_by` INT NULL DEFAULT NULL
+AFTER
+    `deleted_at`,
+ADD
+    COLUMN `updated_by` INT NULL DEFAULT NULL
+AFTER
+    `created_by`,
+ADD
+    COLUMN `deleted_by` INT NULL DEFAULT NULL
+AFTER
+    `updated_by`;
+
+ALTER TABLE
+    `fuel_types`
+ADD
+    COLUMN `created_by` INT NULL DEFAULT NULL
+AFTER
+    `deleted_at`,
+ADD
+    COLUMN `updated_by` INT NULL DEFAULT NULL
+AFTER
+    `created_by`,
+ADD
+    COLUMN `deleted_by` INT NULL DEFAULT NULL
+AFTER
+    `updated_by`;
+
+ALTER TABLE
+    `insurance_companies`
+ADD
+    COLUMN `created_by` INT NULL DEFAULT NULL
+AFTER
+    `deleted_at`,
+ADD
+    COLUMN `updated_by` INT NULL DEFAULT NULL
+AFTER
+    `created_by`,
+ADD
+    COLUMN `deleted_by` INT NULL DEFAULT NULL
+AFTER
+    `updated_by`;
+
+ALTER TABLE
+    `policy_types`
+ADD
+    COLUMN `created_by` INT NULL DEFAULT NULL
+AFTER
+    `deleted_at`,
+ADD
+    COLUMN `updated_by` INT NULL DEFAULT NULL
+AFTER
+    `created_by`,
+ADD
+    COLUMN `deleted_by` INT NULL DEFAULT NULL
+AFTER
+    `updated_by`;
+
+ALTER TABLE
+    `premium_types`
+ADD
+    COLUMN `created_by` INT NULL DEFAULT NULL
+AFTER
+    `deleted_at`,
+ADD
+    COLUMN `updated_by` INT NULL DEFAULT NULL
+AFTER
+    `created_by`,
+ADD
+    COLUMN `deleted_by` INT NULL DEFAULT NULL
+AFTER
+    `updated_by`;
+
+ALTER TABLE
+    `reference_users`
+ADD
+    COLUMN `created_by` INT NULL DEFAULT NULL
+AFTER
+    `deleted_at`,
+ADD
+    COLUMN `updated_by` INT NULL DEFAULT NULL
+AFTER
+    `created_by`,
+ADD
+    COLUMN `deleted_by` INT NULL DEFAULT NULL
+AFTER
+    `updated_by`;
+
+ALTER TABLE
+    `relationship_managers`
+ADD
+    COLUMN `created_by` INT NULL DEFAULT NULL
+AFTER
+    `deleted_at`,
+ADD
+    COLUMN `updated_by` INT NULL DEFAULT NULL
+AFTER
+    `created_by`,
+ADD
+    COLUMN `deleted_by` INT NULL DEFAULT NULL
+AFTER
+    `updated_by`;
+
+ALTER TABLE
+    `users`
+ADD
+    COLUMN `created_by` INT NULL DEFAULT NULL
+AFTER
+    `deleted_at`,
+ADD
+    COLUMN `updated_by` INT NULL DEFAULT NULL
+AFTER
+    `created_by`,
+ADD
+    COLUMN `deleted_by` INT NULL DEFAULT NULL
+AFTER
+    `updated_by`;
+
+ALTER TABLE
+    `premium_types`
+ADD
+    COLUMN `is_life_insurance_policies` TINYINT(3) NOT NULL DEFAULT '0'
+AFTER
+    `is_vehicle`;

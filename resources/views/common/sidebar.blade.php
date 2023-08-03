@@ -225,6 +225,27 @@
         </li>
 
         <li class="nav-item">
+            <a class="nav-link {{ Route::currentRouteName() == 'reference_users.index' || Route::currentRouteName() == 'reference_users.create' || Route::currentRouteName() == 'reference_users.edit' ? '' : 'collapsed' }}"
+                href="#" data-toggle="collapse" data-target="#taTpDropDown"
+                aria-expanded="{{ Route::currentRouteName() == 'reference_users.index' || Route::currentRouteName() == 'reference_users.create' || Route::currentRouteName() == 'reference_users.edit' ? 'true' : 'false' }}"
+                aria-controls="taTpDropDown">
+                <i class="fas fa-user-alt"></i>
+                <span>Reference Management</span>
+            </a>
+            <div id="taTpDropDown"
+                class="collapse {{ Route::currentRouteName() == 'reference_users.index' || Route::currentRouteName() == 'reference_users.create' || Route::currentRouteName() == 'reference_users.edit' ? 'show' : '' }}"
+                aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">Reference By:</h6>
+                    <a class="collapse-item {{ Route::currentRouteName() == 'reference_users.index' ? 'active' : '' }}"
+                        href="{{ route('reference_users.index') }}">List</a>
+                    <a class="collapse-item {{ Route::currentRouteName() == 'reference_users.edit' || Route::currentRouteName() == 'reference_users.create' ? 'active' : '' }}"
+                        href="{{ route('reference_users.create') }}">Add New</a>
+                </div>
+            </div>
+        </li>
+
+        <li class="nav-item">
             <a class="nav-link {{ Route::currentRouteName() == 'permissions.index' || Route::currentRouteName() == 'permissions.create' || Route::currentRouteName() == 'permissions.edit' ? '' : 'collapsed' }}"
                 href="#" data-toggle="collapse" data-target="#collapsePages"
                 aria-expanded="{{ Route::currentRouteName() == 'permissions.index' || Route::currentRouteName() == 'permissions.create' || Route::currentRouteName() == 'permissions.edit' ? 'true' : 'false' }}"

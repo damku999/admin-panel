@@ -69,6 +69,9 @@ class PremiumTypeController extends Controller
         ];
 
         $request->validate($validation_array);
+        if ($request->input('is_vehicle') && $request->input('is_life_insurance_policies')) {
+            return redirect()->back()->withInput()->with('error', 'Both "Is it for Vehicle?" and "Is Life Insurance Policies?" cannot be true at the same time.');
+        }
         DB::beginTransaction();
 
         try {
@@ -76,6 +79,7 @@ class PremiumTypeController extends Controller
             PremiumType::create([
                 'name' => $request->name,
                 'is_vehicle' => $request->is_vehicle,
+                'is_life_insurance_policies' => $request->is_life_insurance_policies,
             ]);
 
             // Commit And Redirected To Listing
@@ -151,17 +155,21 @@ class PremiumTypeController extends Controller
         // Validations
         $validation_array = [
             'name' => 'required|unique:premium_types,name,' . $premium_type->id,
-            'is_vehicle' => 'required',
+            'is_vehicle' => 'required|boolean',
+            'is_life_insurance_policies' => 'required|boolean',
         ];
 
         $request->validate($validation_array);
-
+        if ($request->input('is_vehicle') && $request->input('is_life_insurance_policies')) {
+            return redirect()->back()->withInput()->with('error', 'Both "Is it for Vehicle?" and "Is Life Insurance Policies?" cannot be true at the same time.');
+        }
         DB::beginTransaction($validation_array);
         try {
             // Store Data
             PremiumType::whereId($premium_type->id)->update([
                 'is_vehicle' => $request->is_vehicle,
                 'name' => $request->name,
+                'is_life_insurance_policies' => $request->is_life_insurance_policies,
             ]);
             // Commit And Redirected To Listing
             DB::commit();

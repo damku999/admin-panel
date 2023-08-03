@@ -280,14 +280,6 @@ ADD
 AFTER
     `policy_document_path`;
 
-
-
-
-
-
-
-
-
 ALTER TABLE
     `branches`
 ADD
@@ -459,3 +451,49 @@ ADD
     COLUMN `is_life_insurance_policies` TINYINT(3) NOT NULL DEFAULT '0'
 AFTER
     `is_vehicle`;
+
+ALTER TABLE
+    `customer_insurances`
+ADD
+    COLUMN `reference_commission_percentage` DOUBLE NULL DEFAULT NULL
+AFTER
+    `transfer_commission_amount`,
+ADD
+    COLUMN `reference_commission_amount` DOUBLE NULL DEFAULT NULL
+AFTER
+    `reference_commission_percentage`,
+ADD
+    COLUMN `reference_by` INT NULL DEFAULT NULL
+AFTER
+    `mfg_year`;
+
+ALTER TABLE
+    `customer_insurances`
+ADD
+    COLUMN `plan_name` VARCHAR(150) NULL DEFAULT NULL
+AFTER
+    `reference_by`,
+ADD
+    COLUMN `premium_paying_term` VARCHAR(150) NULL DEFAULT NULL
+AFTER
+    `plan_name`,
+ADD
+    COLUMN `policy_term` VARCHAR(150) NULL DEFAULT NULL
+AFTER
+    `premium_paying_term`,
+ADD
+    COLUMN `sum_insured` VARCHAR(150) NULL DEFAULT NULL
+AFTER
+    `policy_term`,
+ADD
+    COLUMN `pension_amount_yearly` VARCHAR(150) NULL DEFAULT NULL
+AFTER
+    `sum_insured`,
+ADD
+    COLUMN `approx_maturity_amount` VARCHAR(150) NULL DEFAULT NULL
+AFTER
+    `pension_amount_yearly`,
+ADD
+    COLUMN `remarks` TEXT NULL DEFAULT NULL
+AFTER
+    `approx_maturity_amount`;

@@ -48,11 +48,14 @@ class CreateCustomerInsurancesTable extends Migration
             $table->double('actual_earnings')->nullable();
             $table->double('ncb_percentage')->nullable();
             $table->string('mode_of_payment')->nullable();
+            $table->double('reference_commission_percentage')->nullable();
+            $table->double('reference_commission_amount')->nullable();
             $table->string('cheque_no')->nullable();
             $table->string('insurance_status')->nullable();
             $table->string('policy_document_path', 500)->nullable();
             $table->string('gross_vehicle_weight', 500)->nullable();
             $table->string('mfg_year')->nullable();
+            $table->unsignedBigInteger('reference_by')->nullable();
             $table->boolean('status')->default(1);
             $table->timestamps();
             $table->softDeletes();

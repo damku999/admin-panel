@@ -158,6 +158,7 @@
                                 @foreach ($premium_types as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
                                         data-is_vehicle={{ $item->is_vehicle }}
+                                        data-is_life_insurance_policies={{ $item->is_life_insurance_policies }}
                                         {{ old('premium_type_id', $customer_insurance->premium_type_id) == $item->id ? 'selected' : '' }}>
                                         {{ $item->name }}
                                     </option>
@@ -314,6 +315,117 @@
                             @enderror
                         </div>
 
+                        {{-- Plan Name --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                            <label>Plan Name</label>
+                            <input type="text"
+                                class="decimal-input form-control form-control-customer @error('plan_name') is-invalid @enderror"
+                                id="plan_name" placeholder="Plan Name" name="plan_name"
+                                value="{{ old('plan_name', $customer_insurance->plan_name) }}">
+                            @error('plan_name')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        {{-- Premium Paying Term --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                            <label>Premium Paying Term</label>
+                            <input type="text"
+                                class="decimal-input form-control form-control-customer @error('premium_paying_term') is-invalid @enderror"
+                                id="premium_paying_term" placeholder="Premium Paying Term" name="premium_paying_term"
+                                value="{{ old('premium_paying_term', $customer_insurance->premium_paying_term) }}">
+                            @error('premium_paying_term')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        {{-- Policy Term --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                            <label>Policy Term</label>
+                            <input type="text"
+                                class="decimal-input form-control form-control-customer @error('policy_term') is-invalid @enderror"
+                                id="policy_term" placeholder="Policy Term" name="policy_term"
+                                value="{{ old('policy_term', $customer_insurance->policy_term) }}">
+                            @error('policy_term')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        {{-- Sum Insured --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                            <label>Sum Insured</label>
+                            <input type="text"
+                                class="decimal-input form-control form-control-customer @error('sum_insured') is-invalid @enderror"
+                                id="sum_insured" placeholder="Sum Insured" name="sum_insured"
+                                value="{{ old('sum_insured', $customer_insurance->sum_insured) }}">
+                            @error('sum_insured')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        {{-- Pension Amount Yearly --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                            <label>Pension Amount Yearly </label>
+                            <input type="text"
+                                class="decimal-input form-control form-control-customer @error('pension_amount_yearly') is-invalid @enderror"
+                                id="pension_amount_yearly" placeholder="Pension Amount Yearly "
+                                name="pension_amount_yearly"
+                                value="{{ old('pension_amount_yearly', $customer_insurance->pension_amount_yearly) }}">
+                            @error('pension_amount_yearly')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        {{-- Approx Maturity Amount --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                            <label>Approx Maturity Amount </label>
+                            <input type="text"
+                                class="decimal-input form-control form-control-customer @error('approx_maturity_amount') is-invalid @enderror"
+                                id="approx_maturity_amount" placeholder="Approx Maturity Amount "
+                                name="approx_maturity_amount"
+                                value="{{ old('approx_maturity_amount', $customer_insurance->approx_maturity_amount) }}">
+                            @error('approx_maturity_amount')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        {{-- Life Insurance Payment Mode --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                            <label><span style="color: red;">*</span>Life Insurance Payment Mode</label>
+                            <select name="life_insurance_payment_mode" class="form-control"
+                                id="life_insurance_payment_mode">
+                                <option selected="selected">Select Life Insurance Payment Mode
+                                </option>
+                                @foreach ($life_insurance_payment_mode as $item)
+                                    <option id="{{ $item['id'] }}" value="{{ $item['id'] }}"
+                                        data-multiply_by={{ $item['multiply_by'] }}
+                                        {{ old('life_insurance_payment_mode', $customer_insurance->life_insurance_payment_mode) == $item['id'] ? 'selected' : '' }}>
+                                        {{ $item['name'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('life_insurance_payment_mode')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Maturity Date --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                            <label><span style="color: red;">*</span>Maturity Date</label>
+                            <div class="input-group date" id="maturity_date">
+                                <input type="date" class="form-control @error('maturity_date') is-invalid @enderror"
+                                    id="maturity_date" name="maturity_date"
+                                    value="{{ old('maturity_date', $customer_insurance->maturity_date) }}" />
+                            </div>
+                            @error('maturity_date')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Remarks --}}
+                        <div class="col-sm-6 col-md-8 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                            <label>Remarks</label>
+                            <textarea class="form-control form-control-customer @error('remarks') is-invalid @enderror" id="remarks"
+                                placeholder="Remarks" name="remarks" rows="4">{{ old('remarks', $customer_insurance->remarks) }}</textarea>
+                            @error('remarks')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
                         {{-- Mode of Payment --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Mode of Payment</label>
@@ -361,6 +473,23 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
+
+                        {{-- Reference Name --}}
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <label>Reference By :</label>
+                            <select name="reference_by" class="form-control" id="reference_by">
+                                <option>Select Reference By</option>
+                                @foreach ($reference_by_user as $item)
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        {{ old('reference_by', $customer_insurance->reference_by) == $item->id ? 'selected' : '' }}>
+                                        {{ $item->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('reference_by')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
                     </div>
 
                     <div class="card mb-12 col-md-12 border-left-success">
@@ -387,6 +516,19 @@
                                     value="{{ old('tp_premium', $customer_insurance->tp_premium) }}">
 
                                 @error('tp_premium')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            {{-- Premium Amount --}}
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                                <label><span style="color: red;">*</span>Premium Amount</label>
+                                <div class="input-group date">
+                                    <input type="date"
+                                        class="form-control @error('premium_amount') is-invalid @enderror"
+                                        id="premium_amount" name="premium_amount"
+                                        value="{{ old('premium_amount', $customer_insurance->premium_amount) }}" />
+                                </div>
+                                @error('premium_amount')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
@@ -540,6 +682,31 @@
                             </div>
 
                             <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <label>Reference Commission Percentage</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('reference_commission_percentage') is-invalid @enderror"
+                                    id="reference_commission_percentage" placeholder="Reference Commission Percentage"
+                                    name="reference_commission_percentage"
+                                    value="{{ old('reference_commission_percentage', $customer_insurance->reference_commission_percentage) }}">
+                                @error('reference_commission_percentage')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <label>Reference Commission Amount</label>
+                                <input type="text"
+                                    class="decimal-input form-control form-control-customer @error('reference_commission_amount') is-invalid @enderror"
+                                    id="reference_commission_amount" placeholder="Reference Commission Amount"
+                                    name="reference_commission_amount"
+                                    value="{{ old('reference_commission_amount', $customer_insurance->reference_commission_amount) }}"
+                                    readonly>
+                                @error('reference_commission_amount')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                                 <label><span style="color: red;">*</span>Actual Earnings</label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('actual_earnings') is-invalid @enderror"
@@ -576,16 +743,23 @@
                 var transferCommissionPercentage = parseFloat($('#transfer_commission_percentage').val().replace(
                     ",", ".")) || 0;
 
+                var referenceCommissionPercentage = parseFloat($('#reference_commission_percentage').val().replace(
+                    ",", ".")) || 0;
+
+
                 // Validate percentage values
                 myCommissionPercentage = Math.min(myCommissionPercentage, 100);
                 transferCommissionPercentage = Math.min(transferCommissionPercentage, 100);
+                referenceCommissionPercentage = Math.min(referenceCommissionPercentage, 100);
 
                 var myCommissionAmount = (baseRate * myCommissionPercentage) / 100;
                 var transferCommissionAmount = (baseRate * transferCommissionPercentage) / 100;
-                var actualEarnings = myCommissionAmount - transferCommissionAmount;
+                var referenceCommissionAmount = (baseRate * referenceCommissionPercentage) / 100;
+                var actualEarnings = myCommissionAmount - transferCommissionAmount - referenceCommissionAmount;
 
                 $('#my_commission_amount').val(myCommissionAmount.toFixed(2));
                 $('#transfer_commission_amount').val(transferCommissionAmount.toFixed(2));
+                $('#reference_commission_amount').val(referenceCommissionAmount.toFixed(2));
                 $('#actual_earnings').val(actualEarnings.toFixed(2));
             }
 
@@ -601,14 +775,28 @@
             });
 
             // Calculate on change of commission fields
-            $('#commission_on, #my_commission_percentage, #transfer_commission_percentage').on('change',
-                function() {
-                    calculateCommission();
-                });
+            $('#commission_on, #my_commission_percentage, #transfer_commission_percentage, #reference_commission_percentage, #net_premium, #od_premium, #tp_premium')
+                .on('change',
+                    function() {
+                        calculateCommission();
+                    });
 
             // Initial calculation on page load
             calculateCommission();
         });
+        const referenceBySelect = document.getElementById('reference_by');
+        const referenceCommissionFields = document.querySelectorAll('.reference_commission_fields');
+
+        function toggleReferenceFields() {
+            const selectedOptionValue = referenceBySelect.value;
+            const isReferenceSelected = Number(selectedOptionValue) >= 1;
+            // Loop through each element with the class and hide or show them accordingly
+            referenceCommissionFields.forEach(element => {
+                element.style.display = isReferenceSelected ? 'block' : 'none';
+            });
+        }
+        toggleReferenceFields();
+        referenceBySelect.addEventListener('change', toggleReferenceFields);
 
         var netPremiumInput = document.getElementById('net_premium');
         var odPremiumInput = document.getElementById('od_premium');
@@ -659,13 +847,18 @@
         function premiumTypeChanged() {
             var premiumTypeSelect = document.getElementById('premium_type_id');
             var premiumFields = document.getElementsByClassName('premium-fields');
+            var lifeInsuranceFields = document.getElementsByClassName('life-insurance-policies-fields');
             var sgst2Field = document.getElementsByClassName('cgst_sgt2');
+            var netPremiumInput = document.getElementById(
+                'net_premium'); // Replace 'net_premium' with the actual ID of the net premium input field
+
             // Get the selected option value
             var selectedOption = premiumTypeSelect.options[premiumTypeSelect.selectedIndex];
             var isVehicle = selectedOption.getAttribute('data-is_vehicle');
+            var isLifeInsurancePolicies = selectedOption.getAttribute('data-is_life_insurance_policies');
 
-            // Show/hide fields based on the selected option value
-            if (isVehicle === 'true' || isVehicle === '1') {
+            // Show/hide premium fields based on the selected option value
+            if (isVehicle === '1') {
                 for (var i = 0; i < premiumFields.length; i++) {
                     premiumFields[i].style.display = 'block';
                 }
@@ -691,6 +884,17 @@
                 }
                 netPremiumInput.readOnly = false;
             }
+
+            // Show/hide life insurance policies fields based on the selected option value
+            if (isLifeInsurancePolicies === '1') {
+                for (var i = 0; i < lifeInsuranceFields.length; i++) {
+                    lifeInsuranceFields[i].style.display = 'block';
+                }
+            } else {
+                for (var i = 0; i < lifeInsuranceFields.length; i++) {
+                    lifeInsuranceFields[i].style.display = 'none';
+                }
+            }
         }
 
         // Event handler for OD premium change
@@ -699,12 +903,31 @@
         // Event handler for TP premium change
         tpPremiumInput.addEventListener('input', calculateNetPremium);
 
+        // Attach the event listeners to life_insurance_payment_mode and premium_amount to trigger the calculation
+        document.getElementById('life_insurance_payment_mode').addEventListener('change', calculateNetPremium);
+        document.getElementById('premium_amount').addEventListener('input', calculateNetPremium);
+
         function calculateNetPremium() {
+            var lifeInsurancePaymentModeSelect = document.getElementById('life_insurance_payment_mode');
+            var premiumAmountInput = document.getElementById('premium_amount');
+            var netPremiumInput = document.getElementById('net_premium');
+            var selectedOption = lifeInsurancePaymentModeSelect.options[lifeInsurancePaymentModeSelect.selectedIndex];
+
+            var multiplyBy = parseFloat(selectedOption.getAttribute('data-multiply_by'));
+            var premiumAmount = parseFloat(premiumAmountInput.value) * multiplyBy;
+
             var odValue = parseFloat(odPremiumInput.value) || 0;
             var tpValue = parseFloat(tpPremiumInput.value) || 0;
-            var netPremium = odValue + tpValue;
-            netPremiumInput.value = netPremium.toFixed(2);
+            var premiumAmount = parseFloat(premiumAmount) || 0;
+            var netPremium = odValue + tpValue + premiumAmount;
+
+            if (!isNaN(netPremium)) {
+                netPremiumInput.value = netPremium.toFixed(2); // Adjust the decimal places as needed
+            } else {
+                netPremiumInput.value = '';
+            }
         }
+
 
         // Call the function on page load to initially show/hide fields
         premiumTypeChanged();

@@ -9,14 +9,17 @@ use App\Models\FuelType;
 use App\Models\PolicyType;
 use App\Models\PremiumType;
 use Illuminate\Http\Request;
+use App\Models\ReferenceUser;
 use Illuminate\Support\Carbon;
 use App\Models\InsuranceCompany;
 use App\Models\CustomerInsurance;
 use Illuminate\Support\Facades\DB;
 use App\Models\RelationshipManager;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Config;
 use App\Exports\CustomerInsurancesExport;
 use Illuminate\Support\Facades\Validator;
+use League\CommonMark\Reference\Reference;
 
 class CustomerInsuranceController extends Controller
 {
@@ -95,7 +98,9 @@ class CustomerInsuranceController extends Controller
             'insurance_companies' => InsuranceCompany::select('id', 'name')->get(),
             'policy_type' => PolicyType::select('id', 'name')->get(),
             'fuel_type' => FuelType::select('id', 'name')->get(),
-            'premium_types' => PremiumType::select('id', 'name', 'is_vehicle')->get(),
+            'premium_types' => PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies')->get(),
+            'reference_by_user' => ReferenceUser::select('id', 'name')->get(),
+            'life_insurance_payment_mode' => Config::get('constants.LIFE_INSURANCE_PAYMENT_MODE'),
         ];
         return view('customer_insurances.add', $response);
     }
@@ -142,10 +147,20 @@ class CustomerInsuranceController extends Controller
             'my_commission_amount' => 'nullable|numeric',
             'transfer_commission_percentage' => 'nullable|numeric',
             'transfer_commission_amount' => 'nullable|numeric',
+            'reference_commission_percentage' => 'nullable|numeric',
+            'reference_commission_amount' => 'nullable|numeric',
             'actual_earnings' => 'nullable|numeric',
             'ncb_percentage' => 'nullable|numeric',
             'gross_vehicle_weight' => 'nullable|numeric',
             'mfg_year' => 'nullable|numeric',
+            'reference_by' => 'nullable|exists:reference_users,id',
+            'plan_name' => 'nullable|string',
+            'premium_paying_term' => 'nullable|string',
+            'policy_term' => 'nullable|string',
+            'sum_insured' => 'nullable|string',
+            'pension_amount_yearly' => 'nullable|string',
+            'approx_maturity_amount' => 'nullable|string',
+            'remarks' => 'nullable|string',
         ];
         $request->validate($validation_array);
 
@@ -190,6 +205,16 @@ class CustomerInsuranceController extends Controller
                 'ncb_percentage',
                 'gross_vehicle_weight',
                 'mfg_year',
+                'reference_commission_percentage',
+                'reference_commission_amount',
+                'reference_by',
+                'plan_name',
+                'premium_paying_term',
+                'policy_term',
+                'sum_insured',
+                'pension_amount_yearly',
+                'approx_maturity_amount',
+                'remarks',
             ]);
 
             // Store Data
@@ -281,7 +306,9 @@ class CustomerInsuranceController extends Controller
             'customer_insurance'  => $customer_insurance,
             'policy_type' => PolicyType::select('id', 'name')->get(),
             'fuel_type' => FuelType::select('id', 'name')->get(),
-            'premium_types' => PremiumType::select('id', 'name', 'is_vehicle')->get(),
+            'premium_types' => PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies')->get(),
+            'reference_by_user' => ReferenceUser::select('id', 'name')->get(),
+            'life_insurance_payment_mode' => Config::get('constants.LIFE_INSURANCE_PAYMENT_MODE'),
         ];
         // dd($response);
         return view('customer_insurances.edit')->with($response);
@@ -328,10 +355,20 @@ class CustomerInsuranceController extends Controller
             'my_commission_amount' => 'nullable|numeric',
             'transfer_commission_percentage' => 'nullable|numeric',
             'transfer_commission_amount' => 'nullable|numeric',
+            'reference_commission_percentage' => 'nullable|numeric',
+            'reference_commission_amount' => 'nullable|numeric',
             'actual_earnings' => 'nullable|numeric',
             'ncb_percentage' => 'nullable|numeric',
             'gross_vehicle_weight' => 'nullable|numeric',
             'mfg_year' => 'nullable|numeric',
+            'reference_by' => 'nullable|exists:reference_users,id',
+            'plan_name' => 'nullable|string',
+            'premium_paying_term' => 'nullable|string',
+            'policy_term' => 'nullable|string',
+            'sum_insured' => 'nullable|string',
+            'pension_amount_yearly' => 'nullable|string',
+            'approx_maturity_amount' => 'nullable|string',
+            'remarks' => 'nullable|string',
         ];
         $request->validate($validation_array);
         DB::beginTransaction();
@@ -374,6 +411,16 @@ class CustomerInsuranceController extends Controller
                 'ncb_percentage',
                 'gross_vehicle_weight',
                 'mfg_year',
+                'reference_commission_percentage',
+                'reference_commission_amount',
+                'reference_by',
+                'plan_name',
+                'premium_paying_term',
+                'policy_term',
+                'sum_insured',
+                'pension_amount_yearly',
+                'approx_maturity_amount',
+                'remarks',
             ]);
             // Store Data
             CustomerInsurance::whereId($customer_insurance->id)->update($data_to_store);

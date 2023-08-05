@@ -497,3 +497,10 @@ ADD
     COLUMN `remarks` TEXT NULL DEFAULT NULL
 AFTER
     `approx_maturity_amount`;
+
+ALTER TABLE
+    `customer_insurances`
+ADD
+    COLUMN `premium_amount` DOUBLE NULL DEFAULT NULL
+AFTER
+    `net_premium`;

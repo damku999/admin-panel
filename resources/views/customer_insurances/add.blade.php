@@ -457,7 +457,7 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label>Reference By :</label>
                             <select name="reference_by" class="form-control" id="reference_by">
-                                <option selected="selected">Select Reference By</option>
+                                <option selected="selected" value="0">Select Reference By</option>
                                 @foreach ($reference_by_user as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
                                         {{ old('reference_by') == $item->id ? 'selected' : '' }}>

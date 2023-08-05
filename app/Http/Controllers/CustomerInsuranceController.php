@@ -129,6 +129,7 @@ class CustomerInsuranceController extends Controller
             'tp_expiry_date' => 'nullable|date_format:Y-m-d',
             'policy_no' => 'required',
             'net_premium' => 'nullable|numeric',
+            'premium_amount' => 'nullable|numeric',
             'gst' => 'nullable|numeric',
             'final_premium_with_gst' => 'required|numeric',
             'mode_of_payment' => 'nullable|string',
@@ -153,7 +154,7 @@ class CustomerInsuranceController extends Controller
             'ncb_percentage' => 'nullable|numeric',
             'gross_vehicle_weight' => 'nullable|numeric',
             'mfg_year' => 'nullable|numeric',
-            'reference_by' => 'nullable|exists:reference_users,id',
+            // 'reference_by' => 'nullable|exists:reference_users,id',
             'plan_name' => 'nullable|string',
             'premium_paying_term' => 'nullable|string',
             'policy_term' => 'nullable|string',
@@ -191,6 +192,7 @@ class CustomerInsuranceController extends Controller
                 'registration_no',
                 'make_model',
                 'od_premium',
+                'premium_amount',
                 'tp_premium',
                 'cgst1',
                 'sgst1',
@@ -207,7 +209,6 @@ class CustomerInsuranceController extends Controller
                 'mfg_year',
                 'reference_commission_percentage',
                 'reference_commission_amount',
-                'reference_by',
                 'plan_name',
                 'premium_paying_term',
                 'policy_term',
@@ -216,7 +217,8 @@ class CustomerInsuranceController extends Controller
                 'approx_maturity_amount',
                 'remarks',
             ]);
-
+            if (!empty($request->reference_by))
+                $data_to_store['reference_by'] = $request->reference_by;
             // Store Data
             $customer_insurance = CustomerInsurance::create($data_to_store);
 
@@ -337,6 +339,7 @@ class CustomerInsuranceController extends Controller
             'tp_expiry_date' => 'nullable|date_format:Y-m-d',
             'policy_no' => 'required',
             'net_premium' => 'nullable|numeric',
+            'premium_amount' => 'nullable|numeric',
             'gst' => 'nullable|numeric',
             'final_premium_with_gst' => 'required|numeric',
             'mode_of_payment' => 'nullable|string',
@@ -361,7 +364,7 @@ class CustomerInsuranceController extends Controller
             'ncb_percentage' => 'nullable|numeric',
             'gross_vehicle_weight' => 'nullable|numeric',
             'mfg_year' => 'nullable|numeric',
-            'reference_by' => 'nullable|exists:reference_users,id',
+            // 'reference_by' => 'nullable|exists:reference_users,id',
             'plan_name' => 'nullable|string',
             'premium_paying_term' => 'nullable|string',
             'policy_term' => 'nullable|string',
@@ -398,6 +401,7 @@ class CustomerInsuranceController extends Controller
                 'make_model',
                 'od_premium',
                 'tp_premium',
+                'premium_amount',
                 'cgst1',
                 'sgst1',
                 'cgst2',
@@ -413,7 +417,6 @@ class CustomerInsuranceController extends Controller
                 'mfg_year',
                 'reference_commission_percentage',
                 'reference_commission_amount',
-                'reference_by',
                 'plan_name',
                 'premium_paying_term',
                 'policy_term',
@@ -422,6 +425,8 @@ class CustomerInsuranceController extends Controller
                 'approx_maturity_amount',
                 'remarks',
             ]);
+            if (!empty($request->reference_by))
+                $data_to_store['reference_by'] = $request->reference_by;
             // Store Data
             CustomerInsurance::whereId($customer_insurance->id)->update($data_to_store);
             // Handle file uploads

@@ -23,14 +23,24 @@ class HomeController extends Controller
         $this->middleware('auth');
     }
 
+    protected $columns = [
+        'final_premium_with_gst',
+        'my_commission_amount',
+        'transfer_commission_amount',
+        'actual_earnings',
+        'issue_date'
+    ];
+
     /**
      * Show the application dashboard.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-
-    public function index()
+    public function index(Request $request)
     {
+        $data = $this->compressionData($request);
+
+
         // Get counts for customers based on status
         $total_customer = Customer::count();
         $active_customer = Customer::where('status', 1)->count();
@@ -161,8 +171,86 @@ class HomeController extends Controller
             'last_month_my_commission_amount',
             'last_month_transfer_commission_amount',
             'last_month_actual_earnings',
-            'json_data'
+            'json_data',
+            'data'
         ));
+    }
+
+
+    function compressionData($request)
+    {
+        $date = now();
+        if ($request->date) {
+            $date = Carbon::parse($request->date);
+        }
+
+        // Get the financial year start and end dates
+        $current_month = $date->month;
+        $current_year = $date->year;
+        $previous_year = $current_year - 1;
+        $response['date'] = $date;
+        $response['yesterday'] = $date->copy()->subDay()->format('Y-m-d');
+        $response['day_before_yesterday'] = $date->copy()->subDays(2)->format('Y-m-d');
+
+        // Determine the financial year
+        if ($current_month >= 4) {
+            // Financial year starts from April of the current year
+            $response['financial_year_start'] = $financial_year_start = Carbon::create($current_year, 4, 1, 0, 0, 0);
+            $response['financial_year_end'] = $financial_year_end = Carbon::create($current_year + 1, 3, 31, 23, 59, 59);
+            $response['previous_financial_year_start'] = $previous_financial_year_start = Carbon::create($previous_year, 4, 1, 0, 0, 0);
+            $response['previous_financial_year_end'] = $previous_financial_year_end = Carbon::create($previous_year + 1, 3, 31, 23, 59, 59);
+        } else {
+            // Financial year starts from April of the previous year
+            $financial_year_start = Carbon::create($current_year - 1, 4, 1, 0, 0, 0);
+            $financial_year_end = Carbon::create($current_year, 3, 31, 23, 59, 59);
+            $previous_financial_year_start = Carbon::create($previous_year - 1, 4, 1, 0, 0, 0);
+            $previous_financial_year_end = Carbon::create($previous_year, 3, 31, 23, 59, 59);
+        }
+
+        $sum_columns = [
+            DB::raw('COALESCE(SUM(final_premium_with_gst), 0) AS sum_final_premium'),
+            DB::raw('COALESCE(SUM(my_commission_amount), 0) AS sum_my_commission'),
+            DB::raw('COALESCE(SUM(transfer_commission_amount), 0) AS sum_transfer_commission'),
+            DB::raw('COALESCE(SUM(actual_earnings), 0) AS sum_actual_earnings')
+        ];
+
+        // Get the data for the financial year
+        $response['current_year_data'] = CustomerInsurance::select($sum_columns)
+            ->whereBetween('issue_date', [
+                $financial_year_start->format('Y-m-d'),
+                $financial_year_end->format('Y-m-d')
+            ])->first()->toArray();
+
+        // Calculate the sum of columns for the previous financial year
+        $response['last_year_data'] = CustomerInsurance::select($sum_columns)
+            ->whereBetween('issue_date', [
+                $previous_financial_year_start->format('Y-m-d'),
+                $previous_financial_year_end->format('Y-m-d')
+            ])->first()->toArray();
+
+        // Calculate the sum of columns for the today
+        $response['today_data'] = CustomerInsurance::select($sum_columns)->where('issue_date', $date->format('Y-m-d'))->first()->toArray();
+        $response['yesterday_data'] = CustomerInsurance::select($sum_columns)->where('issue_date', $date->copy()->subDay()->format('Y-m-d'))->first()->toArray();
+        $response['day_before_yesterday_data'] = CustomerInsurance::select($sum_columns)->where('issue_date', $date->copy()->subDays(2)->format('Y-m-d'))->first()->toArray();
+
+        $quarters = [];
+        $quarter_date = [];
+        for ($i = 0; $i < 4; $i++) {
+            $quarter_start = $financial_year_start->copy()->addMonths($i * 3);
+            $quarter_end = $quarter_start->copy()->addMonths(2);
+            $quarter_date[] = [
+                'quarter_start' => $quarter_start,
+                'quarter_end' => $quarter_end
+            ];
+
+            $quarters[] = CustomerInsurance::select($sum_columns)->whereBetween('issue_date', [
+                $quarter_start->format('Y-m-d'),
+                $quarter_end->format('Y-m-d')
+            ])->first()->toArray();
+        }
+        $response['quarters_data'] = $quarters;
+        $response['quarter_date'] = $quarter_date;
+        return $response;
     }
 
 

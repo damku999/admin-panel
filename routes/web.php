@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BrokerController;
 use App\Http\Controllers\CommonController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\FuelTypeController;
 use App\Http\Controllers\PolicyTypeController;
@@ -173,4 +174,13 @@ Route::middleware('auth')->prefix('fuel_type')->name('fuel_type.')->group(functi
     Route::put('/update/{fuel_type}', [FuelTypeController::class, 'update'])->name('update');
     Route::get('/update/status/{fuel_type_id}/{status}', [FuelTypeController::class, 'updateStatus'])->name('status');
     Route::get('export/', [FuelTypeController::class, 'export'])->name('export');
+});
+
+
+// Fuel Type
+Route::middleware('auth')->prefix('reports')->name('reports.')->group(function () {
+    Route::get('/', [ReportController::class, 'index'])->name('index');
+    Route::get('export/', [ReportController::class, 'export'])->name('export');
+    Route::post('selected/columns', [ReportController::class, 'saveColumns'])->name('save.selected.columns');
+    Route::get('load/columns/{report_name}', [ReportController::class, 'loadColumns'])->name('load.selected.columns');
 });

@@ -76,6 +76,12 @@
             Admin Section
         </div>
 
+        <li class="nav-item {{ Route::currentRouteName() == 'reports.index' ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('reports.index') }}">
+                <i class="fas fa-fw fa-chart-line"></i>
+                <span>Reports</span></a>
+        </li>
+
         <li class="nav-item">
             <a class="nav-link {{ Route::currentRouteName() == 'brokers.index' || Route::currentRouteName() == 'brokers.create' || Route::currentRouteName() == 'brokers.edit' ? '' : 'collapsed' }}"
                 href="#" data-toggle="collapse" data-target="#taTpDropDownBroker"

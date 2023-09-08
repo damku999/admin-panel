@@ -64,7 +64,6 @@
                         {{-- Policy Type --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label><span style="color: red;">*</span>Policy Type</label>
-
                             <select name="policy_type_id" class="form-control" id="policy_type_id">
                                 <option selected="selected" disabled="disabled">Select Policy Type</option>
                                 @foreach ($policy_type as $item)

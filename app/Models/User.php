@@ -69,4 +69,9 @@ class User extends Authenticatable
     {
         return LogOptions::defaults();
     }
+
+    public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
 }

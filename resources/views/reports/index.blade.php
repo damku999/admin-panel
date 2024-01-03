@@ -19,20 +19,32 @@
                 <div class="card-body">
                     <div class="form-group row">
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
-                            <label for="reportName" class="form-label"><span style="color:red;">*</span>Report Name</label>
-                            <select class="form-control form-control-reprts @error('report_name') is-invalid @enderror"
-                                id="reportName" name="report_name">
-                                <option value="">Select Report Name</option>
-                                @foreach (config('constants.REPORTS') as $reportName => $reportDescription)
-                                    <option
-                                        value="{{ $reportName }}"{{ old('report_name') === $reportName ? ' selected' : '' }}>
-                                        {{ $reportDescription }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('report_name')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
+                            <div class="row">
+                                <div class="col-sm-8 col-md-8">
+                                    <label for="reportName" class="form-label"><span style="color:red;">*</span>Report
+                                        Name:</label>
+                                    <select
+                                        class="form-control form-control-reprts @error('report_name') is-invalid @enderror"
+                                        id="reportName" name="report_name">
+                                        <option value="">Select Report Name</option>
+                                        @foreach (config('constants.REPORTS') as $reportName => $reportDescription)
+                                            <option
+                                                value="{{ $reportName }}"{{ request('report_name') === $reportName ? ' selected' : '' }}>
+                                                {{ $reportDescription }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('report_name')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="col-sm-4 col-md-4">
+                                    <label for="Select Columns" class="form-label">&nbsp;</label>
+                                    <button type="button" class="btn btn-primary form-control" id="openModalPopUpColumn">
+                                        Select Columns
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label for="reportName" class="form-label"><span style="color:red;">*</span>Creation
@@ -58,12 +70,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-sm-3 col-md-2 mt-10 mb-sm-0 justify-content">
-                            <label for="Select Columns" class="form-label">&nbsp;</label>
-                            <button type="button" class="btn btn-primary mt-3 form-control" id="openModalPopUpColumn">
-                                Select Columns
-                            </button>
-                        </div>
+
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 fields-to-toggle insurance_detail">
@@ -77,16 +84,18 @@
                                     style="margin-right: 10px;">
                             </div>
                         </div>
-
-
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 fields-to-toggle policy_detail ">
                         </div>
                     </div>
                 </div>
                 <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-reprts float-right mb-3 filter_by_click"><i
-                            class="fas fa-search"></i> Search</button>
-                    <a class="btn btn-primary float-right mr-3 mb-3 filter_by_click" href="{{ route('reports.index') }}">
+                    {{-- <button type="submit" name="search"
+                        class="btn btn-success btn-reprts float-right mb-3 filter_by_click"><i class="fas fa-search"></i>
+                        Search</button> --}}
+                    <button type="submit" name="download"
+                        class="btn btn-primary btn-reprts float-right  mr-3 mb-3 filter_by_click"><i
+                            class="fas fa-download"></i> Download</button>
+                    <a class="btn btn-warning float-right mr-3 mb-3 filter_by_click" href="{{ route('reports.index') }}">
                         <i class="fas fa-redo"></i> Cancel</a>
                 </div>
             </form>

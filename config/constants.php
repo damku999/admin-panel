@@ -21,7 +21,7 @@ return [
         ],
         [
             'table_column_name' => 'customer_id',
-            'relation_model' => 'Customer Name',
+            'relation_model' => 'Customer',
             'relation_model_column' => 'name',
             'default_visible' => 'Yes',
             'selected_column' => 'Yes',

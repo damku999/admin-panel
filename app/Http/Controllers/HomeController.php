@@ -201,10 +201,10 @@ class HomeController extends Controller
             $response['previous_financial_year_end'] = $previous_financial_year_end = Carbon::create($previous_year + 1, 3, 31, 23, 59, 59);
         } else {
             // Financial year starts from April of the previous year
-            $financial_year_start = Carbon::create($current_year - 1, 4, 1, 0, 0, 0);
-            $financial_year_end = Carbon::create($current_year, 3, 31, 23, 59, 59);
-            $previous_financial_year_start = Carbon::create($previous_year - 1, 4, 1, 0, 0, 0);
-            $previous_financial_year_end = Carbon::create($previous_year, 3, 31, 23, 59, 59);
+            $response['financial_year_start'] = $financial_year_start = Carbon::create($current_year - 1, 4, 1, 0, 0, 0);
+            $response['financial_year_end'] = $financial_year_end = Carbon::create($current_year, 3, 31, 23, 59, 59);
+            $response['previous_financial_year_start'] = $previous_financial_year_start = Carbon::create($previous_year - 1, 4, 1, 0, 0, 0);
+            $response['previous_financial_year_end'] = $previous_financial_year_end = Carbon::create($previous_year, 3, 31, 23, 59, 59);
         }
 
         $sum_columns = [

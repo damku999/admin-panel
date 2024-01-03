@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Report;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\CustomerInsurancesExport1;
 
 class ReportController extends Controller
 {
@@ -30,6 +32,9 @@ class ReportController extends Controller
         // $columns = Schema::getColumnListing('customer_insurances');
         // dd($columns);
         $customers = Customer::select('id', 'name')->get();
+        if ($request->has('download')){
+            return Excel::download(new CustomerInsurancesExport1($request->all()), 'customer_insurances.xlsx');
+        }
 
         return view('reports.index', ['reports' => [], 'customers' => $customers]);
     }
@@ -37,7 +42,7 @@ class ReportController extends Controller
 
     public function export(Request $request)
     {
-        // return Excel::download(new RelationshipManagersExport, 'reports.xlsx');
+        // return Excel::download(new CustomerInsurancesExport, 'reports.xlsx');
     }
     public function saveColumns(Request $request)
     {

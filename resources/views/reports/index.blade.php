@@ -18,33 +18,28 @@
                 @csrf
                 <div class="card-body">
                     <div class="form-group row">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <label for="Select Columns" class="form-label">&nbsp;</label>
+                            <button type="button" class="btn btn-primary form-control" id="openModalPopUpColumn">
+                                Select Columns
+                            </button>
+                        </div>
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
-                            <div class="row">
-                                <div class="col-sm-8 col-md-8">
-                                    <label for="reportName" class="form-label"><span style="color:red;">*</span>Report
-                                        Name:</label>
-                                    <select
-                                        class="form-control form-control-reprts @error('report_name') is-invalid @enderror"
-                                        id="reportName" name="report_name">
-                                        <option value="">Select Report Name</option>
-                                        @foreach (config('constants.REPORTS') as $reportName => $reportDescription)
-                                            <option
-                                                value="{{ $reportName }}"{{ request('report_name') === $reportName ? ' selected' : '' }}>
-                                                {{ $reportDescription }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('report_name')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                                <div class="col-sm-4 col-md-4">
-                                    <label for="Select Columns" class="form-label">&nbsp;</label>
-                                    <button type="button" class="btn btn-primary form-control" id="openModalPopUpColumn">
-                                        Select Columns
-                                    </button>
-                                </div>
-                            </div>
+                            <label for="reportName" class="form-label"><span style="color:red;">*</span>Report
+                                Name:</label>
+                            <select class="form-control form-control-reprts @error('report_name') is-invalid @enderror"
+                                id="reportName" name="report_name">
+                                <option value="">Select Report Name</option>
+                                @foreach (config('constants.REPORTS') as $reportName => $reportDescription)
+                                    <option
+                                        value="{{ $reportName }}"{{ request('report_name') === $reportName ? ' selected' : '' }}>
+                                        {{ $reportDescription }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('report_name')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
                         </div>
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label for="reportName" class="form-label"><span style="color:red;">*</span>Creation
@@ -59,7 +54,7 @@
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
-                            <label for="reportName" class="form-label">Customer : </label>
+                            <label for="customer_id" class="form-label">Customer : </label>
                             <select name="customer_id" id="customer_id" class=" w-100">
                                 <option selected="selected" disabled="disabled">Select Customer</option>
                                 @foreach ($customers as $item)
@@ -71,10 +66,115 @@
                             </select>
                         </div>
 
+                        {{-- <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
+                            <label for="branch_id" class="form-label">Branches : </label>
+                            <select name="branch_id" class="form-control" id="branch_id">
+                                <option selected="selected" disabled="disabled">Select Branches</option>
+                                @foreach ($branches as $item)
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        {{ request('branch_id') == $item->id ? 'selected' : '' }}>
+                                        {{ $item->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div> --}}
+
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
+                            <label for="broker_id" class="form-label">Brokers : </label>
+                            <select name="broker_id" class="form-control" id="broker_id">
+                                <option selected="selected" disabled="disabled">Select Brokers</option>
+                                @foreach ($brokers as $item)
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        {{ request('broker_id') == $item->id ? 'selected' : '' }}>
+                                        {{ $item->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
+                            <label for="relationship_manager_id" class="form-label">RM : </label>
+                            <select name="relationship_manager_id" class="form-control" id="relationship_manager_id">
+                                <option selected="selected" disabled="disabled">Select RM</option>
+                                @foreach ($relationship_managers as $item)
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        {{ request('relationship_manager_id') == $item->id ? 'selected' : '' }}>
+                                        {{ $item->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
+                            <label for="insurance_company_id" class="form-label">Insurance Company : </label>
+                            <select name="insurance_company_id" class="form-control" id="insurance_company_id">
+                                <option selected="selected" disabled="disabled">Select Insurance Company</option>
+                                @foreach ($insurance_companies as $item)
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        {{ request('insurance_company_id') == $item->id ? 'selected' : '' }}>
+                                        {{ $item->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
+                            <label for="policy_type_id" class="form-label">Policy Type : </label>
+                            <select name="policy_type_id" class="form-control" id="policy_type_id">
+                                <option selected="selected" disabled="disabled">Select Policy Type</option>
+                                @foreach ($policy_type as $item)
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        {{ request('policy_type_id') == $item->id ? 'selected' : '' }}>
+                                        {{ $item->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
+                            <label for="fuel_type_id" class="form-label">Fuel Type : </label>
+                            <select name="fuel_type_id" class="form-control" id="fuel_type_id">
+                                <option selected="selected" disabled="disabled">Select Fuel Type</option>
+                                @foreach ($fuel_type as $item)
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        {{ request('fuel_type_id') == $item->id ? 'selected' : '' }}>
+                                        {{ $item->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
+                            <label for="premium_type_id" class="form-label">Fuel Type : </label>
+                            <select name="premium_type_id" class="form-control" id="premium_type_id">
+                                <option selected="selected" disabled="disabled">Select Fuel Type</option>
+                                @foreach ($premium_types as $item)
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        {{ request('premium_type_id') == $item->id ? 'selected' : '' }}>
+                                        {{ $item->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
+                            <label for="reference_by" class="form-label">Reference By : </label>
+                            <select name="reference_by" class="form-control" id="reference_by">
+                                <option selected="selected" disabled="disabled">Select Reference By</option>
+                                @foreach ($reference_by_user as $item)
+                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        {{ request('reference_by') == $item->id ? 'selected' : '' }}>
+                                        {{ $item->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div> --}}
+
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 fields-to-toggle insurance_detail">
-                            <label for="reportName" class="form-label"><span style="color:red;">*</span>Issue Date</label>
+                            <label for="reportName" class="form-label"><span style="color:red;">*</span>Issue
+                                Date</label>
                             <div class="d-flex">
                                 <input type="text" placeholder="Start Date" name="issue_start_date"
                                     class="form-control datepicker" value="{{ request('issue_start_date') }}"

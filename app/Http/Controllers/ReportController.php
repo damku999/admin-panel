@@ -2,9 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Branch;
+use App\Models\Broker;
 use App\Models\Report;
 use App\Models\Customer;
+use App\Models\FuelType;
+use App\Models\PolicyType;
+use App\Models\PremiumType;
 use Illuminate\Http\Request;
+use App\Models\ReferenceUser;
+use App\Models\InsuranceCompany;
+use App\Models\RelationshipManager;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CustomerInsurancesExport1;
 
@@ -31,12 +39,22 @@ class ReportController extends Controller
     {
         // $columns = Schema::getColumnListing('customer_insurances');
         // dd($columns);
-        $customers = Customer::select('id', 'name')->get();
-        if ($request->has('download')){
+        $response  = [
+            'customers' => Customer::select('id', 'name')->get(),
+            'brokers' => Broker::select('id', 'name')->get(),
+            'relationship_managers' => RelationshipManager::select('id', 'name')->get(),
+            'branches' => Branch::select('id', 'name')->get(),
+            'insurance_companies' => InsuranceCompany::select('id', 'name')->get(),
+            'policy_type' => PolicyType::select('id', 'name')->get(),
+            'fuel_type' => FuelType::select('id', 'name')->get(),
+            'premium_types' => PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies')->get(),
+            'reference_by_user' => ReferenceUser::select('id', 'name')->get(),
+        ];
+        if ($request->has('download')) {
             return Excel::download(new CustomerInsurancesExport1($request->all()), 'customer_insurances.xlsx');
         }
 
-        return view('reports.index', ['reports' => [], 'customers' => $customers]);
+        return view('reports.index', $response);
     }
 
 

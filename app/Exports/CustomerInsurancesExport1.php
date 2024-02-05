@@ -22,7 +22,6 @@ class CustomerInsurancesExport1 implements FromCollection, WithHeadings, ShouldA
     public function __construct(array $filters)
     {
         $this->filters = $filters;
-        // dd($this->filters);
         // $this->selected_columns = $selected_columns;
     }
 
@@ -38,10 +37,9 @@ class CustomerInsurancesExport1 implements FromCollection, WithHeadings, ShouldA
         // $select_data = collect($report->selected_columns)->filter(function ($column) {
         //     return $column['relation_model'] === '' && ($column['default_visible'] == 'Yes' || $column['selected_column'] == 'Yes');
         // });
-
-        $report->selected_columns = collect($report->selected_columns)->map(function($item) {
-            $item['select'] = $item['table_column_name']. ' as '.$item['display_name'] ;
-            return $item; 
+        $report->selected_columns = collect($report->selected_columns)->map(function ($item) {
+            $item['select'] = $item['table_column_name'] . ' as ' . $item['display_name'];
+            return $item;
         })->pluck('select');
 
         // dd($report->selected_columns);
@@ -67,6 +65,47 @@ class CustomerInsurancesExport1 implements FromCollection, WithHeadings, ShouldA
             ->when(!empty($this->filters['issue_end_date']), function ($query) {
                 return $query->where('issue_date', '<=', Carbon::parse($this->filters['issue_end_date'])->format('Y-m-d'));
             })
+            ->when(!empty($this->filters['branch_id']), function ($query) {
+                return $query->whereHas('branch', function ($query) {
+                    $query->where('id', $this->filters['branch_id']);
+                });
+            })
+            ->when(!empty($this->filters['broker_id']), function ($query) {
+                return $query->whereHas('broker', function ($query) {
+                    $query->where('id', $this->filters['broker_id']);
+                });
+            })
+            ->when(!empty($this->filters['relationship_manager_id']), function ($query) {
+                return $query->whereHas('relationshipManager', function ($query) {
+                    $query->where('id', $this->filters['relationship_manager_id']);
+                });
+            })
+            ->when(!empty($this->filters['insurance_company_id']), function ($query) {
+                return $query->whereHas('insuranceCompany', function ($query) {
+                    $query->where('id', $this->filters['insurance_company_id']);
+                });
+            })
+            ->when(!empty($this->filters['policy_type_id']), function ($query) {
+                return $query->whereHas('policyType', function ($query) {
+                    $query->where('id', $this->filters['policy_type_id']);
+                });
+            })
+            ->when(!empty($this->filters['fuel_type_id']), function ($query) {
+                return $query->whereHas('fuelType', function ($query) {
+                    $query->where('id', $this->filters['fuel_type_id']);
+                });
+            })
+            ->when(!empty($this->filters['premium_type_id']), function ($query) {
+                return $query->whereHas('premiumType', function ($query) {
+                    $query->where('id', $this->filters['premium_type_id']);
+                });
+            })
+            ->when(!empty($this->filters['customer_id']), function ($query) {
+                return $query->whereHas('customer', function ($query) {
+                    $query->where('id', $this->filters['customer_id']);
+                });
+            })
+
             ->get();
 
         return $customerInsurances->map(function ($customerInsurance) {

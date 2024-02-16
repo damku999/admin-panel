@@ -30,15 +30,14 @@ class ReportController extends Controller
     }
 
     /**
-     * List RelationshipManager 
+     * List Insurance report
      * @param Nill
      * @return Array $report
      * @author Darshan Baraiya
      */
     public function index(Request $request)
     {
-        // $columns = Schema::getColumnListing('customer_insurances');
-        // dd($columns);
+
         $response  = [
             'customers' => Customer::select('id', 'name')->get(),
             'brokers' => Broker::select('id', 'name')->get(),
@@ -49,11 +48,22 @@ class ReportController extends Controller
             'fuel_type' => FuelType::select('id', 'name')->get(),
             'premium_types' => PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies')->get(),
             'reference_by_user' => ReferenceUser::select('id', 'name')->get(),
+            'customerInsurances' => [],
         ];
         if ($request->has('download')) {
+            $validation_array = [
+                'report_name' => 'required',
+            ];
+            $request->validate($validation_array);
             return Excel::download(new CustomerInsurancesExport1($request->all()), 'customer_insurances.xlsx');
         }
-
+        if ($request->has('view')) {
+            $validation_array = [
+                'report_name' => 'required',
+            ];
+            $request->validate($validation_array);
+            $response['customerInsurances'] = Report::getInsuranceReport($request->all());
+        }
         return view('reports.index', $response);
     }
 
@@ -62,6 +72,13 @@ class ReportController extends Controller
     {
         // return Excel::download(new CustomerInsurancesExport, 'reports.xlsx');
     }
+
+    /**
+     * List Insurance report
+     * @param Nill
+     * @return Array $report
+     * @author Darshan Baraiya
+     */
     public function saveColumns(Request $request)
     {
         $updatedColumns = [];

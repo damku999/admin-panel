@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Carbon;
+use App\Models\CustomerInsurance;
 use Spatie\Activitylog\LogOptions;
 use App\Traits\TableRecordObserver;
 use Spatie\Permission\Traits\HasRoles;
@@ -71,5 +73,83 @@ class Report extends Authenticatable
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+
+    public static function getInsuranceReport($filters)
+    {
+        $report = Report::where(['user_id' => auth()->user()->id, 'name' => $filters['report_name']])->first();
+        $report->selected_columns = collect($report->selected_columns)->map(function ($item) {
+            $item['select'] = $item['table_column_name'] . ' as ' . $item['display_name'];
+            return $item;
+        })->pluck('select');
+
+        $customerInsurances = CustomerInsurance::with(
+            'branch',
+            'broker',
+            'relationshipManager',
+            'customer',
+            'insuranceCompany',
+            'premiumType',
+            'policyType',
+            'fuelType'
+        )
+            ->when(!empty($filters['record_creation_start_date']), function ($query) use ($filters) {
+                return $query->where('created_at', '>=', Carbon::parse($filters['record_creation_start_date'])->startOfDay()->format('Y-m-d H:i:s'));
+            })
+            ->when(!empty($filters['record_creation_end_date']), function ($query) use ($filters) {
+                return $query->where('created_at', '<=', Carbon::parse($filters['record_creation_end_date'])->endOfDay()->format('Y-m-d H:i:s'));
+            })
+            ->when(!empty($filters['issue_start_date']), function ($query) use ($filters) {
+                return $query->where('issue_date', '>=', Carbon::parse($filters['issue_start_date'])->format('Y-m-d'));
+            })
+            ->when(!empty($filters['issue_end_date']), function ($query) use ($filters) {
+                return $query->where('issue_date', '<=', Carbon::parse($filters['issue_end_date'])->format('Y-m-d'));
+            })
+            ->when(!empty($filters['branch_id']), function ($query) use ($filters) {
+                return $query->whereHas('branch', function ($query) use ($filters) {
+                    $query->where('id', $filters['branch_id']);
+                });
+            })
+            ->when(!empty($filters['broker_id']), function ($query) use ($filters) {
+                return $query->whereHas('broker', function ($query) use ($filters) {
+                    $query->where('id', $filters['broker_id']);
+                });
+            })
+            ->when(!empty($filters['relationship_manager_id']), function ($query) use ($filters) {
+                return $query->whereHas('relationshipManager', function ($query) use ($filters) {
+                    $query->where('id', $filters['relationship_manager_id']);
+                });
+            })
+            ->when(!empty($filters['insurance_company_id']), function ($query) use ($filters) {
+                return $query->whereHas('insuranceCompany', function ($query) use ($filters) {
+                    $query->where('id', $filters['insurance_company_id']);
+                });
+            })
+            ->when(!empty($filters['policy_type_id']), function ($query) use ($filters) {
+                return $query->whereHas('policyType', function ($query) use ($filters) {
+                    $query->where('id', $filters['policy_type_id']);
+                });
+            })
+            ->when(!empty($filters['fuel_type_id']), function ($query) use ($filters) {
+                return $query->whereHas('fuelType', function ($query) use ($filters) {
+                    $query->where('id', $filters['fuel_type_id']);
+                });
+            })
+            ->when(!empty($filters['premium_type_id']), function ($query) use ($filters) {
+                return $query->whereHas('premiumType', function ($query) use ($filters) {
+                    $query->where('id', $filters['premium_type_id']);
+                });
+            })
+            ->when(!empty($filters['customer_id']), function ($query) use ($filters) {
+                return $query->whereHas('customer', function ($query) use ($filters) {
+                    $query->where('id', $filters['customer_id']);
+                });
+            })
+            ->get();
+        return $customerInsurances;
     }
 }

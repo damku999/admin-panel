@@ -4,7 +4,6 @@
 
 @section('content')
     <div class="container-fluid">
-
         {{-- Alert Messages --}}
         @include('common.alert')
 
@@ -195,12 +194,16 @@
                     <button type="submit" name="download"
                         class="btn btn-primary btn-reprts float-right  mr-3 mb-3 filter_by_click"><i
                             class="fas fa-download"></i> Download</button>
+                    <button type="submit" name="view"
+                        class="btn btn-primary btn-reprts float-right  mr-3 mb-3 filter_by_click"><i
+                            class="fas fa-view"></i> View</button>
                     <a class="btn btn-warning float-right mr-3 mb-3 filter_by_click" href="{{ route('reports.index') }}">
                         <i class="fas fa-redo"></i> Cancel</a>
                 </div>
             </form>
         </div>
     </div>
+
 
     <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -231,7 +234,51 @@
             </div>
         </div>
     </div>
-
+    @if (!empty($customerInsurances))
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Report</h6>
+            </div>
+            <div class="card-body">
+                <div class="container-fluid">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Customer Name</th>
+                                    <th>Policy No</th>
+                                    <th>Broker Name</th>
+                                    <th>RM Name</th>
+                                    <th>Premium Type</th>
+                                    <th>Insurance Company Name</th>
+                                    <th>Commission %</th>
+                                    <th>My Commission Amount</th>
+                                    <th>Transfer Commission</th>
+                                    <th>Actual Earnings</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($customerInsurances as $customerInsurance)
+                                    <tr>
+                                        <td>{{ $customerInsurance->customer->name }}</td>
+                                        <td>{{ $customerInsurance->policy_no }}</td>
+                                        <td>{{ $customerInsurance->broker->name }}</td>
+                                        <td>{{ $customerInsurance->relationshipManager->name }}</td>
+                                        <td>{{ $customerInsurance->premiumType->name }}</td>
+                                        <td>{{ $customerInsurance->insuranceCompany->name }}</td>
+                                        <td>{{ $customerInsurance->my_commission_percentage }}</td>
+                                        <td>{{ $customerInsurance->my_commission_amount }}</td>
+                                        <td>{{ $customerInsurance->transfer_commission_amount }}</td>
+                                        <td>{{ $customerInsurance->actual_earnings }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection
 
 @section('stylesheets')

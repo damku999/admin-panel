@@ -20,9 +20,7 @@
                     <img class="rounded-circle mt-5" width="150px" src="{{ asset('admin/img/undraw_profile.svg') }}">
                     <span class="font-weight-bold">{{ auth()->user()->full_name }}</span>
                     <span class="text-black-50"><i>Role:
-                            {{ auth()->user()->roles
-                                ? auth()->user()->roles->pluck('name')->first()
-                                : 'N/A' }}</i></span>
+                            {{ auth()->user()->roles ? auth()->user()->roles->pluck('name')->first() : 'N/A' }}</i></span>
                     <span class="text-black-50">{{ auth()->user()->email }}</span>
                 </div>
             </div>
@@ -58,7 +56,8 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="labels">Mobile Number</label>
-                                <input type="text" class="form-control @error('mobile_number') is-invalid @enderror" name="mobile_number"
+                                <input type="text" class="form-control @error('mobile_number') is-invalid @enderror"
+                                    name="mobile_number"
                                     value="{{ old('mobile_number') ? old('mobile_number') : auth()->user()->mobile_number }}"
                                     placeholder="Mobile Number">
                                 @error('mobile_number')
@@ -84,21 +83,27 @@
                         <div class="row mt-2">
                             <div class="col-md-4">
                                 <label class="labels">Current Password</label>
-                                <input type="password" name="current_password" class="form-control @error('current_password') is-invalid @enderror" placeholder="Current Password" required>
+                                <input type="password" name="current_password"
+                                    class="form-control @error('current_password') is-invalid @enderror"
+                                    placeholder="Current Password" required>
                                 @error('current_password')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="labels">New Password</label>
-                                <input type="password" name="new_password" class="form-control @error('new_password') is-invalid @enderror" required placeholder="New Password">
+                                <input type="password" name="new_password"
+                                    class="form-control @error('new_password') is-invalid @enderror" required
+                                    placeholder="New Password">
                                 @error('new_password')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="labels">Confirm Password</label>
-                                <input type="password" name="new_confirm_password" class="form-control @error('new_confirm_password') is-invalid @enderror" required placeholder="Confirm Password">
+                                <input type="password" name="new_confirm_password"
+                                    class="form-control @error('new_confirm_password') is-invalid @enderror" required
+                                    placeholder="Confirm Password">
                                 @error('new_confirm_password')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror

@@ -70,25 +70,31 @@
                                         @endif
                                     </td>
                                     <td style="display: flex">
-                                        @if ($broker->status == 0)
-                                            <a href="{{ route('brokers.status', ['broker_id' => $broker->id, 'status' => 1]) }}"
-                                                class="btn btn-success m-2">
-                                                <i class="fa fa-check"></i>
-                                            </a>
-                                        @elseif ($broker->status == 1)
-                                            <a href="{{ route('brokers.status', ['broker_id' => $broker->id, 'status' => 0]) }}"
-                                                class="btn btn-danger m-2">
-                                                <i class="fa fa-ban"></i>
+                                        @if (auth()->user()->hasPermissionTo('broker-delete'))
+                                            @if ($broker->status == 0)
+                                                <a href="{{ route('brokers.status', ['broker_id' => $broker->id, 'status' => 1]) }}"
+                                                    class="btn btn-success m-2">
+                                                    <i class="fa fa-check"></i>
+                                                </a>
+                                            @elseif ($broker->status == 1)
+                                                <a href="{{ route('brokers.status', ['broker_id' => $broker->id, 'status' => 0]) }}"
+                                                    class="btn btn-danger m-2">
+                                                    <i class="fa fa-ban"></i>
+                                                </a>
+                                            @endif
+                                        @endif
+                                        @if (auth()->user()->hasPermissionTo('broker-edit'))
+                                            <a href="{{ route('brokers.edit', ['broker' => $broker->id]) }}"
+                                                class="btn btn-primary m-2">
+                                                <i class="fa fa-pen"></i>
                                             </a>
                                         @endif
-                                        <a href="{{ route('brokers.edit', ['broker' => $broker->id]) }}"
-                                            class="btn btn-primary m-2">
-                                            <i class="fa fa-pen"></i>
-                                        </a>
 
-                                        <a class="btn btn-danger m-2" href="javascript:void(0);"
-                                            onclick="delete_conf_common('{{ $broker->id }}','Broker', 'Broker', '{{ route('brokers.index') }}');"><i
-                                                class="fas fa-trash"></i></a>
+                                        @if (auth()->user()->hasPermissionTo('broker-delete'))
+                                            <a class="btn btn-danger m-2" href="javascript:void(0);"
+                                                onclick="delete_conf_common('{{ $broker->id }}','Broker', 'Broker', '{{ route('brokers.index') }}');"><i
+                                                    class="fas fa-trash"></i></a>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty

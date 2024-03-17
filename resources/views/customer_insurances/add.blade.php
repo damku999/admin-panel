@@ -586,104 +586,106 @@
                         </div>
                     </div>
                     <br>
-                    <div class="card mt-12 col-md-12 border-left-dark">
-                        <div class="form-group row">
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                                <label>Commission On</label>
-                                <select name="commission_on" class="form-control" id="commission_on">
-                                    <option value="net_premium" @if (old('commission_on') == 'net_premium') selected @endif> Net
-                                        Premium </option>
-                                    <option value="od_premium" @if (old('commission_on') == 'od_premium') selected @endif>OD
-                                        Premium </option>
-                                    <option value="tp_premium" @if (old('commission_on') == 'tp_premium') selected @endif>TP
-                                        Premium </option>
-                                </select>
-                                @error('commission_on')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
+                    @if (auth()->user()->hasRole('Admin'))
+                        <div class="card mt-12 col-md-12 border-left-dark">
+                            <div class="form-group row">
+                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                    <label>Commission On</label>
+                                    <select name="commission_on" class="form-control" id="commission_on">
+                                        <option value="net_premium" @if (old('commission_on') == 'net_premium') selected @endif> Net
+                                            Premium </option>
+                                        <option value="od_premium" @if (old('commission_on') == 'od_premium') selected @endif>OD
+                                            Premium </option>
+                                        <option value="tp_premium" @if (old('commission_on') == 'tp_premium') selected @endif>TP
+                                            Premium </option>
+                                    </select>
+                                    @error('commission_on')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
 
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                                <label>My Commission Percentage</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('my_commission_percentage') is-invalid @enderror"
-                                    id="my_commission_percentage" placeholder="My Commission Percentage"
-                                    name="my_commission_percentage" value="{{ old('my_commission_percentage') }}">
-                                @error('my_commission_percentage')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
+                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                    <label>My Commission Percentage</label>
+                                    <input type="text"
+                                        class="decimal-input form-control form-control-customer @error('my_commission_percentage') is-invalid @enderror"
+                                        id="my_commission_percentage" placeholder="My Commission Percentage"
+                                        name="my_commission_percentage" value="{{ old('my_commission_percentage') }}">
+                                    @error('my_commission_percentage')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
 
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                                <label>My Commission Amount</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('my_commission_amount') is-invalid @enderror"
-                                    id="my_commission_amount" placeholder="My Commission Amount"
-                                    name="my_commission_amount" value="{{ old('my_commission_amount') }}" readonly>
-                                @error('my_commission_amount')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
+                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                    <label>My Commission Amount</label>
+                                    <input type="text"
+                                        class="decimal-input form-control form-control-customer @error('my_commission_amount') is-invalid @enderror"
+                                        id="my_commission_amount" placeholder="My Commission Amount"
+                                        name="my_commission_amount" value="{{ old('my_commission_amount') }}" readonly>
+                                    @error('my_commission_amount')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
 
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                                <label>Transfer Commission Percentage</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('transfer_commission_percentage') is-invalid @enderror"
-                                    id="transfer_commission_percentage" placeholder="Transfer Commission Percentage"
-                                    name="transfer_commission_percentage"
-                                    value="{{ old('transfer_commission_percentage') }}">
-                                @error('transfer_commission_percentage')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
+                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                    <label>Transfer Commission Percentage</label>
+                                    <input type="text"
+                                        class="decimal-input form-control form-control-customer @error('transfer_commission_percentage') is-invalid @enderror"
+                                        id="transfer_commission_percentage" placeholder="Transfer Commission Percentage"
+                                        name="transfer_commission_percentage"
+                                        value="{{ old('transfer_commission_percentage') }}">
+                                    @error('transfer_commission_percentage')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
 
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                                <label>Transfer Commission Amount</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('transfer_commission_amount') is-invalid @enderror"
-                                    id="transfer_commission_amount" placeholder="Transfer Commission Amount"
-                                    name="transfer_commission_amount" value="{{ old('transfer_commission_amount') }}"
-                                    readonly>
-                                @error('transfer_commission_amount')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 reference_commission_fields">
-                                <label>Reference Commission Percentage</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('reference_commission_percentage') is-invalid @enderror"
-                                    id="reference_commission_percentage" placeholder="Reference Commission Percentage"
-                                    name="reference_commission_percentage"
-                                    value="{{ old('reference_commission_percentage') }}">
-                                @error('reference_commission_percentage')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
+                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                    <label>Transfer Commission Amount</label>
+                                    <input type="text"
+                                        class="decimal-input form-control form-control-customer @error('transfer_commission_amount') is-invalid @enderror"
+                                        id="transfer_commission_amount" placeholder="Transfer Commission Amount"
+                                        name="transfer_commission_amount"
+                                        value="{{ old('transfer_commission_amount') }}" readonly>
+                                    @error('transfer_commission_amount')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 reference_commission_fields">
+                                    <label>Reference Commission Percentage</label>
+                                    <input type="text"
+                                        class="decimal-input form-control form-control-customer @error('reference_commission_percentage') is-invalid @enderror"
+                                        id="reference_commission_percentage" placeholder="Reference Commission Percentage"
+                                        name="reference_commission_percentage"
+                                        value="{{ old('reference_commission_percentage') }}">
+                                    @error('reference_commission_percentage')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
 
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 reference_commission_fields">
-                                <label>Reference Commission Amount</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('reference_commission_amount') is-invalid @enderror"
-                                    id="reference_commission_amount" placeholder="Reference Commission Amount"
-                                    name="reference_commission_amount" value="{{ old('reference_commission_amount') }}"
-                                    readonly>
-                                @error('reference_commission_amount')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
+                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 reference_commission_fields">
+                                    <label>Reference Commission Amount</label>
+                                    <input type="text"
+                                        class="decimal-input form-control form-control-customer @error('reference_commission_amount') is-invalid @enderror"
+                                        id="reference_commission_amount" placeholder="Reference Commission Amount"
+                                        name="reference_commission_amount"
+                                        value="{{ old('reference_commission_amount') }}" readonly>
+                                    @error('reference_commission_amount')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
 
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
-                                <label><span style="color: red;">*</span>Actual Earnings</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('actual_earnings') is-invalid @enderror"
-                                    id="actual_earnings" placeholder="Actual Earnings" name="actual_earnings"
-                                    value="{{ old('actual_earnings') }}" readonly>
-                                @error('actual_earnings')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
+                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
+                                    <label><span style="color: red;">*</span>Actual Earnings</label>
+                                    <input type="text"
+                                        class="decimal-input form-control form-control-customer @error('actual_earnings') is-invalid @enderror"
+                                        id="actual_earnings" placeholder="Actual Earnings" name="actual_earnings"
+                                        value="{{ old('actual_earnings') }}" readonly>
+                                    @error('actual_earnings')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
 
                 <div class="card-footer">

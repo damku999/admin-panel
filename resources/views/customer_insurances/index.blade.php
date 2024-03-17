@@ -9,11 +9,13 @@
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">All Customer Insurance</h1>
             <div class="row">
-                <div class="col-md-6">
-                    <a href="{{ route('customer_insurances.create') }}" class="btn btn-sm btn-primary">
-                        <i class="fas fa-plus"></i> Add New
-                    </a>
-                </div>
+                @if (auth()->user()->hasPermissionTo('customer-insurance-create'))
+                    <div class="col-md-6">
+                        <a href="{{ route('customer_insurances.create') }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus"></i> Add New
+                        </a>
+                    </div>
+                @endif
                 <div class="col-md-6">
                     <a href="{{ route('customer_insurances.export') }}" class="btn btn-sm btn-success">
                         <i class="fas fa-check"></i> Export To Excel
@@ -177,7 +179,8 @@
                                     <td>{{ $customer_insurance->policy_no }}</td>
                                     <td>{{ $customer_insurance->registration_no }}</td>
                                     <td>{{ \Carbon\Carbon::parse($customer_insurance->start_date)->format('d/m/Y') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($customer_insurance->expired_date)->format('d/m/Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($customer_insurance->expired_date)->format('d/m/Y') }}
+                                    </td>
                                     <td>{{ $customer_insurance->policy_type_name }}</td>
                                     <td>
                                         @if ($customer_insurance->status == 0)
@@ -187,24 +190,29 @@
                                         @endif
                                     </td>
                                     <td style="display: flex">
-                                        @if ($customer_insurance->status == 0)
-                                            <a href="{{ route('customer_insurances.status', ['customer_insurance_id' => $customer_insurance->id, 'status' => 1]) }}"
-                                                class="btn btn-success m-2">
-                                                <i class="fa fa-check"></i>
-                                            </a>
-                                        @elseif ($customer_insurance->status == 1)
-                                            <a href="{{ route('customer_insurances.status', ['customer_insurance_id' => $customer_insurance->id, 'status' => 0]) }}"
-                                                class="btn btn-danger m-2">
-                                                <i class="fa fa-ban"></i>
+                                        @if (auth()->user()->hasPermissionTo('customer-insurance-delete'))
+                                            @if ($customer_insurance->status == 0)
+                                                <a href="{{ route('customer_insurances.status', ['customer_insurance_id' => $customer_insurance->id, 'status' => 1]) }}"
+                                                    class="btn btn-success m-2">
+                                                    <i class="fa fa-check"></i>
+                                                </a>
+                                            @elseif ($customer_insurance->status == 1)
+                                                <a href="{{ route('customer_insurances.status', ['customer_insurance_id' => $customer_insurance->id, 'status' => 0]) }}"
+                                                    class="btn btn-danger m-2">
+                                                    <i class="fa fa-ban"></i>
+                                                </a>
+                                            @endif
+                                        @endif
+                                        @if (auth()->user()->hasPermissionTo('customer-insurance-edit'))
+                                            <a href="{{ route('customer_insurances.edit', ['customer_insurance' => $customer_insurance->id]) }}"
+                                                class="btn btn-primary m-2">
+                                                <i class="fa fa-pen"></i>
                                             </a>
                                         @endif
-                                        <a href="{{ route('customer_insurances.edit', ['customer_insurance' => $customer_insurance->id]) }}"
-                                            class="btn btn-primary m-2">
-                                            <i class="fa fa-pen"></i>
-                                        </a>
                                         @if ($customer_insurance->policy_document_path)
                                             <a href="{{ asset('storage/' . $customer_insurance->policy_document_path) }}"
-                                                class="btn btn-info m-2" target="__blank"><i class="fa fa-download"></i></a>
+                                                class="btn btn-info m-2" target="__blank"><i
+                                                    class="fa fa-download"></i></a>
                                         @endif
 
                                         {{-- <a class="btn btn-danger m-2" href="javascript:void(0);"

@@ -9,11 +9,13 @@
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">All Relationship Managers</h1>
             <div class="row">
-                <div class="col-md-6">
-                    <a href="{{ route('relationship_managers.create') }}" class="btn btn-sm btn-primary">
-                        <i class="fas fa-plus"></i> Add New
-                    </a>
-                </div>
+                @if (auth()->user()->hasPermissionTo('relationship_manager-create'))
+                    <div class="col-md-6">
+                        <a href="{{ route('relationship_managers.create') }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus"></i> Add New
+                        </a>
+                    </div>
+                @endif
                 <div class="col-md-6">
                     <a href="{{ route('relationship_managers.export') }}" class="btn btn-sm btn-success">
                         <i class="fas fa-check"></i> Export To Excel
@@ -70,24 +72,30 @@
                                         @endif
                                     </td>
                                     <td style="display: flex">
-                                        @if ($relationship_manager->status == 0)
-                                            <a href="{{ route('relationship_managers.status', ['relationship_manager_id' => $relationship_manager->id, 'status' => 1]) }}"
-                                                class="btn btn-success m-2">
-                                                <i class="fa fa-check"></i>
-                                            </a>
-                                        @elseif ($relationship_manager->status == 1)
-                                            <a href="{{ route('relationship_managers.status', ['relationship_manager_id' => $relationship_manager->id, 'status' => 0]) }}"
-                                                class="btn btn-danger m-2">
-                                                <i class="fa fa-ban"></i>
+                                        @if (auth()->user()->hasPermissionTo('relationship_manager-delete'))
+                                            @if ($relationship_manager->status == 0)
+                                                <a href="{{ route('relationship_managers.status', ['relationship_manager_id' => $relationship_manager->id, 'status' => 1]) }}"
+                                                    class="btn btn-success m-2">
+                                                    <i class="fa fa-check"></i>
+                                                </a>
+                                            @elseif ($relationship_manager->status == 1)
+                                                <a href="{{ route('relationship_managers.status', ['relationship_manager_id' => $relationship_manager->id, 'status' => 0]) }}"
+                                                    class="btn btn-danger m-2">
+                                                    <i class="fa fa-ban"></i>
+                                                </a>
+                                            @endif
+                                        @endif
+                                        @if (auth()->user()->hasPermissionTo('relationship_manager-edit'))
+                                            <a href="{{ route('relationship_managers.edit', ['relationship_manager' => $relationship_manager->id]) }}"
+                                                class="btn btn-primary m-2">
+                                                <i class="fa fa-pen"></i>
                                             </a>
                                         @endif
-                                        <a href="{{ route('relationship_managers.edit', ['relationship_manager' => $relationship_manager->id]) }}"
-                                            class="btn btn-primary m-2">
-                                            <i class="fa fa-pen"></i>
-                                        </a>
-                                        <a class="btn btn-danger m-2" href="javascript:void(0);"
-                                            onclick="delete_conf_common('{{ $relationship_manager['id'] }}','RelationshipManager','Relationship Manager', '{{ route('relationship_managers.index') }}');"><i
-                                                class="fa fa-trash-alt "></i></a>
+                                        @if (auth()->user()->hasPermissionTo('relationship_manager-delete'))
+                                            <a class="btn btn-danger m-2" href="javascript:void(0);"
+                                                onclick="delete_conf_common('{{ $relationship_manager['id'] }}','RelationshipManager','Relationship Manager', '{{ route('relationship_managers.index') }}');"><i
+                                                    class="fa fa-trash-alt "></i></a>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty

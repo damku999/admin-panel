@@ -31,7 +31,7 @@ class UserController extends Controller
 
 
     /**
-     * List User 
+     * List User
      * @param Nill
      * @return Array $user
      * @author Darshan Baraiya
@@ -43,7 +43,7 @@ class UserController extends Controller
     }
 
     /**
-     * Create User 
+     * Create User
      * @param Nill
      * @return Array $user
      * @author Darshan Baraiya
@@ -187,6 +187,7 @@ class UserController extends Controller
                 'role_id'       => $request->role_id,
                 'status'        => $request->status,
             ]);
+            $user->role_id = $request->role_id;
 
             // Delete Any Existing Role
             DB::table('model_has_roles')->where('model_id', $user->id)->delete();
@@ -226,7 +227,7 @@ class UserController extends Controller
     }
 
     /**
-     * Import Users 
+     * Import Users
      * @param Null
      * @return View File
      */

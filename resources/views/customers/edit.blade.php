@@ -263,60 +263,68 @@
                 </div>
             </form>
         </div>
-        <div class="card-body table-responsive p-0">
-            <table class="table table-head-fixed text-nowrap">
-                <thead>
-                    <tr>
-                        <th>Added Date</th>
-                        <th>Issue Date</th>
-                        <th>Expired Date</th>
-                        <th>Policy Number</th>
-                        <th>Registration Number</th>
-                        <th>Premium Type</th>
-                        <th class="text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (!empty($customer_insurances))
-                        @foreach ($customer_insurances as $customer_insurance)
-                            <tr>
-                                <td>{{ \Carbon\Carbon::parse($customer_insurance->created_at)->format('d/m/Y') }}</td>
-                                <td>{{ \Carbon\Carbon::parse($customer_insurance->issue_date)->format('d/m/Y') }}</td>
-                                <td>{{ \Carbon\Carbon::parse($customer_insurance->expired_date)->format('d/m/Y') }}</td>
-                                <td>{{ $customer_insurance->policy_no }}</td>
-                                <td>{{ $customer_insurance->registration_no }}</td>
-                                <td>{{ $customer_insurance->premiumType->name }}</td>
-                                <td class="text-center">
-                                    <a href="{{ route('customer_insurances.edit', ['customer_insurance' => $customer_insurance->id]) }}"
-                                        class="btn btn-primary m-2">
-                                        <i class="fa fa-pen"></i>
-                                    </a> &nbsp;
-                                    @if ($customer_insurance->status == 0)
-                                        <a href="{{ route('customer_insurances.status', ['customer_insurance_id' => $customer_insurance->id, 'status' => 1]) }}"
-                                            class="btn btn-success m-2">
-                                            <i class="fa fa-check"></i>
-                                        </a>
-                                    @elseif ($customer_insurance->status == 1)
-                                        <a href="{{ route('customer_insurances.status', ['customer_insurance_id' => $customer_insurance->id, 'status' => 0]) }}"
-                                            class="btn btn-danger m-2">
-                                            <i class="fa fa-ban"></i>
-                                        </a>
-                                    @endif
-                                    @if ($customer_insurance->policy_document_path)
-                                        <a href="{{ asset('storage/' . $customer_insurance->policy_document_path) }}"
-                                            class="btn btn-info m-2" target="__blank"><i class="fa fa-download"></i></a>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    @else
+        @if (auth()->user()->hasPermissionTo('customer-insurance-list'))
+            <div class="card-body table-responsive p-0">
+                <table class="table table-head-fixed text-nowrap">
+                    <thead>
                         <tr>
-                            <td colspan="6" class="center">No Record found.</td>
+                            <th>Added Date</th>
+                            <th>Issue Date</th>
+                            <th>Expired Date</th>
+                            <th>Policy Number</th>
+                            <th>Registration Number</th>
+                            <th>Premium Type</th>
+                            <th class="text-center">Action</th>
                         </tr>
-                    @endif
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                        @if (!empty($customer_insurances))
+                            @foreach ($customer_insurances as $customer_insurance)
+                                <tr>
+                                    <td>{{ \Carbon\Carbon::parse($customer_insurance->created_at)->format('d/m/Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($customer_insurance->issue_date)->format('d/m/Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($customer_insurance->expired_date)->format('d/m/Y') }}
+                                    </td>
+                                    <td>{{ $customer_insurance->policy_no }}</td>
+                                    <td>{{ $customer_insurance->registration_no }}</td>
+                                    <td>{{ $customer_insurance->premiumType->name }}</td>
+                                    <td class="text-center">
+                                        @if (auth()->user()->hasPermissionTo('customer-insurance-edit'))
+                                            <a href="{{ route('customer_insurances.edit', ['customer_insurance' => $customer_insurance->id]) }}"
+                                                class="btn btn-primary m-2">
+                                                <i class="fa fa-pen"></i>
+                                            </a> &nbsp;
+                                        @endif
+                                        @if (auth()->user()->hasPermissionTo('customer-insurance-delete'))
+                                            @if ($customer_insurance->status == 0)
+                                                <a href="{{ route('customer_insurances.status', ['customer_insurance_id' => $customer_insurance->id, 'status' => 1]) }}"
+                                                    class="btn btn-success m-2">
+                                                    <i class="fa fa-check"></i>
+                                                </a>
+                                            @elseif ($customer_insurance->status == 1)
+                                                <a href="{{ route('customer_insurances.status', ['customer_insurance_id' => $customer_insurance->id, 'status' => 0]) }}"
+                                                    class="btn btn-danger m-2">
+                                                    <i class="fa fa-ban"></i>
+                                                </a>
+                                            @endif
+                                        @endif
+                                        @if ($customer_insurance->policy_document_path)
+                                            <a href="{{ asset('storage/' . $customer_insurance->policy_document_path) }}"
+                                                class="btn btn-info m-2" target="__blank"><i
+                                                    class="fa fa-download"></i></a>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="6" class="center">No Record found.</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        @endif
     </div>
 
 @endsection

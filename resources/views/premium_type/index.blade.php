@@ -9,11 +9,13 @@
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">All Premium Type</h1>
             <div class="row">
-                <div class="col-md-6">
-                    <a href="{{ route('premium_type.create') }}" class="btn btn-sm btn-primary">
-                        <i class="fas fa-plus"></i> Add New
-                    </a>
-                </div>
+                @if (auth()->user()->hasPermissionTo('premium-type-create'))
+                    <div class="col-md-6">
+                        <a href="{{ route('premium_type.create') }}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus"></i> Add New
+                        </a>
+                    </div>
+                @endif
                 <div class="col-md-6">
                     <a href="{{ route('premium_type.export') }}" class="btn btn-sm btn-success">
                         <i class="fas fa-check"></i> Export To Excel
@@ -75,25 +77,31 @@
                                         @endif
                                     </td>
                                     <td style="display: flex">
-                                        @if ($premium_type_detail->status == 0)
-                                            <a href="{{ route('premium_type.status', ['premium_type_id' => $premium_type_detail->id, 'status' => 1]) }}"
-                                                class="btn btn-success m-2">
-                                                <i class="fa fa-check"></i>
-                                            </a>
-                                        @elseif ($premium_type_detail->status == 1)
-                                            <a href="{{ route('premium_type.status', ['premium_type_id' => $premium_type_detail->id, 'status' => 0]) }}"
-                                                class="btn btn-danger m-2">
-                                                <i class="fa fa-ban"></i>
+                                        @if (auth()->user()->hasPermissionTo('premium-type-delete'))
+                                            @if ($premium_type_detail->status == 0)
+                                                <a href="{{ route('premium_type.status', ['premium_type_id' => $premium_type_detail->id, 'status' => 1]) }}"
+                                                    class="btn btn-success m-2">
+                                                    <i class="fa fa-check"></i>
+                                                </a>
+                                            @elseif ($premium_type_detail->status == 1)
+                                                <a href="{{ route('premium_type.status', ['premium_type_id' => $premium_type_detail->id, 'status' => 0]) }}"
+                                                    class="btn btn-danger m-2">
+                                                    <i class="fa fa-ban"></i>
+                                                </a>
+                                            @endif
+                                        @endif
+                                        @if (auth()->user()->hasPermissionTo('premium-type-edit'))
+                                            <a href="{{ route('premium_type.edit', ['premium_type' => $premium_type_detail->id]) }}"
+                                                class="btn btn-primary m-2">
+                                                <i class="fa fa-pen"></i>
                                             </a>
                                         @endif
-                                        <a href="{{ route('premium_type.edit', ['premium_type' => $premium_type_detail->id]) }}"
-                                            class="btn btn-primary m-2">
-                                            <i class="fa fa-pen"></i>
-                                        </a>
 
-                                        <a class="btn btn-danger m-2" href="javascript:void(0);"
-                                            onclick="delete_conf_common('{{ $premium_type_detail->id }}','PremiumType', 'Premium Type', '{{ route('premium_type.index') }}');"><i
-                                                class="fas fa-trash"></i></a>
+                                        @if (auth()->user()->hasPermissionTo('premium-type-delete'))
+                                            <a class="btn btn-danger m-2" href="javascript:void(0);"
+                                                onclick="delete_conf_common('{{ $premium_type_detail->id }}','PremiumType', 'Premium Type', '{{ route('premium_type.index') }}');"><i
+                                                    class="fas fa-trash"></i></a>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty

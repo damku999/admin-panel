@@ -40,7 +40,7 @@
                                     <td>{{ $permission->name }}</td>
                                     <td>{{ $permission->guard_name }}</td>
                                     <td style="display: flex">
-                                        @if (auth()->user()->hasPermissionTo('permission-update'))
+                                        @if (auth()->user()->hasPermissionTo('permission-edit'))
                                             <a href="{{ route('permissions.edit', ['permission' => $permission->id]) }}"
                                                 class="btn btn-primary m-2">
                                                 <i class="fa fa-pen"></i>

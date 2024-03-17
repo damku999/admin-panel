@@ -9,11 +9,13 @@
 
     <hr class="sidebar-divider my-0">
 
-    <li class="nav-item {{ Route::currentRouteName() == 'home' ? 'active' : '' }}">
-        <a class="nav-link" href="{{ route('home') }}">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard</span></a>
-    </li>
+    @hasrole('Admin')
+        <li class="nav-item {{ Route::currentRouteName() == 'home' ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('home') }}">
+                <i class="fas fa-fw fa-tachometer-alt"></i>
+                <span>Dashboard</span></a>
+        </li>
+    @endhasrole
 
     <!-- Divider -->
     <hr class="sidebar-divider">

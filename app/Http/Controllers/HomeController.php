@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 use App\Rules\MatchOldPassword;
 use App\Models\CustomerInsurance;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class HomeController extends Controller
@@ -38,6 +39,9 @@ class HomeController extends Controller
      */
     public function index(Request $request)
     {
+        if (!Auth::user()->hasRole('Admin')) {
+            return redirect()->route('customers.index');
+        }
         $data = $this->compressionData($request);
 
 

@@ -39,7 +39,7 @@ class CustomerInsuranceController extends Controller
 
 
     /**
-     * List CustomerInsurance 
+     * List CustomerInsurance
      * @param Nill
      * @return Array $customer_insurance
      * @author Darshan Baraiya
@@ -83,7 +83,7 @@ class CustomerInsuranceController extends Controller
     }
 
     /**
-     * Create CustomerInsurance 
+     * Create CustomerInsurance
      * @param Nill
      * @return Array $customer_insurance
      * @author Darshan Baraiya
@@ -429,6 +429,7 @@ class CustomerInsuranceController extends Controller
                 'pension_amount_yearly',
                 'approx_maturity_amount',
                 'remarks',
+                'life_insurance_payment_mode',
             ]);
             if (!empty($request->reference_by))
                 $data_to_store['reference_by'] = $request->reference_by;
@@ -468,7 +469,7 @@ class CustomerInsuranceController extends Controller
     }
 
     /**
-     * Import CustomerInsurances 
+     * Import CustomerInsurances
      * @param Null
      * @return View File
      */

@@ -319,7 +319,7 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
                             <label>Plan Name</label>
                             <input type="text"
-                                class="decimal-input form-control form-control-customer @error('plan_name') is-invalid @enderror"
+                                class="form-control form-control-customer @error('plan_name') is-invalid @enderror"
                                 id="plan_name" placeholder="Plan Name" name="plan_name"
                                 value="{{ old('plan_name', $customer_insurance->plan_name) }}">
                             @error('plan_name')

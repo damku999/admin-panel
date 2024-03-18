@@ -71,6 +71,10 @@ class UserController extends Controller
             'mobile_number' => 'required|numeric|digits:10',
             'role_id'       =>  'required|exists:roles,id',
             'status'       =>  'required|numeric|in:0,1',
+            'new_password' => 'required|min:8|max:16|regex:/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){8,16}$/',
+            'new_confirm_password' => ['required', 'same:new_password'],
+        ], [
+            'new_password.regex' => 'The new password format is invalid. It must contain at least one number, one special character, one uppercase letter, one lowercase letter, and be between 8 and 16 characters long.',
         ]);
 
         DB::beginTransaction();
@@ -84,7 +88,7 @@ class UserController extends Controller
                 'mobile_number' => $request->mobile_number,
                 'role_id'       => $request->role_id,
                 'status'        => $request->status,
-                'password'      => Hash::make($request->first_name . '@' . $request->mobile_number)
+                'password'      => Hash::make($request->new_password)
             ]);
 
             // Delete Any Existing Role
@@ -173,7 +177,31 @@ class UserController extends Controller
             'mobile_number' => 'required|numeric|digits:10',
             'role_id'       =>  'required|exists:roles,id',
             'status'       =>  'required|numeric|in:0,1',
+            'new_password' => 'nullable',
+            'new_confirm_password' => 'nullable',
+
         ]);
+
+        // Check if new password is not empty in the request
+
+        if (!empty($request->input('new_password'))) {
+            $rules = [
+                'new_password' => 'required|min:8|max:16|regex:/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){8,16}$/',
+                'new_confirm_password' => ['required', 'same:new_password'],
+            ];
+            $customMessages = [
+                'new_password.regex' => 'The new password format is invalid. It must contain at least one number, one special character, one uppercase letter, one lowercase letter, and be between 8 and 16 characters long.',
+            ];
+
+            // Perform the validation
+            $validator = Validator::make($request->all(), $rules, $customMessages);
+
+            // Check if validation fails
+            if ($validator->fails()) {
+                // Handle the validation failure, for example, return back with errors
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+        }
 
         DB::beginTransaction();
         try {
@@ -194,7 +222,10 @@ class UserController extends Controller
 
             // Assign Role To User
             $user->assignRole($user->role_id);
-
+            if (!empty($request->input('new_password'))) {
+                $user->password = Hash::make($request->new_password);
+                $user->save();
+            }
             // Commit And Redirected To Listing
             DB::commit();
             return redirect()->back()->with('success', 'User Updated Successfully.');

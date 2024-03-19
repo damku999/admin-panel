@@ -2,27 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\CustomerInsurancesExport;
 use App\Models\Branch;
 use App\Models\Broker;
 use App\Models\Customer;
+use App\Models\CustomerInsurance;
 use App\Models\FuelType;
+use App\Models\InsuranceCompany;
 use App\Models\PolicyType;
 use App\Models\PremiumType;
-use Illuminate\Http\Request;
 use App\Models\ReferenceUser;
-use Illuminate\Support\Carbon;
-use App\Models\InsuranceCompany;
-use App\Models\CustomerInsurance;
-use Illuminate\Support\Facades\DB;
 use App\Models\RelationshipManager;
-use Maatwebsite\Excel\Facades\Excel;
+use App\Traits\WhatsAppApiTrait;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
-use App\Exports\CustomerInsurancesExport;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use League\CommonMark\Reference\Reference;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CustomerInsuranceController extends Controller
 {
+    use WhatsAppApiTrait;
     /**
      * Create a new controller instance.
      *
@@ -36,7 +38,6 @@ class CustomerInsuranceController extends Controller
         $this->middleware('permission:customer-insurance-edit', ['only' => ['edit', 'update']]);
         $this->middleware('permission:customer-insurance-delete', ['only' => ['delete']]);
     }
-
 
     /**
      * List CustomerInsurance
@@ -90,7 +91,7 @@ class CustomerInsuranceController extends Controller
      */
     public function create()
     {
-        $response  = [
+        $response = [
             'customers' => Customer::select('id', 'name')->get(),
             'brokers' => Broker::select('id', 'name')->get(),
             'relationship_managers' => RelationshipManager::select('id', 'name')->get(),
@@ -220,10 +221,13 @@ class CustomerInsuranceController extends Controller
                 'life_insurance_payment_mode',
                 'reference_by',
             ]);
-            if (!empty($request->reference_by))
+            if (!empty($request->reference_by)) {
                 $data_to_store['reference_by'] = $request->reference_by;
+            }
+
             // Store Data
             $customer_insurance = CustomerInsurance::create($data_to_store);
+            $this->whatsAppSendMessageWithAttachment($this->insuranceAdded($customer_insurance->customer), $customer_insurance->customer->mobile_number, Storage::path('public' . DIRECTORY_SEPARATOR . $customer_insurance->policy_document_path));
 
             // Handle file uploads
             $this->handleFileUpload($request, $customer_insurance);
@@ -264,11 +268,11 @@ class CustomerInsuranceController extends Controller
     {
         // Validation
         $validate = Validator::make([
-            'customer_insurance_id'   => $customer_insurance_id,
-            'status' => $status
+            'customer_insurance_id' => $customer_insurance_id,
+            'status' => $status,
         ], [
-            'customer_insurance_id'   =>  'required|exists:customer_insurances,id',
-            'status' =>  'required|in:0,1',
+            'customer_insurance_id' => 'required|exists:customer_insurances,id',
+            'status' => 'required|in:0,1',
         ]);
 
         // If Validations Fails
@@ -302,13 +306,13 @@ class CustomerInsuranceController extends Controller
      */
     public function edit(CustomerInsurance $customer_insurance)
     {
-        $response  = [
+        $response = [
             'customers' => Customer::select('id', 'name')->get(),
             'brokers' => Broker::select('id', 'name')->get(),
             'relationship_managers' => RelationshipManager::select('id', 'name')->get(),
             'branches' => Branch::select('id', 'name')->get(),
             'insurance_companies' => InsuranceCompany::select('id', 'name')->get(),
-            'customer_insurance'  => $customer_insurance,
+            'customer_insurance' => $customer_insurance,
             'policy_type' => PolicyType::select('id', 'name')->get(),
             'fuel_type' => FuelType::select('id', 'name')->get(),
             'premium_types' => PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies')->get(),
@@ -431,8 +435,10 @@ class CustomerInsuranceController extends Controller
                 'remarks',
                 'life_insurance_payment_mode',
             ]);
-            if (!empty($request->reference_by))
+            if (!empty($request->reference_by)) {
                 $data_to_store['reference_by'] = $request->reference_by;
+            }
+
             // Store Data
             CustomerInsurance::whereId($customer_insurance->id)->update($data_to_store);
             // Handle file uploads

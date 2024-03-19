@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
-use Illuminate\Http\Request;
 use App\Exports\CustomersExport;
+use App\Models\Customer;
+use App\Traits\WhatsAppApiTrait;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CustomerController extends Controller
 {
+    use WhatsAppApiTrait;
+
     /**
      * Create a new controller instance.
      *
@@ -26,7 +29,7 @@ class CustomerController extends Controller
     }
 
     /**
-     * List Customer 
+     * List Customer
      * @param Nill
      * @return Array $customer
      * @author Darshan Baraiya
@@ -60,9 +63,8 @@ class CustomerController extends Controller
         return view('customers.index', ['customers' => $customers, 'sortField' => $sortField, 'sortOrder' => $sortOrder]);
     }
 
-
     /**
-     * Create Customer 
+     * Create Customer
      * @param Nill
      * @return Array $customer
      * @author Darshan Baraiya
@@ -128,6 +130,7 @@ class CustomerController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
+            $this->whatsAppSendMessage($this->newCustomerAdd($customer), $customer->mobile_number);
             return redirect()->back()->with('success', 'Customer Created Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
@@ -135,7 +138,6 @@ class CustomerController extends Controller
             return redirect()->back()->withInput()->with('error', $th->getMessage());
         }
     }
-
 
     /**
      * Handle file upload.
@@ -185,11 +187,11 @@ class CustomerController extends Controller
     public function updateStatus($customer_id, $status)
     {
         $validate = Validator::make([
-            'customer_id'   => $customer_id,
-            'status' => $status
+            'customer_id' => $customer_id,
+            'status' => $status,
         ], [
-            'customer_id'   =>  'required|exists:customers,id',
-            'status' =>  'required|in:0,1',
+            'customer_id' => 'required|exists:customers,id',
+            'status' => 'required|in:0,1',
         ]);
 
         // If Validations Fails
@@ -205,6 +207,7 @@ class CustomerController extends Controller
 
             // Commit And Redirect on index with Success Message
             DB::commit();
+
             return redirect()->back()->with('success', 'Customer Status Updated Successfully!');
         } catch (\Throwable $th) {
 
@@ -223,8 +226,8 @@ class CustomerController extends Controller
     public function edit(Customer $customer)
     {
         return view('customers.edit')->with([
-            'customer'  => $customer,
-            'customer_insurances'  => $customer->insurance
+            'customer' => $customer,
+            'customer_insurances' => $customer->insurance,
         ]);
     }
 
@@ -315,7 +318,7 @@ class CustomerController extends Controller
     }
 
     /**
-     * Import Customers 
+     * Import Customers
      * @param Null
      * @return View File
      */
@@ -323,7 +326,6 @@ class CustomerController extends Controller
     {
         return view('customers.import');
     }
-
 
     public function export()
     {

@@ -41,7 +41,7 @@
                             @enderror
                         </div>
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label for="reportName" class="form-label"><span style="color:red;">*</span>Creation
+                            <label for="daterange" class="form-label"><span style="color:red;">*</span>Creation
                                 Date</label>
                             <div class="d-flex">
                                 <input type="text" placeholder="Start Date" name="record_creation_start_date"
@@ -172,7 +172,7 @@
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 fields-to-toggle insurance_detail">
-                            <label for="reportName" class="form-label"><span style="color:red;">*</span>Issue
+                            <label for="issueDate" class="form-label"><span style="color:red;">*</span>Issue
                                 Date</label>
                             <div class="d-flex">
                                 <input type="text" placeholder="Start Date" name="issue_start_date"
@@ -181,6 +181,18 @@
                                 <input type="text" placeholder="End Date" name="issue_end_date"
                                     class="form-control datepicker" value="{{ request('issue_end_date') }}"
                                     style="margin-right: 10px;">
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 fields-to-toggle due_policy_detail">
+                            <label for="policyDueDate" class="form-label"><span style="color:red;">*</span>Month &
+                                Year</label>
+                            <div class="d-flex">
+                                <input type="text" placeholder="Start Date" name="due_start_date"
+                                    class="form-control datepicker_month" value="{{ request('due_start_date') }}"
+                                    style="margin-right: 10px;" autocomplete="off" readonly id="due_start_date">
+                                <input type="text" placeholder="End Date" name="due_end_date"
+                                    class="form-control datepicker_month" value="{{ request('due_end_date') }}"
+                                    style="margin-right: 10px;" autocomplete="off" readonly id="due_end_date">
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 fields-to-toggle policy_detail ">
@@ -303,6 +315,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+
             var openModalPopUpColumn = document.getElementById("openModalPopUpColumn");
 
             openModalPopUpColumn.addEventListener("click", function() {
@@ -415,6 +428,24 @@
                     startDate.datepicker('setEndDate', selected.date);
                     if (selected.date < startDate.datepicker('getDate')) {
                         startDate.datepicker('setDate', selected.date);
+                    }
+                });
+
+                // Month picker changes
+                $('.datepicker_month').datepicker({
+                    format: 'yyyy-mm', // Adjust the format as per your requirement
+                    viewMode: "months",
+                    minViewMode: "months",
+                    autoclose: true,
+                    onChangeMonthYear: function(year, month, inst) {
+                        var selectedDate = new Date(year, month - 1, 1);
+                        console.log(this);
+                        var selectedDate = $(this).datepicker('getDate');
+                        if ($(this).attr('id') == 'due_start_date') {
+                            $('#due_end_date').datepicker('option', 'minDate', selectedDate);
+                        } else {
+                            $('#due_start_date').datepicker('option', 'maxDate', selectedDate);
+                        }
                     }
                 });
             });

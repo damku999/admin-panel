@@ -149,6 +149,12 @@ class Report extends Authenticatable
                     $query->where('id', $filters['customer_id']);
                 });
             })
+            ->when(!empty($filters['due_start_date']), function ($query) use ($filters) {
+                return $query->where('expired_date', '>=', Carbon::parse($filters['due_start_date'])->format('Y-m-01'));
+            })
+            ->when(!empty($filters['due_end_date']), function ($query) use ($filters) {
+                return $query->where('expired_date', '<=', Carbon::parse($filters['due_end_date'])->format('Y-m-31'));
+            })
             ->get();
         return $customerInsurances;
     }

@@ -9,7 +9,8 @@ return [
         ['id' => 'Monthly', 'name' => 'Monthly', 'multiply_by' => 12],
     ],
     'REPORTS' => [
-        'insurance_detail' => 'Insurance Policy Details'
+        'insurance_detail' => 'Insurance Policy Details',
+        'due_policy_detail' => 'Due Policy Details'
     ],
     'INSURANCE_DETAIL' => [
         [

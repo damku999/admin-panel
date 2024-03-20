@@ -35,34 +35,38 @@ trait WhatsAppApiTrait
     }
     protected function whatsAppSendMessageWithAttachment($messageText, $receiverId, $filePath)
     {
+        try {
 
-        $curl = curl_init();
+            $curl = curl_init();
 
-        $fileHandle = fopen($filePath, 'r');
+            $fileHandle = fopen($filePath, 'r');
 
-        $fileSize = filesize($filePath);
-        curl_setopt_array($curl, [
-            CURLOPT_URL => $this->base_url . '?action=send',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => ['senderId' => $this->senderId,
-                'authToken' => $this->authToken,
-                'messageText' => $messageText,
-                'receiverId' => $this->validateAndFormatMobileNumber($receiverId),
-                'uploadFile' => curl_file_create($filePath, mime_content_type($filePath), basename($filePath)),
-            ],
-        ]);
+            $fileSize = filesize($filePath);
+            curl_setopt_array($curl, [
+                CURLOPT_URL => $this->base_url . '?action=send',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_POSTFIELDS => ['senderId' => $this->senderId,
+                    'authToken' => $this->authToken,
+                    'messageText' => $messageText,
+                    'receiverId' => $this->validateAndFormatMobileNumber($receiverId),
+                    'uploadFile' => curl_file_create($filePath, mime_content_type($filePath), basename($filePath)),
+                ],
+            ]);
 
-        $response = curl_exec($curl);
+            $response = curl_exec($curl);
 
-        curl_close($curl);
-        fclose($fileHandle);
-        return $response;
+            curl_close($curl);
+            fclose($fileHandle);
+            return $response;
+        } catch (\Throwable $th) {
+            return $th->getMessage();
+        }
 
     }
 
@@ -87,24 +91,24 @@ trait WhatsAppApiTrait
 
     public function newCustomerAdd($customer)
     {
-        return $message = "Dear {$customer->name}
-
-Thank you for entrusting me with your insurance needs. I appreciate the opportunity to serve you as your dedicated insurance advisor. Attached, you'll find the policy document along with basic details outlining the coverage and benefits. If you have any questions or need further assistance, please don't hesitate to reach out.
-
-Best regards,
-Parth Rawal
-Your Trusted Insurance Advisor
-Think of Insurance, Think of Us.";
-    }
-    public function insuranceAdded($customer)
-    {
-        return $message = "Dear {$customer->name}
+        return "Dear {$customer->name}
 
 Welcome to the world of insurance solutions! I'm Parth Rawal, your dedicated insurance advisor here to guide you through every step of your insurance journey. Whether you're seeking protection for your loved ones, securing your assets, or planning for the future, I'm committed to providing personalized advice and finding the perfect insurance solutions tailored to your needs. Feel free to reach out anytime with questions or concerns. Let's work together to safeguard what matters most to you!
 
 Best regards,
 Parth Rawal
 Your Trusted Insurance Advisor
-Think of Insurance, Think of Us.";
+\"Think of Insurance, Think of Us.\"";
+    }
+    public function insuranceAdded($customer)
+    {
+        return "Dear {$customer->name}
+
+Thank you for entrusting me with your insurance needs. I appreciate the opportunity to serve you as your dedicated insurance advisor. Attached, you'll find the policy document along with basic details outlining the coverage and benefits. If you have any questions or need further assistance, please don't hesitate to reach out.
+
+Best regards,
+Parth Rawal
+Your Trusted Insurance Advisor
+\"Think of Insurance, Think of Us.\"";
     }
 }

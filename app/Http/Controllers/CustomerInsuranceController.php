@@ -114,7 +114,6 @@ class CustomerInsuranceController extends Controller
      */
     public function store(Request $request)
     {
-        // Validations
         $validation_array = [
             'customer_id' => 'required|exists:customers,id',
             'branch_id' => 'required|exists:branches,id',
@@ -224,13 +223,13 @@ class CustomerInsuranceController extends Controller
             if (!empty($request->reference_by)) {
                 $data_to_store['reference_by'] = $request->reference_by;
             }
-
             // Store Data
             $customer_insurance = CustomerInsurance::create($data_to_store);
-            $this->whatsAppSendMessageWithAttachment($this->insuranceAdded($customer_insurance->customer), $customer_insurance->customer->mobile_number, Storage::path('public' . DIRECTORY_SEPARATOR . $customer_insurance->policy_document_path));
 
             // Handle file uploads
             $this->handleFileUpload($request, $customer_insurance);
+
+            $this->whatsAppSendMessageWithAttachment($this->insuranceAdded($customer_insurance->customer), $customer_insurance->customer->mobile_number, Storage::path('public' . DIRECTORY_SEPARATOR . $customer_insurance->policy_document_path));
 
             // Commit And Redirected To Listing
             DB::commit();
@@ -252,10 +251,36 @@ class CustomerInsuranceController extends Controller
     {
         if ($request->hasFile('policy_document_path')) {
             $file = $request->file('policy_document_path');
-            $path = $file->store('customer_insurances/' . $customer_insurance->id . '/policy_document_path', 'public');
+
+            // Extract necessary information
+            $customerName = $customer_insurance->customer->name;
+            $insuranceCompanyName = $customer_insurance->insuranceCompany->name;
+            $premiumType = $customer_insurance->premiumType->name;
+            $policyNo = $customer_insurance->policy_no;
+            $registrationNo = $customer_insurance->registration_no;
+            $currentYear = date('Y');
+
+            // Construct file name
+            $fileName = $customerName . '-' . $insuranceCompanyName . '-' . $premiumType . '-' . $registrationNo . '-' . $policyNo . '-' . $currentYear;
+
+            // Remove empty fields
+            $fileName = trim($fileName, '-');
+            $fileName = str_replace('--', '-', $fileName);
+
+            // Append timestamp to avoid duplicates
+            $fileName .= '-' . time();
+
+            // Replace spaces with underscores and remove special characters
+            $fileName = preg_replace('/[^A-Za-z0-9_\-]/', '', str_replace(' ', '-', $fileName));
+
+            // Store the file with the constructed name
+            $path = $file->storeAs('customer_insurances/' . $customer_insurance->id . '/policy_document_path', $fileName . '.' . $file->getClientOriginalExtension(), 'public');
+
+            // Update the policy_document_path attribute of the customer_insurance
             $customer_insurance->policy_document_path = $path;
             $customer_insurance->save();
         }
+
     }
 
     /**

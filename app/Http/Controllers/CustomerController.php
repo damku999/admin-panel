@@ -147,11 +147,13 @@ class CustomerController extends Controller
      */
     private function handleFileUpload(Request $request, Customer $customer)
     {
+        $timestamp = time(); // Get current timestamp
+
         // Handle file uploads
         if ($request->hasFile('pan_card_path')) {
             $panCardPath = $request->file('pan_card_path')->storeAs(
                 'customers/' . $customer->id . '/pan_card_path',
-                $request->file('pan_card_path')->getClientOriginalName(),
+                $customer->name . '_pan_card_' . $timestamp . '.' . $request->file('pan_card_path')->getClientOriginalExtension(),
                 'public'
             );
             $customer->pan_card_path = $panCardPath;
@@ -160,7 +162,7 @@ class CustomerController extends Controller
         if ($request->hasFile('aadhar_card_path')) {
             $aadharCardPath = $request->file('aadhar_card_path')->storeAs(
                 'customers/' . $customer->id . '/aadhar_card_path',
-                $request->file('aadhar_card_path')->getClientOriginalName(),
+                $customer->name . '_aadhar_card_' . $timestamp . '.' . $request->file('aadhar_card_path')->getClientOriginalExtension(),
                 'public'
             );
             $customer->aadhar_card_path = $aadharCardPath;
@@ -169,7 +171,7 @@ class CustomerController extends Controller
         if ($request->hasFile('gst_path')) {
             $gstPath = $request->file('gst_path')->storeAs(
                 'customers/' . $customer->id . '/gst_path',
-                $request->file('gst_path')->getClientOriginalName(),
+                $customer->name . '_gst_' . $timestamp . '.' . $request->file('gst_path')->getClientOriginalExtension(),
                 'public'
             );
             $customer->gst_path = $gstPath;

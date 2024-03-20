@@ -115,13 +115,14 @@ Route::middleware('auth')->prefix('customer_insurances')->name('customer_insuran
     Route::get('/create', [CustomerInsuranceController::class, 'create'])->name('create');
     Route::post('/store', [CustomerInsuranceController::class, 'store'])->name('store');
     Route::get('/edit/{customer_insurance}', [CustomerInsuranceController::class, 'edit'])->name('edit');
+    Route::get('/sendWADocument/{customer_insurance}', [CustomerInsuranceController::class, 'sendWADocument'])->name('sendWADocument');
     Route::put('/update/{customer_insurance}', [CustomerInsuranceController::class, 'update'])->name('update');
     // Route::delete('/delete/{customer_insurance}', [CustomerInsuranceController::class, 'delete'])->name('destroy');
     Route::get('/update/status/{customer_insurance_id}/{status}', [CustomerInsuranceController::class, 'updateStatus'])->name('status');
     Route::get('export/', [CustomerInsuranceController::class, 'export'])->name('export');
 });
 
-// Users 
+// Users
 Route::middleware('auth')->prefix('users')->name('users.')->group(function () {
     Route::get('/', [UserController::class, 'index'])->name('index');
     Route::get('/create', [UserController::class, 'create'])->name('create');

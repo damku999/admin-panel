@@ -229,7 +229,7 @@ class CustomerInsuranceController extends Controller
             // Handle file uploads
             $this->handleFileUpload($request, $customer_insurance);
             if (!empty($customer_insurance->policy_document_path)) {
-                $this->whatsAppSendMessageWithAttachment($this->insuranceAdded($customer_insurance->customer), $customer_insurance->customer->mobile_number, Storage::path('public' . DIRECTORY_SEPARATOR . $customer_insurance->policy_document_path));
+                $this->whatsAppSendMessageWithAttachment($this->insuranceAdded($customer_insurance), $customer_insurance->customer->mobile_number, Storage::path('public' . DIRECTORY_SEPARATOR . $customer_insurance->policy_document_path));
             }
 
             // Commit And Redirected To Listing
@@ -349,6 +349,21 @@ class CustomerInsuranceController extends Controller
         return view('customer_insurances.edit')->with($response);
     }
 
+    /**
+     * Edit CustomerInsurance
+     * @param Integer $customer_insurance
+     * @return Collection $customer_insurance
+     * @author Darshan Baraiya
+     */
+    public function sendWADocument(CustomerInsurance $customer_insurance)
+    {
+        if (!empty($customer_insurance->policy_document_path)) {
+            $this->whatsAppSendMessageWithAttachment($this->insuranceAdded($customer_insurance), $customer_insurance->customer->mobile_number, Storage::path('public' . DIRECTORY_SEPARATOR . $customer_insurance->policy_document_path));
+            return redirect()->back()->with('success', 'Document Sent Successfully!');
+        } else {
+            return redirect()->back()->with('error', 'Document Not Sent!');
+        }
+    }
     /**
      * Update CustomerInsurance
      * @param Request $request, CustomerInsurance $customer_insurance

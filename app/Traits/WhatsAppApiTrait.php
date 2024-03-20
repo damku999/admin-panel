@@ -100,11 +100,11 @@ Parth Rawal
 Your Trusted Insurance Advisor
 \"Think of Insurance, Think of Us.\"";
     }
-    public function insuranceAdded($customer)
+    public function insuranceAdded($customer_insurance)
     {
-        return "Dear {$customer->name}
+        return "Dear {$customer_insurance->customer->name}
 
-Thank you for entrusting me with your insurance needs. I appreciate the opportunity to serve you as your dedicated insurance advisor. Attached, you'll find the policy document along with basic details outlining the coverage and benefits. If you have any questions or need further assistance, please don't hesitate to reach out.
+Thank you for entrusting me with your insurance needs. Attached, you'll find the policy document with {$customer_insurance->policy_no} of your {$customer_insurance->policyType->name} {$customer_insurance->registration_no} which expire on $customer_insurance->expired_date}. If you have any questions or need further assistance, please don't hesitate to reach out.
 
 Best regards,
 Parth Rawal

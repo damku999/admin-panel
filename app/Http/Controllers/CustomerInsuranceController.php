@@ -252,17 +252,20 @@ class CustomerInsuranceController extends Controller
     {
         if ($request->hasFile('policy_document_path')) {
             $file = $request->file('policy_document_path');
-
+            $timestamp = time();
             // Extract necessary information
             $customerName = $customer_insurance->customer->name;
-            $insuranceCompanyName = $customer_insurance->insuranceCompany->name;
+            // $insuranceCompanyName = $customer_insurance->insuranceCompany->name;
             $premiumType = $customer_insurance->premiumType->name;
             $policyNo = $customer_insurance->policy_no;
             $registrationNo = $customer_insurance->registration_no;
             $currentYear = date('Y');
-
+            if (!empty($registrationNo)) {
+                $fileName = $registrationNo . '-' . $currentYear . '-POLICY COPY-' . $timestamp;
+            } else {
+                $fileName = $customerName . '-' . $premiumType . '-' . $policyNo . '-' . $currentYear . '-POLICY COPY-' . $timestamp;
+            }
             // Construct file name
-            $fileName = $customerName . '-' . $insuranceCompanyName . '-' . $premiumType . '-' . $registrationNo . '-' . $policyNo . '-' . $currentYear;
 
             // Remove empty fields
             $fileName = trim($fileName, '-');

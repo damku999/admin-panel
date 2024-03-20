@@ -103,9 +103,10 @@ Your Trusted Insurance Advisor
     public function insuranceAdded($customer_insurance)
     {
         $expired_date = date('d-m-Y', strtotime($customer_insurance->expired_date));
+        $policy_detail = trim($customer_insurance->premiumType->name . ' ' . $customer_insurance->registration_no);
         return "Dear {$customer_insurance->customer->name}
 
-Thank you for entrusting me with your insurance needs. Attached, you'll find the policy document with Policy No. {$customer_insurance->policy_no} of your {$customer_insurance->premiumType->name} {$customer_insurance->registration_no} which expire on {$expired_date}. If you have any questions or need further assistance, please don't hesitate to reach out.
+Thank you for entrusting me with your insurance needs. Attached, you'll find the policy document with *Policy No. {$customer_insurance->policy_no}* of your *{$policy_detail}* which expire on *{$expired_date}*. If you have any questions or need further assistance, please don't hesitate to reach out.
 
 Best regards,
 Parth Rawal

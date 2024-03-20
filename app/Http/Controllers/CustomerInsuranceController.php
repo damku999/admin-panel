@@ -228,8 +228,9 @@ class CustomerInsuranceController extends Controller
 
             // Handle file uploads
             $this->handleFileUpload($request, $customer_insurance);
-
-            $this->whatsAppSendMessageWithAttachment($this->insuranceAdded($customer_insurance->customer), $customer_insurance->customer->mobile_number, Storage::path('public' . DIRECTORY_SEPARATOR . $customer_insurance->policy_document_path));
+            if (!empty($customer_insurance->policy_document_path)) {
+                $this->whatsAppSendMessageWithAttachment($this->insuranceAdded($customer_insurance->customer), $customer_insurance->customer->mobile_number, Storage::path('public' . DIRECTORY_SEPARATOR . $customer_insurance->policy_document_path));
+            }
 
             // Commit And Redirected To Listing
             DB::commit();

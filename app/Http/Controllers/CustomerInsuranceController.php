@@ -123,10 +123,10 @@ class CustomerInsuranceController extends Controller
             'policy_type_id' => 'required|exists:policy_types,id',
             'fuel_type_id' => 'nullable|exists:fuel_types,id',
             'premium_type_id' => 'required|exists:premium_types,id',
-            'issue_date' => 'required|date_format:Y-m-d',
-            'expired_date' => 'required|date_format:Y-m-d',
-            'start_date' => 'required|date_format:Y-m-d',
-            'tp_expiry_date' => 'nullable|date_format:Y-m-d',
+            'issue_date' => 'required|date_format:d-m-Y',
+            'expired_date' => 'required|date_format:d-m-Y',
+            'start_date' => 'required|date_format:d-m-Y',
+            'tp_expiry_date' => 'nullable|date_format:d-m-Y',
             'policy_no' => 'required',
             'net_premium' => 'nullable|numeric',
             'premium_amount' => 'nullable|numeric',
@@ -178,10 +178,6 @@ class CustomerInsuranceController extends Controller
                 'premium_type_id',
                 'policy_type_id',
                 'fuel_type_id',
-                'issue_date',
-                'expired_date',
-                'start_date',
-                'tp_expiry_date',
                 'policy_no',
                 'net_premium',
                 'gst',
@@ -216,12 +212,23 @@ class CustomerInsuranceController extends Controller
                 'pension_amount_yearly',
                 'approx_maturity_amount',
                 'remarks',
-                'maturity_date',
                 'life_insurance_payment_mode',
                 'reference_by',
             ]);
-            if (!empty($request->reference_by)) {
-                $data_to_store['reference_by'] = $request->reference_by;
+            if (!empty($request->issue_date)) {
+                $data_to_store['issue_date'] = Carbon::createFromFormat('d-m-Y', $request->issue_date)->format('Y-m-d');
+            }
+            if (!empty($request->expired_date)) {
+                $data_to_store['expired_date'] = Carbon::createFromFormat('d-m-Y', $request->expired_date)->format('Y-m-d');
+            }
+            if (!empty($request->start_date)) {
+                $data_to_store['start_date'] = Carbon::createFromFormat('d-m-Y', $request->start_date)->format('Y-m-d');
+            }
+            if (!empty($request->tp_expiry_date)) {
+                $data_to_store['tp_expiry_date'] = Carbon::createFromFormat('d-m-Y', $request->tp_expiry_date)->format('Y-m-d');
+            }
+            if (!empty($request->maturity_date)) {
+                $data_to_store['maturity_date'] = Carbon::createFromFormat('d-m-Y', $request->maturity_date)->format('Y-m-d');
             }
             // Store Data
             $customer_insurance = CustomerInsurance::create($data_to_store);
@@ -439,10 +446,6 @@ class CustomerInsuranceController extends Controller
                 'premium_type_id',
                 'policy_type_id',
                 'fuel_type_id',
-                'issue_date',
-                'expired_date',
-                'start_date',
-                'tp_expiry_date',
                 'policy_no',
                 'net_premium',
                 'gst',
@@ -481,6 +484,21 @@ class CustomerInsuranceController extends Controller
             ]);
             if (!empty($request->reference_by)) {
                 $data_to_store['reference_by'] = $request->reference_by;
+            }
+            if (!empty($request->issue_date)) {
+                $data_to_store['issue_date'] = Carbon::createFromFormat('d-m-Y', $request->issue_date)->format('Y-m-d');
+            }
+            if (!empty($request->expired_date)) {
+                $data_to_store['expired_date'] = Carbon::createFromFormat('d-m-Y', $request->expired_date)->format('Y-m-d');
+            }
+            if (!empty($request->start_date)) {
+                $data_to_store['start_date'] = Carbon::createFromFormat('d-m-Y', $request->start_date)->format('Y-m-d');
+            }
+            if (!empty($request->tp_expiry_date)) {
+                $data_to_store['tp_expiry_date'] = Carbon::createFromFormat('d-m-Y', $request->tp_expiry_date)->format('Y-m-d');
+            }
+            if (!empty($request->maturity_date)) {
+                $data_to_store['maturity_date'] = Carbon::createFromFormat('d-m-Y', $request->maturity_date)->format('Y-m-d');
             }
 
             // Store Data

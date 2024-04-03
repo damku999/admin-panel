@@ -949,8 +949,13 @@
             if (startDate.getDate() === 29 && startDate.getMonth() === 1 && expiredDate.getDate() !== 28) {
                 expiredDate.setDate(expiredDate.getDate() - 1);
             }
-            var formattedExpiredDate = expiredDate.toISOString().split('T')[0];
-            document.getElementById("expired_date").value = formattedExpiredDate;
+
+            // Format the expired date as "dd-mm-yyyy"
+            var formattedExpiredDate = ('0' + expiredDate.getDate()).slice(-2) + '-' + ('0' + (expiredDate.getMonth() + 1))
+                .slice(-2) + '-' + expiredDate.getFullYear();
+
+            // Set the formatted expired date to the input field
+            $('#expired_date').datepicker('update', formattedExpiredDate);
         }
         const inputElements = document.querySelectorAll('input[type="text"]');
 
@@ -965,4 +970,5 @@
 @endsection
 @section('stylesheets')
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="{{ asset('datepicker/css/bootstrap-datepicker.min.css') }}" rel="stylesheet">
 @endsection

@@ -209,6 +209,20 @@
                                                 <i class="fa fa-pen"></i>
                                             </a>
                                         @endif
+                                        @if (auth()->user()->hasPermissionTo('customer-insurance-edit'))
+                                            @php
+                                                $expiredDate = \Carbon\Carbon::parse($customer_insurance->expired_date);
+                                                $oneMonthBefore = $expiredDate->copy()->subMonth();
+                                                $oneMonthAfter = $expiredDate->copy()->addMonth();
+                                                $currentDate = \Carbon\Carbon::now();
+                                            @endphp
+                                            @if ($currentDate->between($oneMonthBefore, $oneMonthAfter))
+                                                <a href="{{ route('customer_insurances.edit', ['customer_insurance' => $customer_insurance->id]) }}"
+                                                    class="btn btn-primary m-2">
+                                                    Renew
+                                                </a>
+                                            @endif
+                                        @endif
                                         @if ($customer_insurance->policy_document_path)
                                             <a href="{{ asset('storage/' . $customer_insurance->policy_document_path) }}"
                                                 class="btn btn-info m-2" target="__blank"><i

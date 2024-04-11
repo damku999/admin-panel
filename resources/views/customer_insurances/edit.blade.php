@@ -56,7 +56,8 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label><span style="color: red;">*</span>Issue Date</label>
                             <div class="input-group date" id="issue_date">
-                                <input type="text" class="form-control datepicker @error('issue_date') is-invalid @enderror"
+                                <input type="text"
+                                    class="form-control datepicker @error('issue_date') is-invalid @enderror"
                                     id="issue_date" name="issue_date"
                                     value="{{ old('issue_date', date('d-m-Y', strtotime($customer_insurance->issue_date))) }}" />
                             </div>
@@ -185,7 +186,8 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label><span style="color: red;">*</span>Start Date</label>
                             <div class="input-group date">
-                                <input type="text" class="form-control datepicker @error('start_date') is-invalid @enderror"
+                                <input type="text"
+                                    class="form-control datepicker @error('start_date') is-invalid @enderror"
                                     id="start_date" name="start_date"
                                     value="{{ old('start_date', date('d-m-Y', strtotime($customer_insurance->start_date))) }}"
                                     onblur="setExpiredDate()" />
@@ -199,7 +201,8 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label><span style="color: red;">*</span>Expired Date</label>
                             <div class="input-group date">
-                                <input type="text" class="form-control datepicker @error('expired_date') is-invalid @enderror"
+                                <input type="text"
+                                    class="form-control datepicker @error('expired_date') is-invalid @enderror"
                                     id="expired_date" name="expired_date"
                                     value="{{ old('expired_date', date('d-m-Y', strtotime($customer_insurance->expired_date))) }}" />
                             </div>
@@ -266,7 +269,8 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                             <label><span style="color: red;">*</span>TP Expiry Date</label>
                             <div class="input-group date">
-                                <input type="text" class="form-control datepicker @error('tp_expiry_date') is-invalid @enderror"
+                                <input type="text"
+                                    class="form-control datepicker @error('tp_expiry_date') is-invalid @enderror"
                                     id="tp_expiry_date" name="tp_expiry_date"
                                     value="{{ old('tp_expiry_date', date('d-m-Y', strtotime($customer_insurance->tp_expiry_date))) }}" />
                             </div>
@@ -407,7 +411,8 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
                             <label><span style="color: red;">*</span>Maturity Date</label>
                             <div class="input-group date" id="maturity_date">
-                                <input type="text" class="form-control datepicker @error('maturity_date') is-invalid @enderror"
+                                <input type="text"
+                                    class="form-control datepicker @error('maturity_date') is-invalid @enderror"
                                     id="maturity_date" name="maturity_date"
                                     value="{{ old('maturity_date', date('d-m-Y', strtotime($customer_insurance->maturity_date))) }}" />
                             </div>
@@ -941,18 +946,25 @@
         premiumTypeChanged();
 
         function setExpiredDate() {
-            var startDate = new Date(document.getElementById("start_date").value);
-            // Calculate the expired date by adding 1 year - 1 day to the start date
-            var expiredDate = new Date(startDate.getFullYear() + 1, startDate.getMonth(), startDate.getDate());
+            var startDateStr = document.getElementById("start_date").value;
+            var startDateComponents = startDateStr.split("-"); // Split the date string by '-'
 
-            // Adjust the expired date if necessary
-            if (startDate.getDate() === 29 && startDate.getMonth() === 1 && expiredDate.getDate() !== 28) {
-                expiredDate.setDate(expiredDate.getDate() - 1);
-            }
+            // Create a new Date object using the parsed components
+            var startDate = new Date(startDateComponents[2], startDateComponents[1] - 1, startDateComponents[0]);
+
+            // Ensure startDate is set to the correct time (typically midnight)
+            startDate.setHours(0, 0, 0, 0);
+            console.log(startDate);
+            // Calculate the expired date by adding 1 year - 1 day to the start date
+            var expiredDate = new Date(startDate);
+            expiredDate.setFullYear(startDate.getFullYear() + 1);
+            expiredDate.setDate(startDate.getDate() - 1);
+            console.log(expiredDate);
 
             // Format the expired date as "dd-mm-yyyy"
             var formattedExpiredDate = ('0' + expiredDate.getDate()).slice(-2) + '-' + ('0' + (expiredDate.getMonth() + 1))
                 .slice(-2) + '-' + expiredDate.getFullYear();
+            console.log(formattedExpiredDate);
 
             // Set the formatted expired date to the input field
             $('#expired_date').datepicker('update', formattedExpiredDate);

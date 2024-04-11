@@ -912,18 +912,25 @@
         premiumTypeChanged();
 
         function setExpiredDate() {
-            var startDate = new Date(document.getElementById("start_date").value);
-            // Calculate the expired date by adding 1 year - 1 day to the start date
-            var expiredDate = new Date(startDate.getFullYear() + 1, startDate.getMonth(), startDate.getDate());
+            var startDateStr = document.getElementById("start_date").value;
+            var startDateComponents = startDateStr.split("-"); // Split the date string by '-'
 
-            // Adjust the expired date if necessary
-            if (startDate.getDate() === 29 && startDate.getMonth() === 1 && expiredDate.getDate() !== 28) {
-                expiredDate.setDate(expiredDate.getDate() - 1);
-            }
+            // Create a new Date object using the parsed components
+            var startDate = new Date(startDateComponents[2], startDateComponents[1] - 1, startDateComponents[0]);
+
+            // Ensure startDate is set to the correct time (typically midnight)
+            startDate.setHours(0, 0, 0, 0);
+            console.log(startDate);
+            // Calculate the expired date by adding 1 year - 1 day to the start date
+            var expiredDate = new Date(startDate);
+            expiredDate.setFullYear(startDate.getFullYear() + 1);
+            expiredDate.setDate(startDate.getDate() - 1);
+            console.log(expiredDate);
 
             // Format the expired date as "dd-mm-yyyy"
             var formattedExpiredDate = ('0' + expiredDate.getDate()).slice(-2) + '-' + ('0' + (expiredDate.getMonth() + 1))
                 .slice(-2) + '-' + expiredDate.getFullYear();
+            console.log(formattedExpiredDate);
 
             // Set the formatted expired date to the input field
             $('#expired_date').datepicker('update', formattedExpiredDate);

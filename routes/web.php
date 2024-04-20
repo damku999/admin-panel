@@ -120,6 +120,8 @@ Route::middleware('auth')->prefix('customer_insurances')->name('customer_insuran
     // Route::delete('/delete/{customer_insurance}', [CustomerInsuranceController::class, 'delete'])->name('destroy');
     Route::get('/update/status/{customer_insurance_id}/{status}', [CustomerInsuranceController::class, 'updateStatus'])->name('status');
     Route::get('export/', [CustomerInsuranceController::class, 'export'])->name('export');
+    Route::get('/renew/{customer_insurance}', [CustomerInsuranceController::class, 'renew'])->name('renew');
+    Route::put('/storeRenew/{customer_insurance}', [CustomerInsuranceController::class, 'storeRenew'])->name('storeRenew');
 });
 
 // Users

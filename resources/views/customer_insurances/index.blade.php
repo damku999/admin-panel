@@ -217,7 +217,7 @@
                                                 $currentDate = \Carbon\Carbon::now();
                                             @endphp
                                             @if ($currentDate->between($oneMonthBefore, $oneMonthAfter))
-                                                <a href="{{ route('customer_insurances.edit', ['customer_insurance' => $customer_insurance->id]) }}"
+                                                <a href="{{ route('customer_insurances.renew', ['customer_insurance' => $customer_insurance->id]) }}"
                                                     class="btn btn-primary m-2">
                                                     Renew
                                                 </a>

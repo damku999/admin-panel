@@ -73,7 +73,7 @@
                                 <option selected="selected" disabled="disabled">Select Policy Type</option>
                                 @foreach ($policy_type as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ old('policy_type_id', $customer_insurance->policy_type_id) == $item->id ? 'selected' : '' }}>
+                                        {{ old('policy_type_id') == $item->id ? 'selected' : '' }}>
                                         {{ $item->name }}
                                     </option>
                                 @endforeach
@@ -140,7 +140,7 @@
                                 <option selected="selected" disabled="disabled">Select Company</option>
                                 @foreach ($insurance_companies as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ old('insurance_company_id', $customer_insurance->insurance_company_id) == $item->id ? 'selected' : '' }}>
+                                        {{ old('insurance_company_id') == $item->id ? 'selected' : '' }}>
                                         {{ $item->name }}
                                     </option>
                                 @endforeach
@@ -174,7 +174,7 @@
                             <input type="text"
                                 class="form-control form-control-customer @error('policy_no') is-invalid @enderror"
                                 id="policy_no" placeholder="Policy No." name="policy_no"
-                                value="{{ old('policy_no', $customer_insurance->policy_no) }}">
+                                value="{{ old('policy_no') }}">
 
                             @error('policy_no')
                                 <span class="text-danger">{{ $message }}</span>
@@ -187,7 +187,7 @@
                             <div class="input-group date">
                                 <input type="text" class="form-control datepicker @error('start_date') is-invalid @enderror"
                                     id="start_date" name="start_date"
-                                    value="{{ old('start_date', date('d-m-Y', strtotime($customer_insurance->start_date))) }}"
+                                    value="{{ old('start_date') }}"
                                     onblur="setExpiredDate()" />
                             </div>
                             @error('start_date')
@@ -201,7 +201,7 @@
                             <div class="input-group date">
                                 <input type="text" class="form-control datepicker @error('expired_date') is-invalid @enderror"
                                     id="expired_date" name="expired_date"
-                                    value="{{ old('expired_date', date('d-m-Y', strtotime($customer_insurance->expired_date))) }}" />
+                                    value="{{ old('expired_date') }}" />
                             </div>
                             @error('expired_date')
                                 <span class="text-danger">{{ $message }}</span>
@@ -268,7 +268,7 @@
                             <div class="input-group date">
                                 <input type="text" class="form-control datepicker @error('tp_expiry_date') is-invalid @enderror"
                                     id="tp_expiry_date" name="tp_expiry_date"
-                                    value="{{ old('tp_expiry_date', date('d-m-Y', strtotime($customer_insurance->tp_expiry_date))) }}" />
+                                    value="{{ old('tp_expiry_date') }}" />
                             </div>
                             @error('tp_expiry_date')
                                 <span class="text-danger">{{ $message }}</span>
@@ -432,7 +432,7 @@
                             <input type="text"
                                 class="form-control form-control-customer @error('mode_of_payment') is-invalid @enderror"
                                 id="mode_of_payment" placeholder="Mode of Payment" name="mode_of_payment"
-                                value="{{ old('mode_of_payment', $customer_insurance->mode_of_payment) }}">
+                                value="{{ old('mode_of_payment') }}">
 
                             @error('mode_of_payment')
                                 <span class="text-danger">{{ $message }}</span>
@@ -500,7 +500,7 @@
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('od_premium') is-invalid @enderror"
                                     id="od_premium" placeholder="OD Premium" name="od_premium"
-                                    value="{{ old('od_premium', $customer_insurance->od_premium) }}">
+                                    value="{{ old('od_premium') }}">
 
                                 @error('od_premium')
                                     <span class="text-danger">{{ $message }}</span>
@@ -513,7 +513,7 @@
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('tp_premium') is-invalid @enderror"
                                     id="tp_premium" placeholder="TP Premium" name="tp_premium"
-                                    value="{{ old('tp_premium', $customer_insurance->tp_premium) }}">
+                                    value="{{ old('tp_premium') }}">
 
                                 @error('tp_premium')
                                     <span class="text-danger">{{ $message }}</span>
@@ -526,7 +526,7 @@
                                     <input type="date"
                                         class="form-control @error('premium_amount') is-invalid @enderror"
                                         id="premium_amount" name="premium_amount"
-                                        value="{{ old('premium_amount', $customer_insurance->premium_amount) }}" />
+                                        value="{{ old('premium_amount') }}" />
                                 </div>
                                 @error('premium_amount')
                                     <span class="text-danger">{{ $message }}</span>
@@ -539,7 +539,7 @@
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('net_premium') is-invalid @enderror"
                                     id="net_premium" placeholder="Net Premium" name="net_premium"
-                                    value="{{ old('net_premium', $customer_insurance->net_premium) }}">
+                                    value="{{ old('net_premium') }}">
 
                                 @error('net_premium')
                                     <span class="text-danger">{{ $message }}</span>
@@ -552,7 +552,7 @@
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('cgst1') is-invalid @enderror"
                                     id="cgst1" placeholder="CGST" name="cgst1"
-                                    value="{{ old('cgst1', $customer_insurance->cgst1) }}">
+                                    value="{{ old('cgst1') }}">
 
                                 @error('cgst1')
                                     <span class="text-danger">{{ $message }}</span>
@@ -564,7 +564,7 @@
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('sgst1') is-invalid @enderror"
                                     id="sgst1" placeholder="SGST" name="sgst1"
-                                    value="{{ old('sgst1', $customer_insurance->sgst1) }}">
+                                    value="{{ old('sgst1') }}">
 
                                 @error('sgst1')
                                     <span class="text-danger">{{ $message }}</span>
@@ -577,7 +577,7 @@
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('cgst2') is-invalid @enderror"
                                     id="cgst2" placeholder="CGST 2" name="cgst2"
-                                    value="{{ old('cgst2', $customer_insurance->cgst2) }}">
+                                    value="{{ old('cgst2') }}">
 
                                 @error('cgst2')
                                     <span class="text-danger">{{ $message }}</span>
@@ -590,7 +590,7 @@
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('sgst2') is-invalid @enderror"
                                     id="sgst2" placeholder="SGST 2" name="sgst2"
-                                    value="{{ old('sgst2', $customer_insurance->sgst2) }}">
+                                    value="{{ old('sgst2') }}">
 
                                 @error('sgst2')
                                     <span class="text-danger">{{ $message }}</span>
@@ -604,7 +604,7 @@
                                     class="decimal-input form-control form-control-customer @error('final_premium_with_gst') is-invalid @enderror"
                                     id="final_premium_with_gst" placeholder="Final Premium With GST"
                                     name="final_premium_with_gst"
-                                    value="{{ old('final_premium_with_gst', $customer_insurance->final_premium_with_gst) }}"
+                                    value="{{ old('final_premium_with_gst') }}"
                                     readonly>
 
                                 @error('final_premium_with_gst')
@@ -620,11 +620,11 @@
                                 <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                                     <label>Commission On</label>
                                     <select name="commission_on" class="form-control" id="commission_on">
-                                        <option value="net_premium" @if (old('commission_on', $customer_insurance->commission_on) == 'net_premium') selected @endif> Net
+                                        <option value="net_premium" @if (old('commission_on') == 'net_premium') selected @endif> Net
                                             Premium </option>
-                                        <option value="od_premium" @if (old('commission_on', $customer_insurance->commission_on) == 'od_premium') selected @endif>OD
+                                        <option value="od_premium" @if (old('commission_on') == 'od_premium') selected @endif>OD
                                             Premium </option>
-                                        <option value="tp_premium" @if (old('commission_on', $customer_insurance->commission_on) == 'tp_premium') selected @endif>TP
+                                        <option value="tp_premium" @if (old('commission_on') == 'tp_premium') selected @endif>TP
                                             Premium </option>
                                     </select>
                                     @error('commission_on')
@@ -638,7 +638,7 @@
                                         class="decimal-input form-control form-control-customer @error('my_commission_percentage') is-invalid @enderror"
                                         id="my_commission_percentage" placeholder="My Commission Percentage"
                                         name="my_commission_percentage"
-                                        value="{{ old('my_commission_percentage', $customer_insurance->my_commission_percentage) }}">
+                                        value="{{ old('my_commission_percentage') }}">
                                     @error('my_commission_percentage')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -650,7 +650,7 @@
                                         class="decimal-input form-control form-control-customer @error('my_commission_amount') is-invalid @enderror"
                                         id="my_commission_amount" placeholder="My Commission Amount"
                                         name="my_commission_amount"
-                                        value="{{ old('my_commission_amount', $customer_insurance->my_commission_amount) }}"
+                                        value="{{ old('my_commission_amount') }}"
                                         readonly>
                                     @error('my_commission_amount')
                                         <span class="text-danger">{{ $message }}</span>
@@ -663,7 +663,7 @@
                                         class="decimal-input form-control form-control-customer @error('transfer_commission_percentage') is-invalid @enderror"
                                         id="transfer_commission_percentage" placeholder="Transfer Commission Percentage"
                                         name="transfer_commission_percentage"
-                                        value="{{ old('transfer_commission_percentage', $customer_insurance->transfer_commission_percentage) }}">
+                                        value="{{ old('transfer_commission_percentage') }}">
                                     @error('transfer_commission_percentage')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -675,7 +675,7 @@
                                         class="decimal-input form-control form-control-customer @error('transfer_commission_amount') is-invalid @enderror"
                                         id="transfer_commission_amount" placeholder="Transfer Commission Amount"
                                         name="transfer_commission_amount"
-                                        value="{{ old('transfer_commission_amount', $customer_insurance->transfer_commission_amount) }}"
+                                        value="{{ old('transfer_commission_amount') }}"
                                         readonly>
                                     @error('transfer_commission_amount')
                                         <span class="text-danger">{{ $message }}</span>
@@ -688,7 +688,7 @@
                                         class="decimal-input form-control form-control-customer @error('reference_commission_percentage') is-invalid @enderror"
                                         id="reference_commission_percentage" placeholder="Reference Commission Percentage"
                                         name="reference_commission_percentage"
-                                        value="{{ old('reference_commission_percentage', $customer_insurance->reference_commission_percentage) }}">
+                                        value="{{ old('reference_commission_percentage') }}">
                                     @error('reference_commission_percentage')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -700,7 +700,7 @@
                                         class="decimal-input form-control form-control-customer @error('reference_commission_amount') is-invalid @enderror"
                                         id="reference_commission_amount" placeholder="Reference Commission Amount"
                                         name="reference_commission_amount"
-                                        value="{{ old('reference_commission_amount', $customer_insurance->reference_commission_amount) }}"
+                                        value="{{ old('reference_commission_amount') }}"
                                         readonly>
                                     @error('reference_commission_amount')
                                         <span class="text-danger">{{ $message }}</span>
@@ -712,7 +712,7 @@
                                     <input type="text"
                                         class="decimal-input form-control form-control-customer @error('actual_earnings') is-invalid @enderror"
                                         id="actual_earnings" placeholder="Actual Earnings" name="actual_earnings"
-                                        value="{{ old('actual_earnings', $customer_insurance->actual_earnings) }}"
+                                        value="{{ old('actual_earnings') }}"
                                         readonly>
                                     @error('actual_earnings')
                                         <span class="text-danger">{{ $message }}</span>
@@ -941,18 +941,25 @@
         premiumTypeChanged();
 
         function setExpiredDate() {
-            var startDate = new Date(document.getElementById("start_date").value);
-            // Calculate the expired date by adding 1 year - 1 day to the start date
-            var expiredDate = new Date(startDate.getFullYear() + 1, startDate.getMonth(), startDate.getDate());
+            var startDateStr = document.getElementById("start_date").value;
+            var startDateComponents = startDateStr.split("-"); // Split the date string by '-'
 
-            // Adjust the expired date if necessary
-            if (startDate.getDate() === 29 && startDate.getMonth() === 1 && expiredDate.getDate() !== 28) {
-                expiredDate.setDate(expiredDate.getDate() - 1);
-            }
+            // Create a new Date object using the parsed components
+            var startDate = new Date(startDateComponents[2], startDateComponents[1] - 1, startDateComponents[0]);
+
+            // Ensure startDate is set to the correct time (typically midnight)
+            startDate.setHours(0, 0, 0, 0);
+            console.log(startDate);
+            // Calculate the expired date by adding 1 year - 1 day to the start date
+            var expiredDate = new Date(startDate);
+            expiredDate.setFullYear(startDate.getFullYear() + 1);
+            expiredDate.setDate(startDate.getDate() - 1);
+            console.log(expiredDate);
 
             // Format the expired date as "dd-mm-yyyy"
             var formattedExpiredDate = ('0' + expiredDate.getDate()).slice(-2) + '-' + ('0' + (expiredDate.getMonth() + 1))
                 .slice(-2) + '-' + expiredDate.getFullYear();
+            console.log(formattedExpiredDate);
 
             // Set the formatted expired date to the input field
             $('#expired_date').datepicker('update', formattedExpiredDate);

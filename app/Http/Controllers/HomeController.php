@@ -140,7 +140,7 @@ class HomeController extends Controller
             $issue_date = Carbon::parse($item->issue_date);
             return $issue_date->format('Y-m');
         });
-
+        $result=[];
         // Loop through each group and calculate sums for each month
         foreach ($financial_year_grouped_data as $month => $grouped_data) {
             // Extract the month and year from the $month variable

@@ -190,7 +190,7 @@
                                     class="form-control datepicker @error('start_date') is-invalid @enderror"
                                     id="start_date" name="start_date"
                                     value="{{ old('start_date', date('d-m-Y', strtotime($customer_insurance->start_date))) }}"
-                                    onblur="setExpiredDate()" />
+                                    onchange="setExpiredDate()" />
                             </div>
                             @error('start_date')
                                 <span class="text-danger">{{ $message }}</span>

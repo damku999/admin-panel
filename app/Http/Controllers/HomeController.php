@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Customer;
+use App\Models\CustomerInsurance;
+use App\Models\User;
+use App\Rules\MatchOldPassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use App\Rules\MatchOldPassword;
-use App\Models\CustomerInsurance;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class HomeController extends Controller
@@ -29,7 +29,7 @@ class HomeController extends Controller
         'my_commission_amount',
         'transfer_commission_amount',
         'actual_earnings',
-        'issue_date'
+        'issue_date',
     ];
 
     /**
@@ -43,7 +43,6 @@ class HomeController extends Controller
             return redirect()->route('customers.index');
         }
         $data = $this->compressionData($request);
-
 
         // Get counts for customers based on status
         $total_customer = Customer::count();
@@ -68,43 +67,43 @@ class HomeController extends Controller
         // Calculate sums for customer insurances in the current month
         $current_month_final_premium_with_gst = CustomerInsurance::whereBetween('issue_date', [
             Carbon::now()->startOfMonth()->format('Y-m-d'),
-            Carbon::now()->startOfMonth()->endOfMonth()->format('Y-m-d')
+            Carbon::now()->startOfMonth()->endOfMonth()->format('Y-m-d'),
         ])->sum('final_premium_with_gst');
 
         $current_month_my_commission_amount = CustomerInsurance::whereBetween('issue_date', [
             Carbon::now()->startOfMonth()->format('Y-m-d'),
-            Carbon::now()->startOfMonth()->endOfMonth()->format('Y-m-d')
+            Carbon::now()->startOfMonth()->endOfMonth()->format('Y-m-d'),
         ])->sum('my_commission_amount');
 
         $current_month_transfer_commission_amount = CustomerInsurance::whereBetween('issue_date', [
             Carbon::now()->startOfMonth()->format('Y-m-d'),
-            Carbon::now()->startOfMonth()->endOfMonth()->format('Y-m-d')
+            Carbon::now()->startOfMonth()->endOfMonth()->format('Y-m-d'),
         ])->sum('transfer_commission_amount');
 
         $current_month_actual_earnings = CustomerInsurance::whereBetween('issue_date', [
             Carbon::now()->startOfMonth()->format('Y-m-d'),
-            Carbon::now()->startOfMonth()->endOfMonth()->format('Y-m-d')
+            Carbon::now()->startOfMonth()->endOfMonth()->format('Y-m-d'),
         ])->sum('actual_earnings');
 
         // Calculate sums for customer insurances in the last month
         $last_month_final_premium_with_gst = CustomerInsurance::whereBetween('issue_date', [
             Carbon::now()->subMonth()->startOfMonth()->format('Y-m-d'),
-            Carbon::now()->subMonth()->startOfMonth()->endOfMonth()->format('Y-m-d')
+            Carbon::now()->subMonth()->startOfMonth()->endOfMonth()->format('Y-m-d'),
         ])->sum('final_premium_with_gst');
 
         $last_month_my_commission_amount = CustomerInsurance::whereBetween('issue_date', [
             Carbon::now()->subMonth()->startOfMonth()->format('Y-m-d'),
-            Carbon::now()->subMonth()->startOfMonth()->endOfMonth()->format('Y-m-d')
+            Carbon::now()->subMonth()->startOfMonth()->endOfMonth()->format('Y-m-d'),
         ])->sum('my_commission_amount');
 
         $last_month_transfer_commission_amount = CustomerInsurance::whereBetween('issue_date', [
             Carbon::now()->subMonth()->startOfMonth()->format('Y-m-d'),
-            Carbon::now()->subMonth()->startOfMonth()->endOfMonth()->format('Y-m-d')
+            Carbon::now()->subMonth()->startOfMonth()->endOfMonth()->format('Y-m-d'),
         ])->sum('transfer_commission_amount');
 
         $last_month_actual_earnings = CustomerInsurance::whereBetween('issue_date', [
             Carbon::now()->subMonth()->startOfMonth()->format('Y-m-d'),
-            Carbon::now()->subMonth()->startOfMonth()->endOfMonth()->format('Y-m-d')
+            Carbon::now()->subMonth()->startOfMonth()->endOfMonth()->format('Y-m-d'),
         ])->sum('actual_earnings');
 
         // Calculate count of expiring customer insurances for the current month
@@ -112,7 +111,6 @@ class HomeController extends Controller
             ->whereMonth('expired_date', Carbon::now()->month)
             ->whereYear('expired_date', Carbon::now()->year)
             ->count();
-
 
         // Get the financial year start and end dates
         $current_month = Carbon::now()->month;
@@ -132,7 +130,7 @@ class HomeController extends Controller
         // Get the data for the financial year
         $financial_year_data = CustomerInsurance::whereBetween('issue_date', [
             $financial_year_start->format('Y-m-d'),
-            $financial_year_end->format('Y-m-d')
+            $financial_year_end->format('Y-m-d'),
         ])->get();
 
         // Group data by month and year for the financial year
@@ -140,7 +138,7 @@ class HomeController extends Controller
             $issue_date = Carbon::parse($item->issue_date);
             return $issue_date->format('Y-m');
         });
-        $result=[];
+        $result = [];
         // Loop through each group and calculate sums for each month
         foreach ($financial_year_grouped_data as $month => $grouped_data) {
             // Extract the month and year from the $month variable
@@ -180,8 +178,7 @@ class HomeController extends Controller
         ));
     }
 
-
-    function compressionData($request)
+    public function compressionData($request)
     {
         $date = now();
         if ($request->date) {
@@ -215,21 +212,21 @@ class HomeController extends Controller
             DB::raw('COALESCE(SUM(final_premium_with_gst), 0) AS sum_final_premium'),
             DB::raw('COALESCE(SUM(my_commission_amount), 0) AS sum_my_commission'),
             DB::raw('COALESCE(SUM(transfer_commission_amount), 0) AS sum_transfer_commission'),
-            DB::raw('COALESCE(SUM(actual_earnings), 0) AS sum_actual_earnings')
+            DB::raw('COALESCE(SUM(actual_earnings), 0) AS sum_actual_earnings'),
         ];
 
         // Get the data for the financial year
         $response['current_year_data'] = CustomerInsurance::select($sum_columns)
             ->whereBetween('issue_date', [
                 $financial_year_start->format('Y-m-d'),
-                $financial_year_end->format('Y-m-d')
+                $financial_year_end->format('Y-m-d'),
             ])->first()->toArray();
 
         // Calculate the sum of columns for the previous financial year
         $response['last_year_data'] = CustomerInsurance::select($sum_columns)
             ->whereBetween('issue_date', [
                 $previous_financial_year_start->format('Y-m-d'),
-                $previous_financial_year_end->format('Y-m-d')
+                $previous_financial_year_end->format('Y-m-d'),
             ])->first()->toArray();
 
         // Calculate the sum of columns for the today
@@ -244,19 +241,18 @@ class HomeController extends Controller
             $quarter_end = $quarter_start->copy()->addMonths(2);
             $quarter_date[] = [
                 'quarter_start' => $quarter_start,
-                'quarter_end' => $quarter_end
+                'quarter_end' => $quarter_end,
             ];
 
             $quarters[] = CustomerInsurance::select($sum_columns)->whereBetween('issue_date', [
                 $quarter_start->format('Y-m-d'),
-                $quarter_end->format('Y-m-d')
+                $quarter_end->format('Y-m-d'),
             ])->first()->toArray();
         }
         $response['quarters_data'] = $quarters;
         $response['quarter_date'] = $quarter_date;
         return $response;
     }
-
 
     /**
      * User Profile
@@ -279,8 +275,8 @@ class HomeController extends Controller
     {
         #Validations
         $request->validate([
-            'first_name'    => 'required',
-            'last_name'     => 'required',
+            'first_name' => 'required',
+            'last_name' => 'required',
             'mobile_number' => 'required|numeric|digits:10',
         ]);
 

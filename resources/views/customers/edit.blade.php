@@ -217,7 +217,8 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <span style="color:red;"></span>Date Of Birth</label>
                             <div class="input-group date" id="datepicker">
-                                <input type="date" class="form-control @error('date_of_birth') is-invalid @enderror"
+                                <input type="text"
+                                    class="form-control datepicker @error('date_of_birth') is-invalid @enderror"
                                     id="date_of_birth" name="date_of_birth"
                                     value="{{ old('date_of_birth') ? old('date_of_birth') : $customer->date_of_birth }}" />
                             </div>
@@ -230,8 +231,8 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <span style="color:red;"></span>Date Of Engagement Anniversary</label>
                             <div class="input-group date" id="datepicker">
-                                <input type="date"
-                                    class="form-control @error('engagement_anniversary_date') is-invalid @enderror"
+                                <input type="text"
+                                    class="form-control datepicker @error('engagement_anniversary_date') is-invalid @enderror"
                                     id="engagement_anniversary_date" name="engagement_anniversary_date"
                                     value="{{ old('engagement_anniversary_date') ? old('engagement_anniversary_date') : $customer->engagement_anniversary_date }}" />
                             </div>
@@ -244,8 +245,8 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <span style="color:red;"></span>Date Of Wedding Anniversary</label>
                             <div class="input-group date" id="datepicker">
-                                <input type="date"
-                                    class="form-control @error('wedding_anniversary_date') is-invalid @enderror"
+                                <input type="text"
+                                    class="form-control datepicker @error('wedding_anniversary_date') is-invalid @enderror"
                                     id="wedding_anniversary_date" name="wedding_anniversary_date"
                                     value="{{ old('wedding_anniversary_date') ? old('wedding_anniversary_date') : $customer->wedding_anniversary_date }}" />
                             </div>

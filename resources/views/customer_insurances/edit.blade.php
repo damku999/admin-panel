@@ -738,14 +738,8 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="{{ asset('datepicker/js/bootstrap-datepicker.min.js') }}"></script>
     <script>
         $(document).ready(function() {
-            $('.datepicker').datepicker({
-                format: 'dd-mm-yyyy', // Adjust the format as per your requirement
-                autoclose: true
-            });
             $('#customer_id').select2();
             // Calculate and update commission fields
             function calculateCommission() {
@@ -981,6 +975,4 @@
     </script>
 @endsection
 @section('stylesheets')
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="{{ asset('datepicker/css/bootstrap-datepicker.min.css') }}" rel="stylesheet">
 @endsection

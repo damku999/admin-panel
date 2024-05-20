@@ -36,22 +36,20 @@
                 <form action="{{ route('customer_insurances.index') }}" method="GET" role="search">
                     <div class="input-group">
                         <input type="text" placeholder="Search" name="search"
-                            class="form-control float-right filter_by_key" value="{{ request('search') }}"
-                            style="margin-right: 10px;">
-                        <!-- New filter for expiring date range -->
-                        <input type="text" placeholder="Exp Start Date" name="start_date" class="form-control datepicker"
-                            value="{{ request('start_date') }}" style="margin-right: 10px;">
-                        <input type="text" placeholder="Exp End Date" name="end_date" class="form-control datepicker"
-                            value="{{ request('end_date') }}" style="margin-right: 10px;">
-                        <select name="customer_id" class="form-control" id="customer_id">
-                            <option selected="selected" disabled="disabled">Select Customer</option>
-                            @foreach ($customers as $item)
-                                <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                    {{ request('customer_id') == $item->id ? 'selected' : '' }}>
-                                    {{ $item->name }}
-                                </option>
-                            @endforeach
+                            class="form-control float-right filter_by_key mr-2" value="{{ request('search') }}">
+
+                        <input type="text" placeholder="Exp Start Date" name="start_date"
+                            class="form-control datepicker mr-2" value="{{ request('start_date') }}">
+
+                        <input type="text" placeholder="Exp End Date" name="end_date"
+                            class="form-control datepicker mr-2" value="{{ request('end_date') }}">
+
+                        <select name="status" class="form-control" id="status">
+                            <option value="all" {{ request('status', '1') == 'all' ? 'selected' : '' }}>All</option>
+                            <option value="1" {{ request('status', '1') == '1' ? 'selected' : '' }}>Active</option>
+                            <option value="0" {{ request('status', '1') == '0' ? 'selected' : '' }}>In Active</option>
                         </select>
+
                         <div class="input-group-append">
                             <button type="submit" class="btn btn-default filter_by_click">
                                 <i class="fas fa-search"></i>
@@ -61,6 +59,23 @@
                                 <i class="fas fa-redo"></i>
                             </a>
                         </div>
+                    </div>
+                    <div class="input-group mt-2">
+                        {{-- <input type="text" placeholder="Search" name="search"
+                            class="form-control float-right filter_by_key" value="{{ request('search') }}">
+
+                        <!-- New filter for expiring date range -->
+                        <input type="text" placeholder="Exp Start Date" name="start_date" class="form-control datepicker"
+                            value="{{ request('start_date') }}">
+
+                        <input type="text" placeholder="Exp End Date" name="end_date" class="form-control datepicker"
+                            value="{{ request('end_date') }}">
+
+                        <select name="status" class="form-control" id="status">
+                            <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All</option>
+                            <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Active</option>
+                            <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>In Active</option>
+                        </select> --}}
                     </div>
                 </form>
             </div>
@@ -216,7 +231,7 @@
                                                 $oneMonthAfter = $expiredDate->copy()->addMonth();
                                                 $currentDate = \Carbon\Carbon::now();
                                             @endphp
-                                            @if ($currentDate->between($oneMonthBefore, $oneMonthAfter))
+                                            @if ($currentDate->between($oneMonthBefore, $oneMonthAfter) && $customer_insurance->is_renewed == 0)
                                                 <a href="{{ route('customer_insurances.renew', ['customer_insurance' => $customer_insurance->id]) }}"
                                                     class="btn btn-primary m-2">
                                                     Renew
@@ -240,7 +255,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5">No Record Found.</td>
+                                    <td colspan="8">No Record Found.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -255,17 +270,9 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"
-        integrity="sha512-LsnSViqQyaXpD4mBBdRYeP6sRwJiJveh2ZIbW41EBrNmKxgr/LFZIiWT6yr+nycvhvauz8c2nYMhrP80YhG7Cw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         $(document).ready(function() {
             $('#customer_id').select2();
-            $('.datepicker').datepicker({
-                format: 'yyyy-mm-dd', // Adjust the format as per your requirement
-                autoclose: true
-            });
 
             // Optional: Add logic to ensure the start date is before or equal to the end date
             $('.datepicker[name="start_date"]').on('changeDate', function(selected) {
@@ -288,9 +295,4 @@
     </script>
 @endsection
 @section('stylesheets')
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css"
-        integrity="sha512-34s5cpvaNG3BknEWSuOncX28vz97bRI59UnVtEEpFX536A7BtZSJHsDyFoCl8S7Dt2TPzcrCEoHBGeM4SUBDBw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
 @endsection

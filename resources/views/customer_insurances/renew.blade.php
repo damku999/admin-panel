@@ -56,7 +56,8 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label><span style="color: red;">*</span>Issue Date</label>
                             <div class="input-group date" id="issue_date">
-                                <input type="text" class="form-control datepicker @error('issue_date') is-invalid @enderror"
+                                <input type="text"
+                                    class="form-control datepicker @error('issue_date') is-invalid @enderror"
                                     id="issue_date" name="issue_date"
                                     value="{{ old('issue_date', date('d-m-Y', strtotime($customer_insurance->issue_date))) }}" />
                             </div>
@@ -185,10 +186,10 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label><span style="color: red;">*</span>Start Date</label>
                             <div class="input-group date">
-                                <input type="text" class="form-control datepicker @error('start_date') is-invalid @enderror"
-                                    id="start_date" name="start_date"
-                                    value="{{ old('start_date') }}"
-                                    onblur="setExpiredDate()" />
+                                <input type="text"
+                                    class="form-control datepicker @error('start_date') is-invalid @enderror"
+                                    id="start_date" name="start_date" value="{{ old('start_date') }}"
+                                    onchange="setExpiredDate()" />
                             </div>
                             @error('start_date')
                                 <span class="text-danger">{{ $message }}</span>
@@ -199,9 +200,9 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label><span style="color: red;">*</span>Expired Date</label>
                             <div class="input-group date">
-                                <input type="text" class="form-control datepicker @error('expired_date') is-invalid @enderror"
-                                    id="expired_date" name="expired_date"
-                                    value="{{ old('expired_date') }}" />
+                                <input type="text"
+                                    class="form-control datepicker @error('expired_date') is-invalid @enderror"
+                                    id="expired_date" name="expired_date" value="{{ old('expired_date') }}" />
                             </div>
                             @error('expired_date')
                                 <span class="text-danger">{{ $message }}</span>
@@ -266,9 +267,9 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                             <label><span style="color: red;">*</span>TP Expiry Date</label>
                             <div class="input-group date">
-                                <input type="text" class="form-control datepicker @error('tp_expiry_date') is-invalid @enderror"
-                                    id="tp_expiry_date" name="tp_expiry_date"
-                                    value="{{ old('tp_expiry_date') }}" />
+                                <input type="text"
+                                    class="form-control datepicker @error('tp_expiry_date') is-invalid @enderror"
+                                    id="tp_expiry_date" name="tp_expiry_date" value="{{ old('tp_expiry_date') }}" />
                             </div>
                             @error('tp_expiry_date')
                                 <span class="text-danger">{{ $message }}</span>
@@ -407,7 +408,8 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
                             <label><span style="color: red;">*</span>Maturity Date</label>
                             <div class="input-group date" id="maturity_date">
-                                <input type="text" class="form-control datepicker @error('maturity_date') is-invalid @enderror"
+                                <input type="text"
+                                    class="form-control datepicker @error('maturity_date') is-invalid @enderror"
                                     id="maturity_date" name="maturity_date"
                                     value="{{ old('maturity_date', date('d-m-Y', strtotime($customer_insurance->maturity_date))) }}" />
                             </div>
@@ -551,8 +553,7 @@
                                 <label><span style="color: red;">*</span>CGST 1</label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('cgst1') is-invalid @enderror"
-                                    id="cgst1" placeholder="CGST" name="cgst1"
-                                    value="{{ old('cgst1') }}">
+                                    id="cgst1" placeholder="CGST" name="cgst1" value="{{ old('cgst1') }}">
 
                                 @error('cgst1')
                                     <span class="text-danger">{{ $message }}</span>
@@ -563,8 +564,7 @@
                                 <label><span style="color: red;">*</span>SGST 1</label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('sgst1') is-invalid @enderror"
-                                    id="sgst1" placeholder="SGST" name="sgst1"
-                                    value="{{ old('sgst1') }}">
+                                    id="sgst1" placeholder="SGST" name="sgst1" value="{{ old('sgst1') }}">
 
                                 @error('sgst1')
                                     <span class="text-danger">{{ $message }}</span>
@@ -576,8 +576,7 @@
                                 <label><span style="color: red;">*</span>CGST 2 </label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('cgst2') is-invalid @enderror"
-                                    id="cgst2" placeholder="CGST 2" name="cgst2"
-                                    value="{{ old('cgst2') }}">
+                                    id="cgst2" placeholder="CGST 2" name="cgst2" value="{{ old('cgst2') }}">
 
                                 @error('cgst2')
                                     <span class="text-danger">{{ $message }}</span>
@@ -589,8 +588,7 @@
                                 <label><span style="color: red;">*</span>SGST 2 </label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('sgst2') is-invalid @enderror"
-                                    id="sgst2" placeholder="SGST 2" name="sgst2"
-                                    value="{{ old('sgst2') }}">
+                                    id="sgst2" placeholder="SGST 2" name="sgst2" value="{{ old('sgst2') }}">
 
                                 @error('sgst2')
                                     <span class="text-danger">{{ $message }}</span>
@@ -603,9 +601,7 @@
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('final_premium_with_gst') is-invalid @enderror"
                                     id="final_premium_with_gst" placeholder="Final Premium With GST"
-                                    name="final_premium_with_gst"
-                                    value="{{ old('final_premium_with_gst') }}"
-                                    readonly>
+                                    name="final_premium_with_gst" value="{{ old('final_premium_with_gst') }}" readonly>
 
                                 @error('final_premium_with_gst')
                                     <span class="text-danger">{{ $message }}</span>
@@ -637,8 +633,7 @@
                                     <input type="text"
                                         class="decimal-input form-control form-control-customer @error('my_commission_percentage') is-invalid @enderror"
                                         id="my_commission_percentage" placeholder="My Commission Percentage"
-                                        name="my_commission_percentage"
-                                        value="{{ old('my_commission_percentage') }}">
+                                        name="my_commission_percentage" value="{{ old('my_commission_percentage') }}">
                                     @error('my_commission_percentage')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -649,9 +644,7 @@
                                     <input type="text"
                                         class="decimal-input form-control form-control-customer @error('my_commission_amount') is-invalid @enderror"
                                         id="my_commission_amount" placeholder="My Commission Amount"
-                                        name="my_commission_amount"
-                                        value="{{ old('my_commission_amount') }}"
-                                        readonly>
+                                        name="my_commission_amount" value="{{ old('my_commission_amount') }}" readonly>
                                     @error('my_commission_amount')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -675,8 +668,7 @@
                                         class="decimal-input form-control form-control-customer @error('transfer_commission_amount') is-invalid @enderror"
                                         id="transfer_commission_amount" placeholder="Transfer Commission Amount"
                                         name="transfer_commission_amount"
-                                        value="{{ old('transfer_commission_amount') }}"
-                                        readonly>
+                                        value="{{ old('transfer_commission_amount') }}" readonly>
                                     @error('transfer_commission_amount')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -700,8 +692,7 @@
                                         class="decimal-input form-control form-control-customer @error('reference_commission_amount') is-invalid @enderror"
                                         id="reference_commission_amount" placeholder="Reference Commission Amount"
                                         name="reference_commission_amount"
-                                        value="{{ old('reference_commission_amount') }}"
-                                        readonly>
+                                        value="{{ old('reference_commission_amount') }}" readonly>
                                     @error('reference_commission_amount')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -712,8 +703,7 @@
                                     <input type="text"
                                         class="decimal-input form-control form-control-customer @error('actual_earnings') is-invalid @enderror"
                                         id="actual_earnings" placeholder="Actual Earnings" name="actual_earnings"
-                                        value="{{ old('actual_earnings') }}"
-                                        readonly>
+                                        value="{{ old('actual_earnings') }}" readonly>
                                     @error('actual_earnings')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -733,14 +723,8 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="{{ asset('datepicker/js/bootstrap-datepicker.min.js') }}"></script>
     <script>
         $(document).ready(function() {
-            $('.datepicker').datepicker({
-                format: 'dd-mm-yyyy', // Adjust the format as per your requirement
-                autoclose: true
-            });
             $('#customer_id').select2();
             // Calculate and update commission fields
             function calculateCommission() {
@@ -960,7 +944,6 @@
             var formattedExpiredDate = ('0' + expiredDate.getDate()).slice(-2) + '-' + ('0' + (expiredDate.getMonth() + 1))
                 .slice(-2) + '-' + expiredDate.getFullYear();
             console.log(formattedExpiredDate);
-
             // Set the formatted expired date to the input field
             $('#expired_date').datepicker('update', formattedExpiredDate);
         }
@@ -976,6 +959,4 @@
     </script>
 @endsection
 @section('stylesheets')
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="{{ asset('datepicker/css/bootstrap-datepicker.min.css') }}" rel="stylesheet">
 @endsection

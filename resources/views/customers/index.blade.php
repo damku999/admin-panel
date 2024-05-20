@@ -191,41 +191,4 @@
 @endsection
 
 @section('scripts')
-    {{-- <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css"
-        rel="stylesheet">
-
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Other CSS files -->
-
-    <!-- Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-
-    <!-- Bootstrap Datepicker JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('.datepicker').datepicker({
-                format: 'yyyy-mm-dd',
-                autoclose: true,
-                todayHighlight: true
-            });
-
-            // Validate the selected dates
-            $('#from_date, #to_date').change(function() {
-                var fromDate = $('#from_date').datepicker('getDate');
-                var toDate = $('#to_date').datepicker('getDate');
-
-                if (fromDate && toDate) {
-                    if (fromDate > toDate) {
-                        alert('Start date must be before the end date.');
-                        $('#from_date').val('');
-                        $('#to_date').val('');
-                    }
-                }
-            });
-        });
-    </script> --}}
 @endsection

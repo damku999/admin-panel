@@ -57,6 +57,9 @@ class HomeController extends Controller
         // Get the current month and last month
         $current_month = Carbon::now()->startOfMonth();
         $last_month = Carbon::now()->subMonth()->startOfMonth();
+        $total_renewing_this_month = CustomerInsurance::whereMonth('expired_date', $current_month->month)->whereYear('expired_date', $current_month->year)->count();
+        $already_renewed_this_month = CustomerInsurance::whereMonth('expired_date', $current_month->month)->whereYear('expired_date', $current_month->year)->where('is_renewed', 1)->count();
+        $pending_renewal_this_month = CustomerInsurance::whereMonth('expired_date', $current_month->month)->whereYear('expired_date', $current_month->year)->where('is_renewed', 0)->count();
 
         // Get the sum of final premium with GST and commission amounts for the entire life
         $life_time_final_premium_with_gst = CustomerInsurance::sum('final_premium_with_gst');
@@ -174,7 +177,10 @@ class HomeController extends Controller
             'last_month_transfer_commission_amount',
             'last_month_actual_earnings',
             'json_data',
-            'data'
+            'data',
+            'total_renewing_this_month',
+            'already_renewed_this_month',
+            'pending_renewal_this_month',
         ));
     }
 

@@ -300,11 +300,6 @@
         }
     </style>
 
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css"
-        integrity="sha512-34s5cpvaNG3BknEWSuOncX28vz97bRI59UnVtEEpFX536A7BtZSJHsDyFoCl8S7Dt2TPzcrCEoHBGeM4SUBDBw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
 @endsection
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -396,11 +391,6 @@
                     dropdownAutoWidth: true
                 });
 
-                // Date picker changes
-                $('.datepicker').datepicker({
-                    format: 'yyyy-mm-dd', // Adjust the format as per your requirement
-                    autoclose: true
-                });
                 $('.datepicker[name="issue_start_date"]').on('changeDate', function(selected) {
                     var endDate = $('.datepicker[name="issue_end_date"]');
                     endDate.datepicker('setStartDate', selected.date);

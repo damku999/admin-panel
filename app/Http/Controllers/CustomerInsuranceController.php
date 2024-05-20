@@ -47,6 +47,7 @@ class CustomerInsuranceController extends Controller
      */
     public function index(Request $request)
     {
+
         $customer_insurance_obj = CustomerInsurance::select(['customer_insurances.*', 'customers.name as customer_name', 'branches.name as branch_name', 'brokers.name as broker_name', 'relationship_managers.name as relationship_manager_name', 'premium_types.name AS policy_type_name'])
             ->join('customers', 'customers.id', 'customer_insurances.customer_id')
             ->leftJoin('branches', 'branches.id', 'customer_insurances.branch_id')
@@ -59,8 +60,18 @@ class CustomerInsuranceController extends Controller
                 ->orWhere('customers.name', 'LIKE', '%' . trim($request->search) . '%')
                 ->orWhere('customers.mobile_number', 'LIKE', '%' . trim($request->search) . '%');
         }
+
+        if (isset($request->status) && $request->status != 'all') {
+            $customer_insurance_obj->where('customer_insurances.status', $request->status);
+        }
         if (!empty($request->customer_id)) {
             $customer_insurance_obj->where('customer_insurances.customer_id', $request->customer_id);
+        }
+        if (!empty($request->already_renewed_this_month)) {
+            $customer_insurance_obj->where('customer_insurances.is_renewed', 1);
+        }
+        if (!empty($request->pending_renewal_this_month)) {
+            $customer_insurance_obj->where('customer_insurances.is_renewed', 0);
         }
         // New code for expiring date range filter
         if ($request->filled('start_date') && $request->filled('end_date')) {
@@ -709,13 +720,9 @@ class CustomerInsuranceController extends Controller
                 $this->whatsAppSendMessageWithAttachment($this->insuranceAdded($renew_customer_insurance), $renew_customer_insurance->customer->mobile_number, Storage::path('public' . DIRECTORY_SEPARATOR . $renew_customer_insurance->policy_document_path));
             }
 
-            // Update Status
-            $status = 0;
-            CustomerInsurance::whereId($customer_insurance->id)->update(['status' => $status]);
+            CustomerInsurance::whereId($customer_insurance->id)->update(['status' => 0, 'is_renewed' => 1, 'renewed_date' => Carbon::now(), 'new_insurance_id' => $renew_customer_insurance->id]);
 
-            // Commit And Redirected To Listing
             DB::commit();
-            // return redirect()->back()->with('success', 'Customer Insurance Renewed Successfully.');
             return redirect()->route('customer_insurances.index')->with('success', 'Customer Insurance Renewed Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error

@@ -14,11 +14,15 @@
                 return '';
             }
         }
-        $metricLabels = ['sum_final_premium' => 'Final Premium', 'sum_my_commission' => 'My Commission', 'sum_transfer_commission' => 'Commission Given', 'sum_actual_earnings' => 'My Earning'];
-        
+        $metricLabels = [
+            'sum_final_premium' => 'Final Premium',
+            'sum_my_commission' => 'My Commission',
+            'sum_transfer_commission' => 'Commission Given',
+            'sum_actual_earnings' => 'My Earning',
+        ];
+
     @endphp
     <div class="container-fluid">
-
         <div class="row">
             <div class="card py-1">
                 <div class="card-body overflow-x-auto">
@@ -178,6 +182,68 @@
                 </div>
             </div>
         </div>
+
+        <div class="row"><br />
+            <hr /><br />
+        </div>
+        <!-- Content Row -->
+        <div class="row">
+            <div class="col-xl-3 col-md-4 b-4">
+                <div class="card border-left-primary shadow h-100 py-2" onclick="redirectToCustomerInsuranceIndex()">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Total Renewing This Month</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {{ $total_renewing_this_month }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-4 b-4">
+                <div class="card border-left-success shadow h-100 py-2" onclick="redirectToCustomerInsuranceIndex(1)">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Already Renewed This Month</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {{ $already_renewed_this_month }}
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-4 b-4">
+                <div class="card border-left-warning shadow h-100 py-2" onclick="redirectToCustomerInsuranceIndex(0,1)">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    Pending Renewal This Month</div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {{ $pending_renewal_this_month }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
         <div class="row"><br />
             <hr /><br />
         </div>
@@ -579,6 +645,26 @@
         };
 
         const myChart = new Chart(document.getElementById("earningsChart"), config);
+
+        function redirectToCustomerInsuranceIndex(already_renewed_this_month = 0, pending_renewal_this_month = 0) {
+            var date = new Date();
+
+            // Start of the month
+            var start = new Date(date.getFullYear(), date.getMonth(), 1);
+            var startDate = ("0" + start.getDate()).slice(-2) + "-" +
+                ("0" + (start.getMonth() + 1)).slice(-2) + "-" +
+                start.getFullYear();
+
+            // End of the month
+            var end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+            var endDate = ("0" + end.getDate()).slice(-2) + "-" +
+                ("0" + (end.getMonth() + 1)).slice(-2) + "-" +
+                end.getFullYear();
+
+            const url =
+                `{{ route('customer_insurances.index') }}?start_date=${startDate}&end_date=${endDate}&already_renewed_this_month=${already_renewed_this_month}&pending_renewal_this_month=${pending_renewal_this_month}`;
+            window.location.href = url;
+        }
     </script>
 
 @endsection

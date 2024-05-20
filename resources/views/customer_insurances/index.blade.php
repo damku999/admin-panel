@@ -63,7 +63,7 @@
                     <div class="input-group mt-2">
 
                     </div>
-                    <input type="hidden" name="sort" value="{{ request('sort') }}">
+                    <input type="hidden" name="sort" value="{{ request('sort', 'updated_at') }}">
                     <input type="hidden" name="direction" value="{{ request('direction', 'asc') }}">
                 </form>
             </div>

@@ -61,22 +61,10 @@
                         </div>
                     </div>
                     <div class="input-group mt-2">
-                        {{-- <input type="text" placeholder="Search" name="search"
-                            class="form-control float-right filter_by_key" value="{{ request('search') }}">
 
-                        <!-- New filter for expiring date range -->
-                        <input type="text" placeholder="Exp Start Date" name="start_date" class="form-control datepicker"
-                            value="{{ request('start_date') }}">
-
-                        <input type="text" placeholder="Exp End Date" name="end_date" class="form-control datepicker"
-                            value="{{ request('end_date') }}">
-
-                        <select name="status" class="form-control" id="status">
-                            <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All</option>
-                            <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Active</option>
-                            <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>In Active</option>
-                        </select> --}}
                     </div>
+                    <input type="hidden" name="sort" value="{{ request('sort') }}">
+                    <input type="hidden" name="direction" value="{{ request('direction', 'asc') }}">
                 </form>
             </div>
             <div class="card-body">
@@ -85,7 +73,7 @@
                         <thead>
                             <tr>
                                 <th width="20%">
-                                    <a href="{{ route('customer_insurances.index', ['sort' => 'customer_name', 'direction' => $direction === 'asc' ? 'desc' : 'asc']) }}"
+                                    <a href="{{ route('customer_insurances.index', array_merge(request()->query(), ['sort' => 'customer_name', 'direction' => $direction === 'asc' ? 'desc' : 'asc'])) }}"
                                         class="{{ $sort === 'customer_name' ? 'active' : '' }}">Customer Name
                                         @if ($sort === 'customer_name')
                                             @if ($direction === 'asc')
@@ -99,7 +87,7 @@
                                     </a>
                                 </th>
                                 <th width="25%">
-                                    <a href="{{ route('customer_insurances.index', ['sort' => 'policy_no', 'direction' => $direction === 'asc' ? 'desc' : 'asc']) }}"
+                                    <a href="{{ route('customer_insurances.index', array_merge(request()->query(), ['sort' => 'policy_no', 'direction' => $direction === 'asc' ? 'desc' : 'asc'])) }}"
                                         class="{{ $sort === 'policy_no' ? 'active' : '' }}">POLICY NO.
                                         @if ($sort === 'policy_no')
                                             @if ($direction === 'asc')
@@ -113,7 +101,7 @@
                                     </a>
                                 </th>
                                 <th width="15%">
-                                    <a href="{{ route('customer_insurances.index', ['sort' => 'registration_no', 'direction' => $direction === 'asc' ? 'desc' : 'asc']) }}"
+                                    <a href="{{ route('customer_insurances.index', array_merge(request()->query(), ['sort' => 'registration_no', 'direction' => $direction === 'asc' ? 'desc' : 'asc'])) }}"
                                         class="{{ $sort === 'registration_no' ? 'active' : '' }}">Registration NO.
                                         @if ($sort === 'registration_no')
                                             @if ($direction === 'asc')
@@ -127,7 +115,7 @@
                                     </a>
                                 </th>
                                 <th width="15%">
-                                    <a href="{{ route('customer_insurances.index', ['sort' => 'start_date', 'direction' => $direction === 'asc' ? 'desc' : 'asc']) }}"
+                                    <a href="{{ route('customer_insurances.index', array_merge(request()->query(), ['sort' => 'start_date', 'direction' => $direction === 'asc' ? 'desc' : 'asc'])) }}"
                                         class="{{ $sort === 'start_date' ? 'active' : '' }}">Start Date
                                         @if ($sort === 'start_date')
                                             @if ($direction === 'asc')
@@ -141,8 +129,8 @@
                                     </a>
                                 </th>
                                 <th width="15%">
-                                    <a href="{{ route('customer_insurances.index', ['sort' => 'expired_date', 'direction' => $direction === 'asc' ? 'desc' : 'asc']) }}"
-                                        class="{{ $sort === 'expired_date' ? 'active' : '' }}"> Expired Date
+                                    <a href="{{ route('customer_insurances.index', array_merge(request()->query(), ['sort' => 'expired_date', 'direction' => $direction === 'asc' ? 'desc' : 'asc'])) }}"
+                                        class="{{ $sort === 'expired_date' ? 'active' : '' }}">Expired Date
                                         @if ($sort === 'expired_date')
                                             @if ($direction === 'asc')
                                                 <i class="fas fa-sort-up"></i>
@@ -155,7 +143,7 @@
                                     </a>
                                 </th>
                                 <th width="15%">
-                                    <a href="{{ route('customer_insurances.index', ['sort' => 'premium_types.name', 'direction' => $direction === 'asc' ? 'desc' : 'asc']) }}"
+                                    <a href="{{ route('customer_insurances.index', array_merge(request()->query(), ['sort' => 'premium_types.name', 'direction' => $direction === 'asc' ? 'desc' : 'asc'])) }}"
                                         class="{{ $sort === 'premium_types.name' ? 'active' : '' }}">Premium Type
                                         @if ($sort === 'premium_types.name')
                                             @if ($direction === 'asc')
@@ -170,7 +158,7 @@
                                 </th>
 
                                 <th width="15%">
-                                    <a href="{{ route('customer_insurances.index', ['sort' => 'status', 'direction' => $direction === 'asc' ? 'desc' : 'asc']) }}"
+                                    <a href="{{ route('customer_insurances.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => $direction === 'asc' ? 'desc' : 'asc'])) }}"
                                         class="{{ $sort === 'status' ? 'active' : '' }}">Status
                                         @if ($sort === 'status')
                                             @if ($direction === 'asc')

@@ -35,39 +35,42 @@ trait WhatsAppApiTrait
     }
     protected function whatsAppSendMessageWithAttachment($messageText, $receiverId, $filePath)
     {
-        try {
+        if (env('APP_ENV') == 'production') {
+            try {
 
-            $curl = curl_init();
+                $curl = curl_init();
 
-            $fileHandle = fopen($filePath, 'r');
+                $fileHandle = fopen($filePath, 'r');
 
-            $fileSize = filesize($filePath);
-            curl_setopt_array($curl, [
-                CURLOPT_URL => $this->base_url . '?action=send',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'POST',
-                CURLOPT_POSTFIELDS => ['senderId' => $this->senderId,
-                    'authToken' => $this->authToken,
-                    'messageText' => $messageText,
-                    'receiverId' => $this->validateAndFormatMobileNumber($receiverId),
-                    'uploadFile' => curl_file_create($filePath, mime_content_type($filePath), basename($filePath)),
-                ],
-            ]);
+                $fileSize = filesize($filePath);
+                curl_setopt_array($curl, [
+                    CURLOPT_URL => $this->base_url . '?action=send',
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_ENCODING => '',
+                    CURLOPT_MAXREDIRS => 10,
+                    CURLOPT_TIMEOUT => 0,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    CURLOPT_CUSTOMREQUEST => 'POST',
+                    CURLOPT_POSTFIELDS => ['senderId' => $this->senderId,
+                        'authToken' => $this->authToken,
+                        'messageText' => $messageText,
+                        'receiverId' => $this->validateAndFormatMobileNumber($receiverId),
+                        'uploadFile' => curl_file_create($filePath, mime_content_type($filePath), basename($filePath)),
+                    ],
+                ]);
 
-            $response = curl_exec($curl);
+                $response = curl_exec($curl);
 
-            curl_close($curl);
-            fclose($fileHandle);
-            return $response;
-        } catch (\Throwable $th) {
-            return $th->getMessage();
+                curl_close($curl);
+                fclose($fileHandle);
+                return $response;
+            } catch (\Throwable $th) {
+                return $th->getMessage();
+            }
+        } else {
+            return true;
         }
-
     }
 
     public function validateAndFormatMobileNumber($mobileNumber)

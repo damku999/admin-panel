@@ -17,12 +17,12 @@
                 @csrf
                 <div class="card-body">
                     <div class="form-group row">
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        {{-- <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label for="Select Columns" class="form-label">&nbsp;</label>
                             <button type="button" class="btn btn-primary form-control" id="openModalPopUpColumn">
                                 Select Columns
                             </button>
-                        </div>
+                        </div> --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
                             <label for="reportName" class="form-label"><span style="color:red;">*</span>Report
                                 Name:</label>
@@ -40,7 +40,19 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 fields-to-toggle due_policy_detail">
+                            <label for="policyDueDate" class="form-label"><span style="color:red;">*</span>Due Month &
+                                Year</label>
+                            <div class="d-flex">
+                                <input type="text" placeholder="Start Date" name="due_start_date"
+                                    class="form-control datepicker_month" value="{{ request('due_start_date') }}"
+                                    style="margin-right: 10px;" autocomplete="off" readonly id="due_start_date">
+                                <input type="text" placeholder="End Date" name="due_end_date"
+                                    class="form-control datepicker_month" value="{{ request('due_end_date') }}"
+                                    style="margin-right: 10px;" autocomplete="off" readonly id="due_end_date">
+                            </div>
+                        </div>
+                        {{-- <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <label for="daterange" class="form-label"><span style="color:red;">*</span>Creation
                                 Date</label>
                             <div class="d-flex">
@@ -51,7 +63,7 @@
                                     class="form-control datepicker" value="{{ request('record_creation_end_date') }}"
                                     style="margin-right: 10px;">
                             </div>
-                        </div>
+                        </div> --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
                             <label for="customer_id" class="form-label">Customer : </label>
                             <select name="customer_id" id="customer_id" class=" w-100">
@@ -183,18 +195,7 @@
                                     style="margin-right: 10px;">
                             </div>
                         </div>
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 fields-to-toggle due_policy_detail">
-                            <label for="policyDueDate" class="form-label"><span style="color:red;">*</span>Month &
-                                Year</label>
-                            <div class="d-flex">
-                                <input type="text" placeholder="Start Date" name="due_start_date"
-                                    class="form-control datepicker_month" value="{{ request('due_start_date') }}"
-                                    style="margin-right: 10px;" autocomplete="off" readonly id="due_start_date">
-                                <input type="text" placeholder="End Date" name="due_end_date"
-                                    class="form-control datepicker_month" value="{{ request('due_end_date') }}"
-                                    style="margin-right: 10px;" autocomplete="off" readonly id="due_end_date">
-                            </div>
-                        </div>
+
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 fields-to-toggle policy_detail ">
                         </div>
                     </div>
@@ -311,7 +312,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
-            var openModalPopUpColumn = document.getElementById("openModalPopUpColumn");
+            /* var openModalPopUpColumn = document.getElementById("openModalPopUpColumn");
 
             openModalPopUpColumn.addEventListener("click", function() {
                 var reportName = document.querySelector("#reportName").value;
@@ -331,7 +332,7 @@
                         });
                 } else
                     toastr.error('Select Report first.', 'Error');
-            });
+            }); */
             const reportNameSelect = document.getElementById("reportName");
             const fieldsToToggle = document.querySelectorAll(".fields-to-toggle");
 

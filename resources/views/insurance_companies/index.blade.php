@@ -106,7 +106,7 @@
                         </tbody>
                     </table>
 
-                    {{ $insurance_companies->links() }}
+                    {{ $insurance_companies->appends($request)->links() }}
                 </div>
             </div>
         </div>

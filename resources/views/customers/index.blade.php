@@ -181,7 +181,7 @@
                         </tbody>
                     </table>
 
-                    {{ $customers->links() }}
+                    {{ $customers->appends($request)->links() }}
                 </div>
             </div>
         </div>

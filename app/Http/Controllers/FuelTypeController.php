@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\FuelTypesExport;
 use App\Models\FuelType;
 use Illuminate\Http\Request;
-use App\Exports\FuelTypesExport;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class FuelTypeController extends Controller
 {
@@ -25,7 +25,7 @@ class FuelTypeController extends Controller
     }
 
     /**
-     * List FuelType 
+     * List FuelType
      * @param Nill
      * @return Array $fuel_type
      * @author Darshan Baraiya
@@ -38,11 +38,11 @@ class FuelTypeController extends Controller
         }
 
         $fuel_type = $fuel_type_obj->paginate(10);
-        return view('fuel_type.index', ['fuel_type' => $fuel_type]);
+        return view('fuel_type.index', ['fuel_type' => $fuel_type, 'request' => $request->all()]);
     }
 
     /**
-     * Create FuelType 
+     * Create FuelType
      * @param Nill
      * @return Array $fuel_type
      * @author Darshan Baraiya
@@ -94,11 +94,11 @@ class FuelTypeController extends Controller
     {
         // Validation
         $validate = Validator::make([
-            'fuel_type_id'   => $fuel_type_id,
-            'status' => $status
+            'fuel_type_id' => $fuel_type_id,
+            'status' => $status,
         ], [
-            'fuel_type_id'   =>  'required|exists:fuel_types,id',
-            'status' =>  'required|in:0,1',
+            'fuel_type_id' => 'required|exists:fuel_types,id',
+            'status' => 'required|in:0,1',
         ]);
 
         // If Validations Fails
@@ -126,7 +126,7 @@ class FuelTypeController extends Controller
     public function edit(FuelType $fuel_type)
     {
         return view('fuel_type.edit')->with([
-            'fuel_type'  => $fuel_type
+            'fuel_type' => $fuel_type,
         ]);
     }
 
@@ -177,7 +177,7 @@ class FuelTypeController extends Controller
     }
 
     /**
-     * Import FuelTypes 
+     * Import FuelTypes
      * @param Null
      * @return View File
      */
@@ -185,7 +185,6 @@ class FuelTypeController extends Controller
     {
         return view('fuel_type.import');
     }
-
 
     public function export()
     {

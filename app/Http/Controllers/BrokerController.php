@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\BrokersExport;
 use App\Models\Broker;
 use Illuminate\Http\Request;
-use App\Exports\BrokersExport;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BrokerController extends Controller
 {
@@ -25,9 +25,8 @@ class BrokerController extends Controller
         $this->middleware('permission:broker-delete', ['only' => ['delete']]);
     }
 
-
     /**
-     * List Broker 
+     * List Broker
      * @param Nill
      * @return Array $broker
      * @author Darshan Baraiya
@@ -40,11 +39,11 @@ class BrokerController extends Controller
         }
 
         $brokers = $broker_obj->paginate(10);
-        return view('brokers.index', ['brokers' => $brokers]);
+        return view('brokers.index', ['brokers' => $brokers, 'request' => $request->all()]);
     }
 
     /**
-     * Create Broker 
+     * Create Broker
      * @param Nill
      * @return Array $broker
      * @author Darshan Baraiya
@@ -66,7 +65,6 @@ class BrokerController extends Controller
         $validation_array = [
             'name' => 'required',
         ];
-
 
         $request->validate($validation_array);
         DB::beginTransaction();
@@ -99,11 +97,11 @@ class BrokerController extends Controller
     {
         // Validation
         $validate = Validator::make([
-            'broker_id'   => $broker_id,
-            'status' => $status
+            'broker_id' => $broker_id,
+            'status' => $status,
         ], [
-            'broker_id'   =>  'required|exists:brokers,id',
-            'status' =>  'required|in:0,1',
+            'broker_id' => 'required|exists:brokers,id',
+            'status' => 'required|in:0,1',
         ]);
 
         // If Validations Fails
@@ -137,7 +135,7 @@ class BrokerController extends Controller
     public function edit(Broker $broker)
     {
         return view('brokers.edit')->with([
-            'broker'  => $broker
+            'broker' => $broker,
         ]);
     }
 
@@ -196,7 +194,7 @@ class BrokerController extends Controller
     }
 
     /**
-     * Import Brokers 
+     * Import Brokers
      * @param Null
      * @return View File
      */
@@ -204,7 +202,6 @@ class BrokerController extends Controller
     {
         return view('brokers.import');
     }
-
 
     public function export()
     {

@@ -105,7 +105,7 @@
                         </tbody>
                     </table>
 
-                    {{ $brokers->links() }}
+                    {{ $brokers->appends($request)->links()}}
                 </div>
             </div>
         </div>

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\InsuranceCompany;
-use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\InsuranceCompanyExport;
+use App\Models\InsuranceCompany;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InsuranceCompanyController extends Controller
 {
@@ -25,9 +25,8 @@ class InsuranceCompanyController extends Controller
         $this->middleware('permission:insurance_company-delete', ['only' => ['delete']]);
     }
 
-
     /**
-     * List InsuranceCompany 
+     * List InsuranceCompany
      * @param Nill
      * @return Array $insurance_company
      * @author Darshan Baraiya
@@ -40,11 +39,11 @@ class InsuranceCompanyController extends Controller
         }
 
         $insurance_companies = $insurance_company_obj->paginate(10);
-        return view('insurance_companies.index', ['insurance_companies' => $insurance_companies]);
+        return view('insurance_companies.index', ['insurance_companies' => $insurance_companies, 'request' => $request->all()]);
     }
 
     /**
-     * Create InsuranceCompany 
+     * Create InsuranceCompany
      * @param Nill
      * @return Array $insurance_company
      * @author Darshan Baraiya
@@ -66,7 +65,6 @@ class InsuranceCompanyController extends Controller
         $validation_array = [
             'name' => 'required',
         ];
-
 
         $request->validate($validation_array);
         DB::beginTransaction();
@@ -99,11 +97,11 @@ class InsuranceCompanyController extends Controller
     {
         // Validation
         $validate = Validator::make([
-            'insurance_company_id'   => $insurance_company_id,
-            'status' => $status
+            'insurance_company_id' => $insurance_company_id,
+            'status' => $status,
         ], [
-            'insurance_company_id'   =>  'required|exists:insurance_companies,id',
-            'status' =>  'required|in:0,1',
+            'insurance_company_id' => 'required|exists:insurance_companies,id',
+            'status' => 'required|in:0,1',
         ]);
 
         // If Validations Fails
@@ -137,7 +135,7 @@ class InsuranceCompanyController extends Controller
     public function edit(InsuranceCompany $insurance_company)
     {
         return view('insurance_companies.edit')->with([
-            'insurance_company'  => $insurance_company
+            'insurance_company' => $insurance_company,
         ]);
     }
 
@@ -196,7 +194,7 @@ class InsuranceCompanyController extends Controller
     }
 
     /**
-     * Import InsuranceCompanys 
+     * Import InsuranceCompanys
      * @param Null
      * @return View File
      */
@@ -204,7 +202,6 @@ class InsuranceCompanyController extends Controller
     {
         return view('insurance_companies.import');
     }
-
 
     public function export()
     {

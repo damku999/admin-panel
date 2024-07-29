@@ -60,7 +60,7 @@ class CustomerController extends Controller
         }
 
         $customers = $customer_obj->paginate(10);
-        return view('customers.index', ['customers' => $customers, 'sortField' => $sortField, 'sortOrder' => $sortOrder]);
+        return view('customers.index', ['customers' => $customers, 'sortField' => $sortField, 'sortOrder' => $sortOrder, 'request' => $request->all()]);
     }
 
     /**

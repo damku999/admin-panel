@@ -102,7 +102,7 @@
                         </tbody>
                     </table>
 
-                    {{ $fuel_type->links() }}
+                    {{ $fuel_type->appends($request)->links() }}
                 </div>
             </div>
         </div>

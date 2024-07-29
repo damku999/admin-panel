@@ -248,8 +248,7 @@
                             @endforelse
                         </tbody>
                     </table>
-
-                    {{ $customer_insurances->links() }}
+                    {{ $customer_insurances->appends($request)->links() }}
                 </div>
             </div>
         </div>

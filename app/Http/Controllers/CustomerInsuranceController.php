@@ -91,6 +91,7 @@ class CustomerInsuranceController extends Controller
             'customers' => $customers,
             'sort' => $sort,
             'direction' => $direction,
+            'request' => $request->all(),
         ]);
     }
 

@@ -232,7 +232,7 @@
                                                     class="fa fa-download"></i></a>
 
                                             <a href="{{ route('customer_insurances.sendWADocument', ['customer_insurance' => $customer_insurance->id]) }}"
-                                                class="btn btn-info m-2"><i class="fa fa-whatsapp"></i></a>
+                                                class="btn btn-info m-2"><i class="fab fa-whatsapp"></i></a>
                                         @endif
 
                                         {{-- <a class="btn btn-danger m-2" href="javascript:void(0);"

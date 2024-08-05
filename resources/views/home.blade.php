@@ -218,7 +218,7 @@
                                 </div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                                <i class="fa fas fa-rupee-sign fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
@@ -236,7 +236,7 @@
                                     {{ $pending_renewal_this_month }}</div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                                <i class="fa fas fa-rupee-sign fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
@@ -261,7 +261,7 @@
                                 </div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                                <i class="fa fas fa-rupee-sign fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
@@ -279,7 +279,7 @@
                                 </div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                                <i class="fa fas fa-rupee-sign fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
@@ -296,7 +296,7 @@
                                     &#8377; {{ number_format($current_month_transfer_commission_amount, 2) }}</div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                                <i class="fa fas fa-rupee-sign fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
@@ -313,7 +313,7 @@
                                     &#8377; {{ number_format($current_month_actual_earnings, 2) }}</div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                                <i class="fa fas fa-rupee-sign fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
@@ -336,7 +336,7 @@
                                 </div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                                <i class="fa fas fa-rupee-sign fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
@@ -355,7 +355,7 @@
                                 </div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                                <i class="fa fas fa-rupee-sign fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
@@ -373,7 +373,7 @@
                                     &#8377; {{ number_format($last_month_transfer_commission_amount, 2) }}</div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                                <i class="fa fas fa-rupee-sign fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
@@ -390,7 +390,7 @@
                                     &#8377; {{ number_format($last_month_actual_earnings, 2) }}</div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                                <i class="fa fas fa-rupee-sign fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
@@ -413,7 +413,7 @@
                                 </div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                                <i class="fa fas fa-rupee-sign fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
@@ -432,7 +432,7 @@
                                 </div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                                <i class="fa fas fa-rupee-sign fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
@@ -450,7 +450,7 @@
                                     &#8377; {{ number_format($life_time_transfer_commission_amount, 2) }}</div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                                <i class="fa fas fa-rupee-sign fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>
@@ -468,7 +468,7 @@
                                     &#8377; {{ number_format($life_time_actual_earnings, 2) }}</div>
                             </div>
                             <div class="col-auto">
-                                <i class="fa fad fa-rupee-sign fa-2x text-gray-300"></i>
+                                <i class="fa fas fa-rupee-sign fa-2x text-gray-300"></i>
                             </div>
                         </div>
                     </div>

@@ -209,7 +209,7 @@
                             class="fas fa-download"></i> Download</button>
                     <button type="submit" name="view"
                         class="btn btn-primary btn-reprts float-right  mr-3 mb-3 filter_by_click"><i
-                            class="fas fa-view"></i> View</button>
+                            class="fa-solid fa-eye"></i> View</button>
                     <a class="btn btn-warning float-right mr-3 mb-3 filter_by_click" href="{{ route('reports.index') }}">
                         <i class="fas fa-redo"></i> Cancel</a>
                 </div>

@@ -109,7 +109,7 @@
             var token = "{{ csrf_token() }}";
             $.ajax({
                 type: "POST",
-                url: "{{ url(\Config::get('app.url')) }}delete_common",
+                url: "{{ url(config('app.url')) }}delete_common",
                 data: {
                     _token: token,
                     record_id: record_id,

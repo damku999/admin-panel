@@ -113,7 +113,7 @@ class CustomerInsuranceController extends Controller
             'fuel_type' => FuelType::select('id', 'name')->get(),
             'premium_types' => PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies')->get(),
             'reference_by_user' => ReferenceUser::select('id', 'name')->get(),
-            'life_insurance_payment_mode' => Config::get('constants.LIFE_INSURANCE_PAYMENT_MODE'),
+            'life_insurance_payment_mode' => config('constants.LIFE_INSURANCE_PAYMENT_MODE'),
         ];
         return view('customer_insurances.add', $response);
     }
@@ -365,7 +365,7 @@ class CustomerInsuranceController extends Controller
             'fuel_type' => FuelType::select('id', 'name')->get(),
             'premium_types' => PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies')->get(),
             'reference_by_user' => ReferenceUser::select('id', 'name')->get(),
-            'life_insurance_payment_mode' => Config::get('constants.LIFE_INSURANCE_PAYMENT_MODE'),
+            'life_insurance_payment_mode' => config('constants.LIFE_INSURANCE_PAYMENT_MODE'),
         ];
         // dd($response);
         return view('customer_insurances.edit')->with($response);
@@ -582,7 +582,7 @@ class CustomerInsuranceController extends Controller
             'fuel_type' => FuelType::select('id', 'name')->get(),
             'premium_types' => PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies')->get(),
             'reference_by_user' => ReferenceUser::select('id', 'name')->get(),
-            'life_insurance_payment_mode' => Config::get('constants.LIFE_INSURANCE_PAYMENT_MODE'),
+            'life_insurance_payment_mode' => config('constants.LIFE_INSURANCE_PAYMENT_MODE'),
         ];
         // dd($response);
         return view('customer_insurances.renew')->with($response);

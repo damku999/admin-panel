@@ -28,7 +28,7 @@
                                         <i class="fas fa-redo"></i>
                                     </button>
 
-                                    <a href="{{ url(Config::get('app.url') . 'broker/create') }}"
+                                    <a href="{{ url(config('app.url') . 'broker/create') }}"
                                         class="btn btn-default ml15" style="max-width: 125px;">
                                         <i class="fas fa-plus"></i> &nbsp; Add {{ $module_name }}
                                     </a>

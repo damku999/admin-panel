@@ -234,10 +234,11 @@
                                             <a href="{{ route('customer_insurances.sendWADocument', ['customer_insurance' => $customer_insurance->id]) }}"
                                                 class="btn btn-info m-2"><i class="fab fa-whatsapp"></i></a>
                                         @endif
-
-                                        {{-- <a class="btn btn-danger m-2" href="javascript:void(0);"
-                                            onclick="delete_conf_common('{{ $customer_insurance->id }}','CustomerInsurance', 'Customer Insurance', '{{ route('customer_insurances.index') }}');"><i
-                                                class="fas fa-trash"></i></a> --}}
+                                        @if (auth()->user()->hasPermissionTo('customer-insurance-delete'))
+                                            <a class="btn btn-danger m-2" href="javascript:void(0);"
+                                                onclick="delete_conf_common('{{ $customer_insurance->id }}','CustomerInsurance', 'Customer Insurance', '{{ route('customer_insurances.index') }}');"><i
+                                                    class="fas fa-trash"></i></a>
+                                        @endif
                                         {{-- <a class="btn btn-danger m-2" href="javascript:void(0);" onclick="delete_conf_common('{{ $customer_insurance->id }}','CustomerInsurance', 'CustomerInsurance', '{{ route('customer_insurances.index') }}');"><i class="fas fa-trash"></i></a> --}}
                                     </td>
                                 </tr>

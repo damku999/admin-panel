@@ -100,6 +100,7 @@ Welcome to the world of insurance solutions! I'm Parth Rawal, your dedicated ins
 
 Best regards,
 Parth Rawal
+https://parthrawal.in
 Your Trusted Insurance Advisor
 \"Think of Insurance, Think of Us.\"";
     }
@@ -113,6 +114,35 @@ Thank you for entrusting me with your insurance needs. Attached, you'll find the
 
 Best regards,
 Parth Rawal
+https://parthrawal.in
+Your Trusted Insurance Advisor
+\"Think of Insurance, Think of Us.\"";
+    }
+
+    public function renewalReminder($customer_insurance)
+    {
+        $expired_date = date('d-m-Y', strtotime($customer_insurance->expired_date));
+        return "Dear *{$customer_insurance->customer->name}*
+
+Your *{$customer_insurance->premiumType->name}*  Under Policy No *{$customer_insurance->policy_no}* of *{$customer_insurance->insuranceCompany->name}* is due for renewal on *{$expired_date}*. To ensure continuous coverage, please renew by the due date. For assistance, contact us at +919727793123.
+
+Best regards,
+Parth Rawal
+https://parthrawal.in
+Your Trusted Insurance Advisor
+\"Think of Insurance, Think of Us.\"";
+    }
+
+    public function renewalReminderVehicle($customer_insurance)
+    {
+        $expired_date = date('d-m-Y', strtotime($customer_insurance->expired_date));
+        return "Dear *{$customer_insurance->customer->name}*
+
+Your *{$customer_insurance->premiumType->name}* Under Policy No *{$customer_insurance->policy_no}* of *{$customer_insurance->insuranceCompany->name}* for Vehicle Number *{$customer_insurance->registration_no}* is due for renewal on *{$expired_date}*. To ensure continuous coverage, please renew by the due date. For assistance, contact us at +919727793123.
+
+Best regards,
+Parth Rawal
+https://parthrawal.in
 Your Trusted Insurance Advisor
 \"Think of Insurance, Think of Us.\"";
     }

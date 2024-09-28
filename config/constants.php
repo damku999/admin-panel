@@ -10,7 +10,8 @@ return [
     ],
     'REPORTS' => [
         'insurance_detail' => 'Insurance Policy Details',
-        'due_policy_detail' => 'Due Policy Details'
+        'due_policy_detail' => 'Due Policy Details',
+        'cross_selling' => 'Cross Selling Report',
     ],
     'INSURANCE_DETAIL' => [
         [

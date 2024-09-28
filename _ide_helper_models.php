@@ -1,7 +1,6 @@
 <?php
 
 // @formatter:off
-// phpcs:ignoreFile
 /**
  * A helper file for your Eloquent Models
  * Copy the phpDocs from this file to the correct Model,
@@ -329,6 +328,12 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance withoutTrashed()
  * @mixin \Eloquent
+ * @property int $is_renewed
+ * @property string|null $renewed_date
+ * @property int|null $new_insurance_id
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereIsRenewed($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereNewInsuranceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereRenewedDate($value)
  */
 	class CustomerInsurance extends \Eloquent {}
 }

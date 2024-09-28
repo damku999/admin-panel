@@ -386,6 +386,14 @@ class CustomerInsuranceController extends Controller
             return redirect()->back()->with('error', 'Document Not Sent!');
         }
     }
+    public function sendRenewalReminderWA(CustomerInsurance $customer_insurance)
+    {
+        $messageText = $customer_insurance->premiumType->is_vehicle == 1 ? $this->renewalReminderVehicle($customer_insurance) : $this->renewalReminder($customer_insurance);
+        $receiverId = $customer_insurance->customer->mobile_number;
+        $this->whatsAppSendMessage($messageText, $receiverId);
+        return redirect()->back()->with('success', 'Renewal Reminder Sent Successfully!');
+    }
+
     /**
      * Update CustomerInsurance
      * @param Request $request, CustomerInsurance $customer_insurance

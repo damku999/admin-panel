@@ -224,6 +224,13 @@
                                                     class="btn btn-primary m-2">
                                                     Renew
                                                 </a>
+                                                <a href="{{ route('customer_insurances.sendWADocument', ['customer_insurance' => $customer_insurance->id]) }}"
+                                                    class="btn btn-info m-2">
+                                                    <span class="icon-group">
+                                                        <i class="fa fa-bell" aria-hidden="true"></i>
+                                                        <i class="fab fa-whatsapp"></i>
+                                                    </span>
+                                                </a>
                                             @endif
                                         @endif
                                         @if ($customer_insurance->policy_document_path)
@@ -283,4 +290,19 @@
     </script>
 @endsection
 @section('stylesheets')
+    <style>
+        .icon-group {
+            display: inline-flex !important;
+            align-items: center !important;
+        }
+
+        .icon-group svg {
+            margin-left: 10px !important;
+            /* Adjust spacing as needed */
+        }
+
+        .icon-group svg:first-child {
+            margin-left: 0 !important;
+        }
+    </style>
 @endsection

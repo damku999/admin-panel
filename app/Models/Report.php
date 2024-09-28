@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Carbon;
 use App\Models\CustomerInsurance;
-use Spatie\Activitylog\LogOptions;
 use App\Traits\TableRecordObserver;
-use Spatie\Permission\Traits\HasRoles;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Carbon;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * App\Models\Report
@@ -53,7 +53,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  */
 class Report extends Authenticatable
 {
-    use  HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
+    use HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
 
     protected $guarded = [];
 
@@ -81,6 +81,7 @@ class Report extends Authenticatable
 
     public static function getInsuranceReport($filters)
     {
+
         $report = Report::where(['user_id' => auth()->user()->id, 'name' => $filters['report_name']])->first();
         $report->selected_columns = collect($report->selected_columns)->map(function ($item) {
             $item['select'] = $item['table_column_name'] . ' as ' . $item['display_name'];

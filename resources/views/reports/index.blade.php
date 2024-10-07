@@ -328,8 +328,6 @@
             </div>
         </div>
     @endif
-
-
 @endsection
 
 @section('stylesheets')

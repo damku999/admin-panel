@@ -224,7 +224,7 @@
                                                     class="btn btn-primary m-2">
                                                     Renew
                                                 </a>
-                                                <a href="{{ route('customer_insurances.sendWADocument', ['customer_insurance' => $customer_insurance->id]) }}"
+                                                <a href="{{ route('customer_insurances.sendRenewalReminderWA', ['customer_insurance' => $customer_insurance->id]) }}"
                                                     class="btn btn-info m-2">
                                                     <span class="icon-group">
                                                         <i class="fa fa-bell" aria-hidden="true"></i>

@@ -154,14 +154,14 @@
                                 @endforeach
                             </select>
                         </div>
-
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
-                            <label for="premium_type_id" class="form-label">Fuel Type : </label>
-                            <select name="premium_type_id" class="form-control" id="premium_type_id">
-                                <option selected="selected" disabled="disabled">Select Fuel Type</option>
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <label for="premium_type_id" class="form-label">Premium Type:</label>
+                            <select name="premium_type_id[]" class="form-control" id="premium_type_id"
+                                multiple="multiple">
+                                <option value="" disabled>Select Premium Type</option>
                                 @foreach ($premium_types as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ request('premium_type_id') == $item->id ? 'selected' : '' }}>
+                                        {{ in_array($item->id, request('premium_type_id', [])) ? 'selected' : '' }}>
                                         {{ $item->name }}
                                     </option>
                                 @endforeach
@@ -305,7 +305,7 @@
                                 <tr>
                                     <th>Customer Name</th>
                                     <th>Total Premium Collected (Last Year)</th>
-                                    @foreach ($premium_types as $premiumType)
+                                    @foreach ($premiumTypes as $premiumType)
                                         <th>{{ $premiumType->name }}</th>
                                     @endforeach
                                 </tr>
@@ -313,11 +313,23 @@
                             <tbody>
                                 @foreach ($crossSelling as $customerData)
                                     <tr>
-                                        <td>{{ $customerData['customer_name'] }}</td>
+                                        <td>
+                                            <a href="{{ route('customer_insurances.index', ['customer_id' => $customerData['id']]) }}"
+                                                target="_blank">
+                                                {{ $customerData['customer_name'] }}
+                                            </a>
+                                        </td>
+
                                         <td>{{ number_format($customerData['total_premium_last_year'], 2) }}</td>
                                         <!-- New Total Premium Column -->
-                                        @foreach ($premium_types as $premiumType)
-                                            <td>{{ $customerData[$premiumType->name] }}</td>
+                                        @foreach ($premiumTypes as $premiumType)
+                                            <td>{{ $customerData['premium_totals'][$premiumType->name]['has_premium'] }}
+                                                @if (!empty($customerData['premium_totals'][$premiumType->name]['amount']))
+                                                    /
+                                                    <i class="fa fas fa-rupee-sign"></i>
+                                                    {{ $customerData['premium_totals'][$premiumType->name]['amount'] }}
+                                                @endif
+                                            </td>
                                         @endforeach
                                     </tr>
                                 @endforeach
@@ -424,9 +436,25 @@
             });
 
             $(document).ready(function() {
+                // Initialize Select2
                 $('#customer_id').select2({
                     dropdownAutoWidth: true
                 });
+                // Get selected values from the request
+                const selectedValues = {!! json_encode(request('premium_type_id', [])) !!};
+
+                // If no values are selected in the request, select all options except empty values
+                if (selectedValues.length === 0) {
+                    $('#premium_type_id option').each(function() {
+                        const value = $(this).val();
+                        if (value) { // Avoid selecting empty options
+                            $(this).prop('selected', true);
+                        }
+                    });
+                }
+
+                // Trigger change event to update Select2
+                $('#premium_type_id').trigger('change');
 
                 $('.datepicker[name="issue_start_date"]').on('changeDate', function(selected) {
                     var endDate = $('.datepicker[name="issue_end_date"]');

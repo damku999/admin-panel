@@ -18,7 +18,7 @@
             <div class="col-md-3 border-right">
                 <div class="d-flex flex-column align-items-center text-center p-3 py-5">
                     <img class="rounded-circle mt-5" width="150px" src="{{ asset('admin/img/undraw_profile.svg') }}">
-                    <span class="font-weight-bold">{{ auth()->user()->full_name }}</span>
+                    <span class="font-weight-bold">{{ auth()->user()->full_name ?? 'Guest' }}</span>
                     <span class="text-black-50"><i>Role:
                             {{ auth()->user()->roles ? auth()->user()->roles->pluck('name')->first() : 'N/A' }}</i></span>
                     <span class="text-black-50">{{ auth()->user()->email }}</span>

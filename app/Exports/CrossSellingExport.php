@@ -17,9 +17,15 @@ class CrossSellingExport implements FromCollection, WithHeadings, ShouldAutoSize
 {
     protected $premiumTypes;
 
-    public function __construct()
+    public function __construct(array $filters)
     {
-        $this->premiumTypes = PremiumType::all(); // Load premium types when class is initialized
+
+        $premiumTypes = PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies');
+        if ($filters['premium_type_id']) {
+            $premiumTypes = $premiumTypes->whereIn('id', $filters['premium_type_id']);
+        }
+        $this->premiumTypes = $premiumTypes->get();
+
     }
 
     /**
@@ -40,12 +46,19 @@ class CrossSellingExport implements FromCollection, WithHeadings, ShouldAutoSize
 
             // Loop through each premium type dynamically
             foreach ($this->premiumTypes as $premiumType) {
+                // Check if the customer has this premium type
                 $hasPremiumType = $customer->insurance->contains(function ($insurance) use ($premiumType) {
                     return $insurance->premiumType->id === $premiumType->id;
                 });
 
-                // Add the premium type status dynamically to the customer data
-                $customerData[$premiumType->name] = $hasPremiumType ? 'Yes' : 'No';
+                // Calculate the total amount for the current premium type
+                $premiumTotal = $customer->insurance
+                    ->where('premium_type_id', $premiumType->id) // Filter by premium type
+                    ->sum('final_premium_with_gst'); // Sum the 'final_premium_with_gst' column
+
+                // Add the premium type status and amount to the customer data
+                $customerData[$premiumType->name] = $hasPremiumType ? 'Yes' : 'No'; // Status
+                $customerData[$premiumType->name . ' (Sum Insured)'] = $premiumTotal; // Amount
             }
 
             return $customerData;
@@ -61,17 +74,19 @@ class CrossSellingExport implements FromCollection, WithHeadings, ShouldAutoSize
     {
         $header = ['Customer Name', 'Total Premium (Last Year)'];
 
-        // Add dynamic premium type headers
+        // Add dynamic premium type headers with 'Yes/No' and 'amount' suffix
         foreach ($this->premiumTypes as $premiumType) {
-            $header[] = $premiumType->name;
+            $header[] = $premiumType->name; // Header for Yes/No status
+            $header[] = $premiumType->name . ' (Sum Insured)'; // Header for amount
         }
 
         return $header;
     }
-/**
- * @param Worksheet $sheet
- * @return array
- */
+
+    /**
+     * @param Worksheet $sheet
+     * @return array
+     */
     public function styles(Worksheet $sheet): array
     {
         return [

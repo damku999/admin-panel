@@ -142,7 +142,11 @@ class Report extends Authenticatable
             })
             ->when(!empty($filters['premium_type_id']), function ($query) use ($filters) {
                 return $query->whereHas('premiumType', function ($query) use ($filters) {
-                    $query->where('id', $filters['premium_type_id']);
+                    if (is_array($filters['premium_type_id'])) {
+                        $query->whereIn('id', $filters['premium_type_id']);
+                    } else {
+                        $query->where('id', $filters['premium_type_id']);
+                    }
                 });
             })
             ->when(!empty($filters['customer_id']), function ($query) use ($filters) {

@@ -56,6 +56,7 @@ Route::middleware('auth')->prefix('customers')->name('customers.')->group(functi
     Route::post('/store', [CustomerController::class, 'store'])->name('store');
     Route::get('/edit/{customer}', [CustomerController::class, 'edit'])->name('edit');
     Route::put('/update/{customer}', [CustomerController::class, 'update'])->name('update');
+    Route::get('/resendOnBoardingWA/{customer}', [CustomerController::class, 'resendOnBoardingWA'])->name('resendOnBoardingWA');
     // Route::delete('/delete/{customer}', [CustomerController::class, 'delete'])->name('destroy');
     Route::get('/update/status/{customer_id}/{status}', [CustomerController::class, 'updateStatus'])->name('status');
     Route::get('export/', [CustomerController::class, 'export'])->name('export');

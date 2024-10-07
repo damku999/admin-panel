@@ -161,6 +161,12 @@
                                             @endif
                                         @endif
                                         @if (auth()->user()->hasPermissionTo('customer-edit'))
+                                            <a href="{{ route('customers.resendOnBoardingWA', ['customer' => $customer->id]) }}"
+                                                class="btn btn-info m-2">
+                                                <span class="icon-group">
+                                                    <i class="fab fa-whatsapp"></i>
+                                                </span>
+                                            </a>
                                             <a href="{{ route('customers.edit', ['customer' => $customer->id]) }}"
                                                 class="btn btn-primary m-2">
                                                 <i class="fa fa-pen"></i>

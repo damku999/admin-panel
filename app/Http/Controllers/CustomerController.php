@@ -333,4 +333,12 @@ class CustomerController extends Controller
     {
         return Excel::download(new CustomersExport, 'customers.xlsx');
     }
+
+    public function resendOnBoardingWA(Customer $customer)
+    {
+        $this->whatsAppSendMessage($this->newCustomerAdd($customer), $customer->mobile_number);
+
+        return redirect()->back()->with('success', 'Renewal Reminder Sent Successfully!');
+    }
+
 }

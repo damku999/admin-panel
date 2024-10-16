@@ -61,9 +61,11 @@ class CustomerInsuranceController extends Controller
                 ->orWhere('customers.mobile_number', 'LIKE', '%' . trim($request->search) . '%');
         }
 
-        if (isset($request->status) && $request->status != 'all') {
-            $customer_insurance_obj->where('customer_insurances.status', $request->status);
-        }
+        // if (isset($request->status) && $request->status != 'all') {
+        //     $customer_insurance_obj->where('customer_insurances.status', $request->status);
+        // }
+        $customer_insurance_obj->where('customer_insurances.status', 1);
+
         if (!empty($request->customer_id)) {
             $customer_insurance_obj->where('customer_insurances.customer_id', $request->customer_id);
         }

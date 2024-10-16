@@ -44,11 +44,11 @@
                         <input type="text" placeholder="Exp End Date" name="end_date"
                             class="form-control datepicker mr-2" value="{{ request('end_date') }}">
 
-                        <select name="status" class="form-control" id="status">
+                        {{-- <select name="status" class="form-control" id="status">
                             <option value="all" {{ request('status', '1') == 'all' ? 'selected' : '' }}>All</option>
                             <option value="1" {{ request('status', '1') == '1' ? 'selected' : '' }}>Active</option>
                             <option value="0" {{ request('status', '1') == '0' ? 'selected' : '' }}>In Active</option>
-                        </select>
+                        </select> --}}
 
                         <div class="input-group-append">
                             <button type="submit" class="btn btn-default filter_by_click">

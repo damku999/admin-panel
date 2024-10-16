@@ -183,9 +183,8 @@
 
                     </div>
                     <div class="form-group row">
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 fields-to-toggle insurance_detail">
-                            <label for="issueDate" class="form-label"><span style="color:red;">*</span>Issue
-                                Date</label>
+                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 fields-to-toggle insurance_detail cross_selling">
+                            <label for="issueDate" class="form-label"><span style="color:red;">*</span>Issue Date</label>
                             <div class="d-flex">
                                 <input type="text" placeholder="Start Date" name="issue_start_date"
                                     class="form-control datepicker" value="{{ request('issue_start_date') }}"
@@ -305,6 +304,7 @@
                                 <tr>
                                     <th>Customer Name</th>
                                     <th>Total Premium Collected (Last Year)</th>
+                                    <th>Actual Earnings (Last Year)</th>
                                     @foreach ($premiumTypes as $premiumType)
                                         <th>{{ $premiumType->name }}</th>
                                     @endforeach
@@ -321,6 +321,7 @@
                                         </td>
 
                                         <td>{{ number_format($customerData['total_premium_last_year'], 2) }}</td>
+                                        <td>{{ number_format($customerData['actual_earnings_last_year'], 2) }}</td>
                                         <!-- New Total Premium Column -->
                                         @foreach ($premiumTypes as $premiumType)
                                             <td>{{ $customerData['premium_totals'][$premiumType->name]['has_premium'] }}

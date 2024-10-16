@@ -16,10 +16,10 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 class CrossSellingExport implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles
 {
     protected $premiumTypes;
-
+    protected $filters;
     public function __construct(array $filters)
     {
-
+        $this->filters = $filters;
         $premiumTypes = PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies');
         if ($filters['premium_type_id']) {
             $premiumTypes = $premiumTypes->whereIn('id', $filters['premium_type_id']);
@@ -33,16 +33,46 @@ class CrossSellingExport implements FromCollection, WithHeadings, ShouldAutoSize
      */
     public function collection()
     {
-        $customers = Customer::with(['insurance.premiumType'])->orderBy('name')->get();
+        $customer_obj = Customer::with(['insurance.premiumType'])
+            ->orderBy('name');
+
+        $hasDateFilter = false; // Flag to check if date filters are applied
+
+        if (!empty($this->filters['issue_start_date']) || !empty($this->filters['issue_end_date'])) {
+            $customer_obj = $customer_obj->whereHas('insurance', function ($query) {
+                if (!empty($this->filters['issue_start_date'])) {
+                    $query->where('start_date', '>=', Carbon::parse($this->filters['issue_start_date'])->format('Y-m-d'));
+                }
+                if (!empty($this->filters['issue_end_date'])) {
+                    $query->where('start_date', '<=', Carbon::parse($this->filters['issue_end_date'])->format('Y-m-d'));
+                }
+            });
+            $hasDateFilter = true; // Set the flag to true if filters are applied
+        }
+
+// Execute the query
+        $customers = $customer_obj->get();
         $oneYearAgo = Carbon::now()->subYear(); // Calculate one year ago from today
 
-        $results = $customers->map(function ($customer) use ($oneYearAgo) {
+        $results = $customers->map(function ($customer) use ($oneYearAgo, $hasDateFilter) {
             // Initialize customer data
             $customerData = ['customer_name' => $customer->name];
-            $totalPremium = $customer->insurance
-                ->where('start_date', '>=', $oneYearAgo) // Filter insurance from the last year
-                ->sum('final_premium_with_gst'); // Sum the 'final_premium_with_gst' column
-            $customerData['total_premium_last_year'] = $totalPremium;
+
+            // Calculate total premium and actual earnings only if no date filters are applied
+            if (!$hasDateFilter) {
+                $customerData['total_premium_last_year'] = $customer->insurance
+                    ->where('start_date', '>=', $oneYearAgo)
+                    ->sum('final_premium_with_gst');
+
+                $customerData['actual_earnings_last_year'] = $customer->insurance
+                    ->where('start_date', '>=', $oneYearAgo)
+                    ->sum('actual_earnings');
+            } else {
+                $customerData['total_premium_last_year'] = $customer->insurance
+                    ->sum('final_premium_with_gst');
+                $customerData['actual_earnings_last_year'] = $customer->insurance
+                    ->sum('actual_earnings');
+            }
 
             // Loop through each premium type dynamically
             foreach ($this->premiumTypes as $premiumType) {
@@ -72,7 +102,7 @@ class CrossSellingExport implements FromCollection, WithHeadings, ShouldAutoSize
      */
     public function headings(): array
     {
-        $header = ['Customer Name', 'Total Premium (Last Year)'];
+        $header = ['Customer Name', 'Total Premium (Last Year)', 'Actual Earnings (Last Year)'];
 
         // Add dynamic premium type headers with 'Yes/No' and 'amount' suffix
         foreach ($this->premiumTypes as $premiumType) {

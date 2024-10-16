@@ -54,19 +54,46 @@ class ReportController extends Controller
             'crossSelling' => [],
         ];
         if ($request['report_name'] == 'cross_selling') {
-
             if ($request->has('view')) {
                 $premiumTypes = PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies');
                 if ($request['premium_type_id']) {
                     $premiumTypes = $premiumTypes->whereIn('id', $request['premium_type_id']);
                 }
                 $response['premiumTypes'] = $premiumTypes = $premiumTypes->get();
-                $customers = Customer::with(['insurance.premiumType'])->orderBy('name')->get();
+
+                $customer_obj = Customer::with(['insurance.premiumType'])
+                    ->orderBy('name');
+
+                // Filtering based on the provided start and end dates
+                $hasDateFilter = false; // Flag to check if date filters are applied
+
+                if (!empty($request['issue_start_date']) || !empty($request['issue_end_date'])) {
+                    $customer_obj = $customer_obj->whereHas('insurance', function ($query) use ($request) {
+                        if (!empty($request['issue_start_date'])) {
+                            $query->where('start_date', '>=', Carbon::parse($request['issue_start_date'])->format('Y-m-d'));
+                        }
+                        if (!empty($request['issue_end_date'])) {
+                            $query->where('start_date', '<=', Carbon::parse($request['issue_end_date'])->format('Y-m-d'));
+                        }
+                    });
+                    $hasDateFilter = true; // Set the flag to true if filters are applied
+                }
+
+                // Execute the query
+                $customers = $customer_obj->get();
+
                 $oneYearAgo = Carbon::now()->subYear(); // Calculate one year ago from today
 
-                $results = $customers->map(function ($customer) use ($premiumTypes, $oneYearAgo) {
+                $results = $customers->map(function ($customer) use ($premiumTypes, $oneYearAgo, $hasDateFilter) {
                     // Initialize customer data
-                    $customerData = ['customer_name' => $customer->name, 'id' => $customer->id];
+                    $customerData = [
+                        'customer_name' => $customer->name,
+                        'id' => $customer->id,
+                        'total_premium_last_year' => 0,
+                        'actual_earnings_last_year' => 0,
+                        'premium_totals' => [],
+                    ];
+
                     // Loop through each premium type dynamically
                     foreach ($premiumTypes as $premiumType) {
                         // Check if the customer has this premium type in their insurances
@@ -77,13 +104,21 @@ class ReportController extends Controller
                         // Calculate total premium collected for the specific premium type in the last year
                         $premiumTotal = $customer->insurance
                             ->where('premium_type_id', $premiumType->id) // Filter insurances by premium type
-                            ->where('start_date', '>=', $oneYearAgo) // Filter insurances from the last year
-                            ->sum('final_premium_with_gst'); // Sum the 'final_premium_with_gst' column
-
-                        // Add the total premium to the customer data
-                        $customerData['total_premium_last_year'] = $customer->insurance
-                            ->where('start_date', '>=', $oneYearAgo)
+                            ->when(!$hasDateFilter, function ($query) use ($oneYearAgo) {
+                                return $query->where('start_date', '>=', $oneYearAgo);
+                            })
                             ->sum('final_premium_with_gst');
+
+                        // Update total premium last year and actual earnings
+                        $customerData['total_premium_last_year'] += $premiumTotal;
+
+                        // Only calculate actual earnings if date filters are not applied
+                        $customerData['actual_earnings_last_year'] = $customerData['actual_earnings_last_year'] + $customer->insurance
+                            ->where('premium_type_id', $premiumType->id)
+                            ->when(!$hasDateFilter, function ($query) use ($oneYearAgo) {
+                                return $query->where('actual_earnings', '>=', $oneYearAgo);
+                            })
+                            ->sum('actual_earnings');
 
                         // Add the premium type status and total dynamically to the customer data
                         $customerData['premium_totals'][$premiumType->name] = [
@@ -94,6 +129,7 @@ class ReportController extends Controller
 
                     return $customerData;
                 });
+
                 $response['crossSelling'] = $results;
             } else {
                 return Excel::download(new CrossSellingExport($request->all()), 'cross_selling.xlsx');

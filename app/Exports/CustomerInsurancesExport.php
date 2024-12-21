@@ -43,7 +43,7 @@ class CustomerInsurancesExport implements FromCollection, WithHeadings, ShouldAu
                 'Policy Number' => $customerInsurance->policy_no,
                 'registration Number' => $customerInsurance->registration_no,
                 'RTO' => $customerInsurance->rto,
-                'Make & Model' => $customerInsurance->make_mode,
+                'Make & Model' => $customerInsurance->make_model,
                 'Commission On' => $customerInsurance->commission_on,
                 'Start Date' => $customerInsurance->start_date,
                 'Expired Date' => $customerInsurance->expired_date,

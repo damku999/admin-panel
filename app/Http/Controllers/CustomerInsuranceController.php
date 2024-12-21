@@ -47,7 +47,6 @@ class CustomerInsuranceController extends Controller
      */
     public function index(Request $request)
     {
-
         $customer_insurance_obj = CustomerInsurance::select(['customer_insurances.*', 'customers.name as customer_name', 'branches.name as branch_name', 'brokers.name as broker_name', 'relationship_managers.name as relationship_manager_name', 'premium_types.name AS policy_type_name'])
             ->join('customers', 'customers.id', 'customer_insurances.customer_id')
             ->leftJoin('branches', 'branches.id', 'customer_insurances.branch_id')
@@ -82,7 +81,7 @@ class CustomerInsuranceController extends Controller
             $customer_insurance_obj->whereBetween('expired_date', [$start_date, $end_date]);
         }
 
-        $sort = $request->input('sort', 'updated_at');
+        $sort = $request->input('sort', 'id');
         $direction = $request->input('direction', 'desc');
         $customer_insurance_obj->orderBy($sort, $direction);
         $customer_insurances = $customer_insurance_obj->paginate(10);

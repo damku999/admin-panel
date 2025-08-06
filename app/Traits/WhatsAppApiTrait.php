@@ -4,10 +4,13 @@ namespace App\Traits;
 
 trait WhatsAppApiTrait
 {
-    protected $base_url = 'https://api.botmastersender.com/api/v2/';
     protected $senderId = '919727793123';
-    protected $authToken = '5cd77122-acbe-419d-a662-1300d3b20565';
-// mediaurl
+    // protected $base_url = 'https://api.botmastersender.com/api/v2/';
+    // protected $authToken = '5cd77122-acbe-419d-a662-1300d3b20565';
+    protected $base_url = 'https://api.botmastersender.com/api/v1/';
+    protected $authToken = '53eb1f03-90be-49ce-9dbe-b23fe982b31f';
+
+    // mediaurl
     protected function whatsAppSendMessage($messageText, $receiverId)
     {
 
@@ -52,7 +55,8 @@ trait WhatsAppApiTrait
                     CURLOPT_FOLLOWLOCATION => true,
                     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                     CURLOPT_CUSTOMREQUEST => 'POST',
-                    CURLOPT_POSTFIELDS => ['senderId' => $this->senderId,
+                    CURLOPT_POSTFIELDS => [
+                        'senderId' => $this->senderId,
                         'authToken' => $this->authToken,
                         'messageText' => $messageText,
                         'receiverId' => $this->validateAndFormatMobileNumber($receiverId),

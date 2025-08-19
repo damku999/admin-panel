@@ -270,6 +270,11 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                @php
+                                    $totalCommissionAmount = 0;
+                                    $totalTransferCommission = 0;
+                                    $totalActualEarnings = 0;
+                                @endphp
                                 @foreach ($customerInsurances as $customerInsurance)
                                     <tr>
                                         <td>{{ $customerInsurance->customer->name }}</td>
@@ -283,7 +288,18 @@
                                         <td>{{ $customerInsurance->transfer_commission_amount }}</td>
                                         <td>{{ $customerInsurance->actual_earnings }}</td>
                                     </tr>
+                                    @php
+                                        $totalCommissionAmount += $customerInsurance->my_commission_amount;
+                                        $totalTransferCommission += $customerInsurance->transfer_commission_amount;
+                                        $totalActualEarnings += $customerInsurance->actual_earnings;
+                                    @endphp
                                 @endforeach
+                                <tr>
+                                    <td colspan="7" class="text-right">Total:</td>
+                                    <td>{{ $totalCommissionAmount }}</td>
+                                    <td>{{ $totalTransferCommission }}</td>
+                                    <td>{{ $totalActualEarnings }}</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>

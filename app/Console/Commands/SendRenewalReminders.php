@@ -32,12 +32,12 @@ class SendRenewalReminders extends Command
             '30_days' => $currentDate->copy()->addDays(30)->startOfDay(),
         ];
 
-        $insurances = CustomerInsurance::where(function($query) use ($dates) {
-                $query->whereDate('expired_date', $dates['5_days'])
-                      ->orWhereDate('expired_date', $dates['10_days'])
-                      ->orWhereDate('expired_date', $dates['15_days'])
-                      ->orWhereDate('expired_date', $dates['30_days']);
-            })
+        $insurances = CustomerInsurance::where(function ($query) use ($dates) {
+            $query->whereDate('expired_date', $dates['5_days'])
+                ->orWhereDate('expired_date', $dates['10_days'])
+                ->orWhereDate('expired_date', $dates['15_days'])
+                ->orWhereDate('expired_date', $dates['30_days']);
+        })
             ->where('is_renewed', 0)
             ->where('status', 1)
             ->get();
@@ -46,7 +46,7 @@ class SendRenewalReminders extends Command
             foreach ($chunkedInurances as $insurance) {
                 $messageText = $insurance->premiumType->is_vehicle == 1 ? $this->renewalReminderVehicle($insurance) : $this->renewalReminder($insurance);
                 $receiverId = $insurance->customer->mobile_number;
-                $this->whatsAppSendMessage($messageText, $receiverId);
+                // $this->whatsAppSendMessage($messageText, $receiverId);
                 // $this->whatsAppSendMessage($messageText, '+918000071413');
             }
         }
@@ -54,4 +54,3 @@ class SendRenewalReminders extends Command
         $this->info('Renewal reminders sent successfully.');
     }
 }
-

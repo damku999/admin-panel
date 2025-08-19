@@ -31,12 +31,7 @@ class ReportController extends Controller
         $this->middleware('permission:report-list', ['only' => ['index']]);
     }
 
-    /**
-     * List Insurance report
-     * @param Nill
-     * @return Array $report
-     * @author Darshan Baraiya
-     */
+
     public function index(Request $request)
     {
         $premiumTypes = PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies')->get();
@@ -53,6 +48,7 @@ class ReportController extends Controller
             'customerInsurances' => [],
             'crossSelling' => [],
         ];
+
         if ($request['report_name'] == 'cross_selling') {
             if ($request->has('view')) {
                 $premiumTypes = PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies');
@@ -158,12 +154,6 @@ class ReportController extends Controller
         // return Excel::download(new CustomerInsurancesExport, 'reports.xlsx');
     }
 
-    /**
-     * List Insurance report
-     * @param Nill
-     * @return Array $report
-     * @author Darshan Baraiya
-     */
     public function saveColumns(Request $request)
     {
         $updatedColumns = [];

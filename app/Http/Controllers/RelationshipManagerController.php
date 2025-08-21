@@ -27,7 +27,7 @@ class RelationshipManagerController extends Controller
 
 
     /**
-     * List RelationshipManager 
+     * List RelationshipManager
      * @param Nill
      * @return Array $relationship_manager
      * @author Darshan Baraiya
@@ -44,7 +44,7 @@ class RelationshipManagerController extends Controller
     }
 
     /**
-     * Create RelationshipManager 
+     * Create RelationshipManager
      * @param Nill
      * @return Array $relationship_manager
      * @author Darshan Baraiya
@@ -196,7 +196,7 @@ class RelationshipManagerController extends Controller
     }
 
     /**
-     * Import RelationshipManagers 
+     * Import RelationshipManagers
      * @param Null
      * @return View File
      */
@@ -208,6 +208,6 @@ class RelationshipManagerController extends Controller
 
     public function export()
     {
-        return Excel::download(new RelationshipManagersExport, 'relationship_managers.xlsx');
+        return Excel::download(new RelationshipManagersExport(), 'relationship_managers.xlsx');
     }
 }

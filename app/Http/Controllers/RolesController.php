@@ -63,16 +63,16 @@ class RolesController extends Controller
                 'name' => 'required',
                 'guard_name' => 'required'
             ]);
-    
+
             Role::create($request->all());
 
             DB::commit();
-            return redirect()->back()->with('success','Roles created successfully.');
+            return redirect()->back()->with('success', 'Roles created successfully.');
         } catch (\Throwable $th) {
             DB::rollback();
-            return redirect()->route('roles.add')->with('error',$th->getMessage());
+            return redirect()->route('roles.add')->with('error', $th->getMessage());
         }
-        
+
     }
 
     /**
@@ -95,7 +95,7 @@ class RolesController extends Controller
     public function edit($id)
     {
         $role = Role::whereId($id)->with('permissions')->first();
-        
+
         $permissions = Permission::all();
 
         return view('roles.edit', ['role' => $role, 'permissions' => $permissions]);
@@ -118,7 +118,7 @@ class RolesController extends Controller
                 'name' => 'required',
                 'guard_name' => 'required'
             ]);
-            
+
             $role = Role::whereId($id)->first();
 
             $role->name = $request->name;
@@ -128,12 +128,12 @@ class RolesController extends Controller
             // Sync Permissions
             $permissions = $request->permissions;
             $role->syncPermissions($permissions);
-            
+
             DB::commit();
-            return redirect()->back()->with('success','Roles updated successfully.');
+            return redirect()->back()->with('success', 'Roles updated successfully.');
         } catch (\Throwable $th) {
             DB::rollback();
-            return redirect()->route('roles.edit',['role' => $role])->with('error',$th->getMessage());
+            return redirect()->route('roles.edit', ['role' => $role])->with('error', $th->getMessage());
         }
     }
 
@@ -147,14 +147,14 @@ class RolesController extends Controller
     {
         DB::beginTransaction();
         try {
-    
+
             Role::whereId($id)->delete();
-            
+
             DB::commit();
-            return redirect()->back()->with('success','Roles deleted successfully.');
+            return redirect()->back()->with('success', 'Roles deleted successfully.');
         } catch (\Throwable $th) {
             DB::rollback();
-            return redirect()->back()->with('error',$th->getMessage());
+            return redirect()->back()->with('error', $th->getMessage());
         }
     }
 }

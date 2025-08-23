@@ -14,6 +14,7 @@ use App\Http\Controllers\PremiumTypeController;
 use App\Http\Controllers\ReferenceUsersController;
 use App\Http\Controllers\InsuranceCompanyController;
 use App\Http\Controllers\CustomerInsuranceController;
+use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RelationshipManagerController;
 
 /*
@@ -182,7 +183,21 @@ Route::middleware('auth')->prefix('fuel_type')->name('fuel_type.')->group(functi
 });
 
 
-// Fuel Type
+// Quotations
+Route::middleware('auth')->prefix('quotations')->name('quotations.')->group(function () {
+    Route::get('/', [QuotationController::class, 'index'])->name('index');
+    Route::get('/create', [QuotationController::class, 'create'])->name('create');
+    Route::post('/store', [QuotationController::class, 'store'])->name('store');
+    Route::get('/show/{quotation}', [QuotationController::class, 'show'])->name('show');
+    Route::get('/edit/{quotation}', [QuotationController::class, 'edit'])->name('edit');
+    Route::put('/update/{quotation}', [QuotationController::class, 'update'])->name('update');
+    Route::post('/generate-quotes/{quotation}', [QuotationController::class, 'generateQuotes'])->name('generate-quotes');
+    Route::post('/send-whatsapp/{quotation}', [QuotationController::class, 'sendToWhatsApp'])->name('send-whatsapp');
+    Route::get('/download-pdf/{quotation}', [QuotationController::class, 'downloadPdf'])->name('download-pdf');
+    Route::delete('/delete/{quotation}', [QuotationController::class, 'delete'])->name('delete');
+});
+
+// Reports
 Route::middleware('auth')->prefix('reports')->name('reports.')->group(function () {
     Route::get('/', [ReportController::class, 'index'])->name('index');
     Route::get('export/', [ReportController::class, 'export'])->name('export');

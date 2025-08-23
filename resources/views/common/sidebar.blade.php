@@ -69,6 +69,32 @@
         </div>
     </li>
 
+    <!-- Nav Item - Quotations Management -->
+    @can('quotation-list')
+    <li class="nav-item">
+        <a class="nav-link {{ str_contains(Route::currentRouteName(), 'quotations.') ? '' : 'collapsed' }}"
+            href="#" data-toggle="collapse" data-target="#taTpDropDownQuotations"
+            aria-expanded="{{ str_contains(Route::currentRouteName(), 'quotations.') ? 'true' : 'false' }}"
+            aria-controls="taTpDropDownQuotations">
+            <i class="fas fa-file-alt"></i>
+            <span>Quotation Management</span>
+        </a>
+        <div id="taTpDropDownQuotations"
+            class="collapse {{ str_contains(Route::currentRouteName(), 'quotations.') ? 'show' : '' }}"
+            aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Insurance Quotations:</h6>
+                <a class="collapse-item {{ Route::currentRouteName() == 'quotations.index' ? 'active' : '' }}"
+                    href="{{ route('quotations.index') }}">List Quotations</a>
+                @can('quotation-create')
+                <a class="collapse-item {{ str_contains(Route::currentRouteName(), 'quotations.create') ? 'active' : '' }}"
+                    href="{{ route('quotations.create') }}">Create New Quote</a>
+                @endcan
+            </div>
+        </div>
+    </li>
+    @endcan
+
     <!-- Divider -->
     <hr class="sidebar-divider">
 

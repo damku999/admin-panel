@@ -1,17 +1,15 @@
 <?php
+
 namespace App\Traits;
 
 use Illuminate\Http\Response;
-
-/**
- * This Helper is use to call the API helper.
- */
 trait HelperTrait
 {
-    protected function getUserActivityLogJSON($obj)
+    protected function getUserActivityLogJSON(object $obj): string
     {
         $dirty = $obj->getDirty();
-        $activity_log = $reference_table_array = [];
+        $activity_log = [];
+        $reference_table_array = [];
         if (!empty($dirty)) {
             $check_reference_table = false;
             if (!empty($obj->activity_model)) {
@@ -26,15 +24,15 @@ trait HelperTrait
                     $model_name = '\\App\\Models\\' . $reference_table_array[$key]['model_name'];
                     $model_field = $reference_table_array[$key]['model_field'];
                     if (!empty($old_value_id)) {
-                        $model_obj = new $model_name;
+                        $model_obj = new $model_name();
                         $old_record = $model_obj::find($old_value_id);
-                        $old_value = @$old_record->$model_field;
+                        $old_value = $old_record?->$model_field ?? '';
                     } else {
                         $old_value = '';
                     }
-                    $model_obj1 = new $model_name;
+                    $model_obj1 = new $model_name();
                     $new_record = $model_obj1::find($new_value_id);
-                    $new_value = $new_record->$model_field;
+                    $new_value = $new_record?->$model_field ?? '';
                 } else {
                     $old_value = $obj->getOriginal($key);
                     $new_value = $obj->$key;
@@ -47,13 +45,13 @@ trait HelperTrait
         return json_encode($activity_log);
     }
 
-    protected function isJson($string = '')
+    protected function isJson(string $string = ''): bool
     {
         json_decode($string);
         return (json_last_error() == JSON_ERROR_NONE);
     }
 
-    protected function sentenceCase($string)
+    protected function sentenceCase(string $string): string
     {
         $sentences = preg_split(
             '/([.?!]+)/',

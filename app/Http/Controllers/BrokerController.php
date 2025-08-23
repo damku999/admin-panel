@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Exports\BrokersExport;
+use App\Http\Requests\StoreBrokerRequest;
+use App\Http\Requests\UpdateBrokerRequest;
 use App\Models\Broker;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 
 class BrokerController extends Controller
@@ -31,7 +35,7 @@ class BrokerController extends Controller
      * @return Array $broker
      * @author Darshan Baraiya
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $broker_obj = Broker::select('*');
         if (!empty($request->search)) {
@@ -48,7 +52,7 @@ class BrokerController extends Controller
      * @return Array $broker
      * @author Darshan Baraiya
      */
-    public function create()
+    public function create(): View
     {
         return view('brokers.add');
     }
@@ -59,14 +63,8 @@ class BrokerController extends Controller
      * @return View Brokers
      * @author Darshan Baraiya
      */
-    public function store(Request $request)
+    public function store(StoreBrokerRequest $request): RedirectResponse
     {
-        // Validations
-        $validation_array = [
-            'name' => 'required',
-        ];
-
-        $request->validate($validation_array);
         DB::beginTransaction();
 
         try {
@@ -93,7 +91,7 @@ class BrokerController extends Controller
      * @return List Page With Success
      * @author Darshan Baraiya
      */
-    public function updateStatus($broker_id, $status)
+    public function updateStatus(int $broker_id, int $status): RedirectResponse
     {
         // Validation
         $validate = Validator::make([
@@ -132,7 +130,7 @@ class BrokerController extends Controller
      * @return Collection $broker
      * @author Darshan Baraiya
      */
-    public function edit(Broker $broker)
+    public function edit(Broker $broker): View
     {
         return view('brokers.edit')->with([
             'broker' => $broker,
@@ -145,16 +143,10 @@ class BrokerController extends Controller
      * @return View Brokers
      * @author Darshan Baraiya
      */
-    public function update(Request $request, Broker $broker)
+    public function update(UpdateBrokerRequest $request, Broker $broker): RedirectResponse
     {
-        // Validations
-        $validation_array = [
-            'name' => 'required',
-        ];
 
-        $request->validate($validation_array);
-
-        DB::beginTransaction($validation_array);
+        DB::beginTransaction();
         try {
             // Store Data
             $broker_updated = Broker::whereId($broker->id)->update([
@@ -178,7 +170,7 @@ class BrokerController extends Controller
      * @return Index Brokers
      * @author Darshan Baraiya
      */
-    public function delete(Broker $broker)
+    public function delete(Broker $broker): RedirectResponse
     {
         DB::beginTransaction();
         try {
@@ -198,7 +190,7 @@ class BrokerController extends Controller
      * @param Null
      * @return View File
      */
-    public function importBrokers()
+    public function importBrokers(): View
     {
         return view('brokers.import');
     }

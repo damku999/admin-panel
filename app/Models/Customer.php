@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Models\CustomerInsurance;
+use App\Models\Quotation;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use App\Traits\TableRecordObserver;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -110,6 +112,16 @@ class Customer extends Authenticatable
         'type'
     ];
 
+    protected $casts = [
+        'status' => 'boolean',
+        'date_of_birth' => 'date',
+        'wedding_anniversary_date' => 'date',
+        'engagement_anniversary_date' => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
+    ];
+
     /**
      * Get the insurance for the customer.
      */
@@ -118,8 +130,49 @@ class Customer extends Authenticatable
         return $this->hasMany(CustomerInsurance::class);
     }
 
+    public function quotations(): HasMany
+    {
+        return $this->hasMany(Quotation::class);
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults();
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === true;
+    }
+
+    public function isRetailCustomer(): bool
+    {
+        return $this->type === 'Retail';
+    }
+
+    public function isCorporateCustomer(): bool
+    {
+        return $this->type === 'Corporate';
+    }
+
+    protected function panCardPath(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => $value ? asset('storage/' . $value) : null,
+        );
+    }
+
+    protected function aadharCardPath(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => $value ? asset('storage/' . $value) : null,
+        );
+    }
+
+    protected function gstPath(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value) => $value ? asset('storage/' . $value) : null,
+        );
     }
 }

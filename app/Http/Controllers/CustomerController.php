@@ -3,23 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Exports\CustomersExport;
+use App\Http\Requests\StoreCustomerRequest;
+use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
+use App\Services\FileUploadService;
 use App\Traits\WhatsAppApiTrait;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 
 class CustomerController extends Controller
 {
     use WhatsAppApiTrait;
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    public function __construct(private FileUploadService $fileUploadService)
     {
         $this->middleware('auth');
         $this->middleware('permission:customer-list|customer-create|customer-edit|customer-delete', ['only' => ['index']]);
@@ -34,7 +34,7 @@ class CustomerController extends Controller
      * @return Array $customer
      * @author Darshan Baraiya
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $customer_obj = Customer::select('*');
         // Sorting
@@ -69,7 +69,7 @@ class CustomerController extends Controller
      * @return Array $customer
      * @author Darshan Baraiya
      */
-    public function create()
+    public function create(): View
     {
         return view('customers.add');
     }
@@ -80,34 +80,8 @@ class CustomerController extends Controller
      * @return View Customers
      * @author Darshan Baraiya
      */
-    public function store(Request $request)
+    public function store(StoreCustomerRequest $request): RedirectResponse
     {
-        $validation_array = [
-            'name' => 'required',
-            // 'email' => 'required|unique:customers,email',
-            'email' => 'required',
-            'mobile_number' => 'required|numeric|digits:10',
-            'status' => 'required|numeric|in:0,1',
-            'type' => 'required|in:Retail,Corporate',
-            'pan_card_number' => 'required_if:type,Retail',
-            'pan_card_path' => 'nullable|file|max:1024|mimetypes:application/pdf,image/jpeg,image/png',
-            'aadhar_card_number' => 'required_if:type,Retail',
-            'aadhar_card_path' => 'nullable|file|max:1024|mimetypes:application/pdf,image/jpeg,image/png',
-            'gst_number' => 'required_if:type,Corporate',
-            'gst_path' => 'nullable|file|max:1024|mimetypes:application/pdf,image/jpeg,image/png',
-        ];
-
-        if (!empty($request->date_of_birth)) {
-            $validation_array['date_of_birth'] = 'date_format:Y-m-d';
-        }
-
-        if (!empty($request->wedding_anniversary_date)) {
-            $validation_array['wedding_anniversary_date'] = 'date_format:Y-m-d';
-        }
-        if (!empty($request->engagement_anniversary_date)) {
-            $validation_array['engagement_anniversary_date'] = 'date_format:Y-m-d';
-        }
-        $request->validate($validation_array);
         DB::beginTransaction();
 
         try {
@@ -139,42 +113,33 @@ class CustomerController extends Controller
         }
     }
 
-    /**
-     * Handle file upload.
-     * @param Request $request
-     * @param Customer $customer
-     * @return void
-     */
-    private function handleFileUpload(Request $request, Customer $customer)
+    private function handleFileUpload(StoreCustomerRequest|UpdateCustomerRequest $request, Customer $customer): void
     {
-        $timestamp = time(); // Get current timestamp
-
-        // Handle file uploads
         if ($request->hasFile('pan_card_path')) {
-            $panCardPath = $request->file('pan_card_path')->storeAs(
-                'customers/' . $customer->id . '/pan_card_path',
-                $customer->name . '_pan_card_' . $timestamp . '.' . $request->file('pan_card_path')->getClientOriginalExtension(),
-                'public'
+            $customer->pan_card_path = $this->fileUploadService->uploadCustomerDocument(
+                $request->file('pan_card_path'),
+                $customer->id,
+                'pan_card',
+                $customer->name
             );
-            $customer->pan_card_path = $panCardPath;
         }
 
         if ($request->hasFile('aadhar_card_path')) {
-            $aadharCardPath = $request->file('aadhar_card_path')->storeAs(
-                'customers/' . $customer->id . '/aadhar_card_path',
-                $customer->name . '_aadhar_card_' . $timestamp . '.' . $request->file('aadhar_card_path')->getClientOriginalExtension(),
-                'public'
+            $customer->aadhar_card_path = $this->fileUploadService->uploadCustomerDocument(
+                $request->file('aadhar_card_path'),
+                $customer->id,
+                'aadhar_card',
+                $customer->name
             );
-            $customer->aadhar_card_path = $aadharCardPath;
         }
 
         if ($request->hasFile('gst_path')) {
-            $gstPath = $request->file('gst_path')->storeAs(
-                'customers/' . $customer->id . '/gst_path',
-                $customer->name . '_gst_' . $timestamp . '.' . $request->file('gst_path')->getClientOriginalExtension(),
-                'public'
+            $customer->gst_path = $this->fileUploadService->uploadCustomerDocument(
+                $request->file('gst_path'),
+                $customer->id,
+                'gst',
+                $customer->name
             );
-            $customer->gst_path = $gstPath;
         }
 
         $customer->save();
@@ -186,7 +151,7 @@ class CustomerController extends Controller
      * @return List Page With Success
      * @author Darshan Baraiya
      */
-    public function updateStatus($customer_id, $status)
+    public function updateStatus(int $customer_id, int $status): RedirectResponse
     {
         $validate = Validator::make([
             'customer_id' => $customer_id,
@@ -225,7 +190,7 @@ class CustomerController extends Controller
      * @return Collection $customer
      * @author Darshan Baraiya
      */
-    public function edit(Customer $customer)
+    public function edit(Customer $customer): View
     {
         return view('customers.edit')->with([
             'customer' => $customer,
@@ -239,37 +204,10 @@ class CustomerController extends Controller
      * @return View Customers
      * @author Darshan Baraiya
      */
-    public function update(Request $request, Customer $customer)
+    public function update(UpdateCustomerRequest $request, Customer $customer): RedirectResponse
     {
-        $validation_array = [
-            'name' => 'required',
-            'email' => 'required',
-            // 'email' => 'required|unique:customers,email,' . $customer->id . ',id',
-            'mobile_number' => 'required|numeric|digits:10',
-            'status' => 'required|numeric|in:0,1',
-            'type' => 'required|in:Retail,Corporate',
-            'pan_card_number' => 'required_if:type,Retail',
-            'pan_card_path' => 'nullable|file|max:1024|mimetypes:application/pdf,image/jpeg,image/png',
-            'aadhar_card_number' => 'required_if:type,Retail',
-            'aadhar_card_path' => 'nullable|file|max:1024|mimetypes:application/pdf,image/jpeg,image/png',
-            'gst_number' => 'required_if:type,Corporate',
-            'gst_path' => 'nullable|file|max:1024|mimetypes:application/pdf,image/jpeg,image/png',
-        ];
 
-        if (!empty($request->date_of_birth)) {
-            $validation_array['date_of_birth'] = 'date_format:Y-m-d';
-        }
-
-        if (!empty($request->wedding_anniversary_date)) {
-            $validation_array['wedding_anniversary_date'] = 'date_format:Y-m-d';
-        }
-        if (!empty($request->engagement_anniversary_date)) {
-            $validation_array['engagement_anniversary_date'] = 'date_format:Y-m-d';
-        }
-
-        $request->validate($validation_array);
-
-        DB::beginTransaction($validation_array);
+        DB::beginTransaction();
         try {
             // Store Data
             $customer_updated = Customer::whereId($customer->id)->update([
@@ -304,7 +242,7 @@ class CustomerController extends Controller
      * @return Index Customers
      * @author Darshan Baraiya
      */
-    public function delete(Customer $customer)
+    public function delete(Customer $customer): RedirectResponse
     {
         DB::beginTransaction();
         try {
@@ -324,7 +262,7 @@ class CustomerController extends Controller
      * @param Null
      * @return View File
      */
-    public function importCustomers()
+    public function importCustomers(): View
     {
         return view('customers.import');
     }
@@ -334,7 +272,7 @@ class CustomerController extends Controller
         return Excel::download(new CustomersExport, 'customers.xlsx');
     }
 
-    public function resendOnBoardingWA(Customer $customer)
+    public function resendOnBoardingWA(Customer $customer): RedirectResponse
     {
         $this->whatsAppSendMessage($this->newCustomerAdd($customer), $customer->mobile_number);
 

@@ -99,7 +99,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="vehicle_number">Vehicle Number</label>
                                                 <input type="text" name="vehicle_number" id="vehicle_number"
@@ -111,7 +111,7 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="make_model_variant"><span class="text-danger">*</span>
                                                     Make/Model/Variant</label>
@@ -124,9 +124,6 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="rto_location"><span class="text-danger">*</span> RTO
@@ -140,6 +137,9 @@
                                                 @enderror
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="manufacturing_year"><span class="text-danger">*</span>
@@ -173,10 +173,7 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="fuel_type"><span class="text-danger">*</span> Fuel
                                                     Type</label>
@@ -199,6 +196,27 @@
                                                     </option>
                                                 </select>
                                                 @error('fuel_type')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="ncb_percentage">NCB Percentage</label>
+                                                <div class="input-group">
+                                                    <input type="number" name="ncb_percentage" id="ncb_percentage"
+                                                        class="form-control @error('ncb_percentage') is-invalid @enderror"
+                                                        value="{{ old('ncb_percentage', 0) }}" min="0"
+                                                        max="50" step="0.01" placeholder="0">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text">%</span>
+                                                    </div>
+                                                </div>
+                                                <small class="form-text text-muted">No Claim Bonus (0-50%)</small>
+                                                @error('ncb_percentage')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
@@ -580,6 +598,19 @@
                                                             </div>
                                                         </div>
                                                         <div class="row">
+                                                            <div class="col-md-6">
+                                                                <div class="form-group">
+                                                                    <label>TP Premium (₹) <span
+                                                                            class="text-danger">*</span></label>
+                                                                    <input type="number"
+                                                                        name="companies[{{ $index }}][tp_premium]"
+                                                                        class="form-control premium-field" step="0.01"
+                                                                        required
+                                                                        value="{{ old("companies.{$index}.tp_premium") }}">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row">
                                                             <div class="col-md-12">
                                                                 <div class="card border-left-success mb-3">
                                                                     <div class="card-header bg-success text-white py-1">
@@ -593,7 +624,9 @@
                                                                                 <div class="form-group mb-2 addon-field-container"
                                                                                     data-addon="zero_dep"
                                                                                     style="{{ in_array('Zero Depreciation', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Zero Depreciation (₹)</label>
+                                                                                    <label class="small">Zero Depreciation
+                                                                                        (₹)
+                                                                                    </label>
                                                                                     <input type="number"
                                                                                         name="companies[{{ $index }}][addon_zero_dep]"
                                                                                         class="form-control form-control-sm addon-field"
@@ -606,12 +639,15 @@
                                                                                         maxlength="100"
                                                                                         placeholder="Add note (e.g., Depreciation Reimbursement - Count of Claim 2)"
                                                                                         value="{{ old("companies.{$index}.addon_zero_dep_note") }}">
-                                                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
+                                                                                    <small class="text-muted">Coverage
+                                                                                        details, limits etc. (Max 100
+                                                                                        chars)</small>
                                                                                 </div>
                                                                                 <div class="form-group mb-2 addon-field-container"
                                                                                     data-addon="engine_protection"
                                                                                     style="{{ in_array('Engine Protection', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Engine Protection (₹)</label>
+                                                                                    <label class="small">Engine Protection
+                                                                                        (₹)</label>
                                                                                     <input type="number"
                                                                                         name="companies[{{ $index }}][addon_engine_protection]"
                                                                                         class="form-control form-control-sm addon-field"
@@ -624,12 +660,15 @@
                                                                                         maxlength="100"
                                                                                         placeholder="Add note (e.g., Engine Secure TA 16 - Protects against engine damage)"
                                                                                         value="{{ old("companies.{$index}.addon_engine_protection_note") }}">
-                                                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
+                                                                                    <small class="text-muted">Coverage
+                                                                                        details, limits etc. (Max 100
+                                                                                        chars)</small>
                                                                                 </div>
                                                                                 <div class="form-group mb-2 addon-field-container"
                                                                                     data-addon="road_side_assistance"
                                                                                     style="{{ in_array('Road Side Assistance', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Road Side Assistance (₹)</label>
+                                                                                    <label class="small">Road Side
+                                                                                        Assistance (₹)</label>
                                                                                     <input type="number"
                                                                                         name="companies[{{ $index }}][addon_rsa]"
                                                                                         class="form-control form-control-sm addon-field"
@@ -642,14 +681,17 @@
                                                                                         maxlength="100"
                                                                                         placeholder="Add note (e.g., Emergency transport and hotel expenses - Any One Accident: 5000)"
                                                                                         value="{{ old("companies.{$index}.addon_rsa_note") }}">
-                                                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
+                                                                                    <small class="text-muted">Coverage
+                                                                                        details, limits etc. (Max 100
+                                                                                        chars)</small>
                                                                                 </div>
                                                                             </div>
                                                                             <div class="col-md-4">
                                                                                 <div class="form-group mb-2 addon-field-container"
                                                                                     data-addon="ncb_protection"
                                                                                     style="{{ in_array('NCB Protection', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">NCB Protection (₹)</label>
+                                                                                    <label class="small">NCB Protection
+                                                                                        (₹)</label>
                                                                                     <input type="number"
                                                                                         name="companies[{{ $index }}][addon_ncb_protection]"
                                                                                         class="form-control form-control-sm addon-field"
@@ -662,12 +704,15 @@
                                                                                         maxlength="100"
                                                                                         placeholder="Add note (e.g., Protects No Claim Bonus in case of claim)"
                                                                                         value="{{ old("companies.{$index}.addon_ncb_protection_note") }}">
-                                                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
+                                                                                    <small class="text-muted">Coverage
+                                                                                        details, limits etc. (Max 100
+                                                                                        chars)</small>
                                                                                 </div>
                                                                                 <div class="form-group mb-2 addon-field-container"
                                                                                     data-addon="invoice_protection"
                                                                                     style="{{ in_array('Invoice Protection', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Invoice Protection (₹)</label>
+                                                                                    <label class="small">Invoice
+                                                                                        Protection (₹)</label>
                                                                                     <input type="number"
                                                                                         name="companies[{{ $index }}][addon_invoice_protection]"
                                                                                         class="form-control form-control-sm addon-field"
@@ -680,12 +725,15 @@
                                                                                         maxlength="100"
                                                                                         placeholder="Add note (e.g., Return to invoice TA 05 - Covers full invoice value)"
                                                                                         value="{{ old("companies.{$index}.addon_invoice_protection_note") }}">
-                                                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
+                                                                                    <small class="text-muted">Coverage
+                                                                                        details, limits etc. (Max 100
+                                                                                        chars)</small>
                                                                                 </div>
                                                                                 <div class="form-group mb-2 addon-field-container"
                                                                                     data-addon="key_replacement"
                                                                                     style="{{ in_array('Key Replacement', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Key Replacement (₹)</label>
+                                                                                    <label class="small">Key Replacement
+                                                                                        (₹)</label>
                                                                                     <input type="number"
                                                                                         name="companies[{{ $index }}][addon_key_replacement]"
                                                                                         class="form-control form-control-sm addon-field"
@@ -698,14 +746,17 @@
                                                                                         maxlength="100"
                                                                                         placeholder="Add note (e.g., Key Replacement TA 15 - SI: ₹25,000 per occurrence limit 50% of SI)"
                                                                                         value="{{ old("companies.{$index}.addon_key_replacement_note") }}">
-                                                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
+                                                                                    <small class="text-muted">Coverage
+                                                                                        details, limits etc. (Max 100
+                                                                                        chars)</small>
                                                                                 </div>
                                                                             </div>
                                                                             <div class="col-md-4">
                                                                                 <div class="form-group mb-2 addon-field-container"
                                                                                     data-addon="personal_accident"
                                                                                     style="{{ in_array('Personal Accident', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Personal Accident (₹)</label>
+                                                                                    <label class="small">Personal Accident
+                                                                                        (₹)</label>
                                                                                     <input type="number"
                                                                                         name="companies[{{ $index }}][addon_personal_accident]"
                                                                                         class="form-control form-control-sm addon-field"
@@ -718,12 +769,15 @@
                                                                                         maxlength="100"
                                                                                         placeholder="Add note (e.g., Emergency Medical Expenses TA 22 - Sum Insured: ₹25,000)"
                                                                                         value="{{ old("companies.{$index}.addon_personal_accident_note") }}">
-                                                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
+                                                                                    <small class="text-muted">Coverage
+                                                                                        details, limits etc. (Max 100
+                                                                                        chars)</small>
                                                                                 </div>
                                                                                 <div class="form-group mb-2 addon-field-container"
                                                                                     data-addon="tyre_protection"
                                                                                     style="{{ in_array('Tyre Protection', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Tyre Protection (₹)</label>
+                                                                                    <label class="small">Tyre Protection
+                                                                                        (₹)</label>
                                                                                     <input type="number"
                                                                                         name="companies[{{ $index }}][addon_tyre_protection]"
                                                                                         class="form-control form-control-sm addon-field"
@@ -736,12 +790,15 @@
                                                                                         maxlength="100"
                                                                                         placeholder="Add note (e.g., Tyre Secure TA 17 - Covers tyre and rim damage)"
                                                                                         value="{{ old("companies.{$index}.addon_tyre_protection_note") }}">
-                                                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
+                                                                                    <small class="text-muted">Coverage
+                                                                                        details, limits etc. (Max 100
+                                                                                        chars)</small>
                                                                                 </div>
                                                                                 <div class="form-group mb-2 addon-field-container"
                                                                                     data-addon="consumables"
                                                                                     style="{{ in_array('Consumables', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Consumables (₹)</label>
+                                                                                    <label class="small">Consumables
+                                                                                        (₹)</label>
                                                                                     <input type="number"
                                                                                         name="companies[{{ $index }}][addon_consumables]"
                                                                                         class="form-control form-control-sm addon-field"
@@ -754,17 +811,21 @@
                                                                                         maxlength="100"
                                                                                         placeholder="Add note (e.g., Consumables Expenses TA 18 - Nuts, bolts, oils, lubricants etc.)"
                                                                                         value="{{ old("companies.{$index}.addon_consumables_note") }}">
-                                                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
+                                                                                    <small class="text-muted">Coverage
+                                                                                        details, limits etc. (Max 100
+                                                                                        chars)</small>
                                                                                 </div>
                                                                                 <div class="form-group mb-2">
-                                                                                    <label class="small">Others (₹)</label>
+                                                                                    <label class="small">Others
+                                                                                        (₹)</label>
                                                                                     <input type="number"
                                                                                         name="companies[{{ $index }}][addon_others]"
                                                                                         class="form-control form-control-sm addon-field"
                                                                                         step="0.01"
                                                                                         value="{{ old("companies.{$index}.addon_others", 0) }}"
                                                                                         placeholder="Additional covers">
-                                                                                    <small class="text-muted">Other addon covers</small>
+                                                                                    <small class="text-muted">Other addon
+                                                                                        covers</small>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -1032,6 +1093,14 @@
                             </div>
                         </div>
                         <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>TP Premium (₹) <span class="text-danger">*</span></label>
+                                    <input type="number" name="companies[${currentIndex}][tp_premium]" class="form-control premium-field" step="0.01" required value="${existingData.tp_premium || ''}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-12">
                                 <div class="card border-left-success mb-3">
                                     <div class="card-header bg-success text-white py-1">
@@ -1164,7 +1233,8 @@
                 }
 
                 // Trigger premium calculation if data exists
-                if (existingData.basic_od_premium || existingData.total_addon_premium || existingData
+                if (existingData.basic_od_premium || existingData.tp_premium || existingData.total_addon_premium ||
+                    existingData
                     .cng_lpg_premium) {
                     const quoteCard = $(`.quote-entry[data-index="${currentIndex}"]`);
                     calculateQuotePremium(quoteCard);
@@ -1214,10 +1284,11 @@
 
             function calculateQuotePremium(quoteCard) {
                 const basicOd = parseFloat(quoteCard.find('[name*="[basic_od_premium]"]').val()) || 0;
+                const tpPremium = parseFloat(quoteCard.find('[name*="[tp_premium]"]').val()) || 0;
                 const addonPremium = parseFloat(quoteCard.find('[name*="[total_addon_premium]"]').val()) || 0;
                 const cngLpg = parseFloat(quoteCard.find('[name*="[cng_lpg_premium]"]').val()) || 0;
 
-                const netPremium = basicOd + addonPremium + cngLpg;
+                const netPremium = basicOd + tpPremium + addonPremium + cngLpg;
                 const gstAmount = netPremium * 0.18; // 18% GST
                 const finalPremium = netPremium + gstAmount;
 
@@ -1234,7 +1305,7 @@
                 quoteCard.append(`
                     <input type="hidden" name="companies[${index}][sgst_amount]" value="${(gstAmount/2).toFixed(2)}">
                     <input type="hidden" name="companies[${index}][cgst_amount]" value="${(gstAmount/2).toFixed(2)}">
-                    <input type="hidden" name="companies[${index}][total_od_premium]" value="${(basicOd + cngLpg).toFixed(2)}">
+                    <input type="hidden" name="companies[${index}][total_od_premium]" value="${(basicOd + tpPremium + cngLpg).toFixed(2)}">
                 `);
             }
 

@@ -24,6 +24,7 @@ class Quotation extends Model
         'cubic_capacity_kw',
         'seating_capacity',
         'fuel_type',
+        'ncb_percentage',
         'idv_vehicle',
         'idv_trailer',
         'idv_cng_lpg_kit',
@@ -41,6 +42,7 @@ class Quotation extends Model
 
     protected $casts = [
         'date_of_registration' => 'date',
+        'ncb_percentage' => 'decimal:2',
         'idv_vehicle' => 'decimal:2',
         'idv_trailer' => 'decimal:2',
         'idv_cng_lpg_kit' => 'decimal:2',

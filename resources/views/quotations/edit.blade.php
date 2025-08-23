@@ -29,7 +29,8 @@
                     <i class="fas fa-edit"></i> Edit Quotation: {{ $quotation->getQuoteReference() }}
                 </h6>
                 <div class="d-flex">
-                    <span class="badge badge-{{ $quotation->status == 'Draft' ? 'secondary' : ($quotation->status == 'Generated' ? 'info' : ($quotation->status == 'Sent' ? 'warning' : ($quotation->status == 'Accepted' ? 'success' : 'danger'))) }} mr-2">
+                    <span
+                        class="badge badge-{{ $quotation->status == 'Draft' ? 'secondary' : ($quotation->status == 'Generated' ? 'info' : ($quotation->status == 'Sent' ? 'warning' : ($quotation->status == 'Accepted' ? 'success' : 'danger'))) }} mr-2">
                         {{ $quotation->status }}
                     </span>
                     <span class="badge badge-info">{{ $quotation->quotationCompanies->count() }} Companies</span>
@@ -110,47 +111,48 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="vehicle_number">Vehicle Number</label>
                                                 <input type="text" name="vehicle_number" id="vehicle_number"
                                                     class="form-control @error('vehicle_number') is-invalid @enderror"
                                                     placeholder="e.g., GJ05AB1234 (Leave blank if new vehicle)"
-                                                    style="text-transform: uppercase" value="{{ old('vehicle_number') ?? $quotation->vehicle_number }}">
+                                                    style="text-transform: uppercase"
+                                                    value="{{ old('vehicle_number') ?? $quotation->vehicle_number }}">
                                                 @error('vehicle_number')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="make_model_variant"><span class="text-danger">*</span>
                                                     Make/Model/Variant</label>
                                                 <input type="text" name="make_model_variant" id="make_model_variant"
                                                     class="form-control @error('make_model_variant') is-invalid @enderror"
                                                     placeholder="e.g., Maruti Swift VDI"
-                                                    value="{{ old('make_model_variant') ?? $quotation->make_model_variant }}" required>
+                                                    value="{{ old('make_model_variant') ?? $quotation->make_model_variant }}"
+                                                    required>
                                                 @error('make_model_variant')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="rto_location"><span class="text-danger">*</span> RTO
                                                     Location</label>
                                                 <input type="text" name="rto_location" id="rto_location"
                                                     class="form-control @error('rto_location') is-invalid @enderror"
-                                                    placeholder="e.g., Ahmedabad" value="{{ old('rto_location') ?? $quotation->rto_location }}"
-                                                    required>
+                                                    placeholder="e.g., Ahmedabad"
+                                                    value="{{ old('rto_location') ?? $quotation->rto_location }}" required>
                                                 @error('rto_location')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="manufacturing_year"><span class="text-danger">*</span>
@@ -178,16 +180,14 @@
                                                 <input type="date" name="date_of_registration"
                                                     id="date_of_registration"
                                                     class="form-control @error('date_of_registration') is-invalid @enderror"
-                                                    value="{{ old('date_of_registration') ?? $quotation->date_of_registration->format('Y-m-d') }}" required>
+                                                    value="{{ old('date_of_registration') ?? $quotation->date_of_registration->format('Y-m-d') }}"
+                                                    required>
                                                 @error('date_of_registration')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="fuel_type"><span class="text-danger">*</span> Fuel
                                                     Type</label>
@@ -195,21 +195,46 @@
                                                     class="form-control @error('fuel_type') is-invalid @enderror" required>
                                                     <option value="">Select Fuel Type</option>
                                                     <option value="Petrol"
-                                                        {{ (old('fuel_type') ?? $quotation->fuel_type) == 'Petrol' ? 'selected' : '' }}>Petrol
+                                                        {{ (old('fuel_type') ?? $quotation->fuel_type) == 'Petrol' ? 'selected' : '' }}>
+                                                        Petrol
                                                     </option>
                                                     <option value="Diesel"
-                                                        {{ (old('fuel_type') ?? $quotation->fuel_type) == 'Diesel' ? 'selected' : '' }}>Diesel
+                                                        {{ (old('fuel_type') ?? $quotation->fuel_type) == 'Diesel' ? 'selected' : '' }}>
+                                                        Diesel
                                                     </option>
                                                     <option value="CNG"
-                                                        {{ (old('fuel_type') ?? $quotation->fuel_type) == 'CNG' ? 'selected' : '' }}>CNG</option>
+                                                        {{ (old('fuel_type') ?? $quotation->fuel_type) == 'CNG' ? 'selected' : '' }}>
+                                                        CNG</option>
                                                     <option value="Electric"
-                                                        {{ (old('fuel_type') ?? $quotation->fuel_type) == 'Electric' ? 'selected' : '' }}>Electric
+                                                        {{ (old('fuel_type') ?? $quotation->fuel_type) == 'Electric' ? 'selected' : '' }}>
+                                                        Electric
                                                     </option>
                                                     <option value="Hybrid"
-                                                        {{ (old('fuel_type') ?? $quotation->fuel_type) == 'Hybrid' ? 'selected' : '' }}>Hybrid
+                                                        {{ (old('fuel_type') ?? $quotation->fuel_type) == 'Hybrid' ? 'selected' : '' }}>
+                                                        Hybrid
                                                     </option>
                                                 </select>
                                                 @error('fuel_type')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                <label for="ncb_percentage">NCB Percentage</label>
+                                                <div class="input-group">
+                                                    <input type="number" name="ncb_percentage" id="ncb_percentage"
+                                                        class="form-control @error('ncb_percentage') is-invalid @enderror"
+                                                        value="{{ old('ncb_percentage', $quotation->ncb_percentage ?? 0) }}"
+                                                        min="0" max="50" step="0.01" placeholder="0">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text">%</span>
+                                                    </div>
+                                                </div>
+                                                <small class="form-text text-muted">No Claim Bonus (0-50%)</small>
+                                                @error('ncb_percentage')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
@@ -220,7 +245,8 @@
                                                     Capacity (CC/KW)</label>
                                                 <input type="number" name="cubic_capacity_kw" id="cubic_capacity_kw"
                                                     class="form-control @error('cubic_capacity_kw') is-invalid @enderror"
-                                                    placeholder="e.g., 1200" value="{{ old('cubic_capacity_kw') ?? $quotation->cubic_capacity_kw }}"
+                                                    placeholder="e.g., 1200"
+                                                    value="{{ old('cubic_capacity_kw') ?? $quotation->cubic_capacity_kw }}"
                                                     required>
                                                 @error('cubic_capacity_kw')
                                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -233,7 +259,9 @@
                                                     Capacity</label>
                                                 <input type="number" name="seating_capacity" id="seating_capacity"
                                                     class="form-control @error('seating_capacity') is-invalid @enderror"
-                                                    placeholder="e.g., 5" value="{{ old('seating_capacity') ?? $quotation->seating_capacity }}" required>
+                                                    placeholder="e.g., 5"
+                                                    value="{{ old('seating_capacity') ?? $quotation->seating_capacity }}"
+                                                    required>
                                                 @error('seating_capacity')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -247,13 +275,16 @@
                                                     class="form-control @error('policy_tenure_years') is-invalid @enderror"
                                                     required>
                                                     <option value="1"
-                                                        {{ (old('policy_tenure_years') ?? $quotation->policy_tenure_years) == '1' ? 'selected' : '' }}>1 Year
+                                                        {{ (old('policy_tenure_years') ?? $quotation->policy_tenure_years) == '1' ? 'selected' : '' }}>
+                                                        1 Year
                                                     </option>
                                                     <option value="2"
-                                                        {{ (old('policy_tenure_years') ?? $quotation->policy_tenure_years) == '2' ? 'selected' : '' }}>2 Years
+                                                        {{ (old('policy_tenure_years') ?? $quotation->policy_tenure_years) == '2' ? 'selected' : '' }}>
+                                                        2 Years
                                                     </option>
                                                     <option value="3"
-                                                        {{ (old('policy_tenure_years') ?? $quotation->policy_tenure_years) == '3' ? 'selected' : '' }}>3 Years
+                                                        {{ (old('policy_tenure_years') ?? $quotation->policy_tenure_years) == '3' ? 'selected' : '' }}>
+                                                        3 Years
                                                     </option>
                                                 </select>
                                                 @error('policy_tenure_years')
@@ -288,10 +319,12 @@
                                                         {{ (old('policy_type') ?? $quotation->policy_type) == 'Comprehensive' ? 'selected' : '' }}>
                                                         Comprehensive</option>
                                                     <option value="Own Damage"
-                                                        {{ (old('policy_type') ?? $quotation->policy_type) == 'Own Damage' ? 'selected' : '' }}>Own
+                                                        {{ (old('policy_type') ?? $quotation->policy_type) == 'Own Damage' ? 'selected' : '' }}>
+                                                        Own
                                                         Damage</option>
                                                     <option value="Third Party"
-                                                        {{ (old('policy_type') ?? $quotation->policy_type) == 'Third Party' ? 'selected' : '' }}>Third
+                                                        {{ (old('policy_type') ?? $quotation->policy_type) == 'Third Party' ? 'selected' : '' }}>
+                                                        Third
                                                         Party</option>
                                                 </select>
                                                 @error('policy_type')
@@ -306,7 +339,8 @@
                                                 </label>
                                                 <input type="number" name="idv_vehicle" id="idv_vehicle" step="0.01"
                                                     class="form-control @error('idv_vehicle') is-invalid @enderror"
-                                                    placeholder="e.g., 500000" value="{{ old('idv_vehicle') ?? $quotation->idv_vehicle }}" required>
+                                                    placeholder="e.g., 500000"
+                                                    value="{{ old('idv_vehicle') ?? $quotation->idv_vehicle }}" required>
                                                 @error('idv_vehicle')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -325,7 +359,8 @@
                                                 </label>
                                                 <input type="number" name="idv_trailer" id="idv_trailer" step="0.01"
                                                     class="form-control @error('idv_trailer') is-invalid @enderror"
-                                                    placeholder="0" value="{{ old('idv_trailer') ?? $quotation->idv_trailer }}">
+                                                    placeholder="0"
+                                                    value="{{ old('idv_trailer') ?? $quotation->idv_trailer }}">
                                                 @error('idv_trailer')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -342,7 +377,8 @@
                                                 <input type="number" name="idv_cng_lpg_kit" id="idv_cng_lpg_kit"
                                                     step="0.01"
                                                     class="form-control @error('idv_cng_lpg_kit') is-invalid @enderror"
-                                                    placeholder="0" value="{{ old('idv_cng_lpg_kit') ?? $quotation->idv_cng_lpg_kit }}">
+                                                    placeholder="0"
+                                                    value="{{ old('idv_cng_lpg_kit') ?? $quotation->idv_cng_lpg_kit }}">
                                                 @error('idv_cng_lpg_kit')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -359,7 +395,8 @@
                                                 <input type="number" name="idv_electrical_accessories"
                                                     id="idv_electrical_accessories" step="0.01"
                                                     class="form-control @error('idv_electrical_accessories') is-invalid @enderror"
-                                                    placeholder="0" value="{{ old('idv_electrical_accessories') ?? $quotation->idv_electrical_accessories }}">
+                                                    placeholder="0"
+                                                    value="{{ old('idv_electrical_accessories') ?? $quotation->idv_electrical_accessories }}">
                                                 @error('idv_electrical_accessories')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -512,7 +549,8 @@
                                     class="card-header bg-primary text-white py-2 d-flex justify-content-between align-items-center">
                                     <h6 class="m-0"><i class="fas fa-building"></i> Insurance Company Quotes</h6>
                                     <div class="d-flex align-items-center">
-                                        <span class="badge badge-light mr-2">{{ $quotation->quotationCompanies->count() }} Existing</span>
+                                        <span class="badge badge-light mr-2">{{ $quotation->quotationCompanies->count() }}
+                                            Existing</span>
                                         <button type="button" class="btn btn-sm btn-light" id="addQuoteBtn">
                                             <i class="fas fa-plus"></i> Add Quote
                                         </button>
@@ -520,16 +558,17 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="alert alert-info">
-                                        <small><i class="fas fa-info-circle"></i> You can edit existing company quotes or add new ones. Changes will be saved when you update the quotation.</small>
+                                        <small><i class="fas fa-info-circle"></i> You can edit existing company quotes or
+                                            add new ones. Changes will be saved when you update the quotation.</small>
                                     </div>
 
                                     <div id="quotesContainer">
                                         @php
                                             $quoteIndex = 0;
                                         @endphp
-                                        
+
                                         <!-- Existing company quotes -->
-                                        @foreach($quotation->quotationCompanies as $company)
+                                        @foreach ($quotation->quotationCompanies as $company)
                                             <div class="card border-left-info mb-3 quote-entry existing-quote"
                                                 data-index="{{ $quoteIndex }}" data-company-id="{{ $company->id }}">
                                                 <div
@@ -538,20 +577,23 @@
                                                         <i class="fas fa-quote-left"></i> Quote #{{ $quoteIndex + 1 }}
                                                         <span class="badge badge-info ml-2">Existing</span>
                                                     </h6>
-                                                    <button type="button"
-                                                        class="btn btn-sm btn-danger removeQuoteBtn">
+                                                    <button type="button" class="btn btn-sm btn-danger removeQuoteBtn">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </div>
                                                 <div class="card-body">
                                                     <!-- Hidden field to track existing company -->
-                                                    <input type="hidden" name="companies[{{ $quoteIndex }}][id]" value="{{ $company->id }}">
-                                                    
+                                                    <input type="hidden" name="companies[{{ $quoteIndex }}][id]"
+                                                        value="{{ $company->id }}">
+
                                                     <div class="row">
                                                         <div class="col-md-6">
                                                             <div class="form-group">
-                                                                <label>Insurance Company <span class="text-danger">*</span></label>
-                                                                <select name="companies[{{ $quoteIndex }}][insurance_company_id]" class="form-control company-select" required>
+                                                                <label>Insurance Company <span
+                                                                        class="text-danger">*</span></label>
+                                                                <select
+                                                                    name="companies[{{ $quoteIndex }}][insurance_company_id]"
+                                                                    class="form-control company-select" required>
                                                                     <option value="">Select Company</option>
                                                                     @foreach ($insuranceCompanies as $insuranceCompany)
                                                                         <option value="{{ $insuranceCompany->id }}"
@@ -565,8 +607,10 @@
                                                         <div class="col-md-6">
                                                             <div class="form-group">
                                                                 <label>Plan Name</label>
-                                                                <input type="text" name="companies[{{ $quoteIndex }}][plan_name]" 
-                                                                    class="form-control" placeholder="e.g., Comprehensive Plus" 
+                                                                <input type="text"
+                                                                    name="companies[{{ $quoteIndex }}][plan_name]"
+                                                                    class="form-control"
+                                                                    placeholder="e.g., Comprehensive Plus"
                                                                     value="{{ $company->plan_name }}">
                                                             </div>
                                                         </div>
@@ -575,17 +619,33 @@
                                                         <div class="col-md-6">
                                                             <div class="form-group">
                                                                 <label>Quote Number</label>
-                                                                <input type="text" name="companies[{{ $quoteIndex }}][quote_number]" 
-                                                                    class="form-control" placeholder="Company quote reference number" 
+                                                                <input type="text"
+                                                                    name="companies[{{ $quoteIndex }}][quote_number]"
+                                                                    class="form-control"
+                                                                    placeholder="Company quote reference number"
                                                                     value="{{ $company->quote_number }}">
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6">
                                                             <div class="form-group">
-                                                                <label>Basic OD Premium (Rs.) <span class="text-danger">*</span></label>
-                                                                <input type="number" name="companies[{{ $quoteIndex }}][basic_od_premium]" 
-                                                                    class="form-control premium-field" step="0.01" required 
-                                                                    value="{{ $company->basic_od_premium }}">
+                                                                <label>Basic OD Premium (Rs.) <span
+                                                                        class="text-danger">*</span></label>
+                                                                <input type="number"
+                                                                    name="companies[{{ $quoteIndex }}][basic_od_premium]"
+                                                                    class="form-control premium-field" step="0.01"
+                                                                    required value="{{ $company->basic_od_premium }}">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label>TP Premium (Rs.) <span
+                                                                        class="text-danger">*</span></label>
+                                                                <input type="number"
+                                                                    name="companies[{{ $quoteIndex }}][tp_premium]"
+                                                                    class="form-control premium-field" step="0.01"
+                                                                    required value="{{ $company->tp_premium ?? 0 }}">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -594,100 +654,174 @@
                                                         <div class="col-md-12">
                                                             <div class="card border-left-success mb-3">
                                                                 <div class="card-header bg-success text-white py-1">
-                                                                    <h6 class="m-0 small"><i class="fas fa-plus-circle"></i> Add-on Covers Breakdown</h6>
+                                                                    <h6 class="m-0 small"><i
+                                                                            class="fas fa-plus-circle"></i> Add-on Covers
+                                                                        Breakdown</h6>
                                                                 </div>
                                                                 <div class="card-body p-2">
                                                                     @php
-                                                                        $addonBreakdown = $company->addon_covers_breakdown ?? [];
+                                                                        $addonBreakdown =
+                                                                            $company->addon_covers_breakdown ?? [];
                                                                     @endphp
                                                                     <div class="row">
                                                                         <div class="col-md-4">
-@php
-                                                                            $addonMappings = [
-                                                                                'zero_dep' => 'Zero Depreciation',
-                                                                                'engine_protection' => 'Engine Protection', 
-                                                                                'road_side_assistance' => 'Road Side Assistance'
-                                                                            ];
-                                                                        @endphp
-                                                                        @foreach($addonMappings as $key => $label)
+                                                                            @php
+                                                                                $addonMappings = [
+                                                                                    'zero_dep' => 'Zero Depreciation',
+                                                                                    'engine_protection' =>
+                                                                                        'Engine Protection',
+                                                                                    'road_side_assistance' =>
+                                                                                        'Road Side Assistance',
+                                                                                ];
+                                                                            @endphp
+                                                                            @foreach ($addonMappings as $key => $label)
                                                                                 @php
-                                                                                    $addonData = $addonBreakdown[$label] ?? ['price' => 0, 'note' => ''];
-                                                                                    $price = is_array($addonData) ? ($addonData['price'] ?? 0) : $addonData;
-                                                                                    $note = is_array($addonData) ? ($addonData['note'] ?? '') : '';
+                                                                                    $addonData = $addonBreakdown[
+                                                                                        $label
+                                                                                    ] ?? ['price' => 0, 'note' => ''];
+                                                                                    $price = is_array($addonData)
+                                                                                        ? $addonData['price'] ?? 0
+                                                                                        : $addonData;
+                                                                                    $note = is_array($addonData)
+                                                                                        ? $addonData['note'] ?? ''
+                                                                                        : '';
                                                                                 @endphp
-                                                                                <div class="form-group mb-2 addon-field-container" data-addon="{{ $key }}" style="{{ in_array($label, $quotation->addon_covers ?? []) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">{{ $label }} (Rs.)</label>
-                                                                                    <input type="number" name="companies[{{ $quoteIndex }}][addon_{{ $key }}]" 
-                                                                                        class="form-control form-control-sm addon-field" step="0.01" 
-                                                                                        value="{{ $price }}" placeholder="0">
-                                                                                    <input type="text" name="companies[{{ $quoteIndex }}][addon_{{ $key }}_note]" 
-                                                                                        class="form-control form-control-sm mt-1 addon-note" maxlength="100" 
-                                                                                        value="{{ $note }}" placeholder="Add coverage details, limits etc.">
-                                                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
+                                                                                <div class="form-group mb-2 addon-field-container"
+                                                                                    data-addon="{{ $key }}"
+                                                                                    style="{{ in_array($label, $quotation->addon_covers ?? []) ? 'display: block;' : 'display: none;' }}">
+                                                                                    <label
+                                                                                        class="small">{{ $label }}
+                                                                                        (Rs.)
+                                                                                    </label>
+                                                                                    <input type="number"
+                                                                                        name="companies[{{ $quoteIndex }}][addon_{{ $key }}]"
+                                                                                        class="form-control form-control-sm addon-field"
+                                                                                        step="0.01"
+                                                                                        value="{{ $price }}"
+                                                                                        placeholder="0">
+                                                                                    <input type="text"
+                                                                                        name="companies[{{ $quoteIndex }}][addon_{{ $key }}_note]"
+                                                                                        class="form-control form-control-sm mt-1 addon-note"
+                                                                                        maxlength="100"
+                                                                                        value="{{ $note }}"
+                                                                                        placeholder="Add coverage details, limits etc.">
+                                                                                    <small class="text-muted">Coverage
+                                                                                        details, limits etc. (Max 100
+                                                                                        chars)</small>
                                                                                 </div>
                                                                             @endforeach
                                                                         </div>
                                                                         <div class="col-md-4">
-@php
-                                                                            $addonMappings = [
-                                                                                'ncb_protection' => 'NCB Protection',
-                                                                                'invoice_protection' => 'Invoice Protection',
-                                                                                'key_replacement' => 'Key Replacement'
-                                                                            ];
-                                                                        @endphp
-                                                                        @foreach($addonMappings as $key => $label)
+                                                                            @php
+                                                                                $addonMappings = [
+                                                                                    'ncb_protection' =>
+                                                                                        'NCB Protection',
+                                                                                    'invoice_protection' =>
+                                                                                        'Invoice Protection',
+                                                                                    'key_replacement' =>
+                                                                                        'Key Replacement',
+                                                                                ];
+                                                                            @endphp
+                                                                            @foreach ($addonMappings as $key => $label)
                                                                                 @php
-                                                                                    $addonData = $addonBreakdown[$label] ?? ['price' => 0, 'note' => ''];
-                                                                                    $price = is_array($addonData) ? ($addonData['price'] ?? 0) : $addonData;
-                                                                                    $note = is_array($addonData) ? ($addonData['note'] ?? '') : '';
+                                                                                    $addonData = $addonBreakdown[
+                                                                                        $label
+                                                                                    ] ?? ['price' => 0, 'note' => ''];
+                                                                                    $price = is_array($addonData)
+                                                                                        ? $addonData['price'] ?? 0
+                                                                                        : $addonData;
+                                                                                    $note = is_array($addonData)
+                                                                                        ? $addonData['note'] ?? ''
+                                                                                        : '';
                                                                                 @endphp
-                                                                                <div class="form-group mb-2 addon-field-container" data-addon="{{ $key }}" style="{{ in_array($label, $quotation->addon_covers ?? []) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">{{ $label }} (Rs.)</label>
-                                                                                    <input type="number" name="companies[{{ $quoteIndex }}][addon_{{ $key }}]" 
-                                                                                        class="form-control form-control-sm addon-field" step="0.01" 
-                                                                                        value="{{ $price }}" placeholder="0">
-                                                                                    <input type="text" name="companies[{{ $quoteIndex }}][addon_{{ $key }}_note]" 
-                                                                                        class="form-control form-control-sm mt-1 addon-note" maxlength="100" 
-                                                                                        value="{{ $note }}" placeholder="Add coverage details, limits etc.">
-                                                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
+                                                                                <div class="form-group mb-2 addon-field-container"
+                                                                                    data-addon="{{ $key }}"
+                                                                                    style="{{ in_array($label, $quotation->addon_covers ?? []) ? 'display: block;' : 'display: none;' }}">
+                                                                                    <label
+                                                                                        class="small">{{ $label }}
+                                                                                        (Rs.)
+                                                                                    </label>
+                                                                                    <input type="number"
+                                                                                        name="companies[{{ $quoteIndex }}][addon_{{ $key }}]"
+                                                                                        class="form-control form-control-sm addon-field"
+                                                                                        step="0.01"
+                                                                                        value="{{ $price }}"
+                                                                                        placeholder="0">
+                                                                                    <input type="text"
+                                                                                        name="companies[{{ $quoteIndex }}][addon_{{ $key }}_note]"
+                                                                                        class="form-control form-control-sm mt-1 addon-note"
+                                                                                        maxlength="100"
+                                                                                        value="{{ $note }}"
+                                                                                        placeholder="Add coverage details, limits etc.">
+                                                                                    <small class="text-muted">Coverage
+                                                                                        details, limits etc. (Max 100
+                                                                                        chars)</small>
                                                                                 </div>
                                                                             @endforeach
                                                                         </div>
                                                                         <div class="col-md-4">
-@php
-                                                                            $addonMappings = [
-                                                                                'personal_accident' => 'Personal Accident',
-                                                                                'tyre_protection' => 'Tyre Protection',
-                                                                                'consumables' => 'Consumables'
-                                                                            ];
-                                                                        @endphp
-                                                                        @foreach($addonMappings as $key => $label)
+                                                                            @php
+                                                                                $addonMappings = [
+                                                                                    'personal_accident' =>
+                                                                                        'Personal Accident',
+                                                                                    'tyre_protection' =>
+                                                                                        'Tyre Protection',
+                                                                                    'consumables' => 'Consumables',
+                                                                                ];
+                                                                            @endphp
+                                                                            @foreach ($addonMappings as $key => $label)
                                                                                 @php
-                                                                                    $addonData = $addonBreakdown[$label] ?? ['price' => 0, 'note' => ''];
-                                                                                    $price = is_array($addonData) ? ($addonData['price'] ?? 0) : $addonData;
-                                                                                    $note = is_array($addonData) ? ($addonData['note'] ?? '') : '';
+                                                                                    $addonData = $addonBreakdown[
+                                                                                        $label
+                                                                                    ] ?? ['price' => 0, 'note' => ''];
+                                                                                    $price = is_array($addonData)
+                                                                                        ? $addonData['price'] ?? 0
+                                                                                        : $addonData;
+                                                                                    $note = is_array($addonData)
+                                                                                        ? $addonData['note'] ?? ''
+                                                                                        : '';
                                                                                 @endphp
-                                                                                <div class="form-group mb-2 addon-field-container" data-addon="{{ $key }}" style="{{ in_array($label, $quotation->addon_covers ?? []) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">{{ $label }} (Rs.)</label>
-                                                                                    <input type="number" name="companies[{{ $quoteIndex }}][addon_{{ $key }}]" 
-                                                                                        class="form-control form-control-sm addon-field" step="0.01" 
-                                                                                        value="{{ $price }}" placeholder="0">
-                                                                                    <input type="text" name="companies[{{ $quoteIndex }}][addon_{{ $key }}_note]" 
-                                                                                        class="form-control form-control-sm mt-1 addon-note" maxlength="100" 
-                                                                                        value="{{ $note }}" placeholder="Add coverage details, limits etc.">
-                                                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
+                                                                                <div class="form-group mb-2 addon-field-container"
+                                                                                    data-addon="{{ $key }}"
+                                                                                    style="{{ in_array($label, $quotation->addon_covers ?? []) ? 'display: block;' : 'display: none;' }}">
+                                                                                    <label
+                                                                                        class="small">{{ $label }}
+                                                                                        (Rs.)
+                                                                                    </label>
+                                                                                    <input type="number"
+                                                                                        name="companies[{{ $quoteIndex }}][addon_{{ $key }}]"
+                                                                                        class="form-control form-control-sm addon-field"
+                                                                                        step="0.01"
+                                                                                        value="{{ $price }}"
+                                                                                        placeholder="0">
+                                                                                    <input type="text"
+                                                                                        name="companies[{{ $quoteIndex }}][addon_{{ $key }}_note]"
+                                                                                        class="form-control form-control-sm mt-1 addon-note"
+                                                                                        maxlength="100"
+                                                                                        value="{{ $note }}"
+                                                                                        placeholder="Add coverage details, limits etc.">
+                                                                                    <small class="text-muted">Coverage
+                                                                                        details, limits etc. (Max 100
+                                                                                        chars)</small>
                                                                                 </div>
                                                                             @endforeach
                                                                             <div class="form-group mb-2">
                                                                                 <label class="small">Others (Rs.)</label>
                                                                                 @php
-                                                                                    $othersData = $addonBreakdown['Others'] ?? 0;
-                                                                                    $othersPrice = is_array($othersData) ? ($othersData['price'] ?? 0) : $othersData;
+                                                                                    $othersData =
+                                                                                        $addonBreakdown['Others'] ?? 0;
+                                                                                    $othersPrice = is_array($othersData)
+                                                                                        ? $othersData['price'] ?? 0
+                                                                                        : $othersData;
                                                                                 @endphp
-                                                                                <input type="number" name="companies[{{ $quoteIndex }}][addon_others]" 
-                                                                                    class="form-control form-control-sm addon-field" step="0.01" 
-                                                                                    value="{{ $othersPrice }}" placeholder="Additional covers">
-                                                                                <small class="text-muted">Other addon covers</small>
+                                                                                <input type="number"
+                                                                                    name="companies[{{ $quoteIndex }}][addon_others]"
+                                                                                    class="form-control form-control-sm addon-field"
+                                                                                    step="0.01"
+                                                                                    value="{{ $othersPrice }}"
+                                                                                    placeholder="Additional covers">
+                                                                                <small class="text-muted">Other addon
+                                                                                    covers</small>
                                                                             </div>
                                                                         </div>
                                                                     </div>
@@ -695,10 +829,14 @@
                                                                     <div class="row">
                                                                         <div class="col-md-12">
                                                                             <div class="form-group mb-0">
-                                                                                <label class="font-weight-bold text-success">Total Add-on Premium (Rs.)</label>
-                                                                                <input type="number" name="companies[{{ $quoteIndex }}][total_addon_premium]" 
-                                                                                    class="form-control form-control-sm total-addon-premium font-weight-bold" 
-                                                                                    step="0.01" readonly style="background: #d1ecf1;" 
+                                                                                <label
+                                                                                    class="font-weight-bold text-success">Total
+                                                                                    Add-on Premium (Rs.)</label>
+                                                                                <input type="number"
+                                                                                    name="companies[{{ $quoteIndex }}][total_addon_premium]"
+                                                                                    class="form-control form-control-sm total-addon-premium font-weight-bold"
+                                                                                    step="0.01" readonly
+                                                                                    style="background: #d1ecf1;"
                                                                                     value="{{ $company->total_addon_premium }}">
                                                                             </div>
                                                                         </div>
@@ -709,8 +847,9 @@
                                                         <div class="col-md-4">
                                                             <div class="form-group">
                                                                 <label>CNG/LPG Premium (Rs.)</label>
-                                                                <input type="number" name="companies[{{ $quoteIndex }}][cng_lpg_premium]" 
-                                                                    class="form-control premium-field" step="0.01" 
+                                                                <input type="number"
+                                                                    name="companies[{{ $quoteIndex }}][cng_lpg_premium]"
+                                                                    class="form-control premium-field" step="0.01"
                                                                     value="{{ $company->cng_lpg_premium }}">
                                                             </div>
                                                         </div>
@@ -719,43 +858,58 @@
                                                         <div class="col-md-4">
                                                             <div class="form-group">
                                                                 <label>Net Premium (Rs.)</label>
-                                                                <input type="number" name="companies[{{ $quoteIndex }}][net_premium]" 
-                                                                    class="form-control net-premium" step="0.01" readonly 
-                                                                    value="{{ $company->net_premium }}">
+                                                                <input type="number"
+                                                                    name="companies[{{ $quoteIndex }}][net_premium]"
+                                                                    class="form-control net-premium" step="0.01"
+                                                                    readonly value="{{ $company->net_premium }}">
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4">
                                                             <div class="form-group">
                                                                 <label>GST Amount (Rs.)</label>
-                                                                <input type="number" name="companies[{{ $quoteIndex }}][gst_amount]" 
-                                                                    class="form-control gst-amount" step="0.01" readonly 
+                                                                <input type="number"
+                                                                    name="companies[{{ $quoteIndex }}][gst_amount]"
+                                                                    class="form-control gst-amount" step="0.01"
+                                                                    readonly
                                                                     value="{{ $company->sgst_amount + $company->cgst_amount }}">
                                                             </div>
                                                         </div>
                                                         <div class="col-md-4">
                                                             <div class="form-group">
                                                                 <label><strong>Final Premium (Rs.)</strong></label>
-                                                                <input type="number" name="companies[{{ $quoteIndex }}][final_premium]" 
-                                                                    class="form-control final-premium font-weight-bold" step="0.01" readonly 
-                                                                    style="background: #d4edda;" value="{{ $company->final_premium }}">
+                                                                <input type="number"
+                                                                    name="companies[{{ $quoteIndex }}][final_premium]"
+                                                                    class="form-control final-premium font-weight-bold"
+                                                                    step="0.01" readonly style="background: #d4edda;"
+                                                                    value="{{ $company->final_premium }}">
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="row">
                                                         <div class="col-md-12">
                                                             <div class="form-check">
-                                                                <input type="checkbox" name="companies[{{ $quoteIndex }}][is_recommended]" value="1" 
-                                                                    class="form-check-input" {{ $company->is_recommended ? 'checked' : '' }}>
+                                                                <input type="checkbox"
+                                                                    name="companies[{{ $quoteIndex }}][is_recommended]"
+                                                                    value="1" class="form-check-input"
+                                                                    {{ $company->is_recommended ? 'checked' : '' }}>
                                                                 <label class="form-check-label">Mark as Recommended</label>
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                     <!-- Hidden fields for backend processing -->
-                                                    <input type="hidden" name="companies[{{ $quoteIndex }}][sgst_amount]" value="{{ $company->sgst_amount }}">
-                                                    <input type="hidden" name="companies[{{ $quoteIndex }}][cgst_amount]" value="{{ $company->cgst_amount }}">
-                                                    <input type="hidden" name="companies[{{ $quoteIndex }}][total_od_premium]" value="{{ $company->total_od_premium }}">
-                                                    <input type="hidden" name="companies[{{ $quoteIndex }}][total_premium]" value="{{ $company->total_premium }}">
+                                                    <input type="hidden"
+                                                        name="companies[{{ $quoteIndex }}][sgst_amount]"
+                                                        value="{{ $company->sgst_amount }}">
+                                                    <input type="hidden"
+                                                        name="companies[{{ $quoteIndex }}][cgst_amount]"
+                                                        value="{{ $company->cgst_amount }}">
+                                                    <input type="hidden"
+                                                        name="companies[{{ $quoteIndex }}][total_od_premium]"
+                                                        value="{{ $company->total_od_premium }}">
+                                                    <input type="hidden"
+                                                        name="companies[{{ $quoteIndex }}][total_premium]"
+                                                        value="{{ $company->total_premium }}">
                                                 </div>
                                             </div>
                                             @php $quoteIndex++; @endphp
@@ -871,7 +1025,8 @@
             });
 
             // Manual Quote Entry System
-            let quoteIndex = {{ $quotation->quotationCompanies->count() + (old('companies') ? count(old('companies')) : 0) }};
+            let quoteIndex =
+                {{ $quotation->quotationCompanies->count() + (old('companies') ? count(old('companies')) : 0) }};
 
             // Initialize premium calculations for existing quotes
             setTimeout(function() {
@@ -930,6 +1085,14 @@
                                  <div class="form-group">
                                     <label>Basic OD Premium (Rs.) <span class="text-danger">*</span></label>
                                     <input type="number" name="companies[${currentIndex}][basic_od_premium]" class="form-control premium-field" step="0.01" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>TP Premium (Rs.) <span class="text-danger">*</span></label>
+                                    <input type="number" name="companies[${currentIndex}][tp_premium]" class="form-control premium-field" step="0.01" required>
                                 </div>
                             </div>
                         </div>
@@ -1097,10 +1260,11 @@
 
             function calculateQuotePremium(quoteCard) {
                 const basicOd = parseFloat(quoteCard.find('[name*="[basic_od_premium]"]').val()) || 0;
+                const tpPremium = parseFloat(quoteCard.find('[name*="[tp_premium]"]').val()) || 0;
                 const addonPremium = parseFloat(quoteCard.find('[name*="[total_addon_premium]"]').val()) || 0;
                 const cngLpg = parseFloat(quoteCard.find('[name*="[cng_lpg_premium]"]').val()) || 0;
 
-                const netPremium = basicOd + addonPremium + cngLpg;
+                const netPremium = basicOd + tpPremium + addonPremium + cngLpg;
                 const gstAmount = netPremium * 0.18; // 18% GST
                 const finalPremium = netPremium + gstAmount;
 
@@ -1110,8 +1274,8 @@
 
                 // Update hidden fields for backend
                 const index = quoteCard.data('index');
-                quoteCard.find('[name*="[sgst_amount]"]').val((gstAmount/2).toFixed(2));
-                quoteCard.find('[name*="[cgst_amount]"]').val((gstAmount/2).toFixed(2));
+                quoteCard.find('[name*="[sgst_amount]"]').val((gstAmount / 2).toFixed(2));
+                quoteCard.find('[name*="[cgst_amount]"]').val((gstAmount / 2).toFixed(2));
             }
 
             // Dynamic addon checkbox functionality
@@ -1121,7 +1285,8 @@
 
                 // Show/hide addon fields in all company quotes
                 $('.quote-entry').each(function() {
-                    const addonContainer = $(this).find(`.addon-field-container[data-addon="${addonType}"]`);
+                    const addonContainer = $(this).find(
+                        `.addon-field-container[data-addon="${addonType}"]`);
                     if (isChecked) {
                         addonContainer.show();
                     } else {
@@ -1134,12 +1299,12 @@
             // Initialize addon visibility on page load
             setTimeout(function() {
                 initializeAddonVisibility();
-                
+
                 // Calculate addon totals for existing quotes
                 $('.quote-entry').each(function() {
                     calculateAddonTotal($(this));
                 });
-                
+
                 // Recalculate all premiums for existing quotes
                 $('.existing-quote').each(function() {
                     calculateQuotePremium($(this));
@@ -1149,13 +1314,13 @@
             // Add Quote button click handler
             $('#addQuoteBtn').on('click', function() {
                 addQuoteForm();
-                
+
                 // Apply addon synchronization after the form is added
                 setTimeout(function() {
                     initializeAddonVisibility();
                 }, 50);
             });
-            
+
             // Initialize addon visibility on page load and synchronize with checkboxes
             function initializeAddonVisibility() {
                 $('.addon-checkbox').each(function() {

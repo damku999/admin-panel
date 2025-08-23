@@ -69,6 +69,7 @@
                             <strong>Number:</strong> {{ $quotation->vehicle_number ?? 'New Vehicle' }}<br>
                             <strong>RTO:</strong> {{ $quotation->rto_location }} | 
                             <strong>Fuel:</strong> {{ $quotation->fuel_type }} | 
+                            <strong>NCB:</strong> {{ $quotation->ncb_percentage ?? 0 }}% | 
                             <strong>Year:</strong> {{ $quotation->manufacturing_year }}<br>
                             <strong>Registration:</strong> {{ \Carbon\Carbon::parse($quotation->date_of_registration)->format('d M Y') }}<br>
                             <strong>CC/KW:</strong> {{ number_format($quotation->cubic_capacity_kw) }} | 
@@ -200,6 +201,7 @@
                                         <th>Insurance Company</th>
                                         <th>Plan Name</th>
                                         <th>Basic OD</th>
+                                        <th>TP Premium</th>
                                         <th>Add-on</th>
                                         <th>CNG/LPG</th>
                                         <th>Net Premium</th>
@@ -229,6 +231,7 @@
                                             </td>
                                             <td>{{ $company->plan_name ?? 'Standard Plan' }}</td>
                                             <td>₹{{ number_format($company->basic_od_premium) }}</td>
+                                            <td>₹{{ number_format($company->tp_premium ?? 0) }}</td>
                                             <td>₹{{ number_format($company->total_addon_premium) }}</td>
                                             <td>₹{{ number_format($company->cng_lpg_premium ?? 0) }}</td>
                                             <td>₹{{ number_format($company->net_premium) }}</td>

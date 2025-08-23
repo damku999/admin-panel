@@ -21,13 +21,13 @@ class QuotationService
     public function createQuotation(array $data): Quotation
     {
         $data['total_idv'] = $this->calculateTotalIdv($data);
-        
+
         // Extract company data before creating quotation
         $companies = $data['companies'] ?? [];
         unset($data['companies']);
-        
+
         $quotation = Quotation::create($data);
-        
+
         // Create company quotes manually
         if (!empty($companies)) {
             $this->createManualCompanyQuotes($quotation, $companies);
@@ -243,9 +243,9 @@ class QuotationService
         $microtime = (string) microtime(true);
         $uniqueId = str_replace('.', '', $microtime); // Remove decimal point
         $uniqueId = substr($uniqueId, -8); // Take last 8 digits for uniqueness
-        
+
         return 'QT/' . date('y') . '/' . str_pad($quotation->id, 4, '0', STR_PAD_LEFT) .
-               str_pad($companyId, 2, '0', STR_PAD_LEFT) . 
+               str_pad($companyId, 2, '0', STR_PAD_LEFT) .
                $uniqueId;
     }
 
@@ -321,21 +321,21 @@ class QuotationService
     public function createManualCompanyQuotes(Quotation $quotation, array $companies): void
     {
         $processedQuotes = []; // Track processed quotes to avoid exact duplicates
-        
+
         foreach ($companies as $index => $companyData) {
             // Create unique key based on multiple fields to allow same company with different plans
-            $quoteKey = $companyData['insurance_company_id'] . '_' . 
-                       ($companyData['quote_number'] ?? '') . '_' . 
-                       ($companyData['plan_name'] ?? '') . '_' . 
-                       ($companyData['basic_od_premium'] ?? '') . '_' . 
+            $quoteKey = $companyData['insurance_company_id'] . '_' .
+                       ($companyData['quote_number'] ?? '') . '_' .
+                       ($companyData['plan_name'] ?? '') . '_' .
+                       ($companyData['basic_od_premium'] ?? '') . '_' .
                        $index; // Include index to ensure each form entry is processed
-            
+
             // Skip only if this exact quote has already been processed
             if (in_array($quoteKey, $processedQuotes)) {
                 continue;
             }
             $processedQuotes[] = $quoteKey;
-            
+
             // Process addon breakdown to calculate total if needed
             $companyData = $this->processAddonBreakdown($companyData);
             $this->createManualCompanyQuote($quotation, $companyData);
@@ -361,7 +361,7 @@ class QuotationService
                 $totalAddon += floatval($addon);
             }
         }
-        
+
         // Update total if not set or if breakdown total differs
         if (!isset($data['total_addon_premium']) || $data['total_addon_premium'] != $totalAddon) {
             $data['total_addon_premium'] = $totalAddon;
@@ -434,7 +434,7 @@ class QuotationService
         $quotationData = $data;
         $companies = $quotationData['companies'] ?? [];
         unset($quotationData['companies']);
-        
+
         $quotationData['total_idv'] = $this->calculateTotalIdv($quotationData);
         $quotation->update($quotationData);
 
@@ -448,7 +448,7 @@ class QuotationService
     private function setRankings(Quotation $quotation): void
     {
         $quotes = $quotation->quotationCompanies()->orderBy('final_premium')->get();
-        
+
         foreach ($quotes as $index => $quote) {
             if (!$quote->ranking || $quote->ranking === 1) {
                 $quote->update(['ranking' => $index + 1]);

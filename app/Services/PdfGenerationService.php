@@ -14,12 +14,6 @@ class PdfGenerationService
         
         $data = [
             'quotation' => $quotation,
-            'customer' => $quotation->customer,
-            'companies' => $quotation->quotationCompanies,
-            'recommendedQuote' => $quotation->recommendedQuote(),
-            'bestQuote' => $quotation->bestQuote(),
-            'generatedDate' => now()->format('d/m/Y'),
-            'generatedTime' => now()->format('H:i:s'),
         ];
 
         $pdf = Pdf::loadView('pdfs.quotation', $data);

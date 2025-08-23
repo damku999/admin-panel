@@ -19,6 +19,7 @@ class QuotationCompany extends Model
         'quote_number',
         'plan_name',
         'basic_od_premium',
+        'tp_premium',
         'cng_lpg_premium',
         'total_od_premium',
         'addon_covers_breakdown',
@@ -37,6 +38,7 @@ class QuotationCompany extends Model
 
     protected $casts = [
         'basic_od_premium' => 'decimal:2',
+        'tp_premium' => 'decimal:2',
         'cng_lpg_premium' => 'decimal:2',
         'total_od_premium' => 'decimal:2',
         'addon_covers_breakdown' => 'array',

@@ -12,7 +12,10 @@
       "mcp__laravel-boost__list-routes",
       "mcp__laravel-boost__get-absolute-url",
       "mcp__laravel-boost__application-info",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "mcp__laravel-boost__last-error",
+      "mcp__laravel-boost__browser-logs",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

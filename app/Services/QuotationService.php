@@ -180,13 +180,21 @@ class QuotationService
     public function sendQuotationViaWhatsApp(Quotation $quotation): void
     {
         $message = $this->generateWhatsAppMessageWithAttachment($quotation);
-        $pdfPath = $this->generatePdf($quotation);
-        $this->whatsAppSendMessageWithAttachment($message, $quotation->whatsapp_number, $pdfPath);
-
-        $quotation->update([
-            'status' => 'Sent',
-            'sent_at' => now(),
-        ]);
+        $pdfPath = $this->pdfService->generateQuotationPdfForWhatsApp($quotation);
+        
+        try {
+            $response = $this->whatsAppSendMessageWithAttachment($message, $quotation->whatsapp_number, $pdfPath);
+            
+            $quotation->update([
+                'status' => 'Sent',
+                'sent_at' => now(),
+            ]);
+        } finally {
+            // Clean up temporary PDF file
+            if (file_exists($pdfPath)) {
+                unlink($pdfPath);
+            }
+        }
     }
 
     private function generateWhatsAppMessage(Quotation $quotation): string
@@ -226,33 +234,55 @@ class QuotationService
     private function generateWhatsAppMessageWithAttachment(Quotation $quotation): string
     {
         $customer = $quotation->customer;
+        $quotes = $quotation->quotationCompanies()->orderBy('final_premium')->get();
+        $bestQuote = $quotes->first();
         $recommendedQuote = $quotation->recommendedQuote();
-        $bestQuote = $quotation->bestQuote();
 
         $message = "🚗 *MIDAS Insurance Quotation*\n\n";
-        $message .= "Dear {$customer->name},\n\n";
-        $message .= "Your insurance quotation is ready! Please find the detailed comparison attached.\n\n";
-        $message .= "📋 *Vehicle Details:*\n";
-        $message .= "• Vehicle: {$quotation->make_model_variant}\n";
-        $message .= "• Registration: {$quotation->vehicle_number}\n";
-        $message .= "• IDV: ₹" . number_format($quotation->total_idv) . "\n\n";
+        $message .= "Dear *{$customer->name}*,\n\n";
+        $message .= "Your insurance quotation is ready! We have compared *{$quotes->count()} insurance companies* for you.\n\n";
+        
+        $message .= "🚙 *Vehicle Details:*\n";
+        $message .= "• Vehicle: *{$quotation->make_model_variant}*\n";
+        $message .= "• Registration: *{$quotation->vehicle_number}*\n";
+        $message .= "• IDV: *₹" . number_format($quotation->total_idv) . "*\n";
+        $message .= "• Policy: *{$quotation->policy_type}* - {$quotation->policy_tenure_years} Year(s)\n\n";
 
-        $message .= "💰 *Best Quote:*\n";
         if ($bestQuote) {
-            $message .= "• Company: {$bestQuote->insuranceCompany->name}\n";
-            $message .= "• Premium: {$bestQuote->getFormattedPremium()}\n";
-            $message .= "• Plan: {$bestQuote->plan_name}\n\n";
+            $message .= "💰 *Best Premium:*\n";
+            $message .= "• *{$bestQuote->insuranceCompany->name}*\n";
+            $message .= "• Premium: *{$bestQuote->getFormattedPremium()}*";
+            if ($bestQuote->plan_name) {
+                $message .= "\n• Plan: {$bestQuote->plan_name}";
+            }
+            $message .= "\n\n";
         }
 
-        $message .= "📊 *All Quotes:*\n";
-        foreach ($quotation->quotationCompanies as $quote) {
-            $icon = $quote->is_recommended ? '⭐' : '•';
-            $message .= "{$icon} {$quote->insuranceCompany->name}: {$quote->getFormattedPremium()}\n";
+        $message .= "📊 *Premium Comparison:*\n";
+        foreach ($quotes as $index => $quote) {
+            $icon = $quote->is_recommended ? '⭐' : ($index + 1);
+            $ranking = is_numeric($icon) ? "{$icon}." : $icon;
+            $message .= "{$ranking} *{$quote->insuranceCompany->name}*: {$quote->getFormattedPremium()}";
+            if ($quote->is_recommended) {
+                $message .= " _(Recommended)_";
+            }
+            $message .= "\n";
         }
 
-        $message .= "\n📎 *Detailed comparison PDF attached*\n";
-        $message .= "\n📞 Contact us for more details!\n";
-        $message .= "\n*MIDAS Insurance Services*";
+        // Calculate savings if more than one quote
+        if ($quotes->count() > 1) {
+            $highestQuote = $quotes->last();
+            $savings = $highestQuote->final_premium - $bestQuote->final_premium;
+            if ($savings > 0) {
+                $message .= "\n💵 *You can save up to ₹" . number_format($savings) . "*\n";
+            }
+        }
+
+        $message .= "\n📎 *Detailed PDF comparison attached*";
+        $message .= "\n\n📞 For any queries or to proceed with purchase:";
+        $message .= "\n*Call/WhatsApp: +919727793123*";
+        $message .= "\n\n*MIDAS Insurance Services*";
+        $message .= "\n_\"Think of Insurance, Think of Us.\"_";
 
         return $message;
     }

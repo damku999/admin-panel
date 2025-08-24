@@ -25,6 +25,34 @@ class PdfGenerationService
         return $pdf->download($filename);
     }
 
+    public function generateQuotationPdfForWhatsApp(Quotation $quotation): string
+    {
+        $quotation->load(['customer', 'quotationCompanies.insuranceCompany']);
+        
+        $data = [
+            'quotation' => $quotation,
+        ];
+
+        $pdf = Pdf::loadView('pdfs.quotation', $data);
+        $pdf->setPaper('A4', 'portrait');
+        
+        $filename = 'Quotation_' . $this->sanitizeFilename($quotation->getQuoteReference()) . '_' . 
+                   $this->sanitizeFilename($quotation->customer->name) . '.pdf';
+
+        // Create temp directory if it doesn't exist
+        $tempDir = storage_path('app/temp/quotations');
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0755, true);
+        }
+
+        $filePath = $tempDir . '/' . $filename;
+        
+        // Save PDF to file
+        file_put_contents($filePath, $pdf->output());
+        
+        return $filePath;
+    }
+
     public function generateComparisonPdf(Quotation $quotation): Response
     {
         $quotation->load(['customer', 'quotationCompanies.insuranceCompany']);

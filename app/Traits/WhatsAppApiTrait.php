@@ -5,10 +5,10 @@ namespace App\Traits;
 trait WhatsAppApiTrait
 {
     protected $senderId = '919727793123';
-    protected $base_url = 'https://api.botmastersender.com/api/v2/';
-    protected $authToken = '5cd77122-acbe-419d-a662-1300d3b20565';
-    // protected $base_url = 'https://api.botmastersender.com/api/v1/';
-    // protected $authToken = '53eb1f03-90be-49ce-9dbe-b23fe982b31f444444444';
+    // protected $base_url = 'https://api.botmastersender.com/api/v2/';
+    // protected $authToken = '5cd77122-acbe-419d-a662-1300d3b20565';
+    protected $base_url = 'https://api.botmastersender.com/api/v1/';
+    protected $authToken = '53eb1f03-90be-49ce-9dbe-b23fe982b31f';
 
     // mediaurl
     protected function whatsAppSendMessage($messageText, $receiverId)
@@ -38,42 +38,37 @@ trait WhatsAppApiTrait
     }
     protected function whatsAppSendMessageWithAttachment($messageText, $receiverId, $filePath)
     {
-        if (env('APP_ENV') == 'production') {
-            try {
+        try {
 
-                $curl = curl_init();
+            $curl = curl_init();
 
-                $fileHandle = fopen($filePath, 'r');
+            $fileHandle = fopen($filePath, 'r');
 
-                $fileSize = filesize($filePath);
-                curl_setopt_array($curl, [
-                    CURLOPT_URL => $this->base_url . '?action=send',
-                    CURLOPT_RETURNTRANSFER => true,
-                    CURLOPT_ENCODING => '',
-                    CURLOPT_MAXREDIRS => 10,
-                    CURLOPT_TIMEOUT => 0,
-                    CURLOPT_FOLLOWLOCATION => true,
-                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                    CURLOPT_CUSTOMREQUEST => 'POST',
-                    CURLOPT_POSTFIELDS => [
-                        'senderId' => $this->senderId,
-                        'authToken' => $this->authToken,
-                        'messageText' => $messageText,
-                        'receiverId' => $this->validateAndFormatMobileNumber($receiverId),
-                        'uploadFile' => curl_file_create($filePath, mime_content_type($filePath), basename($filePath)),
-                    ],
-                ]);
+            $fileSize = filesize($filePath);
+            curl_setopt_array($curl, [
+                CURLOPT_URL => $this->base_url . '?action=send',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_POSTFIELDS => [
+                    'senderId' => $this->senderId,
+                    'authToken' => $this->authToken,
+                    'messageText' => $messageText,
+                    'receiverId' => $this->validateAndFormatMobileNumber($receiverId),
+                    'uploadFile' => curl_file_create($filePath, mime_content_type($filePath), basename($filePath)),
+                ],
+            ]);
 
-                $response = curl_exec($curl);
-
-                curl_close($curl);
-                fclose($fileHandle);
-                return $response;
-            } catch (\Throwable $th) {
-                return $th->getMessage();
-            }
-        } else {
-            return true;
+            $response = curl_exec($curl);
+            curl_close($curl);
+            fclose($fileHandle);
+            return $response;
+        } catch (\Throwable $th) {
+            return $th->getMessage();
         }
     }
 

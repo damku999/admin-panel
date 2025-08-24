@@ -162,7 +162,7 @@
 <body>
     <div class="header">
         <h1><a href="https://midastech.in"> MIDAS </a> | Insurance Quote Comparison</h1>
-        <p>Generated on {{ now()->format('d/m/Y H:i:s') }}</p>
+        {{-- <p>Generated on {{ now()->format('d/m/Y H:i:s') }}</p> --}}
     </div>
 
     <div class="customer-info">

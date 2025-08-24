@@ -245,7 +245,6 @@ class QuotationService
 
         $message .= "\n📎 *Detailed PDF comparison attached*";
         $message .= "\n\n📞 For any queries or to proceed with purchase:";
-        $message .= "\n\n*MIDAS Insurance Services*\n\n";
         $message .= "\n\nBest regards,";
         $message .= "\nParth Rawal";
         $message .= "\nhttps://parthrawal.in";

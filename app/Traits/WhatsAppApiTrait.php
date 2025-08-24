@@ -5,10 +5,10 @@ namespace App\Traits;
 trait WhatsAppApiTrait
 {
     protected $senderId = '919727793123';
-    // protected $base_url = 'https://api.botmastersender.com/api/v2/';
-    // protected $authToken = '5cd77122-acbe-419d-a662-1300d3b20565';
-    protected $base_url = 'https://api.botmastersender.com/api/v1/';
-    protected $authToken = '53eb1f03-90be-49ce-9dbe-b23fe982b31f';
+    protected $base_url = 'https://api.botmastersender.com/api/v2/';
+    protected $authToken = '5cd77122-acbe-419d-a662-1300d3b20565';
+    // protected $base_url = 'https://api.botmastersender.com/api/v1/';
+    // protected $authToken = '53eb1f03-90be-49ce-9dbe-b23fe982b31f444444444';
 
     // mediaurl
     protected function whatsAppSendMessage($messageText, $receiverId)

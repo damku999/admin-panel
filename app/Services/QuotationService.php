@@ -179,8 +179,9 @@ class QuotationService
 
     public function sendQuotationViaWhatsApp(Quotation $quotation): void
     {
-        $message = $this->generateWhatsAppMessage($quotation);
-        $this->whatsAppSendMessage($message, $quotation->whatsapp_number);
+        $message = $this->generateWhatsAppMessageWithAttachment($quotation);
+        $pdfPath = $this->generatePdf($quotation);
+        $this->whatsAppSendMessageWithAttachment($message, $quotation->whatsapp_number, $pdfPath);
 
         $quotation->update([
             'status' => 'Sent',
@@ -216,6 +217,40 @@ class QuotationService
         }
 
         $message .= "\n🔗 View detailed comparison: [Link to PDF]\n";
+        $message .= "\n📞 Contact us for more details!\n";
+        $message .= "\n*MIDAS Insurance Services*";
+
+        return $message;
+    }
+
+    private function generateWhatsAppMessageWithAttachment(Quotation $quotation): string
+    {
+        $customer = $quotation->customer;
+        $recommendedQuote = $quotation->recommendedQuote();
+        $bestQuote = $quotation->bestQuote();
+
+        $message = "🚗 *MIDAS Insurance Quotation*\n\n";
+        $message .= "Dear {$customer->name},\n\n";
+        $message .= "Your insurance quotation is ready! Please find the detailed comparison attached.\n\n";
+        $message .= "📋 *Vehicle Details:*\n";
+        $message .= "• Vehicle: {$quotation->make_model_variant}\n";
+        $message .= "• Registration: {$quotation->vehicle_number}\n";
+        $message .= "• IDV: ₹" . number_format($quotation->total_idv) . "\n\n";
+
+        $message .= "💰 *Best Quote:*\n";
+        if ($bestQuote) {
+            $message .= "• Company: {$bestQuote->insuranceCompany->name}\n";
+            $message .= "• Premium: {$bestQuote->getFormattedPremium()}\n";
+            $message .= "• Plan: {$bestQuote->plan_name}\n\n";
+        }
+
+        $message .= "📊 *All Quotes:*\n";
+        foreach ($quotation->quotationCompanies as $quote) {
+            $icon = $quote->is_recommended ? '⭐' : '•';
+            $message .= "{$icon} {$quote->insuranceCompany->name}: {$quote->getFormattedPremium()}\n";
+        }
+
+        $message .= "\n📎 *Detailed comparison PDF attached*\n";
         $message .= "\n📞 Contact us for more details!\n";
         $message .= "\n*MIDAS Insurance Services*";
 

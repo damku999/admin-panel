@@ -147,28 +147,23 @@
                             </a>
                         @endcan
 
-                        @if($quotation->status !== 'Sent')
-                            @can('quotation-send-whatsapp')
-                                <form method="POST" action="{{ route('quotations.send-whatsapp', $quotation) }}" class="mb-2">
-                                    @csrf
-                                    <button type="submit" class="btn btn-success btn-block"
-                                            onclick="return confirm('Send quotation via WhatsApp?')">
-                                        <i class="fab fa-whatsapp"></i> Send via WhatsApp
-                                    </button>
-                                </form>
-                            @endcan
-                        @endif
+                        @can('quotation-send-whatsapp')
+                            @if($quotation->status === 'Sent')
+                                <button type="button" class="btn btn-warning btn-block mb-2" data-toggle="modal" data-target="#resendWhatsAppModal">
+                                    <i class="fab fa-whatsapp"></i> Resend via WhatsApp
+                                </button>
+                            @else
+                                <button type="button" class="btn btn-success btn-block mb-2" data-toggle="modal" data-target="#sendWhatsAppModal">
+                                    <i class="fab fa-whatsapp"></i> Send via WhatsApp
+                                </button>
+                            @endif
+                        @endcan
                     @endif
 
                     @can('quotation-delete')
-                        <form method="POST" action="{{ route('quotations.delete', $quotation) }}">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-block"
-                                    onclick="return confirm('Are you sure you want to delete this quotation?')">
-                                <i class="fas fa-trash"></i> Delete Quotation
-                            </button>
-                        </form>
+                        <button type="button" class="btn btn-danger btn-block" data-toggle="modal" data-target="#deleteQuotationModal">
+                            <i class="fas fa-trash"></i> Delete Quotation
+                        </button>
                     @endcan
                 </div>
             </div>
@@ -344,4 +339,119 @@
         </div>
     </div>
 </div>
+
+<!-- Send WhatsApp Modal -->
+<div class="modal fade" id="sendWhatsAppModal" tabindex="-1" role="dialog" aria-labelledby="sendWhatsAppModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="sendWhatsAppModalLabel">
+                    <i class="fab fa-whatsapp"></i> Send Quotation via WhatsApp
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="fab fa-whatsapp fa-3x text-success"></i>
+                </div>
+                <p class="text-center">Send quotation with PDF attachment to:</p>
+                <div class="alert alert-info">
+                    <strong>Customer:</strong> {{ $quotation->customer->name }}<br>
+                    <strong>WhatsApp Number:</strong> {{ $quotation->whatsapp_number ?? $quotation->customer->mobile_number }}
+                </div>
+                <p class="text-muted small">This will generate and attach a PDF comparison of all quotes.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ route('quotations.send-whatsapp', $quotation) }}" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-success">
+                        <i class="fab fa-whatsapp"></i> Send Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resend WhatsApp Modal -->
+<div class="modal fade" id="resendWhatsAppModal" tabindex="-1" role="dialog" aria-labelledby="resendWhatsAppModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="resendWhatsAppModalLabel">
+                    <i class="fab fa-whatsapp"></i> Resend Quotation via WhatsApp
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="fab fa-whatsapp fa-3x text-warning"></i>
+                </div>
+                <p class="text-center">Resend quotation with updated PDF attachment to:</p>
+                <div class="alert alert-warning">
+                    <strong>Customer:</strong> {{ $quotation->customer->name }}<br>
+                    <strong>WhatsApp Number:</strong> {{ $quotation->whatsapp_number ?? $quotation->customer->mobile_number }}<br>
+                    <strong>Last Sent:</strong> {{ $quotation->sent_at ? $quotation->sent_at->format('d M Y, H:i') : 'Not available' }}
+                </div>
+                <p class="text-muted small">This will generate a fresh PDF with current quotes and send it again.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ route('quotations.send-whatsapp', $quotation) }}" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fab fa-whatsapp"></i> Resend Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Quotation Modal -->
+<div class="modal fade" id="deleteQuotationModal" tabindex="-1" role="dialog" aria-labelledby="deleteQuotationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteQuotationModalLabel">
+                    <i class="fas fa-trash"></i> Delete Quotation
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+                </div>
+                <p class="text-center"><strong>Are you sure you want to delete this quotation?</strong></p>
+                <div class="alert alert-danger">
+                    <strong>Quotation:</strong> {{ $quotation->getQuoteReference() }}<br>
+                    <strong>Customer:</strong> {{ $quotation->customer->name }}<br>
+                    <strong>Vehicle:</strong> {{ $quotation->make_model_variant }}
+                    @if($quotation->quotationCompanies->count() > 0)
+                        <br><strong>Company Quotes:</strong> {{ $quotation->quotationCompanies->count() }} will also be deleted
+                    @endif
+                </div>
+                <p class="text-warning small"><strong>Warning:</strong> This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ route('quotations.delete', $quotation) }}" class="d-inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete Permanently
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection

@@ -10,6 +10,29 @@
                 <i class="fas fa-edit"></i> Edit Insurance Quotation
             </h1>
             <div class="d-flex">
+                @if($quotation->quotationCompanies->count() > 0)
+                    @can('quotation-download-pdf')
+                        <a href="{{ route('quotations.download-pdf', $quotation) }}" 
+                           class="btn btn-sm btn-primary shadow-sm mr-2">
+                            <i class="fas fa-download fa-sm text-white-50"></i> Download PDF
+                        </a>
+                    @endcan
+
+                    @can('quotation-send-whatsapp')
+                        @if($quotation->status === 'Sent')
+                            <button type="button" class="btn btn-sm btn-warning shadow-sm mr-2" 
+                                    data-toggle="modal" data-target="#resendWhatsAppModal">
+                                <i class="fab fa-whatsapp fa-sm text-white-50"></i> Resend via WhatsApp
+                            </button>
+                        @else
+                            <button type="button" class="btn btn-sm btn-success shadow-sm mr-2" 
+                                    data-toggle="modal" data-target="#sendWhatsAppModal">
+                                <i class="fab fa-whatsapp fa-sm text-white-50"></i> Send via WhatsApp
+                            </button>
+                        @endif
+                    @endcan
+                @endif
+                
                 <a href="{{ route('quotations.show', $quotation) }}" class="btn btn-sm btn-info shadow-sm mr-2">
                     <i class="fas fa-eye fa-sm text-white-50"></i> View Quotation
                 </a>
@@ -1338,3 +1361,78 @@
         });
     </script>
 @endsection
+
+<!-- Send WhatsApp Modal -->
+<div class="modal fade" id="sendWhatsAppModal" tabindex="-1" role="dialog" aria-labelledby="sendWhatsAppModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="sendWhatsAppModalLabel">
+                    <i class="fab fa-whatsapp"></i> Send Quotation via WhatsApp
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="fab fa-whatsapp fa-3x text-success"></i>
+                </div>
+                <p class="text-center">Send quotation with PDF attachment to:</p>
+                <div class="alert alert-info">
+                    <strong>Quotation:</strong> {{ $quotation->getQuoteReference() }}<br>
+                    <strong>Customer:</strong> {{ $quotation->customer->name }}<br>
+                    <strong>WhatsApp Number:</strong> {{ $quotation->whatsapp_number ?? $quotation->customer->mobile_number }}
+                </div>
+                <p class="text-muted small">This will generate and attach a PDF comparison of all quotes.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ route('quotations.send-whatsapp', $quotation) }}" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-success">
+                        <i class="fab fa-whatsapp"></i> Send Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resend WhatsApp Modal -->
+<div class="modal fade" id="resendWhatsAppModal" tabindex="-1" role="dialog" aria-labelledby="resendWhatsAppModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="resendWhatsAppModalLabel">
+                    <i class="fab fa-whatsapp"></i> Resend Quotation via WhatsApp
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="fab fa-whatsapp fa-3x text-warning"></i>
+                </div>
+                <p class="text-center">Resend quotation with updated PDF attachment to:</p>
+                <div class="alert alert-warning">
+                    <strong>Quotation:</strong> {{ $quotation->getQuoteReference() }}<br>
+                    <strong>Customer:</strong> {{ $quotation->customer->name }}<br>
+                    <strong>WhatsApp Number:</strong> {{ $quotation->whatsapp_number ?? $quotation->customer->mobile_number }}<br>
+                    <strong>Last Sent:</strong> {{ $quotation->sent_at ? $quotation->sent_at->format('d M Y, H:i') : 'Not available' }}
+                </div>
+                <p class="text-muted small">This will generate a fresh PDF with current quotes and send it again.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ route('quotations.send-whatsapp', $quotation) }}" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fab fa-whatsapp"></i> Resend Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

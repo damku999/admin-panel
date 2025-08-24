@@ -181,10 +181,10 @@ class QuotationService
     {
         $message = $this->generateWhatsAppMessageWithAttachment($quotation);
         $pdfPath = $this->pdfService->generateQuotationPdfForWhatsApp($quotation);
-        
+
         try {
             $response = $this->whatsAppSendMessageWithAttachment($message, $quotation->whatsapp_number, $pdfPath);
-            
+
             $quotation->update([
                 'status' => 'Sent',
                 'sent_at' => now(),
@@ -197,51 +197,16 @@ class QuotationService
         }
     }
 
-    private function generateWhatsAppMessage(Quotation $quotation): string
-    {
-        $customer = $quotation->customer;
-        $recommendedQuote = $quotation->recommendedQuote();
-        $bestQuote = $quotation->bestQuote();
-
-        $message = "🚗 *MIDAS Insurance Quotation*\n\n";
-        $message .= "Dear {$customer->name},\n\n";
-        $message .= "Your insurance quotation is ready!\n\n";
-        $message .= "📋 *Vehicle Details:*\n";
-        $message .= "• Vehicle: {$quotation->make_model_variant}\n";
-        $message .= "• Registration: {$quotation->vehicle_number}\n";
-        $message .= "• IDV: ₹" . number_format($quotation->total_idv) . "\n\n";
-
-        $message .= "💰 *Best Quote:*\n";
-        if ($bestQuote) {
-            $message .= "• Company: {$bestQuote->insuranceCompany->name}\n";
-            $message .= "• Premium: {$bestQuote->getFormattedPremium()}\n";
-            $message .= "• Plan: {$bestQuote->plan_name}\n\n";
-        }
-
-        $message .= "📊 *All Quotes:*\n";
-        foreach ($quotation->quotationCompanies as $quote) {
-            $icon = $quote->is_recommended ? '⭐' : '•';
-            $message .= "{$icon} {$quote->insuranceCompany->name}: {$quote->getFormattedPremium()}\n";
-        }
-
-        $message .= "\n🔗 View detailed comparison: [Link to PDF]\n";
-        $message .= "\n📞 Contact us for more details!\n";
-        $message .= "\n*MIDAS Insurance Services*";
-
-        return $message;
-    }
-
     private function generateWhatsAppMessageWithAttachment(Quotation $quotation): string
     {
         $customer = $quotation->customer;
         $quotes = $quotation->quotationCompanies()->orderBy('final_premium')->get();
         $bestQuote = $quotes->first();
-        $recommendedQuote = $quotation->recommendedQuote();
 
-        $message = "🚗 *MIDAS Insurance Quotation*\n\n";
+        $message = "🚗 *Insurance Quotation*\n\n";
         $message .= "Dear *{$customer->name}*,\n\n";
         $message .= "Your insurance quotation is ready! We have compared *{$quotes->count()} insurance companies* for you.\n\n";
-        
+
         $message .= "🚙 *Vehicle Details:*\n";
         $message .= "• Vehicle: *{$quotation->make_model_variant}*\n";
         $message .= "• Registration: *{$quotation->vehicle_number}*\n";
@@ -280,9 +245,12 @@ class QuotationService
 
         $message .= "\n📎 *Detailed PDF comparison attached*";
         $message .= "\n\n📞 For any queries or to proceed with purchase:";
-        $message .= "\n*Call/WhatsApp: +919727793123*";
-        $message .= "\n\n*MIDAS Insurance Services*";
-        $message .= "\n_\"Think of Insurance, Think of Us.\"_";
+        $message .= "\n\n*MIDAS Insurance Services*\n\n";
+        $message .= "\n\nBest regards,";
+        $message .= "\nParth Rawal";
+        $message .= "\nhttps://parthrawal.in";
+        $message .= "\nYour Trusted Insurance Advisor";
+        $message .= "\n\"Think of Insurance, Think of Us.\"";
 
         return $message;
     }

@@ -8,21 +8,21 @@
     <style>
         body {
             font-family: 'DejaVu Sans', sans-serif;
-            font-size: 12px;
-            margin: 20px;
+            font-size: 10px;
+            margin: 10px;
             color: #333;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 15px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
         }
 
         .header h1 {
             margin: 0;
-            font-size: 18px;
+            font-size: 14px;
             font-weight: bold;
         }
 
@@ -196,16 +196,6 @@
                     <span class="info-value">{{ $quotation->rto_location ?? 'N/A' }}</span>
                 </div>
                 <div class="info-item">
-                    <span class="info-label">MFG Year:</span>
-                    <span class="info-value">{{ $quotation->manufacturing_year ?? 'N/A' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Fuel Type:</span>
-                    <span class="info-value">{{ $quotation->fuel_type ?? 'N/A' }}</span>
-                </div>
-            </div>
-            <div class="info-row">
-                <div class="info-item">
                     <span class="info-label">NCB Percentage:</span>
                     <span class="info-value"
                         style="font-weight: bold; color: #2c5f2d;">{{ $quotation->ncb_percentage ?? 0 }}%</span>
@@ -213,19 +203,6 @@
                 <div class="info-item">
                     <span class="info-label">Total IDV:</span>
                     <span class="info-value">₹{{ number_format($quotation->total_idv ?? 0) }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Seating Capacity:</span>
-                    <span class="info-value">{{ $quotation->seating_capacity ?? 'N/A' }}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Policy Tenure:</span>
-                    <span class="info-value">{{ $quotation->policy_tenure_years ?? 'N/A' }} Years</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Registration Date:</span>
-                    <span
-                        class="info-value">{{ $quotation->date_of_registration ? \Carbon\Carbon::parse($quotation->date_of_registration)->format('d/m/Y') : 'N/A' }}</span>
                 </div>
             </div>
         </div>

@@ -161,7 +161,7 @@
 
 <body>
     <div class="header">
-        <h1>Motor Insurance Quote Comparison</h1>
+        <h1><a href="https://midastech.in"> MIDAS </a> | Insurance Quote Comparison</h1>
         <p>Generated on {{ now()->format('d/m/Y H:i:s') }}</p>
     </div>
 

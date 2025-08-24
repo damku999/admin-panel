@@ -32,6 +32,60 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+// Customer Authentication Routes (defined before Auth::routes to ensure priority)
+Route::prefix('customer')->name('customer.')->group(function () {
+    // Public routes with rate limiting for security
+    Route::middleware(['throttle:10,1'])->group(function () {
+        Route::get('/login', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showLoginForm'])->name('login');
+        Route::post('/login', [App\Http\Controllers\Auth\CustomerAuthController::class, 'login']);
+    });
+    
+    // Password Reset Routes (rate limited)
+    Route::middleware(['throttle:5,1'])->group(function () {
+        Route::get('/password/reset', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showPasswordResetForm'])->name('password.request');
+        Route::post('/password/email', [App\Http\Controllers\Auth\CustomerAuthController::class, 'sendPasswordResetLink'])->name('password.email');
+        Route::get('/password/reset/{token}', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showPasswordResetFormWithToken'])->name('password.reset');
+        Route::post('/password/reset', [App\Http\Controllers\Auth\CustomerAuthController::class, 'resetPassword'])->name('password.update');
+    });
+    
+    // Email Verification Routes (rate limited)
+    Route::middleware(['throttle:3,1'])->group(function () {
+        Route::get('/email/verify/{token}', [App\Http\Controllers\Auth\CustomerAuthController::class, 'verifyEmail'])->name('verify-email');
+    });
+    
+    // Logout route (authenticated only)
+    Route::post('/logout', [App\Http\Controllers\Auth\CustomerAuthController::class, 'logout'])
+        ->middleware(['auth:customer'])
+        ->name('logout');
+    
+    // Customer Dashboard (Protected Routes with secure session and family access control)
+    Route::middleware(['auth:customer', 'customer.secure', 'customer.family', 'throttle:60,1'])->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\Auth\CustomerAuthController::class, 'dashboard'])->name('dashboard');
+        
+        // Password Change Routes (for authenticated customers)
+        Route::get('/change-password', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showChangePasswordForm'])->name('change-password');
+        Route::post('/change-password', [App\Http\Controllers\Auth\CustomerAuthController::class, 'changePassword'])
+            ->middleware(['throttle:3,1'])
+            ->name('change-password.update');
+        
+        // Email Verification Notice (for authenticated customers who need verification)
+        Route::get('/email/verify-notice', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showEmailVerificationNotice'])->name('verify-email-notice');
+        Route::post('/email/resend', [App\Http\Controllers\Auth\CustomerAuthController::class, 'resendVerification'])
+            ->middleware(['throttle:2,1'])
+            ->name('verification.send');
+        
+        // Policies routes (family access required)
+        Route::get('/policies', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showPolicies'])->name('policies');
+        Route::get('/policies/{policy}', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showPolicyDetail'])->name('policies.detail');
+        Route::get('/policies/{policy}/download', [App\Http\Controllers\Auth\CustomerAuthController::class, 'downloadPolicy'])
+            ->middleware(['throttle:10,1'])
+            ->name('policies.download');
+        
+        // Profile route - show customer profile information  
+        Route::get('/profile', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showProfile'])->name('profile');
+    });
+});
+
 Auth::routes(['register' => false]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
@@ -142,6 +196,19 @@ Route::middleware('auth')->prefix('users')->name('users.')->group(function () {
     Route::post('/upload-users', [UserController::class, 'uploadUsers'])->name('upload');
 
     Route::get('export/', [UserController::class, 'export'])->name('export');
+});
+
+// Family Groups
+Route::middleware('auth')->prefix('family_groups')->name('family_groups.')->group(function () {
+    Route::get('/', [App\Http\Controllers\FamilyGroupController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\FamilyGroupController::class, 'create'])->name('create');
+    Route::post('/store', [App\Http\Controllers\FamilyGroupController::class, 'store'])->name('store');
+    Route::get('/show/{familyGroup}', [App\Http\Controllers\FamilyGroupController::class, 'show'])->name('show');
+    Route::get('/edit/{familyGroup}', [App\Http\Controllers\FamilyGroupController::class, 'edit'])->name('edit');
+    Route::put('/update/{familyGroup}', [App\Http\Controllers\FamilyGroupController::class, 'update'])->name('update');
+    Route::delete('/delete/{familyGroup}', [App\Http\Controllers\FamilyGroupController::class, 'destroy'])->name('destroy');
+    Route::get('/update/status/{family_group_id}/{status}', [App\Http\Controllers\FamilyGroupController::class, 'updateStatus'])->name('status');
+    Route::get('export/', [App\Http\Controllers\FamilyGroupController::class, 'export'])->name('export');
 });
 
 Route::middleware('auth')->name('delete_common')->group(function () {

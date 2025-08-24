@@ -1,0 +1,433 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\FamilyGroup;
+use App\Models\Customer;
+use App\Models\FamilyMember;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+
+class FamilyGroupController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
+     * Display a listing of family groups.
+     */
+    public function index(Request $request)
+    {
+        $query = FamilyGroup::with(['familyHead', 'familyMembers.customer']);
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhereHas('familyHead', function ($subQ) use ($search) {
+                      $subQ->where('name', 'like', "%{$search}%")
+                           ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $familyGroups = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        return view('admin.family_groups.index', compact('familyGroups'));
+    }
+
+    /**
+     * Show the form for creating a new family group.
+     */
+    public function create()
+    {
+        // Clean up any orphaned family member records first
+        $this->cleanupOrphanedRecords();
+        
+        $availableCustomers = Customer::where('status', true)
+            ->whereNull('family_group_id')
+            ->whereDoesntHave('familyMember') // Ensure no family_members record exists
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.family_groups.create', compact('availableCustomers'));
+    }
+
+    /**
+     * Store a newly created family group.
+     */
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255|unique:family_groups,name',
+            'family_head_id' => 'required|exists:customers,id',
+            'member_ids' => 'sometimes|array',
+            'member_ids.*' => 'exists:customers,id',
+            'relationships' => 'sometimes|array',
+            'relationships.*' => 'nullable|string|max:50',
+            'status' => 'boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        DB::beginTransaction();
+        try {
+            // Create family group
+            $familyGroup = FamilyGroup::create([
+                'name' => $request->name,
+                'family_head_id' => $request->family_head_id,
+                'status' => $request->status ?? true,
+                'created_by' => auth()->id(),
+            ]);
+
+            // Update family head's family_group_id
+            Customer::where('id', $request->family_head_id)
+                ->update(['family_group_id' => $familyGroup->id]);
+
+            // Set up passwords for all family members
+            $passwordNotifications = [];
+            
+            // Setup family head
+            $familyHead = Customer::find($request->family_head_id);
+            if (!$familyHead->hasVerifiedEmail() || $familyHead->needsPasswordChange()) {
+                $password = $familyHead->setDefaultPassword();
+                $passwordNotifications[] = [
+                    'customer' => $familyHead,
+                    'password' => $password,
+                    'is_head' => true
+                ];
+            }
+
+            // Add family head as member
+            FamilyMember::create([
+                'family_group_id' => $familyGroup->id,
+                'customer_id' => $request->family_head_id,
+                'relationship' => 'head',
+                'is_head' => true,
+                'status' => true,
+            ]);
+
+            // Add other family members if provided
+            if ($request->filled('member_ids')) {
+                foreach ($request->member_ids as $index => $memberId) {
+                    if ($memberId != $request->family_head_id) {
+                        Customer::where('id', $memberId)
+                            ->update(['family_group_id' => $familyGroup->id]);
+
+                        // Setup password for family member
+                        $familyMember = Customer::find($memberId);
+                        if (!$familyMember->hasVerifiedEmail() || $familyMember->needsPasswordChange()) {
+                            $password = $familyMember->setDefaultPassword();
+                            $passwordNotifications[] = [
+                                'customer' => $familyMember,
+                                'password' => $password,
+                                'is_head' => false
+                            ];
+                        }
+
+                        FamilyMember::create([
+                            'family_group_id' => $familyGroup->id,
+                            'customer_id' => $memberId,
+                            'relationship' => $request->relationships[$index] ?? null,
+                            'is_head' => false,
+                            'status' => true,
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            // Send password notifications after successful commit
+            $this->sendPasswordNotifications($passwordNotifications, $familyGroup);
+
+            return redirect()->route('family_groups.index')
+                ->with('success', 'Family group created successfully. Login credentials sent to family members.');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', 'Error creating family group: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Display the specified family group.
+     */
+    public function show(FamilyGroup $familyGroup)
+    {
+        $familyGroup->load(['familyHead', 'familyMembers.customer']);
+        
+        return view('admin.family_groups.show', compact('familyGroup'));
+    }
+
+    /**
+     * Show the form for editing the specified family group.
+     */
+    public function edit(FamilyGroup $familyGroup)
+    {
+        // Clean up any orphaned family member records first
+        $this->cleanupOrphanedRecords();
+        
+        $familyGroup->load(['familyHead', 'familyMembers.customer']);
+        
+        $availableCustomers = Customer::where('status', true)
+            ->where(function ($query) use ($familyGroup) {
+                $query->whereNull('family_group_id')
+                      ->orWhere('family_group_id', $familyGroup->id);
+            })
+            ->whereDoesntHave('familyMember', function ($query) use ($familyGroup) {
+                $query->where('family_group_id', '!=', $familyGroup->id);
+            })
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.family_groups.edit', compact('familyGroup', 'availableCustomers'));
+    }
+
+    /**
+     * Update the specified family group.
+     */
+    public function update(Request $request, FamilyGroup $familyGroup)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255|unique:family_groups,name,' . $familyGroup->id,
+            'family_head_id' => 'required|exists:customers,id',
+            'member_ids' => 'sometimes|array',
+            'member_ids.*' => 'exists:customers,id',
+            'relationships' => 'sometimes|array',
+            'relationships.*' => 'nullable|string|max:50',
+            'status' => 'boolean',
+        ]);
+
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
+        }
+
+        DB::beginTransaction();
+        try {
+            // Update family group
+            $familyGroup->update([
+                'name' => $request->name,
+                'family_head_id' => $request->family_head_id,
+                'status' => $request->status ?? true,
+            ]);
+
+            // Remove old family members
+            $oldMemberIds = $familyGroup->familyMembers->pluck('customer_id')->toArray();
+            Customer::whereIn('id', $oldMemberIds)->update(['family_group_id' => null]);
+            FamilyMember::where('family_group_id', $familyGroup->id)->delete();
+
+            // Update new family head's family_group_id
+            Customer::where('id', $request->family_head_id)
+                ->update(['family_group_id' => $familyGroup->id]);
+
+            // Add family head as member
+            FamilyMember::create([
+                'family_group_id' => $familyGroup->id,
+                'customer_id' => $request->family_head_id,
+                'relationship' => 'head',
+                'is_head' => true,
+                'status' => true,
+            ]);
+
+            // Add other family members if provided
+            if ($request->filled('member_ids')) {
+                foreach ($request->member_ids as $index => $memberId) {
+                    if ($memberId != $request->family_head_id) {
+                        Customer::where('id', $memberId)
+                            ->update(['family_group_id' => $familyGroup->id]);
+
+                        FamilyMember::create([
+                            'family_group_id' => $familyGroup->id,
+                            'customer_id' => $memberId,
+                            'relationship' => $request->relationships[$index] ?? null,
+                            'is_head' => false,
+                            'status' => true,
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('family_groups.index')
+                ->with('success', 'Family group updated successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->with('error', 'Error updating family group: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Remove the specified family group.
+     */
+    public function destroy(FamilyGroup $familyGroup)
+    {
+        DB::beginTransaction();
+        try {
+            $familyName = $familyGroup->name;
+            
+            // Get member IDs before deletion
+            $memberIds = $familyGroup->familyMembers->pluck('customer_id')->toArray();
+            
+            // Delete family members FIRST
+            FamilyMember::where('family_group_id', $familyGroup->id)->delete();
+            
+            // Then remove family_group_id from all customers
+            Customer::whereIn('id', $memberIds)->update(['family_group_id' => null]);
+
+            // Finally delete family group
+            $familyGroup->delete();
+
+            DB::commit();
+
+            // Return JSON response for AJAX requests
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => "Family group '{$familyName}' deleted successfully."
+                ]);
+            }
+
+            return redirect()->route('family_groups.index')
+                ->with('success', "Family group '{$familyName}' deleted successfully.");
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            // Return JSON response for AJAX requests
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Error deleting family group: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return back()->with('error', 'Error deleting family group: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Update family group status.
+     */
+    public function updateStatus($familyGroupId, $status)
+    {
+        $familyGroup = FamilyGroup::findOrFail($familyGroupId);
+        $familyGroup->update(['status' => $status]);
+
+        $message = $status ? 'Family group activated successfully.' : 'Family group deactivated successfully.';
+        
+        return back()->with('success', $message);
+    }
+
+    /**
+     * Export family groups.
+     */
+    public function export()
+    {
+        $familyGroups = FamilyGroup::with(['familyHead', 'familyMembers.customer'])->get();
+        
+        // Simple CSV export
+        $filename = 'family_groups_' . date('Y_m_d_H_i_s') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ];
+
+        $callback = function () use ($familyGroups) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, ['ID', 'Family Name', 'Family Head', 'Members Count', 'Status', 'Created Date']);
+
+            foreach ($familyGroups as $group) {
+                fputcsv($file, [
+                    $group->id,
+                    $group->name,
+                    $group->familyHead->name ?? 'N/A',
+                    $group->familyMembers->count(),
+                    $group->status ? 'Active' : 'Inactive',
+                    $group->created_at->format('Y-m-d H:i:s'),
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Clean up orphaned family member records.
+     * This removes family_members records where the family_group no longer exists.
+     */
+    private function cleanupOrphanedRecords()
+    {
+        try {
+            // Find family_members records where family_group doesn't exist
+            $orphanedMemberIds = FamilyMember::whereDoesntHave('familyGroup')->pluck('customer_id');
+            
+            if ($orphanedMemberIds->count() > 0) {
+                // Reset family_group_id for customers with orphaned family_members records
+                Customer::whereIn('id', $orphanedMemberIds)->update(['family_group_id' => null]);
+                
+                // Delete orphaned family_members records
+                FamilyMember::whereDoesntHave('familyGroup')->delete();
+                
+                \Log::info('Cleaned up orphaned family member records', [
+                    'customer_ids' => $orphanedMemberIds->toArray(),
+                    'count' => $orphanedMemberIds->count()
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error cleaning up orphaned family member records: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send password notifications to family members.
+     */
+    private function sendPasswordNotifications(array $notifications, FamilyGroup $familyGroup): void
+    {
+        foreach ($notifications as $notification) {
+            try {
+                $customer = $notification['customer'];
+                $password = $notification['password'];
+                $isHead = $notification['is_head'];
+
+                // For now, we'll log the credentials. In production, you'd send emails.
+                \Log::info('Family group login credentials', [
+                    'family_group' => $familyGroup->name,
+                    'customer_id' => $customer->id,
+                    'customer_name' => $customer->name,
+                    'customer_email' => $customer->email,
+                    'password' => $password,
+                    'is_family_head' => $isHead,
+                    'login_url' => route('customer.login'),
+                    'verification_token' => $customer->email_verification_token,
+                ]);
+
+                // TODO: Send actual email notification
+                // Mail::to($customer->email)->send(new FamilyLoginCredentials($customer, $password, $familyGroup));
+                
+            } catch (\Exception $e) {
+                \Log::error('Failed to send password notification', [
+                    'customer_id' => $customer->id ?? null,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
+    }
+}

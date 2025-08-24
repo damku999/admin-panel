@@ -15,10 +15,25 @@
       "Bash(git add:*)",
       "mcp__laravel-boost__last-error",
       "mcp__laravel-boost__browser-logs",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "mcp__laravel-boost__list-artisan-commands",
+      "Bash(curl:*)",
+      "Read(/C:\\c\\wamp64\\www/**)",
+      "Read(/C:\\c\\wamp64\\www/**)",
+      "Read(/C:\\c\\wamp64\\www/**)",
+      "Read(/C:\\c\\wamp64\\www/**)",
+      "Read(/C:\\c\\wamp64\\www/**)",
+      "Read(/C:\\c\\wamp64\\www/**)",
+      "Read(/C:\\c\\wamp64\\www/**)",
+      "Read(/C:\\c\\wamp64\\www/**)",
+      "Read(/C:\\c\\wamp64\\www/**)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "C:\\",
+      "C:\\c\\wamp64\\www"
+    ]
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [

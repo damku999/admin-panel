@@ -23,7 +23,7 @@ class StoreCustomerRequest extends FormRequest
     {
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
+            'email' => 'required|email|max:255|unique:customers,email',
             'mobile_number' => 'required|numeric|digits:10',
             'status' => 'required|numeric|in:0,1',
             'type' => 'required|in:Retail,Corporate',
@@ -56,6 +56,7 @@ class StoreCustomerRequest extends FormRequest
             'name.required' => 'Customer name is required.',
             'email.required' => 'Email address is required.',
             'email.email' => 'Please provide a valid email address.',
+            'email.unique' => 'This email address is already taken.',
             'mobile_number.required' => 'Mobile number is required.',
             'mobile_number.digits' => 'Mobile number must be exactly 10 digits.',
             'type.required' => 'Customer type is required.',

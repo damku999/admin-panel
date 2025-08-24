@@ -69,6 +69,28 @@
         </div>
     </li>
 
+    <!-- Nav Item - Family Groups Management -->
+    <li class="nav-item">
+        <a class="nav-link {{ str_contains(Route::currentRouteName(), 'family_groups.') ? '' : 'collapsed' }}"
+            href="#" data-toggle="collapse" data-target="#taTpDropDownFamilyGroups"
+            aria-expanded="{{ str_contains(Route::currentRouteName(), 'family_groups.') ? 'true' : 'false' }}"
+            aria-controls="taTpDropDownFamilyGroups">
+            <i class="fas fa-users"></i>
+            <span>Family Groups Management</span>
+        </a>
+        <div id="taTpDropDownFamilyGroups"
+            class="collapse {{ str_contains(Route::currentRouteName(), 'family_groups.') ? 'show' : '' }}"
+            aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Family Groups:</h6>
+                <a class="collapse-item {{ Route::currentRouteName() == 'family_groups.index' ? 'active' : '' }}"
+                    href="{{ route('family_groups.index') }}">List Groups</a>
+                <a class="collapse-item {{ str_contains(Route::currentRouteName(), 'family_groups.create') ? 'active' : '' }}"
+                    href="{{ route('family_groups.create') }}">Create New Group</a>
+            </div>
+        </div>
+    </li>
+
     <!-- Nav Item - Quotations Management -->
     @can('quotation-list')
     <li class="nav-item">

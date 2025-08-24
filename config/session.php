@@ -35,6 +35,8 @@ return [
 
     'expire_on_close' => false,
 
+    'customer_timeout' => env('CUSTOMER_SESSION_TIMEOUT', 60),
+
     /*
     |--------------------------------------------------------------------------
     | Session Encryption

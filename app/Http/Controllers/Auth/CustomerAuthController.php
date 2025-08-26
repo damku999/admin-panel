@@ -20,8 +20,36 @@ class CustomerAuthController extends Controller
 
     public function __construct()
     {
-        $this->middleware('guest:customer')->except('logout', 'dashboard');
-        $this->middleware('auth:customer')->only('logout', 'dashboard');
+        $this->middleware('guest:customer')->except([
+            'logout', 
+            'dashboard', 
+            'showChangePasswordForm',
+            'changePassword',
+            'showProfile',
+            'showPolicies',
+            'showPolicyDetail',
+            'downloadPolicy',
+            'showEmailVerificationNotice',
+            'resendVerification',
+            'showQuotations',
+            'showQuotationDetail',
+            'downloadQuotation'
+        ]);
+        $this->middleware('auth:customer')->only([
+            'logout',
+            'dashboard',
+            'changePassword',           // POST method for changing password
+            'showChangePasswordForm',   // GET method for showing form
+            'showProfile',
+            'showPolicies',
+            'showPolicyDetail',
+            'downloadPolicy',
+            'showEmailVerificationNotice',
+            'resendVerification',
+            'showQuotations',
+            'showQuotationDetail',
+            'downloadQuotation'
+        ]);
     }
 
     /**
@@ -51,7 +79,7 @@ class CustomerAuthController extends Controller
                 'login_method' => 'email_password',
                 'remember_me' => $request->boolean('remember')
             ]);
-            
+
             return $this->sendLoginResponse($request);
         }
 
@@ -114,6 +142,9 @@ class CustomerAuthController extends Controller
         $request->session()->regenerate();
         $this->clearLoginAttempts($request);
 
+        // Set initial session activity timestamp for timeout tracking
+        $request->session()->put('customer_last_activity', now()->format('Y-m-d H:i:s'));
+
         $customer = Auth::guard('customer')->user();
 
         // Check if customer needs to change password
@@ -156,7 +187,7 @@ class CustomerAuthController extends Controller
     {
         // Log logout before ending session
         CustomerAuditLog::logAction('logout', 'Customer logged out successfully');
-        
+
         Auth::guard('customer')->logout();
 
         $request->session()->invalidate();
@@ -174,25 +205,77 @@ class CustomerAuthController extends Controller
     {
         $customer = Auth::guard('customer')->user();
 
-        // Get family policies that this customer can view
+        // Get family policies and quotations that this customer can view
         $familyPolicies = collect();
         $expiringPolicies = collect();
-        
+        $recentQuotations = collect();
+
         if ($customer->hasFamily()) {
-            $allPolicies = $customer->getViewableInsurance()
-                ->orderBy('created_at', 'desc')
-                ->get();
-            
-            $familyPolicies = $allPolicies;
-            
-            // Get policies expiring in next 30 days
-            $thirtyDaysFromNow = now()->addDays(30);
-            $expiringPolicies = $allPolicies->filter(function ($policy) use ($thirtyDaysFromNow) {
-                if (!$policy->expired_date) return false;
-                
-                $expiryDate = \Carbon\Carbon::parse($policy->expired_date);
-                return $expiryDate->isFuture() && $expiryDate->lte($thirtyDaysFromNow);
-            });
+            try {
+                $allPolicies = $customer->getViewableInsurance()
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+                // For dashboard, show only active policies (not expired)
+                $familyPolicies = $allPolicies->filter(function ($policy) {
+                    if (!$policy->expired_date) {
+                        return true; // No expiry date means active
+                    }
+                    return \Carbon\Carbon::parse($policy->expired_date)->isFuture();
+                });
+
+                // Get policies expiring in next 30 days
+                $thirtyDaysFromNow = now()->addDays(30);
+                $expiringPolicies = $allPolicies->filter(function ($policy) use ($thirtyDaysFromNow) {
+                    if (!$policy->expired_date) {
+                        return false;
+                    }
+
+                    $expiryDate = \Carbon\Carbon::parse($policy->expired_date);
+                    return $expiryDate->isFuture() && $expiryDate->lte($thirtyDaysFromNow);
+                });
+
+                // Get recent quotations
+                if ($customer->isFamilyHead()) {
+                    $recentQuotations = \App\Models\Quotation::with(['quotationCompanies.insuranceCompany'])
+                        ->whereHas('customer', function($query) use ($customer) {
+                            $query->where('family_group_id', $customer->family_group_id);
+                        })
+                        ->orderBy('created_at', 'desc')
+                        ->limit(5)
+                        ->get();
+                } else {
+                    $recentQuotations = $customer->quotations()
+                        ->with(['quotationCompanies.insuranceCompany'])
+                        ->orderBy('created_at', 'desc')
+                        ->limit(5)
+                        ->get();
+                }
+            } catch (\InvalidArgumentException $e) {
+                // Log SQL injection attempt
+                CustomerAuditLog::create([
+                    'customer_id' => $customer->id,
+                    'action' => 'sql_injection_attempt',
+                    'description' => 'Invalid family group ID detected in dashboard query',
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'session_id' => session()->getId(),
+                    'success' => false,
+                    'failure_reason' => 'SQL injection prevention - Invalid family group ID',
+                    'metadata' => [
+                        'error_message' => $e->getMessage(),
+                        'family_group_id' => $customer->family_group_id,
+                        'security_violation' => 'sql_injection_attempt',
+                        'location' => 'dashboard'
+                    ]
+                ]);
+
+                // Show dashboard with error but don't crash
+                $familyPolicies = collect();
+                $expiringPolicies = collect();
+                $recentQuotations = collect();
+                session()->flash('error', 'Security error: Unable to load family data.');
+            }
         }
 
         return view('customer.dashboard', [
@@ -202,6 +285,7 @@ class CustomerAuthController extends Controller
             'isHead' => $customer->isFamilyHead(),
             'familyPolicies' => $familyPolicies,
             'expiringPolicies' => $expiringPolicies,
+            'recentQuotations' => $recentQuotations,
         ]);
     }
 
@@ -218,6 +302,22 @@ class CustomerAuthController extends Controller
      */
     public function showChangePasswordForm()
     {
+        // Debug logging
+        \Log::info('Change password form accessed', [
+            'customer_id' => Auth::guard('customer')->id(),
+            'customer_name' => Auth::guard('customer')->user()?->name,
+            'session_id' => session()->getId(),
+            'url' => request()->url(),
+            'ip' => request()->ip()
+        ]);
+
+        $customer = Auth::guard('customer')->user();
+        
+        if (!$customer) {
+            \Log::warning('No authenticated customer found in change password form');
+            return redirect()->route('customer.login')->with('error', 'Please login to change password.');
+        }
+
         return view('customer.auth.change-password');
     }
 
@@ -321,8 +421,7 @@ class CustomerAuthController extends Controller
             return back()->withErrors(['email' => 'Email address not found.']);
         }
 
-        $token = $customer->generateEmailVerificationToken();
-        $customer->update(['password_reset_sent_at' => now()]);
+        $token = $customer->generatePasswordResetToken();
 
         // TODO: Send password reset email
         \Log::info('Password reset requested', [
@@ -340,11 +439,11 @@ class CustomerAuthController extends Controller
      */
     public function showPasswordResetFormWithToken($token)
     {
-        $customer = Customer::where('email_verification_token', $token)->first();
+        $customer = Customer::where('password_reset_token', $token)->first();
 
-        if (!$customer) {
+        if (!$customer || !$customer->verifyPasswordResetToken($token)) {
             return redirect()->route('customer.login')
-                ->with('error', 'Invalid reset link.');
+                ->with('error', 'Invalid or expired reset link.');
         }
 
         return view('customer.auth.reset-password', compact('token'));
@@ -360,14 +459,47 @@ class CustomerAuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $customer = Customer::where('email_verification_token', $request->token)->first();
+        $customer = Customer::where('password_reset_token', $request->token)->first();
 
-        if (!$customer) {
+        if (!$customer || !$customer->verifyPasswordResetToken($request->token)) {
+            CustomerAuditLog::create([
+                'customer_id' => $customer?->id,
+                'action' => 'password_reset_failed',
+                'description' => 'Failed password reset attempt with invalid or expired token',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'session_id' => session()->getId(),
+                'success' => false,
+                'failure_reason' => 'Invalid or expired reset token',
+                'metadata' => [
+                    'token_provided' => !empty($request->token),
+                    'customer_found' => !is_null($customer),
+                    'security_violation' => 'invalid_password_reset_token'
+                ]
+            ]);
+
             return redirect()->route('customer.login')
-                ->with('error', 'Invalid reset token.');
+                ->with('error', 'Invalid or expired reset token.');
         }
 
+        // Clear the reset token before changing password
+        $customer->clearPasswordResetToken();
         $customer->changePassword($request->password);
+
+        // Log successful password reset
+        CustomerAuditLog::create([
+            'customer_id' => $customer->id,
+            'action' => 'password_reset_success',
+            'description' => 'Password reset successfully using valid token',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'session_id' => session()->getId(),
+            'success' => true,
+            'metadata' => [
+                'password_change_method' => 'reset_token',
+                'security_checks_passed' => true
+            ]
+        ]);
 
         return redirect()->route('customer.login')
             ->with('success', 'Password reset successfully. You can now login with your new password.');
@@ -394,16 +526,38 @@ class CustomerAuthController extends Controller
     public function showPolicies()
     {
         $customer = Auth::guard('customer')->user();
-        
+
         // Check authorization for viewing family data
-        if (!$customer->can('viewFamilyData')) {
-            return redirect()->route('customer.dashboard')
-                ->with('error', 'You do not have permission to view family policies.');
-        }
-        
+        // if (!$customer->can('viewFamilyData')) {
+        //     return redirect()->route('customer.dashboard')
+        //         ->with('error', 'You do not have permission to view family policies.');
+        // }
+
         $allPolicies = collect();
         if ($customer->hasFamily()) {
-            $allPolicies = $customer->getViewableInsurance()->get();
+            try {
+                $allPolicies = $customer->getViewableInsurance()->get();
+            } catch (\InvalidArgumentException $e) {
+                // Log SQL injection attempt or data manipulation
+                CustomerAuditLog::create([
+                    'customer_id' => $customer->id,
+                    'action' => 'sql_injection_attempt',
+                    'description' => 'Invalid family group ID detected in policy query',
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'session_id' => session()->getId(),
+                    'success' => false,
+                    'failure_reason' => 'SQL injection prevention - Invalid family group ID',
+                    'metadata' => [
+                        'error_message' => $e->getMessage(),
+                        'family_group_id' => $customer->family_group_id,
+                        'security_violation' => 'sql_injection_attempt'
+                    ]
+                ]);
+
+                return redirect()->route('customer.dashboard')
+                    ->with('error', 'Security error: Invalid family data detected.');
+            }
         }
 
         // Log policy list access
@@ -411,18 +565,22 @@ class CustomerAuthController extends Controller
             'policy_count' => $allPolicies->count(),
             'is_family_head' => $customer->isFamilyHead()
         ]);
-        
+
         // Categorize policies by status
         $activePolicies = $allPolicies->filter(function ($policy) {
-            if (!$policy->expired_date) return true;
+            if (!$policy->expired_date) {
+                return true;
+            }
             return \Carbon\Carbon::parse($policy->expired_date)->isFuture();
         });
-        
+
         $expiredPolicies = $allPolicies->filter(function ($policy) {
-            if (!$policy->expired_date) return false;
+            if (!$policy->expired_date) {
+                return false;
+            }
             return \Carbon\Carbon::parse($policy->expired_date)->isPast();
         });
-        
+
         return view('customer.policies', [
             'customer' => $customer,
             'activePolicies' => $activePolicies,
@@ -437,34 +595,52 @@ class CustomerAuthController extends Controller
     public function showPolicyDetail($policyId)
     {
         $customer = Auth::guard('customer')->user();
-        
+
         // Get the policy and verify access
         $policy = \App\Models\CustomerInsurance::with(['customer', 'insuranceCompany', 'policyType', 'premiumType'])
             ->findOrFail($policyId);
+
+        // Check authorization - customer can only view policies from their family group
+        $hasAccess = false;
         
-        // Check authorization using policy
-        if (!$customer->can('viewPolicy', $policy)) {
-            CustomerAuditLog::logFailure('view_policy_detail', 'Unauthorized access attempt', [
+        if ($customer->isFamilyHead()) {
+            // Family head can view all policies in their family group
+            $hasAccess = $policy->customer->family_group_id === $customer->family_group_id;
+        } else {
+            // Regular family member can only view their own policies
+            $hasAccess = $policy->customer_id === $customer->id;
+        }
+        
+        if (!$hasAccess) {
+            CustomerAuditLog::logFailure('view_policy_detail', 'Unauthorized access attempt to policy outside family group', [
                 'policy_id' => $policyId,
-                'policy_no' => $policy->policy_no
+                'policy_no' => $policy->policy_no,
+                'policy_customer_id' => $policy->customer_id,
+                'policy_family_group_id' => $policy->customer->family_group_id,
+                'accessing_customer_id' => $customer->id,
+                'accessing_family_group_id' => $customer->family_group_id,
+                'is_family_head' => $customer->isFamilyHead(),
+                'security_violation' => 'unauthorized_policy_access'
             ]);
-            abort(403, 'You do not have permission to view this policy.');
+            
+            return redirect()->route('customer.policies')
+                ->with('error', 'You do not have permission to view this policy.');
         }
 
         // Log policy access
         CustomerAuditLog::logPolicyAction('view_policy_detail', $policy);
-        
+
         // Calculate policy status and renewal info
         $isExpired = $policy->expired_date ? \Carbon\Carbon::parse($policy->expired_date)->isPast() : false;
         $isExpiringSoon = false;
         $daysUntilExpiry = null;
-        
+
         if ($policy->expired_date && !$isExpired) {
             $expiryDate = \Carbon\Carbon::parse($policy->expired_date);
             $daysUntilExpiry = now()->diffInDays($expiryDate, false);
             $isExpiringSoon = $daysUntilExpiry <= 30;
         }
-        
+
         return view('customer.policy-detail', [
             'customer' => $customer,
             'policy' => $policy,
@@ -481,31 +657,49 @@ class CustomerAuthController extends Controller
     public function downloadPolicy($policyId)
     {
         $customer = Auth::guard('customer')->user();
-        
+
         // Get the policy and verify access
         $policy = \App\Models\CustomerInsurance::findOrFail($policyId);
+
+        // Check authorization - customer can only download policies from their family group
+        $hasAccess = false;
         
-        // Check authorization using policy
-        if (!$customer->can('downloadPolicy', $policy)) {
-            CustomerAuditLog::logFailure('download_policy', 'Unauthorized download attempt', [
-                'policy_id' => $policyId,
-                'policy_no' => $policy->policy_no
-            ]);
-            abort(403, 'You do not have permission to download this policy document.');
+        if ($customer->isFamilyHead()) {
+            // Family head can download all policies in their family group
+            $hasAccess = $policy->customer->family_group_id === $customer->family_group_id;
+        } else {
+            // Regular family member can only download their own policies
+            $hasAccess = $policy->customer_id === $customer->id;
         }
         
+        if (!$hasAccess) {
+            CustomerAuditLog::logFailure('download_policy', 'Unauthorized download attempt to policy outside family group', [
+                'policy_id' => $policyId,
+                'policy_no' => $policy->policy_no,
+                'policy_customer_id' => $policy->customer_id,
+                'policy_family_group_id' => $policy->customer->family_group_id,
+                'accessing_customer_id' => $customer->id,
+                'accessing_family_group_id' => $customer->family_group_id,
+                'is_family_head' => $customer->isFamilyHead(),
+                'security_violation' => 'unauthorized_policy_download'
+            ]);
+            
+            return redirect()->route('customer.policies')
+                ->with('error', 'You do not have permission to download this policy document.');
+        }
+
         // Check if policy document exists
         if (!$policy->policy_document_path) {
             return redirect()->back()->with('error', 'No policy document is available for download.');
         }
-        
+
         // SECURITY FIX: Validate and sanitize file path to prevent path traversal attacks
         $documentPath = $policy->policy_document_path;
-        
+
         // Remove any path traversal attempts and normalize path
         $documentPath = str_replace(['../', '..\\', '../', '..\\'], '', $documentPath);
         $documentPath = ltrim($documentPath, '/\\');
-        
+
         // Validate that the path only contains allowed characters (alphanumeric, dash, underscore, slash, dot)
         if (!preg_match('/^[a-zA-Z0-9\/_\-\.]+$/', $documentPath)) {
             CustomerAuditLog::logFailure('download_policy', 'Invalid file path detected', [
@@ -516,11 +710,11 @@ class CustomerAuthController extends Controller
             ]);
             return redirect()->back()->with('error', 'Invalid policy document path.');
         }
-        
+
         // Ensure the path stays within the allowed directory structure
         $allowedDirectory = storage_path('app/public/');
         $fullPath = realpath($allowedDirectory . $documentPath);
-        
+
         // Verify the resolved path is within the allowed directory
         if (!$fullPath || !str_starts_with($fullPath, $allowedDirectory)) {
             CustomerAuditLog::logFailure('download_policy', 'Path traversal attack blocked', [
@@ -532,7 +726,7 @@ class CustomerAuthController extends Controller
             ]);
             return redirect()->back()->with('error', 'Access denied. Invalid file path.');
         }
-        
+
         // Check if file exists at the validated path
         if (!file_exists($fullPath)) {
             CustomerAuditLog::logFailure('download_policy', 'Policy document not found', [
@@ -542,11 +736,11 @@ class CustomerAuthController extends Controller
             ]);
             return redirect()->back()->with('error', 'Policy document file not found on server.');
         }
-        
+
         // Validate file type to ensure it's a PDF (additional security layer)
         $fileInfo = pathinfo($fullPath);
         $allowedExtensions = ['pdf', 'PDF'];
-        
+
         if (!isset($fileInfo['extension']) || !in_array($fileInfo['extension'], $allowedExtensions)) {
             CustomerAuditLog::logFailure('download_policy', 'Invalid file type detected', [
                 'policy_id' => $policyId,
@@ -557,9 +751,9 @@ class CustomerAuthController extends Controller
             ]);
             return redirect()->back()->with('error', 'Only PDF documents can be downloaded.');
         }
-        
+
         $fileName = 'Policy_' . $policy->policy_no . '_' . $policy->customer->name . '.pdf';
-        
+
         // Log successful download with security validation details
         CustomerAuditLog::logPolicyAction('download_policy', $policy, 'Policy document downloaded successfully', [
             'file_path' => $documentPath,
@@ -568,7 +762,199 @@ class CustomerAuthController extends Controller
             'file_size' => filesize($fullPath),
             'security_checks_passed' => true
         ]);
-        
+
         return response()->download($fullPath, $fileName);
+    }
+
+    /**
+     * Show all quotations for the customer.
+     */
+    public function showQuotations()
+    {
+        $customer = Auth::guard('customer')->user();
+
+        $allQuotations = collect();
+        if ($customer->hasFamily()) {
+            try {
+                if ($customer->isFamilyHead()) {
+                    // Family head can view all quotations in their family group
+                    $allQuotations = \App\Models\Quotation::with(['quotationCompanies.insuranceCompany'])
+                        ->whereHas('customer', function($query) use ($customer) {
+                            $query->where('family_group_id', $customer->family_group_id);
+                        })
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+                } else {
+                    // Regular family member can only view their own quotations
+                    $allQuotations = $customer->quotations()
+                        ->with(['quotationCompanies.insuranceCompany'])
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+                }
+            } catch (\InvalidArgumentException $e) {
+                // Log SQL injection attempt
+                CustomerAuditLog::create([
+                    'customer_id' => $customer->id,
+                    'action' => 'sql_injection_attempt',
+                    'description' => 'Invalid family group ID detected in quotation query',
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                    'session_id' => session()->getId(),
+                    'success' => false,
+                    'failure_reason' => 'SQL injection prevention - Invalid family group ID',
+                    'metadata' => [
+                        'error_message' => $e->getMessage(),
+                        'family_group_id' => $customer->family_group_id,
+                        'security_violation' => 'sql_injection_attempt',
+                        'location' => 'quotations'
+                    ]
+                ]);
+
+                return redirect()->route('customer.dashboard')
+                    ->with('error', 'Security error: Invalid family data detected.');
+            }
+        } else {
+            // Customer without family can only see their own quotations
+            $allQuotations = $customer->quotations()
+                ->with(['quotationCompanies.insuranceCompany'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
+
+        // Log quotation list access
+        CustomerAuditLog::logAction('view_quotations', 'Customer viewed quotation list', [
+            'quotation_count' => $allQuotations->count(),
+            'is_family_head' => $customer->isFamilyHead()
+        ]);
+
+        return view('customer.quotations', [
+            'customer' => $customer,
+            'quotations' => $allQuotations,
+            'isHead' => $customer->isFamilyHead(),
+        ]);
+    }
+
+    /**
+     * Show detailed view of a specific quotation.
+     */
+    public function showQuotationDetail($quotationId)
+    {
+        $customer = Auth::guard('customer')->user();
+
+        // Get the quotation and verify access
+        $quotation = \App\Models\Quotation::with(['customer', 'quotationCompanies.insuranceCompany'])
+            ->findOrFail($quotationId);
+
+        // Check authorization - customer can only view quotations from their family group
+        $hasAccess = false;
+        
+        if ($customer->isFamilyHead()) {
+            // Family head can view all quotations in their family group
+            $hasAccess = $quotation->customer->family_group_id === $customer->family_group_id;
+        } else {
+            // Regular family member can only view their own quotations
+            $hasAccess = $quotation->customer_id === $customer->id;
+        }
+        
+        if (!$hasAccess) {
+            CustomerAuditLog::logFailure('view_quotation_detail', 'Unauthorized access attempt to quotation outside family group', [
+                'quotation_id' => $quotationId,
+                'quotation_customer_id' => $quotation->customer_id,
+                'quotation_family_group_id' => $quotation->customer->family_group_id,
+                'accessing_customer_id' => $customer->id,
+                'accessing_family_group_id' => $customer->family_group_id,
+                'is_family_head' => $customer->isFamilyHead(),
+                'security_violation' => 'unauthorized_quotation_access'
+            ]);
+            
+            return redirect()->route('customer.quotations')
+                ->with('error', 'You do not have permission to view this quotation.');
+        }
+
+        // Log quotation access
+        CustomerAuditLog::logAction('view_quotation_detail', 'Customer viewed quotation detail', [
+            'quotation_id' => $quotation->id,
+            'quotation_reference' => $quotation->getQuoteReference(),
+            'vehicle_number' => $quotation->vehicle_number,
+            'policy_holder' => $quotation->customer->name,
+            'is_own_quotation' => $quotation->customer_id === $customer->id
+        ]);
+
+        return view('customer.quotation-detail', [
+            'customer' => $customer,
+            'quotation' => $quotation,
+            'isHead' => $customer->isFamilyHead(),
+        ]);
+    }
+
+    /**
+     * Download quotation PDF.
+     */
+    public function downloadQuotation($quotationId)
+    {
+        $customer = Auth::guard('customer')->user();
+
+        // Get the quotation and verify access
+        $quotation = \App\Models\Quotation::with(['customer', 'quotationCompanies.insuranceCompany'])
+            ->findOrFail($quotationId);
+
+        // Check authorization - customer can only download quotations from their family group
+        $hasAccess = false;
+        
+        if ($customer->isFamilyHead()) {
+            // Family head can download all quotations in their family group
+            $hasAccess = $quotation->customer->family_group_id === $customer->family_group_id;
+        } else {
+            // Regular family member can only download their own quotations
+            $hasAccess = $quotation->customer_id === $customer->id;
+        }
+        
+        if (!$hasAccess) {
+            CustomerAuditLog::logFailure('download_quotation', 'Unauthorized download attempt to quotation outside family group', [
+                'quotation_id' => $quotationId,
+                'quotation_reference' => $quotation->getQuoteReference(),
+                'quotation_customer_id' => $quotation->customer_id,
+                'quotation_family_group_id' => $quotation->customer->family_group_id,
+                'accessing_customer_id' => $customer->id,
+                'accessing_family_group_id' => $customer->family_group_id,
+                'is_family_head' => $customer->isFamilyHead(),
+                'security_violation' => 'unauthorized_quotation_download'
+            ]);
+            
+            return redirect()->route('customer.quotations')
+                ->with('error', 'You do not have permission to download this quotation.');
+        }
+
+        // Check if quotation has company quotes
+        if ($quotation->quotationCompanies->count() === 0) {
+            return redirect()->back()->with('error', 'No company quotes available for download.');
+        }
+
+        try {
+            // Log successful download request
+            CustomerAuditLog::logAction('download_quotation', 'Customer requested quotation PDF download', [
+                'quotation_id' => $quotation->id,
+                'quotation_reference' => $quotation->getQuoteReference(),
+                'vehicle_number' => $quotation->vehicle_number,
+                'policy_holder' => $quotation->customer->name,
+                'company_quotes_count' => $quotation->quotationCompanies->count(),
+                'is_own_quotation' => $quotation->customer_id === $customer->id
+            ]);
+
+            // Use the same PDF service as admin
+            $pdfService = app(\App\Services\PdfGenerationService::class);
+            return $pdfService->generateQuotationPdf($quotation);
+
+        } catch (\Throwable $e) {
+            CustomerAuditLog::logFailure('download_quotation', 'Failed to generate quotation PDF', [
+                'quotation_id' => $quotationId,
+                'quotation_reference' => $quotation->getQuoteReference(),
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine()
+            ]);
+
+            return redirect()->back()->with('error', 'Failed to generate PDF. Please try again later.');
+        }
     }
 }

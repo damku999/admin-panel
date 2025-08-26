@@ -20,8 +20,11 @@ class SecureSession
         // Apply secure session settings for customer routes
         if (Auth::guard('customer')->check()) {
             $this->enforceSecureSession($request);
-            $this->checkSessionTimeout($request);
-            $this->validateSessionIntegrity($request);
+            // $this->checkSessionTimeout($request); // Handled by CustomerSessionTimeout middleware
+            $integrityResult = $this->validateSessionIntegrity($request);
+            if ($integrityResult) {
+                return $integrityResult;
+            }
         }
 
         $response = $next($request);
@@ -41,11 +44,11 @@ class SecureSession
     protected function enforceSecureSession(Request $request): void
     {
         // Regenerate session ID periodically for security
-        if (!$request->session()->has('last_regenerated') || 
+        if (!$request->session()->has('last_regenerated') ||
             now()->diffInMinutes($request->session()->get('last_regenerated')) > 30) {
             $request->session()->regenerate();
             $request->session()->put('last_regenerated', now());
-            
+
             Log::info('Customer session regenerated for security', [
                 'customer_id' => Auth::guard('customer')->id(),
                 'session_id' => $request->session()->getId()
@@ -56,55 +59,53 @@ class SecureSession
     /**
      * Check if session has timed out.
      */
-    protected function checkSessionTimeout(Request $request): void
+    protected function checkSessionTimeout(Request $request): ?\Illuminate\Http\RedirectResponse
     {
         $customer = Auth::guard('customer')->user();
         $lastActivity = $request->session()->get('customer_last_activity');
-        
+
         // Customer session timeout (60 minutes)
         $timeoutMinutes = config('session.customer_timeout', 60);
-        
+
         if ($lastActivity && now()->diffInMinutes($lastActivity) > $timeoutMinutes) {
             Log::warning('Customer session timed out', [
                 'customer_id' => $customer->id,
                 'last_activity' => $lastActivity,
                 'timeout_minutes' => $timeoutMinutes
             ]);
-            
+
             Auth::guard('customer')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-            
+
             // Redirect with timeout message
-            redirect()->route('customer.login')
-                ->with('error', 'Your session has timed out due to inactivity. Please log in again.')
-                ->send();
-            exit;
+            return redirect()->route('customer.login')
+                ->with('error', 'Your session has timed out due to inactivity. Please log in again.');
         }
+
+        return null;
     }
 
     /**
      * Validate session integrity.
      */
-    protected function validateSessionIntegrity(Request $request): void
+    protected function validateSessionIntegrity(Request $request): ?\Illuminate\Http\RedirectResponse
     {
         $customer = Auth::guard('customer')->user();
-        
+
         // Check if customer status changed
         if (!$customer->status) {
             Log::warning('Inactive customer session terminated', [
                 'customer_id' => $customer->id,
                 'customer_email' => $customer->email
             ]);
-            
+
             Auth::guard('customer')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-            
-            redirect()->route('customer.login')
-                ->with('error', 'Your account has been deactivated.')
-                ->send();
-            exit;
+
+            return redirect()->route('customer.login')
+                ->with('error', 'Your account has been deactivated.');
         }
 
         // Check if family group became inactive
@@ -113,16 +114,16 @@ class SecureSession
                 'customer_id' => $customer->id,
                 'family_group_id' => $customer->familyGroup->id
             ]);
-            
+
             Auth::guard('customer')->logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
-            
-            redirect()->route('customer.login')
-                ->with('error', 'Your family group has been deactivated.')
-                ->send();
-            exit;
+
+            return redirect()->route('customer.login')
+                ->with('error', 'Your family group has been deactivated.');
         }
+
+        return null;
     }
 
     /**
@@ -134,7 +135,7 @@ class SecureSession
         $response->headers->set('X-Content-Type-Options', 'nosniff');
         $response->headers->set('X-XSS-Protection', '1; mode=block');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
-        
+
         // Cache control for customer pages
         $response->headers->set('Cache-Control', 'no-cache, no-store, must-revalidate, private');
         $response->headers->set('Pragma', 'no-cache');

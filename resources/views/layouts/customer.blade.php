@@ -81,6 +81,7 @@
         @if(session('info'))
             show_notification('info', '{{ session('info') }}');
         @endif
+        
     </script>
 </body>
 

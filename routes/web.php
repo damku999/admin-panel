@@ -39,7 +39,7 @@ Route::prefix('customer')->name('customer.')->group(function () {
         Route::get('/login', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showLoginForm'])->name('login');
         Route::post('/login', [App\Http\Controllers\Auth\CustomerAuthController::class, 'login']);
     });
-    
+
     // Password Reset Routes (rate limited)
     Route::middleware(['throttle:5,1'])->group(function () {
         Route::get('/password/reset', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showPasswordResetForm'])->name('password.request');
@@ -47,33 +47,39 @@ Route::prefix('customer')->name('customer.')->group(function () {
         Route::get('/password/reset/{token}', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showPasswordResetFormWithToken'])->name('password.reset');
         Route::post('/password/reset', [App\Http\Controllers\Auth\CustomerAuthController::class, 'resetPassword'])->name('password.update');
     });
-    
+
     // Email Verification Routes (rate limited)
     Route::middleware(['throttle:3,1'])->group(function () {
         Route::get('/email/verify/{token}', [App\Http\Controllers\Auth\CustomerAuthController::class, 'verifyEmail'])->name('verify-email');
     });
-    
+
     // Logout route (authenticated only)
     Route::post('/logout', [App\Http\Controllers\Auth\CustomerAuthController::class, 'logout'])
         ->middleware(['auth:customer'])
         ->name('logout');
-    
-    // Customer Dashboard (Protected Routes with secure session and family access control)
-    Route::middleware(['auth:customer', 'customer.secure', 'customer.family', 'throttle:60,1'])->group(function () {
+
+    // Customer Dashboard (Protected Routes with timeout enforcement)
+    Route::middleware(['auth:customer', 'customer.timeout', 'throttle:60,1'])->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\Auth\CustomerAuthController::class, 'dashboard'])->name('dashboard');
-        
+
         // Password Change Routes (for authenticated customers)
         Route::get('/change-password', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showChangePasswordForm'])->name('change-password');
         Route::post('/change-password', [App\Http\Controllers\Auth\CustomerAuthController::class, 'changePassword'])
-            ->middleware(['throttle:3,1'])
+            ->middleware(['throttle:10,1'])
             ->name('change-password.update');
-        
+
         // Email Verification Notice (for authenticated customers who need verification)
         Route::get('/email/verify-notice', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showEmailVerificationNotice'])->name('verify-email-notice');
         Route::post('/email/resend', [App\Http\Controllers\Auth\CustomerAuthController::class, 'resendVerification'])
             ->middleware(['throttle:2,1'])
             ->name('verification.send');
-        
+
+        // Profile route - show customer profile information
+        Route::get('/profile', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showProfile'])->name('profile');
+    });
+
+    // Family-specific routes (require family group membership)
+    Route::middleware(['auth:customer', 'customer.timeout', 'customer.family', 'throttle:60,1'])->group(function () {
         // Policies routes (family access required)
         Route::get('/policies', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showPolicies'])->name('policies');
         Route::get('/policies/{policy}', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showPolicyDetail'])->name('policies.detail');
@@ -81,8 +87,12 @@ Route::prefix('customer')->name('customer.')->group(function () {
             ->middleware(['throttle:10,1'])
             ->name('policies.download');
         
-        // Profile route - show customer profile information  
-        Route::get('/profile', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showProfile'])->name('profile');
+        // Quotations routes (family access required)
+        Route::get('/quotations', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showQuotations'])->name('quotations');
+        Route::get('/quotations/{quotation}', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showQuotationDetail'])->name('quotations.detail');
+        Route::get('/quotations/{quotation}/download', [App\Http\Controllers\Auth\CustomerAuthController::class, 'downloadQuotation'])
+            ->middleware(['throttle:10,1'])
+            ->name('quotations.download');
     });
 });
 

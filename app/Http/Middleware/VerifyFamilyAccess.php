@@ -39,6 +39,14 @@ class VerifyFamilyAccess
                 'customer_email' => $customer->email,
                 'route' => $request->route()->getName()
             ]);
+            
+            // If accessing policies, redirect to dashboard with message
+            if (str_starts_with($request->route()->getName(), 'customer.policies')) {
+                return redirect()->route('customer.dashboard')
+                    ->with('warning', 'You need to be part of a family group to access policies.');
+            }
+            
+            // For other routes, show access denied message
             return redirect()->route('customer.dashboard')
                 ->with('warning', 'You need to be part of a family group to access this feature.');
         }

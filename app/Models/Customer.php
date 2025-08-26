@@ -120,7 +120,9 @@ class Customer extends Authenticatable
         'password_changed_at',
         'must_change_password',
         'email_verification_token',
-        'password_reset_sent_at'
+        'password_reset_sent_at',
+        'password_reset_token',
+        'password_reset_expires_at'
     ];
 
     protected $casts = [
@@ -135,6 +137,7 @@ class Customer extends Authenticatable
         'password_changed_at' => 'datetime',
         'must_change_password' => 'boolean',
         'password_reset_sent_at' => 'datetime',
+        'password_reset_expires_at' => 'datetime',
     ];
 
     /**
@@ -232,9 +235,12 @@ class Customer extends Authenticatable
      */
     public function familyInsurance(): HasMany
     {
+        // SECURITY FIX: Validate family_group_id to prevent SQL injection
+        $familyGroupId = $this->validateFamilyGroupId($this->family_group_id);
+        
         return $this->hasMany(CustomerInsurance::class, 'customer_id')
-            ->whereHas('customer', function ($query) {
-                $query->where('family_group_id', $this->family_group_id);
+            ->whereHas('customer', function ($query) use ($familyGroupId) {
+                $query->where('family_group_id', '=', $familyGroupId);
             });
     }
 
@@ -264,9 +270,12 @@ class Customer extends Authenticatable
     public function getViewableInsurance()
     {
         if ($this->isFamilyHead()) {
+            // SECURITY FIX: Validate family_group_id to prevent SQL injection
+            $familyGroupId = $this->validateFamilyGroupId($this->family_group_id);
+            
             // Family head can view all family insurance
-            return CustomerInsurance::whereHas('customer', function ($query) {
-                $query->where('family_group_id', $this->family_group_id);
+            return CustomerInsurance::whereHas('customer', function ($query) use ($familyGroupId) {
+                $query->where('family_group_id', '=', $familyGroupId);
             })->with(['customer', 'insuranceCompany', 'policyType', 'premiumType']);
         } else {
             // Regular members can only view their own insurance
@@ -473,5 +482,119 @@ class Customer extends Authenticatable
             return true;
         }
         return false;
+    }
+
+    /**
+     * Generate secure password reset token with expiration.
+     */
+    public function generatePasswordResetToken(): string
+    {
+        // Generate cryptographically secure token with higher entropy
+        $token = bin2hex(random_bytes(32)); // 64 character hex string
+        
+        // Set expiration to 1 hour from now
+        $expiresAt = now()->addHour();
+        
+        $this->update([
+            'password_reset_token' => $token,
+            'password_reset_expires_at' => $expiresAt,
+            'password_reset_sent_at' => now()
+        ]);
+        
+        return $token;
+    }
+
+    /**
+     * Verify password reset token and check expiration.
+     */
+    public function verifyPasswordResetToken(string $token): bool
+    {
+        if (!$this->password_reset_token || !$this->password_reset_expires_at) {
+            return false;
+        }
+
+        // Check if token matches
+        if (!hash_equals($this->password_reset_token, $token)) {
+            return false;
+        }
+
+        // Check if token has expired
+        if (now()->isAfter($this->password_reset_expires_at)) {
+            // Clear expired token
+            $this->update([
+                'password_reset_token' => null,
+                'password_reset_expires_at' => null
+            ]);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Clear password reset token after successful reset.
+     */
+    public function clearPasswordResetToken(): void
+    {
+        $this->update([
+            'password_reset_token' => null,
+            'password_reset_expires_at' => null
+        ]);
+    }
+
+    /**
+     * Mask PAN number for customer portal display (show first 3 and last 1 characters).
+     * Example: CFDPB1228P -> CFD*****8P
+     */
+    public function getMaskedPanNumber(): ?string
+    {
+        if (!$this->pan_card_number) {
+            return null;
+        }
+        
+        $pan = $this->pan_card_number;
+        $length = strlen($pan);
+        
+        if ($length < 4) {
+            return str_repeat('*', $length);
+        }
+        
+        // Show first 3 characters + stars + last 1 character
+        return substr($pan, 0, 3) . str_repeat('*', $length - 4) . substr($pan, -1);
+    }
+
+    /**
+     * Validate and sanitize family group ID to prevent SQL injection.
+     */
+    protected function validateFamilyGroupId($familyGroupId)
+    {
+        // Check if family group ID is null
+        if (is_null($familyGroupId)) {
+            throw new \InvalidArgumentException('Family group ID cannot be null for family operations');
+        }
+
+        // Ensure it's an integer to prevent SQL injection
+        if (!is_numeric($familyGroupId)) {
+            throw new \InvalidArgumentException('Family group ID must be numeric');
+        }
+
+        $familyGroupId = (int) $familyGroupId;
+
+        // Validate that it's a positive integer
+        if ($familyGroupId <= 0) {
+            throw new \InvalidArgumentException('Family group ID must be a positive integer');
+        }
+
+        // Additional security: Verify the family group actually exists and is active
+        $familyGroupExists = \DB::table('family_groups')
+            ->where('id', '=', $familyGroupId)
+            ->where('status', '=', true)
+            ->exists();
+
+        if (!$familyGroupExists) {
+            throw new \InvalidArgumentException('Invalid or inactive family group ID');
+        }
+
+        return $familyGroupId;
     }
 }

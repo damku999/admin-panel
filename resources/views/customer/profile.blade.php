@@ -13,7 +13,7 @@
 
     <!-- Customer Profile Row -->
     <div class="row">
-        <div class="col-xl-8">
+        <div class="col-xl-8 col-lg-12">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Personal Information</h6>
@@ -104,7 +104,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label class="small mb-1"><strong>PAN Card Number</strong></label>
-                                <p class="form-control-static">{{ $customer->pan_card_number ?? 'Not provided' }}</p>
+                                <p class="form-control-static">{{ $customer->getMaskedPanNumber() ?? 'Not provided' }}</p>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -133,7 +133,7 @@
             </div>
         </div>
 
-        <div class="col-xl-4">
+        <div class="col-xl-4 col-lg-12">
             @if($familyGroup)
             <!-- Family Information -->
             <div class="card shadow mb-4">

@@ -407,26 +407,35 @@ class FamilyGroupController extends Controller
                 $password = $notification['password'];
                 $isHead = $notification['is_head'];
 
-                // For now, we'll log the credentials. In production, you'd send emails.
-                \Log::info('Family group login credentials', [
+                // Send actual email notification
+                \Mail::to($customer->email)->send(new \App\Mail\FamilyLoginCredentialsMail(
+                    customer: $customer,
+                    password: $password,
+                    familyGroup: $familyGroup,
+                    isHead: $isHead
+                ));
+
+                \Log::info('Family group login credentials email sent successfully', [
                     'family_group' => $familyGroup->name,
                     'customer_id' => $customer->id,
                     'customer_name' => $customer->name,
                     'customer_email' => $customer->email,
-                    'password' => $password,
                     'is_family_head' => $isHead,
                     'login_url' => route('customer.login'),
-                    'verification_token' => $customer->email_verification_token,
                 ]);
-
-                // TODO: Send actual email notification
-                // Mail::to($customer->email)->send(new FamilyLoginCredentials($customer, $password, $familyGroup));
                 
             } catch (\Exception $e) {
-                \Log::error('Failed to send password notification', [
+                \Log::error('Failed to send family login credentials email', [
+                    'family_group' => $familyGroup->name ?? null,
                     'customer_id' => $customer->id ?? null,
-                    'error' => $e->getMessage()
+                    'customer_email' => $customer->email ?? null,
+                    'is_family_head' => $isHead ?? false,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
                 ]);
+
+                // Continue with other notifications even if one fails
+                continue;
             }
         }
     }

@@ -21,8 +21,8 @@ class CustomerAuthController extends Controller
     public function __construct()
     {
         $this->middleware('guest:customer')->except([
-            'logout', 
-            'dashboard', 
+            'logout',
+            'dashboard',
             'showChangePasswordForm',
             'changePassword',
             'showProfile',
@@ -238,7 +238,7 @@ class CustomerAuthController extends Controller
                 // Get recent quotations
                 if ($customer->isFamilyHead()) {
                     $recentQuotations = \App\Models\Quotation::with(['quotationCompanies.insuranceCompany'])
-                        ->whereHas('customer', function($query) use ($customer) {
+                        ->whereHas('customer', function ($query) use ($customer) {
                             $query->where('family_group_id', $customer->family_group_id);
                         })
                         ->orderBy('created_at', 'desc')
@@ -302,23 +302,14 @@ class CustomerAuthController extends Controller
      */
     public function showChangePasswordForm()
     {
-        // Debug logging
-        \Log::info('Change password form accessed', [
-            'customer_id' => Auth::guard('customer')->id(),
-            'customer_name' => Auth::guard('customer')->user()?->name,
-            'session_id' => session()->getId(),
-            'url' => request()->url(),
-            'ip' => request()->ip()
-        ]);
-
         $customer = Auth::guard('customer')->user();
-        
+
         if (!$customer) {
             \Log::warning('No authenticated customer found in change password form');
             return redirect()->route('customer.login')->with('error', 'Please login to change password.');
         }
 
-        return view('customer.auth.change-password');
+        return view('customer.auth.change-password', ['isHead' => $customer->isFamilyHead()]);
     }
 
     /**
@@ -389,15 +380,28 @@ class CustomerAuthController extends Controller
 
         $token = $customer->generateEmailVerificationToken();
 
-        // TODO: Send verification email
-        \Log::info('Email verification resend', [
-            'customer_id' => $customer->id,
-            'email' => $customer->email,
-            'token' => $token,
-            'verification_url' => route('customer.verify-email', $token),
-        ]);
+        // Send verification email
+        try {
+            \Mail::to($customer->email)->send(new \App\Mail\CustomerEmailVerificationMail($customer, $token));
 
-        return back()->with('success', 'Verification link sent to your email.');
+            \Log::info('Email verification email sent successfully', [
+                'customer_id' => $customer->id,
+                'email' => $customer->email,
+                'token' => $token,
+                'verification_url' => route('customer.verify-email', $token),
+            ]);
+
+            return back()->with('success', 'Verification link sent to your email.');
+        } catch (\Exception $e) {
+            \Log::error('Failed to send email verification email', [
+                'customer_id' => $customer->id,
+                'email' => $customer->email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()->withErrors(['email' => 'Failed to send verification email. Please try again later.']);
+        }
     }
 
     /**
@@ -423,15 +427,28 @@ class CustomerAuthController extends Controller
 
         $token = $customer->generatePasswordResetToken();
 
-        // TODO: Send password reset email
-        \Log::info('Password reset requested', [
-            'customer_id' => $customer->id,
-            'email' => $customer->email,
-            'token' => $token,
-            'reset_url' => route('customer.password.reset', $token),
-        ]);
+        // Send password reset email
+        try {
+            \Mail::to($customer->email)->send(new \App\Mail\CustomerPasswordResetMail($customer, $token));
 
-        return back()->with('success', 'Password reset link sent to your email.');
+            \Log::info('Password reset email sent successfully', [
+                'customer_id' => $customer->id,
+                'email' => $customer->email,
+                'token' => $token,
+                'reset_url' => route('customer.password.reset', ['token' => $token, 'email' => $customer->email]),
+            ]);
+
+            return back()->with('success', 'Password reset link sent to your email.');
+        } catch (\Exception $e) {
+            \Log::error('Failed to send password reset email', [
+                'customer_id' => $customer->id,
+                'email' => $customer->email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()->withErrors(['email' => 'Failed to send password reset email. Please try again later.']);
+        }
     }
 
     /**
@@ -521,6 +538,129 @@ class CustomerAuthController extends Controller
     }
 
     /**
+     * Show family member profile (read-only, family head only).
+     */
+    public function showFamilyMemberProfile(Customer $member)
+    {
+        $customer = Auth::guard('customer')->user();
+
+        // Security: Only family heads can view family member profiles
+        if (!$customer->isFamilyHead()) {
+            abort(403, 'Only family heads can view family member profiles.');
+        }
+
+        // Security: Ensure the member is in the same family
+        if (!$customer->isInSameFamilyAs($member)) {
+            abort(403, 'You can only view profiles of your family members.');
+        }
+
+        return view('customer.family-member-profile', [
+            'customer' => $customer,
+            'member' => $member,
+            'familyGroup' => $customer->familyGroup,
+            'isViewingMember' => true,
+        ]);
+    }
+
+    /**
+     * Show family member password change form (family head only).
+     */
+    public function showFamilyMemberPasswordForm(Customer $member)
+    {
+        $customer = Auth::guard('customer')->user();
+
+        // Security: Only family heads can change family member passwords
+        if (!$customer->isFamilyHead()) {
+            abort(403, 'Only family heads can change family member passwords.');
+        }
+
+        // Security: Ensure the member is in the same family
+        if (!$customer->isInSameFamilyAs($member)) {
+            abort(403, 'You can only change passwords of your family members.');
+        }
+
+        // Security: Prevent family head from changing their own password via this route
+        if ($customer->id === $member->id) {
+            return redirect()->route('customer.change-password')
+                ->with('info', 'Please use the regular password change form for your own account.');
+        }
+
+        return view('customer.family-member-password', [
+            'customer' => $customer,
+            'member' => $member,
+            'familyGroup' => $customer->familyGroup,
+        ]);
+    }
+
+    /**
+     * Update family member password (family head only, no old password required).
+     */
+    public function updateFamilyMemberPassword(Customer $member, Request $request)
+    {
+        $customer = Auth::guard('customer')->user();
+
+        // Security: Only family heads can change family member passwords
+        if (!$customer->isFamilyHead()) {
+            abort(403, 'Only family heads can change family member passwords.');
+        }
+
+        // Security: Ensure the member is in the same family
+        if (!$customer->isInSameFamilyAs($member)) {
+            abort(403, 'You can only change passwords of your family members.');
+        }
+
+        // Security: Prevent family head from changing their own password via this route
+        if ($customer->id === $member->id) {
+            return redirect()->route('customer.change-password')
+                ->with('info', 'Please use the regular password change form for your own account.');
+        }
+
+        $request->validate([
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        // Update the family member's password
+        $member->update([
+            'password' => Hash::make($request->password),
+            'password_changed_at' => now(),
+            'must_change_password' => false, // Reset the flag
+        ]);
+
+        // Log the password change action
+        CustomerAuditLog::create([
+            'customer_id' => $member->id,
+            'action' => 'password_changed_by_family_head',
+            'description' => 'Password changed by family head: ' . $customer->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'session_id' => session()->getId(),
+            'success' => true,
+            'metadata' => [
+                'changed_by_family_head_id' => $customer->id,
+                'changed_by_family_head_name' => $customer->name,
+            ]
+        ]);
+
+        // Also log in family head's audit log
+        CustomerAuditLog::create([
+            'customer_id' => $customer->id,
+            'action' => 'changed_family_member_password',
+            'description' => 'Changed password for family member: ' . $member->name,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'session_id' => session()->getId(),
+            'success' => true,
+            'metadata' => [
+                'family_member_id' => $member->id,
+                'family_member_name' => $member->name,
+            ]
+        ]);
+
+        return redirect()->route('customer.profile')
+            ->with('success', 'Password successfully changed for ' . $member->name . '.');
+    }
+
+    /**
      * Show all policies for the customer.
      */
     public function showPolicies()
@@ -602,7 +742,7 @@ class CustomerAuthController extends Controller
 
         // Check authorization - customer can only view policies from their family group
         $hasAccess = false;
-        
+
         if ($customer->isFamilyHead()) {
             // Family head can view all policies in their family group
             $hasAccess = $policy->customer->family_group_id === $customer->family_group_id;
@@ -610,7 +750,7 @@ class CustomerAuthController extends Controller
             // Regular family member can only view their own policies
             $hasAccess = $policy->customer_id === $customer->id;
         }
-        
+
         if (!$hasAccess) {
             CustomerAuditLog::logFailure('view_policy_detail', 'Unauthorized access attempt to policy outside family group', [
                 'policy_id' => $policyId,
@@ -622,7 +762,7 @@ class CustomerAuthController extends Controller
                 'is_family_head' => $customer->isFamilyHead(),
                 'security_violation' => 'unauthorized_policy_access'
             ]);
-            
+
             return redirect()->route('customer.policies')
                 ->with('error', 'You do not have permission to view this policy.');
         }
@@ -663,7 +803,7 @@ class CustomerAuthController extends Controller
 
         // Check authorization - customer can only download policies from their family group
         $hasAccess = false;
-        
+
         if ($customer->isFamilyHead()) {
             // Family head can download all policies in their family group
             $hasAccess = $policy->customer->family_group_id === $customer->family_group_id;
@@ -671,7 +811,7 @@ class CustomerAuthController extends Controller
             // Regular family member can only download their own policies
             $hasAccess = $policy->customer_id === $customer->id;
         }
-        
+
         if (!$hasAccess) {
             CustomerAuditLog::logFailure('download_policy', 'Unauthorized download attempt to policy outside family group', [
                 'policy_id' => $policyId,
@@ -683,7 +823,7 @@ class CustomerAuthController extends Controller
                 'is_family_head' => $customer->isFamilyHead(),
                 'security_violation' => 'unauthorized_policy_download'
             ]);
-            
+
             return redirect()->route('customer.policies')
                 ->with('error', 'You do not have permission to download this policy document.');
         }
@@ -779,7 +919,7 @@ class CustomerAuthController extends Controller
                 if ($customer->isFamilyHead()) {
                     // Family head can view all quotations in their family group
                     $allQuotations = \App\Models\Quotation::with(['quotationCompanies.insuranceCompany'])
-                        ->whereHas('customer', function($query) use ($customer) {
+                        ->whereHas('customer', function ($query) use ($customer) {
                             $query->where('family_group_id', $customer->family_group_id);
                         })
                         ->orderBy('created_at', 'desc')
@@ -847,7 +987,7 @@ class CustomerAuthController extends Controller
 
         // Check authorization - customer can only view quotations from their family group
         $hasAccess = false;
-        
+
         if ($customer->isFamilyHead()) {
             // Family head can view all quotations in their family group
             $hasAccess = $quotation->customer->family_group_id === $customer->family_group_id;
@@ -855,7 +995,7 @@ class CustomerAuthController extends Controller
             // Regular family member can only view their own quotations
             $hasAccess = $quotation->customer_id === $customer->id;
         }
-        
+
         if (!$hasAccess) {
             CustomerAuditLog::logFailure('view_quotation_detail', 'Unauthorized access attempt to quotation outside family group', [
                 'quotation_id' => $quotationId,
@@ -866,7 +1006,7 @@ class CustomerAuthController extends Controller
                 'is_family_head' => $customer->isFamilyHead(),
                 'security_violation' => 'unauthorized_quotation_access'
             ]);
-            
+
             return redirect()->route('customer.quotations')
                 ->with('error', 'You do not have permission to view this quotation.');
         }
@@ -900,7 +1040,7 @@ class CustomerAuthController extends Controller
 
         // Check authorization - customer can only download quotations from their family group
         $hasAccess = false;
-        
+
         if ($customer->isFamilyHead()) {
             // Family head can download all quotations in their family group
             $hasAccess = $quotation->customer->family_group_id === $customer->family_group_id;
@@ -908,7 +1048,7 @@ class CustomerAuthController extends Controller
             // Regular family member can only download their own quotations
             $hasAccess = $quotation->customer_id === $customer->id;
         }
-        
+
         if (!$hasAccess) {
             CustomerAuditLog::logFailure('download_quotation', 'Unauthorized download attempt to quotation outside family group', [
                 'quotation_id' => $quotationId,
@@ -920,7 +1060,7 @@ class CustomerAuthController extends Controller
                 'is_family_head' => $customer->isFamilyHead(),
                 'security_violation' => 'unauthorized_quotation_download'
             ]);
-            
+
             return redirect()->route('customer.quotations')
                 ->with('error', 'You do not have permission to download this quotation.');
         }

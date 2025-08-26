@@ -27,13 +27,17 @@
       "Read(/C:\\c\\wamp64\\www/**)",
       "Read(/C:\\c\\wamp64\\www/**)",
       "Read(/C:\\c\\wamp64\\www/**)",
-      "mcp__laravel-boost__get-config"
+      "mcp__laravel-boost__get-config",
+      "Bash(npm run:*)",
+      "Bash(npm install)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": [],
     "additionalDirectories": [
       "C:\\",
-      "C:\\c\\wamp64\\www"
+      "C:\\c\\wamp64\\www",
+      "C:\\C\\wamp64\\www\\test"
     ]
   },
   "enableAllProjectMcpServers": true,

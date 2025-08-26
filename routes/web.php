@@ -76,6 +76,11 @@ Route::prefix('customer')->name('customer.')->group(function () {
 
         // Profile route - show customer profile information
         Route::get('/profile', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showProfile'])->name('profile');
+        
+        // Family member management routes (only for family heads)
+        Route::get('/family-member/{member}/profile', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showFamilyMemberProfile'])->name('family-member.profile');
+        Route::get('/family-member/{member}/change-password', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showFamilyMemberPasswordForm'])->name('family-member.change-password');
+        Route::post('/family-member/{member}/change-password', [App\Http\Controllers\Auth\CustomerAuthController::class, 'updateFamilyMemberPassword'])->name('family-member.update-password');
     });
 
     // Family-specific routes (require family group membership)

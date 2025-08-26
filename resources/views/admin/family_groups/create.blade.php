@@ -168,7 +168,8 @@ $(document).ready(function() {
     // Initialize Select2
     $('.select2').select2({
         placeholder: "Select an option",
-        allowClear: true
+        allowClear: true,
+        minimumResultsForSearch: 0 // Always show search box
     });
 
     // Add Family Member
@@ -179,7 +180,8 @@ $(document).ready(function() {
         // Re-initialize Select2 for the new element
         $('#family-members-container .member-row:last .member-select').select2({
             placeholder: "Select member",
-            allowClear: true
+            allowClear: true,
+            minimumResultsForSearch: 0 // Always show search box
         });
         
         // Update member restrictions

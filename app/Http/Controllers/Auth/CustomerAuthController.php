@@ -147,12 +147,6 @@ class CustomerAuthController extends Controller
 
         $customer = Auth::guard('customer')->user();
 
-        // Check if customer needs to change password
-        if ($customer->needsPasswordChange()) {
-            return redirect()->route('customer.change-password')
-                ->with('warning', 'You must change your password before accessing the dashboard.');
-        }
-
         // Check if email needs verification
         if (!$customer->hasVerifiedEmail() && $customer->email_verification_token) {
             return redirect()->route('customer.verify-email-notice')
@@ -529,10 +523,18 @@ class CustomerAuthController extends Controller
     {
         $customer = Auth::guard('customer')->user();
 
+        // Get all family members (Customer records) in the same family group
+        $familyMembers = collect();
+        if ($customer->familyGroup) {
+            $familyMembers = Customer::where('family_group_id', $customer->familyGroup->id)
+                ->with('familyMember')  // Load the relationship info (relationship, is_head, etc.)
+                ->get();
+        }
+
         return view('customer.profile', [
             'customer' => $customer,
             'familyGroup' => $customer->familyGroup,
-            'familyMembers' => $customer->familyMembers ?? collect(),
+            'familyMembers' => $familyMembers,
             'isHead' => $customer->isFamilyHead(),
         ]);
     }

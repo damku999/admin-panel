@@ -68,7 +68,7 @@ class FamilyGroupController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|unique:family_groups,name',
+            'name' => 'required|string|max:255|unique:family_groups,name,NULL,id,deleted_at,NULL',
             'family_head_id' => 'required|exists:customers,id',
             'member_ids' => 'sometimes|array',
             'member_ids.*' => 'exists:customers,id',
@@ -202,7 +202,7 @@ class FamilyGroupController extends Controller
     public function update(Request $request, FamilyGroup $familyGroup)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|unique:family_groups,name,' . $familyGroup->id,
+            'name' => 'required|string|max:255|unique:family_groups,name,' . $familyGroup->id . ',id,deleted_at,NULL',
             'family_head_id' => 'required|exists:customers,id',
             'member_ids' => 'sometimes|array',
             'member_ids.*' => 'exists:customers,id',
@@ -226,7 +226,12 @@ class FamilyGroupController extends Controller
 
             // Remove old family members
             $oldMemberIds = $familyGroup->familyMembers->pluck('customer_id')->toArray();
-            Customer::whereIn('id', $oldMemberIds)->update(['family_group_id' => null]);
+            Customer::whereIn('id', $oldMemberIds)->update([
+                'family_group_id' => null,
+                'password' => null,
+                'email_verified_at' => null,
+                'password_reset_sent_at' => null
+            ]);
             FamilyMember::where('family_group_id', $familyGroup->id)->delete();
 
             // Update new family head's family_group_id
@@ -287,8 +292,13 @@ class FamilyGroupController extends Controller
             // Delete family members FIRST
             FamilyMember::where('family_group_id', $familyGroup->id)->delete();
             
-            // Then remove family_group_id from all customers
-            Customer::whereIn('id', $memberIds)->update(['family_group_id' => null]);
+            // Reset all customer data related to family group
+            Customer::whereIn('id', $memberIds)->update([
+                'family_group_id' => null,
+                'password' => null,
+                'email_verified_at' => null,
+                'password_reset_sent_at' => null
+            ]);
 
             // Finally delete family group
             $familyGroup->delete();
@@ -380,8 +390,13 @@ class FamilyGroupController extends Controller
             $orphanedMemberIds = FamilyMember::whereDoesntHave('familyGroup')->pluck('customer_id');
             
             if ($orphanedMemberIds->count() > 0) {
-                // Reset family_group_id for customers with orphaned family_members records
-                Customer::whereIn('id', $orphanedMemberIds)->update(['family_group_id' => null]);
+                // Reset customer data for customers with orphaned family_members records
+                Customer::whereIn('id', $orphanedMemberIds)->update([
+                    'family_group_id' => null,
+                    'password' => null,
+                    'email_verified_at' => null,
+                    'password_reset_sent_at' => null
+                ]);
                 
                 // Delete orphaned family_members records
                 FamilyMember::whereDoesntHave('familyGroup')->delete();
@@ -437,6 +452,68 @@ class FamilyGroupController extends Controller
                 // Continue with other notifications even if one fails
                 continue;
             }
+        }
+    }
+
+    /**
+     * Remove a specific family member from their family group.
+     */
+    public function removeMember(FamilyMember $familyMember)
+    {
+        DB::beginTransaction();
+        try {
+            $familyGroupName = $familyMember->familyGroup->name ?? 'Unknown';
+            $customerName = $familyMember->customer->name ?? 'Unknown';
+            $customerId = $familyMember->customer_id;
+            
+            // Prevent removing family head
+            if ($familyMember->is_head) {
+                if (request()->expectsJson()) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Cannot remove family head. Please change family head first or delete the entire family group.'
+                    ], 400);
+                }
+                
+                return back()->with('error', 'Cannot remove family head. Please change family head first or delete the entire family group.');
+            }
+
+            // Reset customer data when removing from family
+            Customer::where('id', $customerId)->update([
+                'family_group_id' => null,
+                'password' => null,
+                'email_verified_at' => null,
+                'password_reset_sent_at' => null
+            ]);
+
+            // Delete the family member record
+            $familyMember->delete();
+
+            DB::commit();
+
+            // Return JSON response for AJAX requests
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => "'{$customerName}' has been removed from '{$familyGroupName}' successfully."
+                ]);
+            }
+
+            return redirect()->back()
+                ->with('success', "'{$customerName}' has been removed from '{$familyGroupName}' successfully.");
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            // Return JSON response for AJAX requests
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Error removing family member: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return back()->with('error', 'Error removing family member: ' . $e->getMessage());
         }
     }
 }

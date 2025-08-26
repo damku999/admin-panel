@@ -27,6 +27,22 @@ class CustomerAuth
             return redirect()->route('customer.login')->with('error', 'Your account has been deactivated. Please contact support.');
         }
 
+        // Check if customer needs to change password (skip for password/email change routes and logout)
+        $excludedRoutes = [
+            'customer.change-password',
+            'customer.change-password.update',
+            'customer.family-member.change-password',
+            'customer.family-member.update-password',
+            'customer.verify-email-notice',
+            'customer.resend-verification',
+            'customer.logout'
+        ];
+
+        if (!in_array($request->route()->getName(), $excludedRoutes) && $customer->needsPasswordChange()) {
+            return redirect()->route('customer.change-password')
+                ->with('warning', 'You must change your password before continuing.');
+        }
+
         return $next($request);
     }
 }

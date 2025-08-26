@@ -146,6 +146,7 @@
                                         <th>Relationship</th>
                                         <th>Role</th>
                                         <th>Status</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -178,6 +179,23 @@
                                                 <span class="badge badge-success">Active</span>
                                             @else
                                                 <span class="badge badge-danger">Inactive</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if(!$member->is_head)
+                                                <form method="POST" action="{{ route('family_groups.member.remove', $member) }}" 
+                                                      style="display: inline;"
+                                                      onsubmit="return confirm('Are you sure you want to remove {{ $member->customer->name }} from this family? This will reset their login credentials.')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Member">
+                                                        <i class="fas fa-user-minus"></i>
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <span class="text-muted" title="Cannot remove family head">
+                                                    <i class="fas fa-lock"></i>
+                                                </span>
                                             @endif
                                         </td>
                                     </tr>

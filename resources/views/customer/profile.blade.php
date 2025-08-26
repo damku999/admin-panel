@@ -199,7 +199,7 @@
                                                         <i class="fas fa-user text-primary"></i>
                                                     </div>
                                                     <div>
-                                                        <h6 class="mb-0 text-white">{{ $member->name }}</h6>
+                                                        <h6 class="mb-0" style="color: #000">{{ $member->name }}</h6>
                                                         <small class="text-muted">{{ $member->email }}</small>
                                                         @if ($member->familyMember?->relationship)
                                                             <span

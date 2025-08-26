@@ -55,11 +55,11 @@ Route::prefix('customer')->name('customer.')->group(function () {
 
     // Logout route (authenticated only)
     Route::post('/logout', [App\Http\Controllers\Auth\CustomerAuthController::class, 'logout'])
-        ->middleware(['auth:customer'])
+        ->middleware(['customer.auth'])
         ->name('logout');
 
     // Customer Dashboard (Protected Routes with timeout enforcement)
-    Route::middleware(['auth:customer', 'customer.timeout', 'throttle:60,1'])->group(function () {
+    Route::middleware(['customer.auth', 'customer.timeout', 'throttle:60,1'])->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\Auth\CustomerAuthController::class, 'dashboard'])->name('dashboard');
 
         // Password Change Routes (for authenticated customers)
@@ -84,7 +84,7 @@ Route::prefix('customer')->name('customer.')->group(function () {
     });
 
     // Family-specific routes (require family group membership)
-    Route::middleware(['auth:customer', 'customer.timeout', 'customer.family', 'throttle:60,1'])->group(function () {
+    Route::middleware(['customer.auth', 'customer.timeout', 'customer.family', 'throttle:60,1'])->group(function () {
         // Policies routes (family access required)
         Route::get('/policies', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showPolicies'])->name('policies');
         Route::get('/policies/{policy}', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showPolicyDetail'])->name('policies.detail');
@@ -223,6 +223,7 @@ Route::middleware('auth')->prefix('family_groups')->name('family_groups.')->grou
     Route::put('/update/{familyGroup}', [App\Http\Controllers\FamilyGroupController::class, 'update'])->name('update');
     Route::delete('/delete/{familyGroup}', [App\Http\Controllers\FamilyGroupController::class, 'destroy'])->name('destroy');
     Route::get('/update/status/{family_group_id}/{status}', [App\Http\Controllers\FamilyGroupController::class, 'updateStatus'])->name('status');
+    Route::delete('/member/{familyMember}', [App\Http\Controllers\FamilyGroupController::class, 'removeMember'])->name('member.remove');
     Route::get('export/', [App\Http\Controllers\FamilyGroupController::class, 'export'])->name('export');
 });
 

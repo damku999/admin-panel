@@ -33,7 +33,10 @@ class CustomerAuthController extends Controller
             'resendVerification',
             'showQuotations',
             'showQuotationDetail',
-            'downloadQuotation'
+            'downloadQuotation',
+            'showFamilyMemberProfile',
+            'showFamilyMemberPasswordForm',
+            'updateFamilyMemberPassword'
         ]);
         $this->middleware('auth:customer')->only([
             'logout',
@@ -48,7 +51,10 @@ class CustomerAuthController extends Controller
             'resendVerification',
             'showQuotations',
             'showQuotationDetail',
-            'downloadQuotation'
+            'downloadQuotation',
+            'showFamilyMemberProfile',
+            'showFamilyMemberPasswordForm',
+            'updateFamilyMemberPassword'
         ]);
     }
 
@@ -540,15 +546,15 @@ class CustomerAuthController extends Controller
     }
 
     /**
-     * Show family member profile (read-only, family head only).
+     * Show family member profile (read-only, any family member can view).
      */
     public function showFamilyMemberProfile(Customer $member)
     {
         $customer = Auth::guard('customer')->user();
 
-        // Security: Only family heads can view family member profiles
-        if (!$customer->isFamilyHead()) {
-            abort(403, 'Only family heads can view family member profiles.');
+        // Security: Ensure both customers have family groups
+        if (!$customer->hasFamily()) {
+            abort(403, 'You must be part of a family group to view family member profiles.');
         }
 
         // Security: Ensure the member is in the same family
@@ -556,24 +562,30 @@ class CustomerAuthController extends Controller
             abort(403, 'You can only view profiles of your family members.');
         }
 
+        // Prevent viewing your own profile via this route
+        if ($customer->id === $member->id) {
+            return redirect()->route('customer.profile');
+        }
+
         return view('customer.family-member-profile', [
             'customer' => $customer,
             'member' => $member,
-            'familyGroup' => $customer->familyGroup,
+            'familyGroup' => $customer->familyGroup->load('members.customer'),
             'isViewingMember' => true,
+            'isHead' => $customer->isFamilyHead(),
         ]);
     }
 
     /**
-     * Show family member password change form (family head only).
+     * Show family member password change form (any family member can change).
      */
     public function showFamilyMemberPasswordForm(Customer $member)
     {
         $customer = Auth::guard('customer')->user();
 
-        // Security: Only family heads can change family member passwords
-        if (!$customer->isFamilyHead()) {
-            abort(403, 'Only family heads can change family member passwords.');
+        // Security: Ensure both customers have family groups
+        if (!$customer->hasFamily()) {
+            abort(403, 'You must be part of a family group to change family member passwords.');
         }
 
         // Security: Ensure the member is in the same family
@@ -581,7 +593,7 @@ class CustomerAuthController extends Controller
             abort(403, 'You can only change passwords of your family members.');
         }
 
-        // Security: Prevent family head from changing their own password via this route
+        // Security: Prevent changing your own password via this route
         if ($customer->id === $member->id) {
             return redirect()->route('customer.change-password')
                 ->with('info', 'Please use the regular password change form for your own account.');
@@ -590,20 +602,21 @@ class CustomerAuthController extends Controller
         return view('customer.family-member-password', [
             'customer' => $customer,
             'member' => $member,
-            'familyGroup' => $customer->familyGroup,
+            'familyGroup' => $customer->familyGroup->load('members.customer'),
+            'isHead' => $customer->isFamilyHead(),
         ]);
     }
 
     /**
-     * Update family member password (family head only, no old password required).
+     * Update family member password (any family member can change, no old password required).
      */
     public function updateFamilyMemberPassword(Customer $member, Request $request)
     {
         $customer = Auth::guard('customer')->user();
 
-        // Security: Only family heads can change family member passwords
-        if (!$customer->isFamilyHead()) {
-            abort(403, 'Only family heads can change family member passwords.');
+        // Security: Ensure both customers have family groups
+        if (!$customer->hasFamily()) {
+            abort(403, 'You must be part of a family group to change family member passwords.');
         }
 
         // Security: Ensure the member is in the same family
@@ -611,7 +624,7 @@ class CustomerAuthController extends Controller
             abort(403, 'You can only change passwords of your family members.');
         }
 
-        // Security: Prevent family head from changing their own password via this route
+        // Security: Prevent changing your own password via this route
         if ($customer->id === $member->id) {
             return redirect()->route('customer.change-password')
                 ->with('info', 'Please use the regular password change form for your own account.');

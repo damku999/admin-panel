@@ -3,40 +3,39 @@
 @section('title', 'Family Member Profile - ' . $member->name)
 
 @section('content')
-    <div class="container-fluid">
+    <div class="container-fluid px-2 px-md-3">
         <!-- Header with back button -->
-        <div class="mb-3">
+        <div class="mb-2">
             <div class="d-flex align-items-center">
-                <a href="{{ route('customer.profile') }}" class="btn btn-outline-secondary btn-sm me-3">
-                    <i class="fas fa-arrow-left me-1"></i>Back to My Profile
+                <a href="{{ route('customer.profile') }}" class="btn btn-outline-secondary btn-sm me-2">
+                    <i class="fas fa-arrow-left me-1"></i>Back
                 </a>
                 <div>
-                    <h5 class="mb-0 fw-bold">{{ $member->name }}'s Profile</h5>
-                    <small class="text-muted">Readonly view - Family Member Information</small>
+                    <h6 class="mb-0 fw-bold">{{ $member->name }}'s Profile</h6>
+                    <small class="text-muted">Family member view</small>
                 </div>
             </div>
         </div>
 
         <!-- Readonly Notice -->
-        <div class="alert alert-info d-flex align-items-center mb-4">
-            <i class="fas fa-info-circle me-2"></i>
-            <div>
-                <strong>Read-Only View:</strong> You are viewing this profile as the family head. 
-                This information is read-only and cannot be edited from this view.
-            </div>
+        <div class="alert alert-info py-2 px-3 mb-3">
+            <small>
+                <i class="fas fa-info-circle me-1"></i>
+                <strong>Read-Only:</strong> Family member profile - view only access.
+            </small>
         </div>
 
         <!-- Family Member Profile -->
         <div class="row">
             <!-- Personal Information -->
-            <div class="col-xl-8 col-lg-12">
-                <div class="card fade-in mb-4">
-                    <div class="card-header">
-                        <h4 class="mb-0">
-                            <i class="fas fa-user me-2"></i>Personal Information
-                        </h4>
+            <div class="col-xl-10 col-lg-12">
+                <div class="card mb-3">
+                    <div class="card-header py-2">
+                        <h6 class="mb-0">
+                            <i class="fas fa-user me-1"></i>Personal Information
+                        </h6>
                     </div>
-                    <div class="card-body p-4">
+                    <div class="card-body p-3">
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <div class="info-item">
@@ -172,28 +171,28 @@
             </div>
 
             <!-- Management Actions Sidebar -->
-            <div class="col-xl-4 col-lg-12">
-                <!-- Family Head Actions -->
-                <div class="card fade-in mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-tools me-2"></i>Family Head Actions
-                        </h5>
+            <div class="col-xl-2 col-lg-12">
+                <!-- Family Actions -->
+                <div class="card mb-3">
+                    <div class="card-header py-2">
+                        <h6 class="mb-0">
+                            <i class="fas fa-tools me-1"></i>Actions
+                        </h6>
                     </div>
-                    <div class="card-body p-3">
-                        <div class="d-grid gap-2">
+                    <div class="card-body p-2">
+                        <div class="d-grid gap-1">
                             <a href="{{ route('customer.family-member.change-password', $member->id) }}" class="btn btn-warning btn-sm">
-                                <i class="fas fa-key me-1"></i>Change {{ $member->name }}'s Password
+                                <i class="fas fa-key me-1"></i>Change Password
                             </a>
                             
                             @if(!$member->hasVerifiedEmail())
                                 <button class="btn btn-outline-info btn-sm" disabled>
-                                    <i class="fas fa-envelope me-1"></i>Email Not Verified
+                                    <i class="fas fa-envelope me-1"></i>Not Verified
                                 </button>
                             @endif
                             
                             <a href="{{ route('customer.policies') }}" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-shield-alt me-1"></i>View Family Policies
+                                <i class="fas fa-shield-alt me-1"></i>Policies
                             </a>
                         </div>
                     </div>
@@ -231,7 +230,7 @@
                             </label>
                             <div class="info-value">
                                 <span class="badge bg-primary px-3 py-2">
-                                    {{ $familyGroup->members->count() }} Members
+                                    {{ $familyGroup->members ? $familyGroup->members->count() : 0 }} Members
                                 </span>
                             </div>
                         </div>

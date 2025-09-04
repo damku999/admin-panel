@@ -45,6 +45,14 @@ class FamilyGroup extends Model
     }
 
     /**
+     * Alias for familyMembers relationship (for convenience).
+     */
+    public function members(): HasMany
+    {
+        return $this->familyMembers();
+    }
+
+    /**
      * Get all customers in this family group.
      */
     public function customers(): HasMany

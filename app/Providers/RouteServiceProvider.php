@@ -37,6 +37,11 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->configureRateLimiting();
 
+        // Route model bindings
+        Route::bind('member', function ($value) {
+            return \App\Models\Customer::findOrFail($value);
+        });
+
         $this->routes(function () {
             Route::prefix('api')
                 ->middleware('api')

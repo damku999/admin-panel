@@ -302,39 +302,6 @@
                         </div>
                     </div>
                 @endif
-
-                <!-- Quick Actions -->
-                <div class="card fade-in">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-bolt me-2"></i>Quick Actions
-                        </h5>
-                    </div>
-                    <div class="card-body p-3">
-                        <div class="d-grid gap-2">
-                            <a href="{{ route('customer.change-password') }}" class="btn btn-webmonks btn-sm">
-                                <i class="fas fa-key me-1"></i>Change Password
-                            </a>
-
-                            @if (!$customer->hasVerifiedEmail())
-                                <form action="{{ route('customer.verification.send') }}" method="POST" class="mb-2">
-                                    @csrf
-                                    <button type="submit" class="btn btn-outline-warning btn-sm w-100">
-                                        <i class="fas fa-envelope me-1"></i>Resend Verification Email
-                                    </button>
-                                </form>
-                                <a href="{{ route('customer.verify-email-notice') }}"
-                                    class="btn btn-outline-info btn-sm">
-                                    <i class="fas fa-info-circle me-1"></i>Email Verification Info
-                                </a>
-                            @endif
-
-                            <a href="{{ route('customer.policies') }}" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-shield-alt me-1"></i>View Policies
-                            </a>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

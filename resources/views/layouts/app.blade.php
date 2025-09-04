@@ -52,7 +52,6 @@
     <!-- Bootstrap core JavaScript-->
     <script src="{{ asset('js/app.js') }}"></script>
 
-
     <!-- Custom scripts for all pages-->
     <script src="{{ asset('admin/js/sb-admin-2.min.js') }}"></script>
     <script src="{{ asset('admin/toastr/toastr.min.js') }}"></script>
@@ -155,6 +154,20 @@
             $('.datepicker').datepicker({
                 format: 'dd-mm-yyyy', // Adjust the format as per your requirement
                 autoclose: true
+            });
+
+            // Fix menu collapse functionality
+            $('[data-toggle="collapse"]').on('click', function(e) {
+                e.preventDefault();
+                var target = $(this).attr('data-target');
+                $(target).collapse('toggle');
+                
+                // Toggle collapsed class on the link
+                $(this).toggleClass('collapsed');
+                
+                // Update aria-expanded attribute
+                var isExpanded = $(this).attr('aria-expanded') === 'true';
+                $(this).attr('aria-expanded', !isExpanded);
             });
         });
     </script>

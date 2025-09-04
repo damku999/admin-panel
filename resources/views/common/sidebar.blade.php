@@ -188,7 +188,6 @@
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Insurance Company:</h6>
                     <a class="collapse-item {{ Route::currentRouteName() == 'insurance_companies.index' ? 'active' : '' }}"
-                        href="{{ route('insurance_companies.index') }}"
                         href="{{ route('insurance_companies.index') }}">List</a>
                     <a class="collapse-item {{ Route::currentRouteName() == 'insurance_companies.edit' || Route::currentRouteName() == 'insurance_companies.create' ? 'active' : '' }}"
                         href="{{ route('insurance_companies.create') }}">Add New</a>
@@ -230,7 +229,7 @@
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Fuel Type:</h6>
                     <a class="collapse-item {{ Route::currentRouteName() == 'fuel_type.index' ? 'active' : '' }}"
-                        href="{{ route('fuel_type.index') }}" href="{{ route('fuel_type.index') }}">List</a>
+                        href="{{ route('fuel_type.index') }}">List</a>
                     <a class="collapse-item {{ Route::currentRouteName() == 'fuel_type.edit' || Route::currentRouteName() == 'fuel_type.create' ? 'active' : '' }}"
                         href="{{ route('fuel_type.create') }}">Add New</a>
                 </div>
@@ -281,13 +280,13 @@
 
         <li class="nav-item">
             <a class="nav-link {{ Route::currentRouteName() == 'reference_users.index' || Route::currentRouteName() == 'reference_users.create' || Route::currentRouteName() == 'reference_users.edit' ? '' : 'collapsed' }}"
-                href="#" data-toggle="collapse" data-target="#taTpDropDown"
+                href="#" data-toggle="collapse" data-target="#taTpDropDownReference"
                 aria-expanded="{{ Route::currentRouteName() == 'reference_users.index' || Route::currentRouteName() == 'reference_users.create' || Route::currentRouteName() == 'reference_users.edit' ? 'true' : 'false' }}"
-                aria-controls="taTpDropDown">
+                aria-controls="taTpDropDownReference">
                 <i class="fas fa-user-alt"></i>
                 <span>Reference Management</span>
             </a>
-            <div id="taTpDropDown"
+            <div id="taTpDropDownReference"
                 class="collapse {{ Route::currentRouteName() == 'reference_users.index' || Route::currentRouteName() == 'reference_users.create' || Route::currentRouteName() == 'reference_users.edit' ? 'show' : '' }}"
                 aria-labelledby="headingTwo" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">

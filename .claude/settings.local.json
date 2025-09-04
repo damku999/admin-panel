@@ -53,7 +53,17 @@
       "Read(/C:\\wamp64\\www\\test\\admin-panel\\resources\\views\\customer/**)",
       "Read(/C:\\wamp64\\www\\test\\admin-panel\\resources\\views\\customer/**)",
       "Read(/C:\\wamp64\\www\\test\\admin-panel\\resources\\views\\customer/**)",
-      "Read(/C:\\wamp64\\www\\test\\admin-panel\\resources\\views\\customer/**)"
+      "Read(/C:\\wamp64\\www\\test\\admin-panel\\resources\\views\\customer/**)",
+      "Read(/C:\\wamp64\\www\\test\\admin-panel\\resources\\js/**)",
+      "Read(/C:\\wamp64\\www\\test\\admin-panel\\resources\\views\\common/**)",
+      "Read(/C:\\wamp64\\www\\test\\admin-panel/**)",
+      "Read(/C:\\wamp64\\www\\test\\admin-panel\\public\\admin\\js/**)",
+      "Read(/C:\\wamp64\\www\\test\\admin-panel/**)",
+      "Read(/C:\\wamp64\\www\\test\\admin-panel\\public\\admin\\js/**)",
+      "Read(/C:\\wamp64\\www\\test\\admin-panel\\resources\\views\\common/**)",
+      "Read(/C:\\wamp64\\www\\test\\admin-panel\\resources\\js/**)",
+      "Read(/C:\\wamp64\\www\\test\\admin-panel\\resources\\sass/**)",
+      "Bash(npm run dev:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

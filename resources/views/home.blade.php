@@ -24,123 +24,127 @@
     @endphp
     <div class="container-fluid">
         <div class="row">
-            <div class="card py-1">
-                <div class="card-body overflow-x-auto">
-                    <table class="table table-striped table-bordered table-responsive">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Today <br>[{{ \Carbon\Carbon::parse($data['date'])->format('d-M-Y') }}]</th>
-                                <th>Yesterday <br>[{{ \Carbon\Carbon::parse($data['yesterday'])->format('d-M-Y') }}]</th>
-                                <th>Ere Yesterday
-                                    <br>[{{ \Carbon\Carbon::parse($data['day_before_yesterday'])->format('d-M-Y') }}]
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th>Final Premium</th>
-                                <td>
-                                    <span>{{ getArrows($data['today_data']['sum_final_premium'], $data['yesterday_data']['sum_final_premium']) }}</span>
-                                    {{ number_format($data['today_data']['sum_final_premium'], 2) }}
-                                </td>
-                                <td>
-                                    <span>{{ getArrows($data['yesterday_data']['sum_final_premium'], $data['day_before_yesterday_data']['sum_final_premium']) }}</span>
-                                    {{ number_format($data['yesterday_data']['sum_final_premium'], 2) }}
-                                </td>
-                                <td>{{ number_format($data['day_before_yesterday_data']['sum_final_premium'], 2) }}</td>
-                            </tr>
-                            <tr>
-                                <th>My Commission</th>
-                                <td>
-                                    <span>{{ getArrows($data['today_data']['sum_my_commission'], $data['yesterday_data']['sum_my_commission']) }}</span>
-                                    {{ number_format($data['today_data']['sum_my_commission'], 2) }}
-                                </td>
-                                <td>
-                                    <span>{{ getArrows($data['yesterday_data']['sum_my_commission'], $data['day_before_yesterday_data']['sum_my_commission']) }}</span>
-                                    {{ number_format($data['yesterday_data']['sum_my_commission'], 2) }}
-                                </td>
-                                <td>{{ number_format($data['day_before_yesterday_data']['sum_my_commission'], 2) }}</td>
-                            </tr>
-                            <tr>
-                                <th>Commission Given</th>
-                                <td>
-                                    <span>{{ getArrows($data['today_data']['sum_transfer_commission'], $data['yesterday_data']['sum_transfer_commission']) }}</span>
-                                    {{ number_format($data['today_data']['sum_transfer_commission'], 2) }}
-                                </td>
-                                <td>
-                                    <span>{{ getArrows($data['yesterday_data']['sum_transfer_commission'], $data['day_before_yesterday_data']['sum_transfer_commission']) }}</span>
-                                    {{ number_format($data['yesterday_data']['sum_transfer_commission'], 2) }}
-                                </td>
-                                <td>{{ number_format($data['day_before_yesterday_data']['sum_transfer_commission'], 2) }}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>My Earning</th>
-                                <td>
-                                    <span>{{ getArrows($data['today_data']['sum_actual_earnings'], $data['yesterday_data']['sum_actual_earnings']) }}</span>
-                                    {{ number_format($data['today_data']['sum_actual_earnings'], 2) }}
-                                </td>
-                                <td>
-                                    <span>{{ getArrows($data['yesterday_data']['sum_actual_earnings'], $data['day_before_yesterday_data']['sum_actual_earnings']) }}</span>
-                                    {{ number_format($data['yesterday_data']['sum_actual_earnings'], 2) }}
-                                </td>
-                                <td>{{ number_format($data['day_before_yesterday_data']['sum_actual_earnings'], 2) }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div class="col-lg-6 mb-4">
+                <div class="card py-1">
+                    <div class="card-body overflow-x-auto">
+                        <table class="table table-striped table-bordered table-responsive">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Today <br>[{{ \Carbon\Carbon::parse($data['date'])->format('d-M-Y') }}]</th>
+                                    <th>Yesterday <br>[{{ \Carbon\Carbon::parse($data['yesterday'])->format('d-M-Y') }}]</th>
+                                    <th>Ere Yesterday
+                                        <br>[{{ \Carbon\Carbon::parse($data['day_before_yesterday'])->format('d-M-Y') }}]
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Final Premium</th>
+                                    <td>
+                                        <span>{{ getArrows($data['today_data']['sum_final_premium'], $data['yesterday_data']['sum_final_premium']) }}</span>
+                                        {{ number_format($data['today_data']['sum_final_premium'], 2) }}
+                                    </td>
+                                    <td>
+                                        <span>{{ getArrows($data['yesterday_data']['sum_final_premium'], $data['day_before_yesterday_data']['sum_final_premium']) }}</span>
+                                        {{ number_format($data['yesterday_data']['sum_final_premium'], 2) }}
+                                    </td>
+                                    <td>{{ number_format($data['day_before_yesterday_data']['sum_final_premium'], 2) }}</td>
+                                </tr>
+                                <tr>
+                                    <th>My Commission</th>
+                                    <td>
+                                        <span>{{ getArrows($data['today_data']['sum_my_commission'], $data['yesterday_data']['sum_my_commission']) }}</span>
+                                        {{ number_format($data['today_data']['sum_my_commission'], 2) }}
+                                    </td>
+                                    <td>
+                                        <span>{{ getArrows($data['yesterday_data']['sum_my_commission'], $data['day_before_yesterday_data']['sum_my_commission']) }}</span>
+                                        {{ number_format($data['yesterday_data']['sum_my_commission'], 2) }}
+                                    </td>
+                                    <td>{{ number_format($data['day_before_yesterday_data']['sum_my_commission'], 2) }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Commission Given</th>
+                                    <td>
+                                        <span>{{ getArrows($data['today_data']['sum_transfer_commission'], $data['yesterday_data']['sum_transfer_commission']) }}</span>
+                                        {{ number_format($data['today_data']['sum_transfer_commission'], 2) }}
+                                    </td>
+                                    <td>
+                                        <span>{{ getArrows($data['yesterday_data']['sum_transfer_commission'], $data['day_before_yesterday_data']['sum_transfer_commission']) }}</span>
+                                        {{ number_format($data['yesterday_data']['sum_transfer_commission'], 2) }}
+                                    </td>
+                                    <td>{{ number_format($data['day_before_yesterday_data']['sum_transfer_commission'], 2) }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>My Earning</th>
+                                    <td>
+                                        <span>{{ getArrows($data['today_data']['sum_actual_earnings'], $data['yesterday_data']['sum_actual_earnings']) }}</span>
+                                        {{ number_format($data['today_data']['sum_actual_earnings'], 2) }}
+                                    </td>
+                                    <td>
+                                        <span>{{ getArrows($data['yesterday_data']['sum_actual_earnings'], $data['day_before_yesterday_data']['sum_actual_earnings']) }}</span>
+                                        {{ number_format($data['yesterday_data']['sum_actual_earnings'], 2) }}
+                                    </td>
+                                    <td>{{ number_format($data['day_before_yesterday_data']['sum_actual_earnings'], 2) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            <div class="card py-1 ml-1">
-                <div class="card-body overflow-x-auto">
-                    <table class="table table-striped table-bordered table-responsive">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Current Year <br>
-                                    [ {{ \Carbon\Carbon::parse($data['financial_year_start'])->format('M-Y') }} to
-                                    {{ \Carbon\Carbon::parse($data['financial_year_end'])->format('M-Y') }}]
-                                </th>
-                                <th>Last Year <br>
-                                    [{{ \Carbon\Carbon::parse($data['previous_financial_year_start'])->format('M-Y') }} to
-                                    {{ \Carbon\Carbon::parse($data['previous_financial_year_end'])->format('M-Y') }}]</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th>Final Premium</th>
-                                <td>
-                                    <span>{{ getArrows($data['current_year_data']['sum_final_premium'], $data['last_year_data']['sum_final_premium']) }}</span>
-                                    {{ number_format($data['current_year_data']['sum_final_premium'], 2) }}
-                                </td>
-                                <td>{{ number_format($data['last_year_data']['sum_final_premium'], 2) }}</td>
-                            </tr>
-                            <tr>
-                                <th>My Commission</th>
-                                <td>
-                                    <span>{{ getArrows($data['current_year_data']['sum_my_commission'], $data['last_year_data']['sum_my_commission']) }}</span>
-                                    {{ number_format($data['current_year_data']['sum_my_commission'], 2) }}
-                                </td>
-                                <td>{{ number_format($data['last_year_data']['sum_my_commission'], 2) }}</td>
-                            </tr>
-                            <tr>
-                                <th>Commission Given</th>
-                                <td>
-                                    <span>{{ getArrows($data['current_year_data']['sum_transfer_commission'], $data['last_year_data']['sum_transfer_commission']) }}</span>
-                                    {{ number_format($data['current_year_data']['sum_transfer_commission'], 2) }}
-                                </td>
-                                <td>{{ number_format($data['last_year_data']['sum_transfer_commission'], 2) }}</td>
-                            </tr>
-                            <tr>
-                                <th>My Earning</th>
-                                <td>
-                                    <span>{{ getArrows($data['current_year_data']['sum_actual_earnings'], $data['last_year_data']['sum_actual_earnings']) }}</span>
-                                    {{ number_format($data['current_year_data']['sum_actual_earnings'], 2) }}
-                                </td>
-                                <td>{{ number_format($data['last_year_data']['sum_actual_earnings'], 2) }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div class="col-lg-6 mb-4">
+                <div class="card py-1">
+                    <div class="card-body overflow-x-auto">
+                        <table class="table table-striped table-bordered table-responsive">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Current Year <br>
+                                        [ {{ \Carbon\Carbon::parse($data['financial_year_start'])->format('M-Y') }} to
+                                        {{ \Carbon\Carbon::parse($data['financial_year_end'])->format('M-Y') }}]
+                                    </th>
+                                    <th>Last Year <br>
+                                        [{{ \Carbon\Carbon::parse($data['previous_financial_year_start'])->format('M-Y') }} to
+                                        {{ \Carbon\Carbon::parse($data['previous_financial_year_end'])->format('M-Y') }}]</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Final Premium</th>
+                                    <td>
+                                        <span>{{ getArrows($data['current_year_data']['sum_final_premium'], $data['last_year_data']['sum_final_premium']) }}</span>
+                                        {{ number_format($data['current_year_data']['sum_final_premium'], 2) }}
+                                    </td>
+                                    <td>{{ number_format($data['last_year_data']['sum_final_premium'], 2) }}</td>
+                                </tr>
+                                <tr>
+                                    <th>My Commission</th>
+                                    <td>
+                                        <span>{{ getArrows($data['current_year_data']['sum_my_commission'], $data['last_year_data']['sum_my_commission']) }}</span>
+                                        {{ number_format($data['current_year_data']['sum_my_commission'], 2) }}
+                                    </td>
+                                    <td>{{ number_format($data['last_year_data']['sum_my_commission'], 2) }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Commission Given</th>
+                                    <td>
+                                        <span>{{ getArrows($data['current_year_data']['sum_transfer_commission'], $data['last_year_data']['sum_transfer_commission']) }}</span>
+                                        {{ number_format($data['current_year_data']['sum_transfer_commission'], 2) }}
+                                    </td>
+                                    <td>{{ number_format($data['last_year_data']['sum_transfer_commission'], 2) }}</td>
+                                </tr>
+                                <tr>
+                                    <th>My Earning</th>
+                                    <td>
+                                        <span>{{ getArrows($data['current_year_data']['sum_actual_earnings'], $data['last_year_data']['sum_actual_earnings']) }}</span>
+                                        {{ number_format($data['current_year_data']['sum_actual_earnings'], 2) }}
+                                    </td>
+                                    <td>{{ number_format($data['last_year_data']['sum_actual_earnings'], 2) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

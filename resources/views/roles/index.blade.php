@@ -5,24 +5,25 @@
 @section('content')
     <div class="container-fluid">
 
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Roles</h1>
-            @if (auth()->user()->hasPermissionTo('role-create'))
-                <a href="{{ route('roles.create') }}" class="btn btn-sm btn-primary">
-                    <i class="fas fa-plus"></i> Add New
-                </a>
-            @endif
-        </div>
-
         {{-- Alert Messages --}}
         @include('common.alert')
 
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">All Roles</h6>
-
+                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+                    <div class="mb-2 mb-md-0">
+                        <h1 class="h4 mb-0 text-primary font-weight-bold">Roles Management</h1>
+                        <small class="text-muted">Manage user roles and permissions</small>
+                    </div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        @if (auth()->user()->hasPermissionTo('role-create'))
+                            <a href="{{ route('roles.create') }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add New</span>
+                            </a>
+                        @endif
+                    </div>
+                </div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -39,23 +40,24 @@
                                 <tr>
                                     <td>{{ $role->name }}</td>
                                     <td>{{ $role->guard_name }}</td>
-                                    <td style="display: flex">
-                                        @if (auth()->user()->hasPermissionTo('role-edit'))
-                                            <a href="{{ route('roles.edit', ['role' => $role->id]) }}"
-                                                class="btn btn-primary m-2">
-                                                <i class="fa fa-pen"></i>
-                                            </a>
-                                        @endif
-                                        @if (auth()->user()->hasPermissionTo('role-delete'))
-                                            <form method="POST"
-                                                action="{{ route('roles.destroy', ['role' => $role->id]) }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="btn btn-danger m-2" type="submit">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        @endif
+                                    <td>
+                                        <div class="d-flex flex-wrap" style="gap: 6px; justify-content: flex-start; align-items: center;">
+                                            @if (auth()->user()->hasPermissionTo('role-edit'))
+                                                <a href="{{ route('roles.edit', ['role' => $role->id]) }}"
+                                                    class="btn btn-primary btn-sm" title="Edit Role">
+                                                    <i class="fa fa-pen"></i>
+                                                </a>
+                                            @endif
+                                            @if (auth()->user()->hasPermissionTo('role-delete'))
+                                                <form method="POST" action="{{ route('roles.destroy', ['role' => $role->id]) }}" style="display: inline;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn btn-danger btn-sm" type="submit" title="Delete Role">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

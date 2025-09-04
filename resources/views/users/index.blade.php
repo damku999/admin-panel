@@ -5,47 +5,40 @@
 @section('content')
     <div class="container-fluid">
 
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Users</h1>
-            <div class="row">
-                @if (auth()->user()->hasPermissionTo('user-create'))
-                    <div class="col-md-6">
-                        <a href="{{ route('users.create') }}" class="btn btn-sm btn-primary">
-                            <i class="fas fa-plus"></i> Add New
-                        </a>
-                    </div>
-                @endif
-                <div class="col-md-6">
-                    <a href="{{ route('users.export') }}" class="btn btn-sm btn-success">
-                        <i class="fas fa-check"></i> Export To Excel
-                    </a>
-                </div>
-
-            </div>
-
-        </div>
-
         {{-- Alert Messages --}}
         @include('common.alert')
 
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">All Users</h6>
-
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h1 class="h4 mb-0 text-primary font-weight-bold">Users Management</h1>
+                        <small class="text-muted">Manage all system users</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        @if (auth()->user()->hasPermissionTo('user-create'))
+                            <a href="{{ route('users.create') }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add New
+                            </a>
+                        @endif
+                        <a href="{{ route('users.export') }}" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> Export To Excel
+                        </a>
+                    </div>
+                </div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th width="20%">Name</th>
-                                <th width="25%">Email</th>
-                                <th width="15%">Mobile</th>
-                                <th width="15%">Role</th>
-                                <th width="15%">Status</th>
-                                <th width="10%">Action</th>
+                                <th width="18%">Name</th>
+                                <th width="22%">Email</th>
+                                <th width="14%">Mobile</th>
+                                <th width="14%">Role</th>
+                                <th width="12%">Status</th>
+                                <th width="20%">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -62,31 +55,36 @@
                                             <span class="badge badge-success">Active</span>
                                         @endif
                                     </td>
-                                    <td style="display: flex">
-                                        @if (auth()->user()->hasPermissionTo('user-delete'))
-                                            @if ($user->status == 0)
-                                                <a href="{{ route('users.status', ['user_id' => $user->id, 'status' => 1]) }}"
-                                                    class="btn btn-success m-2">
-                                                    <i class="fa fa-check"></i>
-                                                </a>
-                                            @elseif ($user->status == 1)
-                                                <a href="{{ route('users.status', ['user_id' => $user->id, 'status' => 0]) }}"
-                                                    class="btn btn-danger m-2">
-                                                    <i class="fa fa-ban"></i>
+                                    <td>
+                                        <div class="d-flex flex-wrap" style="gap: 6px; justify-content: flex-start; align-items: center;">
+                                            @if (auth()->user()->hasPermissionTo('user-edit'))
+                                                <a href="{{ route('users.edit', ['user' => $user->id]) }}"
+                                                    class="btn btn-primary btn-sm" title="Edit User">
+                                                    <i class="fa fa-pen"></i>
                                                 </a>
                                             @endif
-                                        @endif
-                                        @if (auth()->user()->hasPermissionTo('user-edit'))
-                                            <a href="{{ route('users.edit', ['user' => $user->id]) }}"
-                                                class="btn btn-primary m-2">
-                                                <i class="fa fa-pen"></i>
-                                            </a>
-                                        @endif
-                                        @if (auth()->user()->hasPermissionTo('user-delete'))
-                                            <a class="btn btn-danger m-2" href="javascript:void(0);"
-                                                onclick="delete_conf_common('{{ $user['id'] }}','User','User', '{{ route('users.index') }}');"><i
-                                                    class="fa fa-trash-alt "></i></a>
-                                        @endif
+
+                                            @if (auth()->user()->hasPermissionTo('user-delete'))
+                                                @if ($user->status == 0)
+                                                    <a href="{{ route('users.status', ['user_id' => $user->id, 'status' => 1]) }}"
+                                                        class="btn btn-success btn-sm" title="Enable User">
+                                                        <i class="fa fa-check"></i>
+                                                    </a>
+                                                @elseif ($user->status == 1)
+                                                    <a href="{{ route('users.status', ['user_id' => $user->id, 'status' => 0]) }}"
+                                                        class="btn btn-warning btn-sm" title="Disable User">
+                                                        <i class="fa fa-ban"></i>
+                                                    </a>
+                                                @endif
+                                            @endif
+
+                                            @if (auth()->user()->hasPermissionTo('user-delete'))
+                                                <a class="btn btn-danger btn-sm" href="javascript:void(0);" title="Delete User"
+                                                    onclick="delete_conf_common('{{ $user['id'] }}','User','User', '{{ route('users.index') }}');">
+                                                    <i class="fa fa-trash-alt"></i>
+                                                </a>
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

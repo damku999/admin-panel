@@ -725,7 +725,41 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
-            $('#customer_id').select2();
+            // Initialize Select2 for Customer dropdown with enhanced search
+            $('#customer_id').select2({
+                placeholder: 'Search and select customer...',
+                allowClear: true,
+                width: '100%',
+                minimumInputLength: 0,
+                escapeMarkup: function(markup) {
+                    return markup; // Allow HTML in results
+                },
+                templateResult: function(option) {
+                    if (!option.id || option.loading) {
+                        return option.text;
+                    }
+                    
+                    // Get mobile number from data attribute if available  
+                    const $option = $(option.element);
+                    const mobile = $option.data('mobile');
+                    const customerName = option.text.split(' - ')[0];
+                    
+                    if (mobile) {
+                        return '<div style="padding: 5px;"><strong>' + customerName + '</strong><br><small class="text-muted" style="color: #6c757d;">📱 ' + mobile + '</small></div>';
+                    }
+                    
+                    return '<div style="padding: 5px;">' + customerName + '</div>';
+                },
+                templateSelection: function(option) {
+                    if (!option.id) {
+                        return option.text;
+                    }
+                    
+                    // Show just the customer name in the selection
+                    const customerName = option.text.split(' - ')[0];
+                    return customerName;
+                }
+            });
             // Calculate and update commission fields
             function calculateCommission() {
                 var commissionOn = $('#commission_on').val();

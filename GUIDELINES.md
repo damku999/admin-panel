@@ -21,10 +21,11 @@
 - **Follow Bootstrap 5 conventions** for consistent styling (Customer Portal) / jQuery-only for Admin Panel
 - **Implement proper form validation** with server-side error display
 - **Use centralized modal system** via `showModal()` and `hideModal()` functions
-- **Use Select2 or similar libraries** for enhanced user experience
+- **Use enhanced Select2 implementation** for all customer dropdowns with mobile number display
 - **Implement consistent loading states** with `showLoading()` and `hideLoading()`
 - **Ensure responsive design** across all devices
 - **Use performAjaxOperation()** for standardized AJAX calls with error handling
+- **Follow unified button styling** with `btn-sm` class and `gap: 6px` spacing
 
 ---
 
@@ -251,12 +252,58 @@ performAjaxOperation({
 // - Automatic loading spinner cleanup on errors
 ```
 
+### Enhanced Select2 Customer Dropdowns
+```javascript
+// Standard implementation for all customer selection dropdowns
+$('#customer_id').select2({
+    placeholder: 'Search and select customer...',
+    allowClear: true,
+    width: '100%',
+    minimumInputLength: 0,
+    escapeMarkup: function(markup) {
+        return markup; // Allow HTML in results
+    },
+    templateResult: function(option) {
+        if (!option.id || option.loading) {
+            return option.text;
+        }
+        
+        const $option = $(option.element);
+        const mobile = $option.data('mobile');
+        const customerName = option.text.split(' - ')[0];
+        
+        if (mobile) {
+            return '<div style="padding: 5px;"><strong>' + customerName + '</strong><br><small class="text-muted" style="color: #6c757d;">📱 ' + mobile + '</small></div>';
+        }
+        
+        return '<div style="padding: 5px;">' + customerName + '</div>';
+    },
+    templateSelection: function(option) {
+        if (!option.id) {
+            return option.text;
+        }
+        
+        const customerName = option.text.split(' - ')[0];
+        return customerName;
+    }
+});
+
+// Required option format with mobile data
+<option value="{{ $customer->id }}" data-mobile="{{ $customer->mobile_number }}">
+    {{ $customer->name }}
+    @if ($customer->mobile_number)
+        - {{ $customer->mobile_number }}
+    @endif
+</option>
+```
+
 ### Best Practices for New Development
 1. **Always use centralized modal functions** instead of Bootstrap modal methods
 2. **Use performAjaxOperation()** for consistent AJAX handling
 3. **Leverage automatic error handling** - don't reinvent error display
 4. **Use showLoading()/hideLoading()** for consistent loading states
 5. **Follow the established patterns** in layouts/app.blade.php
+6. **Use enhanced Select2 implementation** for all customer dropdowns with mobile display
 
 ---
 
@@ -278,4 +325,4 @@ performAjaxOperation({
 
 ---
 
-*Last Updated: 2025-09-04 - Added centralized systems guide and updated best practices*
+*Last Updated: 2025-09-04 - Added enhanced Select2 customer dropdown standards and updated best practices*

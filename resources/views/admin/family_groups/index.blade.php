@@ -4,21 +4,24 @@
 
 @section('content')
 <div class="container-fluid">
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Family Groups Management</h1>
-        <div class="d-sm-flex">
-            <a href="{{ route('family_groups.export') }}" class="btn btn-success btn-sm mr-2">
-                <i class="fas fa-download fa-sm text-white-50"></i> Export CSV
-            </a>
-            <a href="{{ route('family_groups.create') }}" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus fa-sm text-white-50"></i> Create Family Group
-            </a>
-        </div>
-    </div>
-
     <!-- Search and Filter Card -->
     <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-3">
+                <div class="mb-2 mb-md-0">
+                    <h1 class="h4 mb-0 text-primary font-weight-bold">Family Groups Management</h1>
+                    <small class="text-muted">Manage family group records</small>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <a href="{{ route('family_groups.create') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Create Group</span>
+                    </a>
+                    <a href="{{ route('family_groups.export') }}" class="btn btn-success">
+                        <i class="fas fa-file-excel"></i> <span class="d-none d-sm-inline">Export</span>
+                    </a>
+                </div>
+            </div>
+        </div>
         <div class="card-body">
             <form method="GET" action="{{ route('family_groups.index') }}" id="search_form">
                 <div class="row">
@@ -127,16 +130,16 @@
                                 {{ $familyGroup->created_at->format('h:i A') }}</small>
                             </td>
                             <td>
-                                <div class="btn-group" role="group">
+                                <div class="d-flex flex-wrap" style="gap: 6px; justify-content: flex-start; align-items: center;">
                                     <a href="{{ route('family_groups.show', $familyGroup) }}" 
                                        class="btn btn-info btn-sm" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     <a href="{{ route('family_groups.edit', $familyGroup) }}" 
-                                       class="btn btn-warning btn-sm" title="Edit">
+                                       class="btn btn-primary btn-sm" title="Edit Family Group">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a class="btn btn-danger btn-sm" href="javascript:void(0);" title="Delete"
+                                    <a class="btn btn-danger btn-sm" href="javascript:void(0);" title="Delete Family Group"
                                        onclick="delete_conf_common('{{ $familyGroup->id }}','FamilyGroup', 'Family Group: {{ $familyGroup->name }}', '{{ route('family_groups.index') }}');">
                                         <i class="fas fa-trash"></i>
                                     </a>

@@ -5,31 +5,28 @@
 @section('content')
     <div class="container-fluid">
 
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">All Add-on Covers</h1>
-            <div class="row">
-                @if (auth()->user()->hasPermissionTo('addon-cover-create'))
-                    <div class="col-md-6">
-                        <a href="{{ route('addon-covers.create') }}" class="btn btn-sm btn-primary">
-                            <i class="fas fa-plus"></i> Add New
-                        </a>
-                    </div>
-                @endif
-                <div class="col-md-6">
-                    <a href="{{ route('addon-covers.export') }}" class="btn btn-sm btn-success">
-                        <i class="fas fa-check"></i> Export To Excel
-                    </a>
-                </div>
-            </div>
-        </div>
-
         {{-- Alert Messages --}}
         @include('common.alert')
 
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
+                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-3">
+                    <div class="mb-2 mb-md-0">
+                        <h1 class="h4 mb-0 text-primary font-weight-bold">Add-on Covers Management</h1>
+                        <small class="text-muted">Manage insurance add-on covers</small>
+                    </div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        @if (auth()->user()->hasPermissionTo('addon-cover-create'))
+                            <a href="{{ route('addon-covers.create') }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add New</span>
+                            </a>
+                        @endif
+                        <a href="{{ route('addon-covers.export') }}" class="btn btn-success">
+                            <i class="fas fa-file-excel"></i> <span class="d-none d-sm-inline">Export</span>
+                        </a>
+                    </div>
+                </div>
                 <form action="{{ route('addon-covers.index') }}" method="GET" role="search">
                     <div class="input-group-append">
                         <input type="text" placeholder="Search" name="search"
@@ -70,37 +67,40 @@
                                             <span class="badge badge-success">Active</span>
                                         @endif
                                     </td>
-                                    <td style="display: flex">
-                                        @if (auth()->user()->hasPermissionTo('addon-cover-delete'))
-                                            @if ($addon_cover->status == 0)
-                                                <a href="{{ route('addon-covers.status', ['addon_cover_id' => $addon_cover->id, 'status' => 1]) }}"
-                                                    class="btn btn-success m-2">
-                                                    <i class="fa fa-check"></i>
-                                                </a>
-                                            @elseif ($addon_cover->status == 1)
-                                                <a href="{{ route('addon-covers.status', ['addon_cover_id' => $addon_cover->id, 'status' => 0]) }}"
-                                                    class="btn btn-danger m-2">
-                                                    <i class="fa fa-ban"></i>
+                                    <td>
+                                        <div class="d-flex flex-wrap" style="gap: 6px; justify-content: flex-start; align-items: center;">
+                                            @if (auth()->user()->hasPermissionTo('addon-cover-edit'))
+                                                <a href="{{ route('addon-covers.edit', ['addon_cover' => $addon_cover->id]) }}"
+                                                    class="btn btn-primary btn-sm" title="Edit Add-on Cover">
+                                                    <i class="fa fa-pen"></i>
                                                 </a>
                                             @endif
-                                        @endif
-                                        @if (auth()->user()->hasPermissionTo('addon-cover-edit'))
-                                            <a href="{{ route('addon-covers.edit', ['addon_cover' => $addon_cover->id]) }}"
-                                                class="btn btn-primary m-2">
-                                                <i class="fa fa-pen"></i>
-                                            </a>
-                                        @endif
 
-                                        @if (auth()->user()->hasPermissionTo('addon-cover-delete'))
-                                            <form action="{{ route('addon-covers.delete', $addon_cover->id) }}" method="POST" style="display: inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="button" class="btn btn-danger m-2" 
-                                                    onclick="if(confirm('Are you sure you want to delete this Add-on Cover?')) { this.closest('form').submit(); }">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        @endif
+                                            @if (auth()->user()->hasPermissionTo('addon-cover-delete'))
+                                                @if ($addon_cover->status == 0)
+                                                    <a href="{{ route('addon-covers.status', ['addon_cover_id' => $addon_cover->id, 'status' => 1]) }}"
+                                                        class="btn btn-success btn-sm" title="Enable Add-on Cover">
+                                                        <i class="fa fa-check"></i>
+                                                    </a>
+                                                @elseif ($addon_cover->status == 1)
+                                                    <a href="{{ route('addon-covers.status', ['addon_cover_id' => $addon_cover->id, 'status' => 0]) }}"
+                                                        class="btn btn-warning btn-sm" title="Disable Add-on Cover">
+                                                        <i class="fa fa-ban"></i>
+                                                    </a>
+                                                @endif
+                                            @endif
+
+                                            @if (auth()->user()->hasPermissionTo('addon-cover-delete'))
+                                                <form action="{{ route('addon-covers.delete', $addon_cover->id) }}" method="POST" style="display: inline;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="button" class="btn btn-danger btn-sm" title="Delete Add-on Cover"
+                                                        onclick="if(confirm('Are you sure you want to delete this Add-on Cover?')) { this.closest('form').submit(); }">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
                             @empty

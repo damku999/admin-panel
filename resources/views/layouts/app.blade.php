@@ -152,18 +152,33 @@
                 autoclose: true
             });
 
-            // Fix menu collapse functionality
+            // Fix menu collapse functionality (jQuery-only implementation)
             $('[data-toggle="collapse"]').on('click', function(e) {
                 e.preventDefault();
-                var target = $(this).attr('data-target');
-                $(target).collapse('toggle');
+                var $this = $(this);
+                var target = $this.attr('data-target');
+                var $target = $(target);
                 
-                // Toggle collapsed class on the link
-                $(this).toggleClass('collapsed');
+                // Toggle the target element
+                if ($target.hasClass('show')) {
+                    // Hide the collapse
+                    $target.removeClass('show').slideUp(300);
+                    $this.addClass('collapsed').attr('aria-expanded', 'false');
+                } else {
+                    // Show the collapse
+                    $target.addClass('show').slideDown(300);
+                    $this.removeClass('collapsed').attr('aria-expanded', 'true');
+                }
                 
-                // Update aria-expanded attribute
-                var isExpanded = $(this).attr('aria-expanded') === 'true';
-                $(this).attr('aria-expanded', !isExpanded);
+                // Close other open dropdowns (accordion behavior)
+                $('[data-toggle="collapse"]').not($this).each(function() {
+                    var otherTarget = $(this).attr('data-target');
+                    var $otherTarget = $(otherTarget);
+                    if ($otherTarget.hasClass('show')) {
+                        $otherTarget.removeClass('show').slideUp(300);
+                        $(this).addClass('collapsed').attr('aria-expanded', 'false');
+                    }
+                });
             });
 
             // =======================================================

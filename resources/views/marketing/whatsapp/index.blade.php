@@ -4,17 +4,18 @@
 
 @section('content')
     <div class="container-fluid">
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">
-                <i class="fab fa-whatsapp text-success mr-2"></i>Marketing WhatsApp
-            </h1>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item active">Marketing WhatsApp</li>
-                </ol>
-            </nav>
+        <!-- Main Header Card -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+                    <div class="mb-2 mb-md-0">
+                        <h1 class="h4 mb-0 text-primary font-weight-bold">
+                            <i class="fab fa-whatsapp text-success mr-2"></i>WhatsApp Marketing Management
+                        </h1>
+                        <small class="text-muted">Send marketing messages to customers</small>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Flash Messages -->

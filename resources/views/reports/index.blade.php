@@ -10,8 +10,12 @@
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
             <div class="card-header py-3">
-                Genrate All reports
-                {{-- <input type="text" placeholder="Search" name="search" class="form-control float-right filter_by_key" value="{{ request('search') }}"> --}}
+                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+                    <div class="mb-2 mb-md-0">
+                        <h1 class="h4 mb-0 text-primary font-weight-bold">Reports Management</h1>
+                        <small class="text-muted">Generate and export system reports</small>
+                    </div>
+                </div>
             </div>
             <form action="{{ route('reports.index') }}" method="GET" role="search">
                 @csrf
@@ -70,8 +74,12 @@
                                 <option selected="selected" disabled="disabled">Select Customer</option>
                                 @foreach ($customers as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
+                                        data-mobile="{{ $item->mobile_number }}"
                                         {{ request('customer_id') == $item->id ? 'selected' : '' }}>
                                         {{ $item->name }}
+                                        @if ($item->mobile_number)
+                                            - {{ $item->mobile_number }}
+                                        @endif
                                     </option>
                                 @endforeach
                             </select>
@@ -454,8 +462,40 @@
 
             $(document).ready(function() {
                 // Initialize Select2
+                // Initialize Select2 for Customer dropdown with enhanced search
                 $('#customer_id').select2({
-                    dropdownAutoWidth: true
+                    placeholder: 'Search and select customer...',
+                    allowClear: true,
+                    width: '100%',
+                    minimumInputLength: 0,
+                    escapeMarkup: function(markup) {
+                        return markup; // Allow HTML in results
+                    },
+                    templateResult: function(option) {
+                        if (!option.id || option.loading) {
+                            return option.text;
+                        }
+                        
+                        // Get mobile number from data attribute if available  
+                        const $option = $(option.element);
+                        const mobile = $option.data('mobile');
+                        const customerName = option.text.split(' - ')[0];
+                        
+                        if (mobile) {
+                            return '<div style="padding: 5px;"><strong>' + customerName + '</strong><br><small class="text-muted" style="color: #6c757d;">📱 ' + mobile + '</small></div>';
+                        }
+                        
+                        return '<div style="padding: 5px;">' + customerName + '</div>';
+                    },
+                    templateSelection: function(option) {
+                        if (!option.id) {
+                            return option.text;
+                        }
+                        
+                        // Show just the customer name in the selection
+                        const customerName = option.text.split(' - ')[0];
+                        return customerName;
+                    }
                 });
                 // Get selected values from the request
                 const selectedValues = {!! json_encode(request('premium_type_id', [])) !!};

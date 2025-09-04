@@ -5,15 +5,22 @@
     <div class="row">
         <div class="col-12">
             <div class="card shadow mb-4">
-                <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-primary">
-                        <i class="fas fa-file-alt"></i> Insurance Quotations Management
-                    </h6>
-                    @can('quotation-create')
-                    <a href="{{ route('quotations.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Create New Quotation
-                    </a>
-                    @endcan
+                <div class="card-header py-3">
+                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
+                        <div class="mb-2 mb-md-0">
+                            <h1 class="h4 mb-0 text-primary font-weight-bold">
+                                <i class="fas fa-file-alt"></i> Quotations Management
+                            </h1>
+                            <small class="text-muted">Manage insurance quotations and quotes</small>
+                        </div>
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            @can('quotation-create')
+                            <a href="{{ route('quotations.create') }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Create New</span>
+                            </a>
+                            @endcan
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <!-- Search and Filter Form -->
@@ -116,7 +123,7 @@
                                             <small class="text-muted">{{ $quotation->created_at->format('H:i') }}</small>
                                         </td>
                                         <td>
-                                            <div class="btn-group-vertical btn-group-sm">
+                                            <div class="d-flex flex-wrap" style="gap: 6px; justify-content: flex-start; align-items: center;">
                                                 <!-- 1. WhatsApp (First Priority) -->
                                                 @if($quotation->quotationCompanies->count() > 0)
                                                     @can('quotation-send-whatsapp')
@@ -139,7 +146,7 @@
                                                 <!-- 2. Edit (Second Priority) -->
                                                 @can('quotation-edit')
                                                 <a href="{{ route('quotations.edit', $quotation) }}" 
-                                                   class="btn btn-warning btn-sm" title="Edit Quotation">
+                                                   class="btn btn-primary btn-sm" title="Edit Quotation">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                                 @endcan
@@ -148,7 +155,7 @@
                                                 @if($quotation->quotationCompanies->count() > 0)
                                                     @can('quotation-download-pdf')
                                                     <a href="{{ route('quotations.download-pdf', $quotation) }}" 
-                                                       class="btn btn-primary btn-sm" title="Download PDF">
+                                                       class="btn btn-info btn-sm" title="Download PDF">
                                                         <i class="fas fa-download"></i>
                                                     </a>
                                                     @endcan
@@ -157,7 +164,7 @@
                                                 <!-- View Details (Keep for functionality) -->
                                                 @can('quotation-edit')
                                                 <a href="{{ route('quotations.show', $quotation) }}" 
-                                                   class="btn btn-info btn-sm" title="View Details">
+                                                   class="btn btn-secondary btn-sm" title="View Details">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                                 @endcan

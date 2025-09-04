@@ -496,7 +496,7 @@
                     <i class="fas fa-exclamation-triangle me-2"></i>
                     Confirm Company Removal
                 </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close text-white" onclick="hideCustomModal()" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -536,7 +536,7 @@
                 </div>
             </div>
             <div class="modal-footer border-0 bg-light">
-                <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">
+                <button type="button" class="btn btn-secondary px-4" onclick="hideCustomModal()">
                     <i class="fas fa-times me-1"></i>
                     Cancel
                 </button>
@@ -778,8 +778,10 @@
             }
 
             // Handle modal close events
-            $(document).on('click', '[data-dismiss="modal"], .modal-backdrop', function() {
-                hideCustomModal();
+            $(document).on('click', '.modal-backdrop', function() {
+                if ($('#deleteCompanyModal').hasClass('show')) {
+                    hideCustomModal();
+                }
             });
 
             // Handle ESC key to close modal
@@ -1044,40 +1046,7 @@
             }
         });
 
-        // WhatsApp Modal Functions (jQuery-only, no Bootstrap JS)
-        function showSendWhatsAppModal() {
-            $('#sendWhatsAppModal').css('display', 'block').addClass('show');
-            $('body').addClass('modal-open');
-            $('.modal-backdrop').remove();
-            $('body').append('<div class="modal-backdrop fade show"></div>');
-        }
-
-        function showResendWhatsAppModal() {
-            $('#resendWhatsAppModal').css('display', 'block').addClass('show');
-            $('body').addClass('modal-open');
-            $('.modal-backdrop').remove();
-            $('body').append('<div class="modal-backdrop fade show"></div>');
-        }
-
-        function hideWhatsAppModal(modalId) {
-            $('#' + modalId).css('display', 'none').removeClass('show');
-            $('body').removeClass('modal-open');
-            $('.modal-backdrop').remove();
-        }
-
-        // Close modal when clicking on backdrop
-        $(document).on('click', '.modal-backdrop', function() {
-            hideWhatsAppModal('sendWhatsAppModal');
-            hideWhatsAppModal('resendWhatsAppModal');
-        });
-
-        // Close modal on Escape key
-        $(document).keydown(function(e) {
-            if (e.keyCode === 27) { // ESC key
-                hideWhatsAppModal('sendWhatsAppModal');
-                hideWhatsAppModal('resendWhatsAppModal');
-            }
-        });
+        // Modal functions are now centralized in layouts/app.blade.php
     </script>
 @endsection
 

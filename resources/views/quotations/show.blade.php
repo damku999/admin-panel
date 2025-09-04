@@ -579,61 +579,6 @@
             $('.card').css('transition', 'all 0.3s ease');
         });
 
-        // WhatsApp Modal Functions (jQuery-only, no Bootstrap JS)
-        function showSendWhatsAppModal() {
-            $('#sendWhatsAppModal').css('display', 'block').addClass('show');
-            $('body').addClass('modal-open');
-            $('.modal-backdrop').remove();
-            $('body').append('<div class="modal-backdrop fade show"></div>');
-        }
-
-        function showResendWhatsAppModal() {
-            $('#resendWhatsAppModal').css('display', 'block').addClass('show');
-            $('body').addClass('modal-open');
-            $('.modal-backdrop').remove();
-            $('body').append('<div class="modal-backdrop fade show"></div>');
-        }
-
-        function hideWhatsAppModal(modalId) {
-            $('#' + modalId).css('display', 'none').removeClass('show');
-            $('body').removeClass('modal-open');
-            $('.modal-backdrop').remove();
-        }
-
-        // Close modal when clicking on backdrop
-        $(document).on('click', '.modal-backdrop', function() {
-            hideWhatsAppModal('sendWhatsAppModal');
-            hideWhatsAppModal('resendWhatsAppModal');
-        });
-
-        // Close modal on Escape key
-        $(document).keydown(function(e) {
-            if (e.keyCode === 27) { // ESC key
-                hideWhatsAppModal('sendWhatsAppModal');
-                hideWhatsAppModal('resendWhatsAppModal');
-                hideDeleteModal();
-            }
-        });
-
-        // Delete Modal Functions
-        function showDeleteQuotationModal() {
-            $('#deleteQuotationModal').css('display', 'block').addClass('show');
-            $('body').addClass('modal-open');
-            $('.modal-backdrop').remove();
-            $('body').append('<div class="modal-backdrop fade show"></div>');
-        }
-
-        function hideDeleteModal() {
-            $('#deleteQuotationModal').css('display', 'none').removeClass('show');
-            $('body').removeClass('modal-open');
-            $('.modal-backdrop').remove();
-        }
-
-        // Update backdrop click handler
-        $(document).on('click', '.modal-backdrop', function() {
-            hideWhatsAppModal('sendWhatsAppModal');
-            hideWhatsAppModal('resendWhatsAppModal');
-            hideDeleteModal();
-        });
+        // Modal functions are now centralized in layouts/app.blade.php
     </script>
 @endsection

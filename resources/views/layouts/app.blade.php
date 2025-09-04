@@ -61,23 +61,25 @@
     @yield('scripts')
     <script>
         function filterDataAjax(url, search_serialized = null) {
-            $.ajax({
+            performAjaxOperation({
                 async: true,
                 type: "GET",
-                url: "{{ env('APP_URL') }}/" + url,
+                url: "{{ config('app.url') }}/" + url,
                 data: search_serialized,
+                loaderMessage: 'Filtering data...',
+                showSuccessNotification: false,
                 success: function(res) {
                     $("#list_load").html(res);
-                    // $(table_id).load(location.href + ' '+table_id);
-                },
-                error: function(xhr, status, error) {
-                    $('#cover-spin').hide();
                 },
                 complete: function(result) {
+                    // Handle session expiration
                     if (result.responseText == '{"error":"Unauthenticated."}') {
-                        window.location.href = "login";
+                        show_notification('warning', 'Session expired. Redirecting to login...');
+                        setTimeout(() => window.location.href = "login", 2000);
+                        return;
                     }
 
+                    // Handle form reset
                     if (search_serialized == '&reset=yes') {
                         if ($('#search_form select[name=product_type]').length) {
                             $('#search_form select[name=product_type]').val('');
@@ -89,7 +91,6 @@
                             $(this).valid();
                         });
                     }
-                    $('#cover-spin').hide();
                 }
             });
         }
@@ -100,41 +101,36 @@
             table_id_or_url = window.location.href;
             $('#delete-btn').attr('onclick', 'delete_common("' + record_id + '","' + model + '","' + table_id_or_url +
                 '","' + display_title + '")');
-            $('#delete_confirm').modal('show');
+            showModal('delete_confirm');
             return true;
         }
 
         function delete_common(record_id, model, table_id_or_url = '', display_title = '') {
-            var token = "{{ csrf_token() }}";
-            $.ajax({
+            hideModal('delete_confirm');
+            
+            performAjaxOperation({
                 type: "POST",
-                url: "{{ url(config('app.url')) }}delete_common",
+                url: "{{ route('delete_common') }}",
                 data: {
-                    _token: token,
+                    _token: "{{ csrf_token() }}",
                     record_id: record_id,
                     model: model,
                     table_id_or_url: table_id_or_url,
                     display_title: display_title
                 },
                 dataType: "json",
+                loaderMessage: 'Deleting ' + display_title + '...',
+                showSuccessNotification: false,
                 success: function(data) {
                     console.log(data);
-                    $('#delete_confirm').modal('hide');
                     if (data.status == 'success') {
                         show_notification(data.status, data.message);
-                        $('#cover-spin').hide();
                         setTimeout(function() {
                             window.location.href = table_id_or_url;
                         }, 1000);
                     } else {
                         show_notification(data.status, data.message);
                     }
-                },
-                complete: function(e) {
-
-                },
-                error: function(e) {
-                    $('#cover-spin').hide();
                 }
             });
         }
@@ -222,6 +218,57 @@
                 hideModal('logoutModal');
             };
 
+            // Global Delete Confirmation Modal Functions
+            window.showDeleteConfirmModal = function() {
+                showModal('delete_confirm');
+            };
+
+            window.hideDeleteConfirmModal = function() {
+                hideModal('delete_confirm');
+            };
+
+            // =======================================================
+            // LOADING SPINNER UTILITIES 
+            // =======================================================
+            
+            window.showLoading = function(message = 'Loading...') {
+                $('#cover-spin .sr-only').text(message);
+                $('#cover-spin').show();
+            };
+
+            window.hideLoading = function() {
+                $('#cover-spin').hide();
+            };
+
+            // Enhanced AJAX operations with loading states
+            window.performAjaxOperation = function(options) {
+                const defaults = {
+                    showLoader: true,
+                    loaderMessage: 'Processing...',
+                    showSuccessNotification: true,
+                    showErrorNotification: true
+                };
+                options = $.extend(defaults, options);
+                
+                if (options.showLoader) showLoading(options.loaderMessage);
+                
+                return $.ajax(options)
+                    .done(function(response) {
+                        if (options.showSuccessNotification && response.message) {
+                            show_notification('success', response.message);
+                        }
+                    })
+                    .fail(function(xhr) {
+                        if (options.showErrorNotification) {
+                            const errorMessage = xhr.responseJSON?.message || 'An error occurred. Please try again.';
+                            show_notification('error', errorMessage);
+                        }
+                    })
+                    .always(function() {
+                        if (options.showLoader) hideLoading();
+                    });
+            };
+
             // Global Modal Event Handlers
             $(document).on('click', '.modal-backdrop', function() {
                 // Close all visible modals
@@ -238,6 +285,91 @@
                     });
                 }
             });
+
+            // =======================================================
+            // GLOBAL AJAX ERROR HANDLING & SETUP
+            // =======================================================
+            
+            // Global AJAX setup for better error handling
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    // Add CSRF token to all requests
+                    if (!settings.crossDomain) {
+                        xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', xhr.status, error);
+                    
+                    // Handle common HTTP errors
+                    switch(xhr.status) {
+                        case 401:
+                            show_notification('error', 'Unauthorized access. Please log in again.');
+                            setTimeout(() => window.location.href = '/login', 2000);
+                            break;
+                        case 403:
+                            show_notification('error', 'You do not have permission to perform this action.');
+                            break;
+                        case 404:
+                            show_notification('error', 'The requested resource was not found.');
+                            break;
+                        case 419:
+                            show_notification('error', 'Session expired. Please refresh the page.');
+                            break;
+                        case 422:
+                            // Validation errors - handle in specific contexts
+                            if (xhr.responseJSON && xhr.responseJSON.errors) {
+                                let errorMessages = Object.values(xhr.responseJSON.errors).flat();
+                                show_notification('error', errorMessages.join('<br>'));
+                            } else {
+                                show_notification('error', 'Validation failed. Please check your input.');
+                            }
+                            break;
+                        case 500:
+                            show_notification('error', 'Server error occurred. Please try again or contact support.');
+                            break;
+                        default:
+                            if (xhr.status >= 400) {
+                                const message = xhr.responseJSON?.message || 'An unexpected error occurred.';
+                                show_notification('error', message);
+                            }
+                    }
+                    
+                    // Always hide loading spinner on error
+                    hideLoading();
+                }
+            });
+
+            // Enhanced notification function with auto-dismiss and better styling
+            window.showEnhancedNotification = function(type, message, options = {}) {
+                const defaults = {
+                    autoDismiss: true,
+                    timeout: type === 'error' ? 8000 : 5000,
+                    position: 'top-right',
+                    closeButton: true
+                };
+                options = $.extend(defaults, options);
+                
+                toastr.options = {
+                    "closeButton": options.closeButton,
+                    "debug": false,
+                    "newestOnTop": true,
+                    "progressBar": true,
+                    "positionClass": `toast-${options.position}`,
+                    "preventDuplicates": true,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": options.autoDismiss ? options.timeout : "0",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                };
+                
+                toastr[type](message);
+            };
         });
     </script>
 </body>

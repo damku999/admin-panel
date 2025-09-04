@@ -290,13 +290,15 @@ class HomeController extends Controller
     {
         $currentMonth = Carbon::now();
 
-        $baseQuery = CustomerInsurance::whereMonth('expired_date', $currentMonth->month)
-            ->whereYear('expired_date', $currentMonth->year);
+        $baseConditions = [
+            ['expired_date', '>=', $currentMonth->startOfMonth()],
+            ['expired_date', '<=', $currentMonth->copy()->endOfMonth()],
+        ];
 
         return [
-            'total_renewing_this_month' => $baseQuery->count(),
-            'already_renewed_this_month' => $baseQuery->where('is_renewed', 1)->count(),
-            'pending_renewal_this_month' => $baseQuery->where('is_renewed', 0)->count(),
+            'total_renewing_this_month' => CustomerInsurance::where($baseConditions)->count(),
+            'already_renewed_this_month' => CustomerInsurance::where($baseConditions)->where('is_renewed', 1)->count(),
+            'pending_renewal_this_month' => CustomerInsurance::where($baseConditions)->where('is_renewed', 0)->count(),
         ];
     }
 

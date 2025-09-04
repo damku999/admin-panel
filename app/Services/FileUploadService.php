@@ -48,4 +48,30 @@ class FileUploadService
     {
         return $file->getSize() <= ($maxSizeKB * 1024);
     }
+
+    public function uploadFile(UploadedFile $file, string $directory): array
+    {
+        try {
+            $timestamp = time();
+            $extension = $file->getClientOriginalExtension();
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+            $filename = $this->sanitizeFilename($originalName) . '_' . $timestamp . '.' . $extension;
+            
+            $filePath = $file->storeAs($directory, $filename, 'public');
+            
+            return [
+                'status' => true,
+                'file_path' => $filePath,
+                'filename' => $filename,
+                'message' => 'File uploaded successfully'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'status' => false,
+                'file_path' => null,
+                'filename' => null,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
 }

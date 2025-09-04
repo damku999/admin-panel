@@ -128,6 +128,7 @@
                                 <th>Policy Holder</th>
                                 <th>Insurance Company</th>
                                 <th>Policy Type</th>
+                                <th>Premium Type</th>
                                 <th>Premium Amount</th>
                                 <th>Start Date</th>
                                 <th>Expiry Date</th>
@@ -152,6 +153,13 @@
                                     </td>
                                     <td>{{ $policy->insuranceCompany->name ?? 'N/A' }}</td>
                                     <td>{{ $policy->policyType->name ?? 'N/A' }}</td>
+                                    <td>
+                                        @if($policy->premiumType)
+                                            <span class="badge bg-primary">{{ $policy->premiumType->name }}</span>
+                                        @else
+                                            N/A
+                                        @endif
+                                    </td>
                                     <td>
                                         @if ($policy->final_premium_with_gst)
                                             ₹{{ number_format($policy->final_premium_with_gst, 2) }}

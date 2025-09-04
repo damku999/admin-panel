@@ -8,7 +8,7 @@
                     <i class="fas fa-exclamation-triangle text-warning mr-2"></i>
                     Confirm <span class="module_action">Delete</span>
                 </h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                <button class="close" type="button" onclick="hideModal('delete_confirm')" aria-label="Close">
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
@@ -20,7 +20,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">
+                <button class="btn btn-secondary" type="button" onclick="hideModal('delete_confirm')">
                     <i class="fas fa-times mr-1"></i> Cancel
                 </button>
                 <button class="btn btn-danger" type="button" id="delete-btn">

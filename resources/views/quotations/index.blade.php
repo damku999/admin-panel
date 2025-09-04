@@ -117,25 +117,8 @@
                                         </td>
                                         <td>
                                             <div class="btn-group-vertical btn-group-sm">
-                                                @can('quotation-edit')
-                                                <a href="{{ route('quotations.show', $quotation) }}" 
-                                                   class="btn btn-info btn-sm" title="View Details">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="{{ route('quotations.edit', $quotation) }}" 
-                                                   class="btn btn-warning btn-sm" title="Edit Quotation">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                @endcan
-                                                
+                                                <!-- 1. WhatsApp (First Priority) -->
                                                 @if($quotation->quotationCompanies->count() > 0)
-                                                    @can('quotation-download-pdf')
-                                                    <a href="{{ route('quotations.download-pdf', $quotation) }}" 
-                                                       class="btn btn-primary btn-sm" title="Download PDF">
-                                                        <i class="fas fa-download"></i>
-                                                    </a>
-                                                    @endcan
-                                                    
                                                     @can('quotation-send-whatsapp')
                                                         @if($quotation->status === 'Sent')
                                                             <button type="button" class="btn btn-warning btn-sm" 
@@ -151,7 +134,36 @@
                                                             </button>
                                                         @endif
                                                     @endcan
-                                                @else
+                                                @endif
+
+                                                <!-- 2. Edit (Second Priority) -->
+                                                @can('quotation-edit')
+                                                <a href="{{ route('quotations.edit', $quotation) }}" 
+                                                   class="btn btn-warning btn-sm" title="Edit Quotation">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                @endcan
+                                                
+                                                <!-- 3. Download (Third Priority) -->
+                                                @if($quotation->quotationCompanies->count() > 0)
+                                                    @can('quotation-download-pdf')
+                                                    <a href="{{ route('quotations.download-pdf', $quotation) }}" 
+                                                       class="btn btn-primary btn-sm" title="Download PDF">
+                                                        <i class="fas fa-download"></i>
+                                                    </a>
+                                                    @endcan
+                                                @endif
+
+                                                <!-- View Details (Keep for functionality) -->
+                                                @can('quotation-edit')
+                                                <a href="{{ route('quotations.show', $quotation) }}" 
+                                                   class="btn btn-info btn-sm" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                @endcan
+
+                                                <!-- Generate Quotes (For quotations without companies) -->
+                                                @if($quotation->quotationCompanies->count() == 0)
                                                     @can('quotation-generate')
                                                     <form method="POST" action="{{ route('quotations.generate-quotes', $quotation) }}" 
                                                           style="display: inline;">
@@ -164,6 +176,7 @@
                                                     @endcan
                                                 @endif
                                                 
+                                                <!-- Delete (Last) -->
                                                 @can('quotation-delete')
                                                     <button type="button" class="btn btn-danger btn-sm" 
                                                             title="Delete Quotation"

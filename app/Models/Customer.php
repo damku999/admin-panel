@@ -430,6 +430,22 @@ class Customer extends Authenticatable
     }
 
     /**
+     * Set a custom password with admin control over password change requirement.
+     */
+    public function setCustomPassword(string $plainPassword, bool $forceChange = true): string
+    {
+        $this->update([
+            'password' => Hash::make($plainPassword),
+            'must_change_password' => $forceChange,
+            'password_changed_at' => $forceChange ? null : now(),
+            'email_verified_at' => null,
+            'email_verification_token' => Str::random(60),
+        ]);
+
+        return $plainPassword;
+    }
+
+    /**
      * Change password and mark as user-changed.
      */
     public function changePassword(string $newPassword): void

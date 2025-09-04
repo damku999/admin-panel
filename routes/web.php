@@ -72,7 +72,6 @@ Route::prefix('customer')->name('customer.')->group(function () {
         // Email Verification Notice (for authenticated customers who need verification)
         Route::get('/email/verify-notice', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showEmailVerificationNotice'])->name('verify-email-notice');
         Route::post('/email/resend', [App\Http\Controllers\Auth\CustomerAuthController::class, 'resendVerification'])
-            ->middleware(['throttle:2,1'])
             ->name('verification.send');
 
         // Profile route - show customer profile information
@@ -228,8 +227,8 @@ Route::middleware('auth')->prefix('family_groups')->name('family_groups.')->grou
     Route::get('export/', [App\Http\Controllers\FamilyGroupController::class, 'export'])->name('export');
 });
 
-Route::middleware('auth')->name('delete_common')->group(function () {
-    Route::post('delete_common', [CommonController::class, 'deleteCommon']);
+Route::middleware('auth')->group(function () {
+    Route::post('delete_common', [CommonController::class, 'deleteCommon'])->name('delete_common');
 });
 
 // Policy Type
@@ -300,4 +299,11 @@ Route::middleware('auth')->prefix('reports')->name('reports.')->group(function (
     Route::get('export/', [ReportController::class, 'export'])->name('export');
     Route::post('selected/columns', [ReportController::class, 'saveColumns'])->name('save.selected.columns');
     Route::get('load/columns/{report_name}', [ReportController::class, 'loadColumns'])->name('load.selected.columns');
+});
+
+// Marketing WhatsApp
+Route::middleware('auth')->prefix('marketing/whatsapp')->name('marketing.whatsapp.')->group(function () {
+    Route::get('/', [App\Http\Controllers\MarketingWhatsAppController::class, 'index'])->name('index');
+    Route::post('/send', [App\Http\Controllers\MarketingWhatsAppController::class, 'send'])->name('send');
+    Route::post('/preview', [App\Http\Controllers\MarketingWhatsAppController::class, 'preview'])->name('preview');
 });

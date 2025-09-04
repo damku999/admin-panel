@@ -75,6 +75,8 @@ class FamilyGroupController extends Controller
             'relationships' => 'sometimes|array',
             'relationships.*' => 'nullable|string|max:50',
             'status' => 'boolean',
+            'family_head_password' => 'nullable|string|min:8|confirmed',
+            'force_password_change' => 'boolean',
         ]);
 
         if ($validator->fails()) {
@@ -98,14 +100,20 @@ class FamilyGroupController extends Controller
             // Set up passwords for all family members
             $passwordNotifications = [];
             
-            // Setup family head
+            // Setup family head password
             $familyHead = Customer::find($request->family_head_id);
-            if (!$familyHead->hasVerifiedEmail() || $familyHead->needsPasswordChange()) {
-                $password = $familyHead->setDefaultPassword();
+            
+            // Use admin-provided password or generate one
+            $customPassword = $request->filled('family_head_password') ? $request->family_head_password : null;
+            $forcePasswordChange = $request->boolean('force_password_change', true);
+            
+            if ($customPassword || !$familyHead->hasVerifiedEmail() || $familyHead->needsPasswordChange()) {
+                $password = $customPassword ? $familyHead->setCustomPassword($customPassword, $forcePasswordChange) : $familyHead->setDefaultPassword();
                 $passwordNotifications[] = [
                     'customer' => $familyHead,
                     'password' => $password,
-                    'is_head' => true
+                    'is_head' => true,
+                    'admin_set' => !empty($customPassword)
                 ];
             }
 
@@ -153,7 +161,7 @@ class FamilyGroupController extends Controller
             $this->sendPasswordNotifications($passwordNotifications, $familyGroup);
 
             return redirect()->route('family_groups.index')
-                ->with('success', 'Family group created successfully. Login credentials sent to family members.');
+                ->with('success', 'Family group created successfully. Login credentials sent to family head only. Family head will manage family member access.');
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -209,6 +217,8 @@ class FamilyGroupController extends Controller
             'relationships' => 'sometimes|array',
             'relationships.*' => 'nullable|string|max:50',
             'status' => 'boolean',
+            'family_head_password' => 'nullable|string|min:8|confirmed',
+            'force_password_change' => 'boolean',
         ]);
 
         if ($validator->fails()) {
@@ -237,6 +247,13 @@ class FamilyGroupController extends Controller
             // Update new family head's family_group_id
             Customer::where('id', $request->family_head_id)
                 ->update(['family_group_id' => $familyGroup->id]);
+
+            // Handle family head password update if provided
+            if ($request->filled('family_head_password')) {
+                $familyHead = Customer::find($request->family_head_id);
+                $forcePasswordChange = $request->boolean('force_password_change', false);
+                $familyHead->setCustomPassword($request->family_head_password, $forcePasswordChange);
+            }
 
             // Add family head as member
             FamilyMember::create([
@@ -267,8 +284,13 @@ class FamilyGroupController extends Controller
 
             DB::commit();
 
+            $message = 'Family group updated successfully.';
+            if ($request->filled('family_head_password')) {
+                $message .= ' Family head password has been updated.';
+            }
+
             return redirect()->route('family_groups.index')
-                ->with('success', 'Family group updated successfully.');
+                ->with('success', $message);
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -412,17 +434,23 @@ class FamilyGroupController extends Controller
     }
 
     /**
-     * Send password notifications to family members.
+     * Send password notifications only to family head.
+     * Family members' credentials will be managed by the family head.
      */
     private function sendPasswordNotifications(array $notifications, FamilyGroup $familyGroup): void
     {
-        foreach ($notifications as $notification) {
+        // Filter notifications to send only to family head
+        $familyHeadNotifications = array_filter($notifications, function ($notification) {
+            return $notification['is_head'] === true;
+        });
+
+        foreach ($familyHeadNotifications as $notification) {
             try {
                 $customer = $notification['customer'];
                 $password = $notification['password'];
                 $isHead = $notification['is_head'];
 
-                // Send actual email notification
+                // Send actual email notification only to family head
                 \Mail::to($customer->email)->send(new \App\Mail\FamilyLoginCredentialsMail(
                     customer: $customer,
                     password: $password,
@@ -430,7 +458,7 @@ class FamilyGroupController extends Controller
                     isHead: $isHead
                 ));
 
-                \Log::info('Family group login credentials email sent successfully', [
+                \Log::info('Family group login credentials email sent to family head only', [
                     'family_group' => $familyGroup->name,
                     'customer_id' => $customer->id,
                     'customer_name' => $customer->name,
@@ -440,7 +468,7 @@ class FamilyGroupController extends Controller
                 ]);
                 
             } catch (\Exception $e) {
-                \Log::error('Failed to send family login credentials email', [
+                \Log::error('Failed to send family login credentials email to family head', [
                     'family_group' => $familyGroup->name ?? null,
                     'customer_id' => $customer->id ?? null,
                     'customer_email' => $customer->email ?? null,
@@ -452,6 +480,24 @@ class FamilyGroupController extends Controller
                 // Continue with other notifications even if one fails
                 continue;
             }
+        }
+
+        // Log information about family members who won't receive email notifications
+        $memberNotifications = array_filter($notifications, function ($notification) {
+            return $notification['is_head'] === false;
+        });
+
+        if (!empty($memberNotifications)) {
+            $memberEmails = array_map(function ($notification) {
+                return $notification['customer']->email;
+            }, $memberNotifications);
+
+            \Log::info('Family member credentials generated but no email sent (family head will manage)', [
+                'family_group' => $familyGroup->name,
+                'member_emails' => $memberEmails,
+                'member_count' => count($memberNotifications),
+                'note' => 'Family head will manage family member login credentials'
+            ]);
         }
     }
 

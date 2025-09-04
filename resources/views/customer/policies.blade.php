@@ -88,6 +88,14 @@
                                         <div class="mb-2">
                                             <strong>Policy Type:</strong> {{ $policy->policyType->name ?? 'N/A' }}
                                         </div>
+                                        <div class="mb-2">
+                                            <strong>Premium Type:</strong> 
+                                            @if($policy->premiumType)
+                                                <span class="badge bg-primary">{{ $policy->premiumType->name }}</span>
+                                            @else
+                                                N/A
+                                            @endif
+                                        </div>
                                     </div>
                                     <div class="col-md-6">
                                         <h6 class="text-brand mb-3">
@@ -223,6 +231,14 @@
                                         </div>
                                         <div class="mb-2">
                                             <strong>Policy Type:</strong> {{ $policy->policyType->name ?? 'N/A' }}
+                                        </div>
+                                        <div class="mb-2">
+                                            <strong>Premium Type:</strong> 
+                                            @if($policy->premiumType)
+                                                <span class="badge bg-primary">{{ $policy->premiumType->name }}</span>
+                                            @else
+                                                N/A
+                                            @endif
                                         </div>
                                     </div>
                                     <div class="col-md-6">

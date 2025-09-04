@@ -18,10 +18,13 @@
 
 ### Frontend Development
 - **Use Vue.js 2 components** for interactive elements
-- **Follow Bootstrap 5 conventions** for consistent styling
+- **Follow Bootstrap 5 conventions** for consistent styling (Customer Portal) / jQuery-only for Admin Panel
 - **Implement proper form validation** with server-side error display
+- **Use centralized modal system** via `showModal()` and `hideModal()` functions
 - **Use Select2 or similar libraries** for enhanced user experience
+- **Implement consistent loading states** with `showLoading()` and `hideLoading()`
 - **Ensure responsive design** across all devices
+- **Use performAjaxOperation()** for standardized AJAX calls with error handling
 
 ---
 
@@ -176,9 +179,11 @@
 
 #### JavaScript Not Working
 1. Check browser console for errors
-2. Verify jQuery and other dependencies are loaded
-3. Ensure proper event delegation for dynamic elements
-4. Check for syntax errors in custom JavaScript
+2. Verify jQuery and other dependencies are loaded (Admin Panel uses jQuery-only, NO Bootstrap JS)
+3. Use centralized modal functions (`showModal()`, `hideModal()`) instead of Bootstrap modal methods
+4. Ensure proper event delegation for dynamic elements
+5. Check for syntax errors in custom JavaScript
+6. Use `performAjaxOperation()` for standardized AJAX calls with automatic error handling
 
 #### Form Validation Issues
 1. Verify Form Request validation rules
@@ -200,6 +205,61 @@
 
 ---
 
+## 🎛️ Centralized Systems Guide
+
+### Modal System Usage
+```javascript
+// Universal modal functions (available globally)
+showModal('modalId');           // Show any modal by ID
+hideModal('modalId');           // Hide any modal by ID
+
+// Specialized functions
+showSendWhatsAppModal(quotationId);    // WhatsApp send modal
+showResendWhatsAppModal(quotationId);  // WhatsApp resend modal
+showDeleteQuotationModal(quotationId); // Delete quotation modal
+showLogoutModal();                     // Logout confirmation modal
+```
+
+### Loading State Management
+```javascript
+// Loading spinner functions
+showLoading('Custom message...');  // Show with custom message
+showLoading();                     // Show with default 'Loading...' message
+hideLoading();                     // Hide loading spinner
+
+// Enhanced AJAX with automatic loading
+performAjaxOperation({
+    type: 'POST',
+    url: '/your-endpoint',
+    data: formData,
+    loaderMessage: 'Processing...',    // Custom loading message
+    showSuccessNotification: true,     // Auto-show success notifications
+    success: function(response) {
+        // Your success handler
+    }
+});
+```
+
+### Error Handling System
+```javascript
+// Global error handling automatically handles:
+// - 401 Unauthorized → Redirect to login
+// - 403 Forbidden → Permission denied message
+// - 419 CSRF expired → Session expired message
+// - 422 Validation → Display validation errors
+// - 500 Server error → Generic error message
+// - Automatic loading spinner cleanup on errors
+```
+
+### Best Practices for New Development
+1. **Always use centralized modal functions** instead of Bootstrap modal methods
+2. **Use performAjaxOperation()** for consistent AJAX handling
+3. **Leverage automatic error handling** - don't reinvent error display
+4. **Use showLoading()/hideLoading()** for consistent loading states
+5. **Follow the established patterns** in layouts/app.blade.php
+
+---
+
 ## 📚 Resources & Documentation
 
 ### Laravel Resources
@@ -218,4 +278,4 @@
 
 ---
 
-*Last Updated: 2025-09-04*
+*Last Updated: 2025-09-04 - Added centralized systems guide and updated best practices*

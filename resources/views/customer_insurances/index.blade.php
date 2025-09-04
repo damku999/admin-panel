@@ -193,25 +193,14 @@
                                         @endif
                                     </td>
                                     <td style="display: flex">
-                                        @if (auth()->user()->hasPermissionTo('customer-insurance-delete'))
-                                            @if ($customer_insurance->status == 0)
-                                                <a href="{{ route('customer_insurances.status', ['customer_insurance_id' => $customer_insurance->id, 'status' => 1]) }}"
-                                                    class="btn btn-success m-2">
-                                                    <i class="fa fa-check"></i>
-                                                </a>
-                                            @elseif ($customer_insurance->status == 1)
-                                                <a href="{{ route('customer_insurances.status', ['customer_insurance_id' => $customer_insurance->id, 'status' => 0]) }}"
-                                                    class="btn btn-danger m-2">
-                                                    <i class="fa fa-ban"></i>
-                                                </a>
-                                            @endif
-                                        @endif
-                                        @if (auth()->user()->hasPermissionTo('customer-insurance-edit'))
-                                            <a href="{{ route('customer_insurances.edit', ['customer_insurance' => $customer_insurance->id]) }}"
-                                                class="btn btn-primary m-2">
-                                                <i class="fa fa-pen"></i>
+                                        <!-- 1. WhatsApp (First Priority) -->
+                                        @if ($customer_insurance->policy_document_path)
+                                            <a href="{{ route('customer_insurances.sendWADocument', ['customer_insurance' => $customer_insurance->id]) }}"
+                                                class="btn btn-success m-2" title="Send Document via WhatsApp">
+                                                <i class="fab fa-whatsapp"></i>
                                             </a>
                                         @endif
+                                        
                                         @if (auth()->user()->hasPermissionTo('customer-insurance-edit'))
                                             @php
                                                 $expiredDate = \Carbon\Carbon::parse($customer_insurance->expired_date);
@@ -220,12 +209,8 @@
                                                 $currentDate = \Carbon\Carbon::now();
                                             @endphp
                                             @if ($currentDate->between($oneMonthBefore, $oneMonthAfter) && $customer_insurance->is_renewed == 0)
-                                                <a href="{{ route('customer_insurances.renew', ['customer_insurance' => $customer_insurance->id]) }}"
-                                                    class="btn btn-primary m-2">
-                                                    Renew
-                                                </a>
                                                 <a href="{{ route('customer_insurances.sendRenewalReminderWA', ['customer_insurance' => $customer_insurance->id]) }}"
-                                                    class="btn btn-info m-2">
+                                                    class="btn btn-warning m-2" title="Send Renewal Reminder via WhatsApp">
                                                     <span class="icon-group">
                                                         <i class="fa fa-bell" aria-hidden="true"></i>
                                                         <i class="fab fa-whatsapp"></i>
@@ -233,18 +218,54 @@
                                                 </a>
                                             @endif
                                         @endif
+
+                                        <!-- 2. Edit (Second Priority) -->
+                                        @if (auth()->user()->hasPermissionTo('customer-insurance-edit'))
+                                            <a href="{{ route('customer_insurances.edit', ['customer_insurance' => $customer_insurance->id]) }}"
+                                                class="btn btn-primary m-2" title="Edit Policy">
+                                                <i class="fa fa-pen"></i>
+                                            </a>
+                                        @endif
+
+                                        <!-- 3. Download (Third Priority) -->
                                         @if ($customer_insurance->policy_document_path)
                                             <a href="{{ asset('storage/' . $customer_insurance->policy_document_path) }}"
-                                                class="btn btn-info m-2" target="__blank"><i
-                                                    class="fa fa-download"></i></a>
-
-                                            <a href="{{ route('customer_insurances.sendWADocument', ['customer_insurance' => $customer_insurance->id]) }}"
-                                                class="btn btn-info m-2"><i class="fab fa-whatsapp"></i></a>
+                                                class="btn btn-info m-2" target="__blank" title="Download Policy Document">
+                                                <i class="fa fa-download"></i>
+                                            </a>
                                         @endif
+
+                                        <!-- 4. Renew (Fourth Priority) -->
+                                        @if (auth()->user()->hasPermissionTo('customer-insurance-edit'))
+                                            @if ($currentDate->between($oneMonthBefore, $oneMonthAfter) && $customer_insurance->is_renewed == 0)
+                                                <a href="{{ route('customer_insurances.renew', ['customer_insurance' => $customer_insurance->id]) }}"
+                                                    class="btn btn-secondary m-2" title="Renew Policy">
+                                                    <i class="fas fa-redo"></i> Renew
+                                                </a>
+                                            @endif
+                                        @endif
+
+                                        <!-- 5. Disable/Enable (Fifth Priority) -->
                                         @if (auth()->user()->hasPermissionTo('customer-insurance-delete'))
-                                            <a class="btn btn-danger m-2" href="javascript:void(0);"
-                                                onclick="delete_conf_common('{{ $customer_insurance->id }}','CustomerInsurance', 'Customer Insurance', '{{ route('customer_insurances.index') }}');"><i
-                                                    class="fas fa-trash"></i></a>
+                                            @if ($customer_insurance->status == 0)
+                                                <a href="{{ route('customer_insurances.status', ['customer_insurance_id' => $customer_insurance->id, 'status' => 1]) }}"
+                                                    class="btn btn-success m-2" title="Enable Policy">
+                                                    <i class="fa fa-check"></i>
+                                                </a>
+                                            @elseif ($customer_insurance->status == 1)
+                                                <a href="{{ route('customer_insurances.status', ['customer_insurance_id' => $customer_insurance->id, 'status' => 0]) }}"
+                                                    class="btn btn-danger m-2" title="Disable Policy">
+                                                    <i class="fa fa-ban"></i>
+                                                </a>
+                                            @endif
+                                        @endif
+
+                                        <!-- Delete (Last) -->
+                                        @if (auth()->user()->hasPermissionTo('customer-insurance-delete'))
+                                            <a class="btn btn-danger m-2" href="javascript:void(0);" title="Delete Policy"
+                                                onclick="delete_conf_common('{{ $customer_insurance->id }}','CustomerInsurance', 'Customer Insurance', '{{ route('customer_insurances.index') }}');">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
                                         @endif
                                         {{-- <a class="btn btn-danger m-2" href="javascript:void(0);" onclick="delete_conf_common('{{ $customer_insurance->id }}','CustomerInsurance', 'CustomerInsurance', '{{ route('customer_insurances.index') }}');"><i class="fas fa-trash"></i></a> --}}
                                     </td>

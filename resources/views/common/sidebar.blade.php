@@ -90,6 +90,14 @@
         </div>
     </li>
 
+    <!-- Nav Item - Marketing WhatsApp -->
+    <li class="nav-item {{ str_contains(Route::currentRouteName(), 'marketing.whatsapp.') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('marketing.whatsapp.index') }}">
+            <i class="fab fa-whatsapp text-success"></i>
+            <span>Marketing WhatsApp</span>
+        </a>
+    </li>
+
     <!-- Nav Item - Quotations Management -->
     @can('quotation-list')
         <li class="nav-item">

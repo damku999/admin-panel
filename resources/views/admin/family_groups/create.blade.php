@@ -54,6 +54,54 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card border-left-primary">
+                                    <div class="card-body py-3">
+                                        <h6 class="font-weight-bold text-primary mb-3">
+                                            <i class="fas fa-key mr-2"></i>Family Head Password Settings
+                                        </h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="family_head_password">Set Password for Family Head</label>
+                                                    <input type="password" class="form-control @error('family_head_password') is-invalid @enderror" 
+                                                           id="family_head_password" name="family_head_password" 
+                                                           value="{{ old('family_head_password') }}"
+                                                           placeholder="Leave blank to auto-generate">
+                                                    @error('family_head_password')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                    <small class="form-text text-muted">
+                                                        <i class="fas fa-info-circle mr-1"></i>
+                                                        If left blank, a secure password will be auto-generated
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="family_head_password_confirmation">Confirm Password</label>
+                                                    <input type="password" class="form-control" 
+                                                           id="family_head_password_confirmation" name="family_head_password_confirmation" 
+                                                           placeholder="Re-enter password to confirm">
+                                                    <small class="form-text text-muted">
+                                                        <i class="fas fa-shield-alt mr-1"></i>
+                                                        Password must be at least 8 characters long
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-check mt-2">
+                                            <input class="form-check-input" type="checkbox" value="1" id="force_password_change" name="force_password_change" {{ old('force_password_change', 1) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="force_password_change">
+                                                Force password change on first login
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

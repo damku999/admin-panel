@@ -60,6 +60,69 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card border-left-warning">
+                                    <div class="card-body py-3">
+                                        <h6 class="font-weight-bold text-warning mb-3">
+                                            <i class="fas fa-key mr-2"></i>Family Head Password Management
+                                        </h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="family_head_password">Change Password for Family Head</label>
+                                                    <input type="password" class="form-control @error('family_head_password') is-invalid @enderror" 
+                                                           id="family_head_password" name="family_head_password" 
+                                                           value="{{ old('family_head_password') }}"
+                                                           placeholder="Leave blank to keep current password">
+                                                    @error('family_head_password')
+                                                        <span class="invalid-feedback">{{ $message }}</span>
+                                                    @enderror
+                                                    <small class="form-text text-muted">
+                                                        <i class="fas fa-info-circle mr-1"></i>
+                                                        Only fill this if you want to change the current password
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label for="family_head_password_confirmation">Confirm New Password</label>
+                                                    <input type="password" class="form-control" 
+                                                           id="family_head_password_confirmation" name="family_head_password_confirmation" 
+                                                           placeholder="Re-enter new password to confirm">
+                                                    <small class="form-text text-muted">
+                                                        <i class="fas fa-shield-alt mr-1"></i>
+                                                        Password must be at least 8 characters long
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-check mt-2">
+                                            <input class="form-check-input" type="checkbox" value="1" id="force_password_change" name="force_password_change" {{ old('force_password_change', 0) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="force_password_change">
+                                                Force password change on next login
+                                            </label>
+                                        </div>
+                                        
+                                        @if($familyGroup->familyHead)
+                                        <div class="mt-3 p-2 bg-light rounded">
+                                            <small class="text-muted">
+                                                <i class="fas fa-user-check mr-1"></i>
+                                                <strong>Current Family Head:</strong> {{ $familyGroup->familyHead->name }} ({{ $familyGroup->familyHead->email }})
+                                                <br>
+                                                <i class="fas fa-calendar mr-1"></i>
+                                                <strong>Last Password Change:</strong> {{ $familyGroup->familyHead->password_changed_at ? $familyGroup->familyHead->password_changed_at->format('d M Y H:i') : 'Never' }}
+                                                <br>
+                                                <i class="fas fa-exclamation-triangle mr-1 text-warning"></i>
+                                                <strong>Must Change Password:</strong> {{ $familyGroup->familyHead->must_change_password ? 'Yes' : 'No' }}
+                                            </small>
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

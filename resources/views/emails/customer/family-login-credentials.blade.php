@@ -6,11 +6,18 @@ Dear {{ $customer->name }},
 @if($isHead)
 **Congratulations!** You have been designated as the **Family Head** for the family group "**{{ $familyGroup->name }}**" in the Parth Rawal Insurance Advisory Customer Portal.
 
-As the family head, you have special privileges to:
-- Manage all family members' accounts
-- View all family insurance policies
-- Change family members' passwords without their current password
-- Access comprehensive family reports and documents
+## 👑 Your Family Head Responsibilities
+
+As the family head, you are the primary contact and administrator for your entire family group. Your responsibilities include:
+
+- **📧 Email Management**: Only you receive email notifications for the family group
+- **🔐 Password Management**: Create and manage login credentials for all family members  
+- **👥 Family Access Control**: Add or remove family members from the group
+- **📋 Policy Management**: View and manage all family insurance policies
+- **📊 Family Reports**: Access comprehensive family reports and documents
+- **💬 Primary Contact**: Act as the main communication point with our insurance team
+
+**Important:** Family member login credentials have been created but NOT emailed to them directly. You are responsible for securely sharing their login information with them.
 @else
 **Welcome to the family!** You have been added to the family group "**{{ $familyGroup->name }}**" in the Parth Rawal Insurance Advisory Customer Portal.
 

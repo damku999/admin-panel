@@ -147,35 +147,43 @@
                                         @endif
                                     </td>
                                     <td style="display: flex">
+                                        <!-- 1. WhatsApp (First Priority) -->
+                                        @if (auth()->user()->hasPermissionTo('customer-edit'))
+                                            <a href="{{ route('customers.resendOnBoardingWA', ['customer' => $customer->id]) }}"
+                                                class="btn btn-success m-2" title="Send Onboarding via WhatsApp">
+                                                <i class="fab fa-whatsapp"></i>
+                                            </a>
+                                        @endif
+
+                                        <!-- 2. Edit (Second Priority) -->
+                                        @if (auth()->user()->hasPermissionTo('customer-edit'))
+                                            <a href="{{ route('customers.edit', ['customer' => $customer->id]) }}"
+                                                class="btn btn-primary m-2" title="Edit Customer">
+                                                <i class="fa fa-pen"></i>
+                                            </a>
+                                        @endif
+
+                                        <!-- 3. Disable/Enable (Third Priority) -->
                                         @if (auth()->user()->hasPermissionTo('customer-delete'))
                                             @if ($customer->status == 0)
                                                 <a href="{{ route('customers.status', ['customer_id' => $customer->id, 'status' => 1]) }}"
-                                                    class="btn btn-success m-2">
+                                                    class="btn btn-success m-2" title="Enable Customer">
                                                     <i class="fa fa-check"></i>
                                                 </a>
                                             @elseif ($customer->status == 1)
                                                 <a href="{{ route('customers.status', ['customer_id' => $customer->id, 'status' => 0]) }}"
-                                                    class="btn btn-danger m-2">
+                                                    class="btn btn-danger m-2" title="Disable Customer">
                                                     <i class="fa fa-ban"></i>
                                                 </a>
                                             @endif
                                         @endif
-                                        @if (auth()->user()->hasPermissionTo('customer-edit'))
-                                            <a href="{{ route('customers.resendOnBoardingWA', ['customer' => $customer->id]) }}"
-                                                class="btn btn-info m-2">
-                                                <span class="icon-group">
-                                                    <i class="fab fa-whatsapp"></i>
-                                                </span>
-                                            </a>
-                                            <a href="{{ route('customers.edit', ['customer' => $customer->id]) }}"
-                                                class="btn btn-primary m-2">
-                                                <i class="fa fa-pen"></i>
-                                            </a>
-                                        @endif
+
+                                        <!-- Delete (Last) -->
                                         @if (auth()->user()->hasPermissionTo('customer-delete'))
-                                            <a class="btn btn-danger m-2" href="javascript:void(0);"
-                                                onclick="delete_conf_common('{{ $customer['id'] }}','Customer','Customer', '{{ route('customers.index') }}');"><i
-                                                    class="fa fa-trash-alt "></i></a>
+                                            <a class="btn btn-danger m-2" href="javascript:void(0);" title="Delete Customer"
+                                                onclick="delete_conf_common('{{ $customer['id'] }}','Customer','Customer', '{{ route('customers.index') }}');">
+                                                <i class="fa fa-trash-alt"></i>
+                                            </a>
                                         @endif
                                     </td>
                                 </tr>

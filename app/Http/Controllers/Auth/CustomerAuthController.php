@@ -63,7 +63,8 @@ class CustomerAuthController extends Controller
      */
     public function showLoginForm()
     {
-        return view('customer.auth.login');
+        $isHead = false;
+        return view('customer.auth.login', compact('isHead'));
     }
 
     /**
@@ -342,7 +343,8 @@ class CustomerAuthController extends Controller
     public function showEmailVerificationNotice()
     {
         $customer = Auth::guard('customer')->user();
-        return view('customer.auth.verify-email', compact('customer'));
+        $isHead = $customer->isFamilyHead();
+        return view('customer.auth.verify-email', compact('customer', 'isHead'));
     }
 
     /**
@@ -409,7 +411,8 @@ class CustomerAuthController extends Controller
      */
     public function showPasswordResetForm()
     {
-        return view('customer.auth.password-reset');
+        $isHead = false;
+        return view('customer.auth.password-reset', compact('isHead'));
     }
 
     /**
@@ -463,7 +466,8 @@ class CustomerAuthController extends Controller
                 ->with('error', 'Invalid or expired reset link.');
         }
 
-        return view('customer.auth.reset-password', compact('token'));
+        $isHead = $customer->isFamilyHead();
+        return view('customer.auth.reset-password', compact('token', 'isHead'));
     }
 
     /**

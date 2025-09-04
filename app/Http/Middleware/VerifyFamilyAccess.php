@@ -40,6 +40,15 @@ class VerifyFamilyAccess
                 'route' => $request->route()->getName()
             ]);
             
+            // Allow quotations access even for customers without family (they can see their own quotations)
+            if (str_starts_with($request->route()->getName(), 'customer.quotations')) {
+                Log::info('VerifyFamilyAccess: Allowing quotations access for individual customer', [
+                    'customer_id' => $customer->id,
+                    'route' => $request->route()->getName()
+                ]);
+                return $next($request);
+            }
+            
             // If accessing policies, redirect to dashboard with message
             if (str_starts_with($request->route()->getName(), 'customer.policies')) {
                 return redirect()->route('customer.dashboard')

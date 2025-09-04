@@ -53,7 +53,7 @@
                                             <div class="form-group">
                                                 <label for="customer_id"><span class="text-danger">*</span> Customer</label>
                                                 <select name="customer_id" id="customer_id"
-                                                    class="form-control @error('customer_id') is-invalid @enderror"
+                                                    class="form-control select2 @error('customer_id') is-invalid @enderror"
                                                     required>
                                                     <option value="">Select Customer</option>
                                                     @foreach ($customers as $customer)
@@ -162,19 +162,6 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="date_of_registration"><span class="text-danger">*</span> Date
-                                                    of Registration</label>
-                                                <input type="date" name="date_of_registration"
-                                                    id="date_of_registration"
-                                                    class="form-control @error('date_of_registration') is-invalid @enderror"
-                                                    value="{{ old('date_of_registration') }}" required>
-                                                @error('date_of_registration')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
                                                 <label for="fuel_type"><span class="text-danger">*</span> Fuel
                                                     Type</label>
                                                 <select name="fuel_type" id="fuel_type"
@@ -210,7 +197,7 @@
                                                     <input type="number" name="ncb_percentage" id="ncb_percentage"
                                                         class="form-control @error('ncb_percentage') is-invalid @enderror"
                                                         value="{{ old('ncb_percentage', 0) }}" min="0"
-                                                        max="50" step="0.01" placeholder="0">
+                                                        max="50" step="1" placeholder="0">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">%</span>
                                                     </div>
@@ -246,271 +233,13 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="policy_tenure_years"><span class="text-danger">*</span> Policy
-                                                    Tenure</label>
-                                                <select name="policy_tenure_years" id="policy_tenure_years"
-                                                    class="form-control @error('policy_tenure_years') is-invalid @enderror"
-                                                    required>
-                                                    <option value="1"
-                                                        {{ old('policy_tenure_years') == '1' ? 'selected' : '' }}>1 Year
-                                                    </option>
-                                                    <option value="2"
-                                                        {{ old('policy_tenure_years') == '2' ? 'selected' : '' }}>2 Years
-                                                    </option>
-                                                    <option value="3"
-                                                        {{ old('policy_tenure_years') == '3' ? 'selected' : '' }}>3 Years
-                                                    </option>
-                                                </select>
-                                                @error('policy_tenure_years')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Insurance Details -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card border-left-success mb-4">
-                                <div class="card-header bg-success text-white py-2">
-                                    <h6 class="m-0"><i class="fas fa-shield-alt"></i> Insurance Coverage Details</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="policy_type"><span class="text-danger">*</span> Policy
-                                                    Type</label>
-                                                <select name="policy_type" id="policy_type"
-                                                    class="form-control @error('policy_type') is-invalid @enderror"
-                                                    required>
-                                                    <option value="">Select Policy Type</option>
-                                                    <option value="Comprehensive"
-                                                        {{ old('policy_type') == 'Comprehensive' ? 'selected' : '' }}>
-                                                        Comprehensive</option>
-                                                    <option value="Own Damage"
-                                                        {{ old('policy_type') == 'Own Damage' ? 'selected' : '' }}>Own
-                                                        Damage</option>
-                                                    <option value="Third Party"
-                                                        {{ old('policy_type') == 'Third Party' ? 'selected' : '' }}>Third
-                                                        Party</option>
-                                                </select>
-                                                @error('policy_type')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label for="idv_vehicle">
-                                                    <span class="text-danger">*</span> IDV Vehicle (₹)
-                                                </label>
-                                                <input type="number" name="idv_vehicle" id="idv_vehicle" step="0.01"
-                                                    class="form-control @error('idv_vehicle') is-invalid @enderror"
-                                                    placeholder="e.g., 500000" value="{{ old('idv_vehicle') }}" required>
-                                                @error('idv_vehicle')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div class="row">
-
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="idv_trailer">
-                                                    IDV Trailer (₹)
-                                                    <i class="fas fa-question-circle text-muted ml-1"
-                                                        data-toggle="tooltip"
-                                                        title="Value of trailer attached to your vehicle (if any). Usually applies to commercial vehicles, trucks, or vehicles with detachable trailers."></i>
-                                                </label>
-                                                <input type="number" name="idv_trailer" id="idv_trailer" step="0.01"
-                                                    class="form-control @error('idv_trailer') is-invalid @enderror"
-                                                    placeholder="0" value="{{ old('idv_trailer', 0) }}">
-                                                @error('idv_trailer')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="idv_cng_lpg_kit">
-                                                    IDV CNG/LPG Kit (₹)
-                                                    <i class="fas fa-question-circle text-muted ml-1"
-                                                        data-toggle="tooltip"
-                                                        title="Value of CNG or LPG conversion kit installed in your vehicle. This is separate coverage for the fuel conversion system."></i>
-                                                </label>
-                                                <input type="number" name="idv_cng_lpg_kit" id="idv_cng_lpg_kit"
-                                                    step="0.01"
-                                                    class="form-control @error('idv_cng_lpg_kit') is-invalid @enderror"
-                                                    placeholder="0" value="{{ old('idv_cng_lpg_kit', 0) }}">
-                                                @error('idv_cng_lpg_kit')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="idv_electrical_accessories">
-                                                    IDV Electrical Acc. (₹)
-                                                    <i class="fas fa-question-circle text-muted ml-1"
-                                                        data-toggle="tooltip"
-                                                        title="Value of electrical accessories like music system, GPS, LED lights, etc. that are not part of standard vehicle specifications."></i>
-                                                </label>
-                                                <input type="number" name="idv_electrical_accessories"
-                                                    id="idv_electrical_accessories" step="0.01"
-                                                    class="form-control @error('idv_electrical_accessories') is-invalid @enderror"
-                                                    placeholder="0" value="{{ old('idv_electrical_accessories', 0) }}">
-                                                @error('idv_electrical_accessories')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label for="idv_non_electrical_accessories">
-                                                    IDV Non-Elec. Acc. (₹)
-                                                    <i class="fas fa-question-circle text-muted ml-1"
-                                                        data-toggle="tooltip"
-                                                        title="Value of non-electrical accessories like seat covers, floor mats, roof carriers, etc. that are not part of standard vehicle."></i>
-                                                </label>
-                                                <input type="number" name="idv_non_electrical_accessories"
-                                                    id="idv_non_electrical_accessories" step="0.01"
-                                                    class="form-control @error('idv_non_electrical_accessories') is-invalid @enderror"
-                                                    placeholder="0"
-                                                    value="{{ old('idv_non_electrical_accessories', 0) }}">
-                                                @error('idv_non_electrical_accessories')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label for="total_idv">
-                                                    <strong>Total IDV (₹)</strong>
-                                                    <i class="fas fa-calculator text-success ml-1" data-toggle="tooltip"
-                                                        title="Automatically calculated sum of all IDV components. This is the total insured value of your vehicle."></i>
-                                                </label>
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text bg-success text-white">
-                                                            <i class="fas fa-rupee-sign"></i>
-                                                        </span>
-                                                    </div>
-                                                    <input type="number" name="total_idv" id="total_idv" step="0.01"
-                                                        class="form-control bg-light font-weight-bold text-success"
-                                                        readonly value="{{ old('total_idv') }}">
-                                                </div>
-                                                <small class="text-muted">Auto-calculated: Vehicle + Trailer + CNG/LPG +
-                                                    Electrical + Non-Electrical</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Add-on Covers -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card border-left-warning mb-4">
-                                <div class="card-header bg-warning text-white py-2">
-                                    <h6 class="m-0"><i class="fas fa-plus-circle"></i> Add-on Covers (Optional)</h6>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" name="addon_covers[]" value="Zero Depreciation"
-                                                    class="form-check-input addon-checkbox" id="zero_dep"
-                                                    data-addon="zero_dep"
-                                                    {{ in_array('Zero Depreciation', old('addon_covers', [])) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="zero_dep">Zero Depreciation</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" name="addon_covers[]" value="Engine Protection"
-                                                    class="form-check-input addon-checkbox" id="engine_protection"
-                                                    data-addon="engine_protection"
-                                                    {{ in_array('Engine Protection', old('addon_covers', [])) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="engine_protection">Engine
-                                                    Protection</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" name="addon_covers[]" value="Road Side Assistance"
-                                                    class="form-check-input addon-checkbox" id="rsa"
-                                                    data-addon="road_side_assistance"
-                                                    {{ in_array('Road Side Assistance', old('addon_covers', [])) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="rsa">Road Side
-                                                    Assistance</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" name="addon_covers[]" value="NCB Protection"
-                                                    class="form-check-input addon-checkbox" id="ncb_protection"
-                                                    data-addon="ncb_protection"
-                                                    {{ in_array('NCB Protection', old('addon_covers', [])) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="ncb_protection">NCB
-                                                    Protection</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" name="addon_covers[]" value="Invoice Protection"
-                                                    class="form-check-input addon-checkbox" id="invoice_protection"
-                                                    data-addon="invoice_protection"
-                                                    {{ in_array('Invoice Protection', old('addon_covers', [])) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="invoice_protection">Invoice
-                                                    Protection</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" name="addon_covers[]" value="Key Replacement"
-                                                    class="form-check-input addon-checkbox" id="key_replacement"
-                                                    data-addon="key_replacement"
-                                                    {{ in_array('Key Replacement', old('addon_covers', [])) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="key_replacement">Key
-                                                    Replacement</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" name="addon_covers[]" value="Personal Accident"
-                                                    class="form-check-input addon-checkbox" id="personal_accident"
-                                                    data-addon="personal_accident"
-                                                    {{ in_array('Personal Accident', old('addon_covers', [])) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="personal_accident">Personal
-                                                    Accident</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" name="addon_covers[]" value="Tyre Protection"
-                                                    class="form-check-input addon-checkbox" id="tyre_protection"
-                                                    data-addon="tyre_protection"
-                                                    {{ in_array('Tyre Protection', old('addon_covers', [])) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="tyre_protection">Tyre
-                                                    Protection</label>
-                                            </div>
-                                            <div class="form-check mb-2">
-                                                <input type="checkbox" name="addon_covers[]" value="Consumables"
-                                                    class="form-check-input addon-checkbox" id="consumables"
-                                                    data-addon="consumables"
-                                                    {{ in_array('Consumables', old('addon_covers', [])) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="consumables">Consumables</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Insurance Company Quotes -->
                     <div class="row">
@@ -545,71 +274,176 @@
                                                         </button>
                                                     </div>
                                                     <div class="card-body">
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label>Insurance Company <span
-                                                                            class="text-danger">*</span></label>
-                                                                    <select
-                                                                        name="companies[{{ $index }}][insurance_company_id]"
-                                                                        class="form-control company-select" required>
-                                                                        <option value="">Select Company</option>
-                                                                        @foreach ($insuranceCompanies as $insuranceCompany)
-                                                                            <option value="{{ $insuranceCompany->id }}"
-                                                                                {{ old("companies.{$index}.insurance_company_id") == $insuranceCompany->id ? 'selected' : '' }}>
-                                                                                {{ $insuranceCompany->name }}
-                                                                            </option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </div>
+                                                        <!-- Premium Details Section -->
+                                                        <div class="card border-left-primary mb-3">
+                                                            <div class="card-header bg-primary text-white py-1">
+                                                                <h6 class="m-0 small"><i class="fas fa-money-bill-wave"></i> Premium Details</h6>
                                                             </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label>Plan Name</label>
-                                                                    <input type="text"
-                                                                        name="companies[{{ $index }}][plan_name]"
-                                                                        class="form-control"
-                                                                        placeholder="e.g., Comprehensive Plus"
-                                                                        value="{{ old("companies.{$index}.plan_name") }}">
+                                                            <div class="card-body p-3">
+                                                                <!-- Row 1: Quote Number, Basic OD Premium, TP Premium -->
+                                                                <div class="row">
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group mb-3">
+                                                                            <label class="small font-weight-bold">Quote Number</label>
+                                                                            <input type="text" name="companies[{{ $index }}][quote_number]" class="form-control form-control-sm @error("companies.{$index}.quote_number") is-invalid @enderror" placeholder="Company quote reference number" value="{{ old("companies.{$index}.quote_number") }}">
+                                                                            @error("companies.{$index}.quote_number")
+                                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                                            @enderror
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group mb-3">
+                                                                            <label class="small font-weight-bold">Basic OD Premium (₹) <span class="text-danger">*</span></label>
+                                                                            <input type="number" name="companies[{{ $index }}][basic_od_premium]" class="form-control form-control-sm premium-field @error("companies.{$index}.basic_od_premium") is-invalid @enderror" step="1" required value="{{ old("companies.{$index}.basic_od_premium") }}">
+                                                                            @error("companies.{$index}.basic_od_premium")
+                                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                                            @enderror
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group mb-3">
+                                                                            <label class="small font-weight-bold">TP Premium (₹) <span class="text-danger">*</span></label>
+                                                                            <input type="number" name="companies[{{ $index }}][tp_premium]" class="form-control form-control-sm premium-field @error("companies.{$index}.tp_premium") is-invalid @enderror" step="1" required value="{{ old("companies.{$index}.tp_premium") }}">
+                                                                            @error("companies.{$index}.tp_premium")
+                                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                                            @enderror
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label>Quote Number</label>
-                                                                    <input type="text"
-                                                                        name="companies[{{ $index }}][quote_number]"
-                                                                        class="form-control"
-                                                                        placeholder="Company quote reference number"
-                                                                        value="{{ old("companies.{$index}.quote_number") }}">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label>Basic OD Premium (₹) <span
-                                                                            class="text-danger">*</span></label>
-                                                                    <input type="number"
-                                                                        name="companies[{{ $index }}][basic_od_premium]"
-                                                                        class="form-control premium-field" step="0.01"
-                                                                        required
-                                                                        value="{{ old("companies.{$index}.basic_od_premium") }}">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label>TP Premium (₹) <span
-                                                                            class="text-danger">*</span></label>
-                                                                    <input type="number"
-                                                                        name="companies[{{ $index }}][tp_premium]"
-                                                                        class="form-control premium-field" step="0.01"
-                                                                        required
-                                                                        value="{{ old("companies.{$index}.tp_premium") }}">
+                                                                <!-- Row 2: CNG/LPG Premium -->
+                                                                <div class="row">
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group mb-3">
+                                                                            <label class="small font-weight-bold">CNG/LPG Premium (₹)</label>
+                                                                            <input type="number" name="companies[{{ $index }}][cng_lpg_premium]" class="form-control form-control-sm premium-field @error("companies.{$index}.cng_lpg_premium") is-invalid @enderror" step="1" value="{{ old("companies.{$index}.cng_lpg_premium") }}" placeholder="0">
+                                                                            @error("companies.{$index}.cng_lpg_premium")
+                                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                                            @enderror
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
+
+                                                        <!-- Coverage Details Section -->
+                                                        <div class="card border-left-success mb-3">
+                                                            <div class="card-header bg-success text-white py-1">
+                                                                <h6 class="m-0 small"><i class="fas fa-shield-alt"></i> Coverage Details</h6>
+                                                            </div>
+                                                            <div class="card-body p-3">
+                                                                <!-- Row 1: Insurance Company, Policy Type, Policy Tenure -->
+                                                                <div class="row">
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group mb-3">
+                                                                            <label class="small font-weight-bold">Insurance Company <span class="text-danger">*</span></label>
+                                                                            <select name="companies[{{ $index }}][insurance_company_id]" class="form-control form-control-sm company-select @error("companies.{$index}.insurance_company_id") is-invalid @enderror" required>
+                                                                                <option value="">Select Company</option>
+                                                                                @foreach ($insuranceCompanies as $insuranceCompany)
+                                                                                    <option value="{{ $insuranceCompany->id }}"
+                                                                                        {{ old("companies.{$index}.insurance_company_id") == $insuranceCompany->id ? 'selected' : '' }}>
+                                                                                        {{ $insuranceCompany->name }}
+                                                                                    </option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                            @error("companies.{$index}.insurance_company_id")
+                                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                                            @enderror
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group mb-3">
+                                                                            <label class="small font-weight-bold">Policy Type <span class="text-danger">*</span></label>
+                                                                            <select name="companies[{{ $index }}][policy_type]" class="form-control form-control-sm @error("companies.{$index}.policy_type") is-invalid @enderror" required>
+                                                                                <option value="">Select Policy Type</option>
+                                                                                <option value="Comprehensive" {{ old("companies.{$index}.policy_type") == 'Comprehensive' ? 'selected' : '' }}>Comprehensive</option>
+                                                                                <option value="Own Damage" {{ old("companies.{$index}.policy_type") == 'Own Damage' ? 'selected' : '' }}>Own Damage</option>
+                                                                                <option value="Third Party" {{ old("companies.{$index}.policy_type") == 'Third Party' ? 'selected' : '' }}>Third Party</option>
+                                                                            </select>
+                                                                            @error("companies.{$index}.policy_type")
+                                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                                            @enderror
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group mb-3">
+                                                                            <label class="small font-weight-bold">Policy Tenure <span class="text-danger">*</span></label>
+                                                                            <select name="companies[{{ $index }}][policy_tenure_years]" class="form-control form-control-sm @error("companies.{$index}.policy_tenure_years") is-invalid @enderror" required>
+                                                                                <option value="">Select Tenure</option>
+                                                                                <option value="1" {{ old("companies.{$index}.policy_tenure_years") == '1' ? 'selected' : '' }}>1 Year</option>
+                                                                                <option value="2" {{ old("companies.{$index}.policy_tenure_years") == '2' ? 'selected' : '' }}>2 Years</option>
+                                                                                <option value="3" {{ old("companies.{$index}.policy_tenure_years") == '3' ? 'selected' : '' }}>3 Years</option>
+                                                                            </select>
+                                                                            @error("companies.{$index}.policy_tenure_years")
+                                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                                            @enderror
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <!-- Row 2: IDV Vehicle, IDV Trailer, IDV CNG/LPG Kit -->
+                                                                <div class="row">
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group mb-3">
+                                                                            <label class="small font-weight-bold">IDV Vehicle (₹) <span class="text-danger">*</span></label>
+                                                                            <input type="number" name="companies[{{ $index }}][idv_vehicle]" class="form-control form-control-sm idv-field @error("companies.{$index}.idv_vehicle") is-invalid @enderror" step="1" required placeholder="e.g., 500000" value="{{ old("companies.{$index}.idv_vehicle") }}">
+                                                                            @error("companies.{$index}.idv_vehicle")
+                                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                                            @enderror
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group mb-3">
+                                                                            <label class="small font-weight-bold">IDV Trailer (₹)</label>
+                                                                            <input type="number" name="companies[{{ $index }}][idv_trailer]" class="form-control form-control-sm idv-field @error("companies.{$index}.idv_trailer") is-invalid @enderror" step="1" placeholder="0" value="{{ old("companies.{$index}.idv_trailer") }}">
+                                                                            @error("companies.{$index}.idv_trailer")
+                                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                                            @enderror
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group mb-3">
+                                                                            <label class="small font-weight-bold">IDV CNG/LPG Kit (₹)</label>
+                                                                            <input type="number" name="companies[{{ $index }}][idv_cng_lpg_kit]" class="form-control form-control-sm idv-field @error("companies.{$index}.idv_cng_lpg_kit") is-invalid @enderror" step="1" placeholder="0" value="{{ old("companies.{$index}.idv_cng_lpg_kit") }}">
+                                                                            @error("companies.{$index}.idv_cng_lpg_kit")
+                                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                                            @enderror
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                
+                                                                <!-- Row 3: IDV Electrical Acc., IDV Non-Elec. Acc., Total IDV -->
+                                                                <div class="row">
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group mb-0">
+                                                                            <label class="small font-weight-bold">IDV Electrical Acc. (₹)</label>
+                                                                            <input type="number" name="companies[{{ $index }}][idv_electrical_accessories]" class="form-control form-control-sm idv-field @error("companies.{$index}.idv_electrical_accessories") is-invalid @enderror" step="1" placeholder="0" value="{{ old("companies.{$index}.idv_electrical_accessories") }}">
+                                                                            @error("companies.{$index}.idv_electrical_accessories")
+                                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                                            @enderror
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group mb-0">
+                                                                            <label class="small font-weight-bold">IDV Non-Elec. Acc. (₹)</label>
+                                                                            <input type="number" name="companies[{{ $index }}][idv_non_electrical_accessories]" class="form-control form-control-sm idv-field @error("companies.{$index}.idv_non_electrical_accessories") is-invalid @enderror" step="1" placeholder="0" value="{{ old("companies.{$index}.idv_non_electrical_accessories") }}">
+                                                                            @error("companies.{$index}.idv_non_electrical_accessories")
+                                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                                            @enderror
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <div class="form-group mb-0">
+                                                                            <label class="small font-weight-bold text-success">Total IDV (₹)</label>
+                                                                            <input type="number" name="companies[{{ $index }}][total_idv]" class="form-control form-control-sm total-idv font-weight-bold text-success @error("companies.{$index}.total_idv") is-invalid @enderror" step="1" readonly style="background: #d1ecf1; border-color: #28a745;" value="{{ old("companies.{$index}.total_idv") }}">
+                                                                            @error("companies.{$index}.total_idv")
+                                                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                                            @enderror
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
                                                         <div class="row">
                                                             <div class="col-md-12">
                                                                 <div class="card border-left-success mb-3">
@@ -620,214 +454,59 @@
                                                                     </div>
                                                                     <div class="card-body p-2">
                                                                         <div class="row">
-                                                                            <div class="col-md-4">
-                                                                                <div class="form-group mb-2 addon-field-container"
-                                                                                    data-addon="zero_dep"
-                                                                                    style="{{ in_array('Zero Depreciation', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Zero Depreciation
-                                                                                        (₹)
-                                                                                    </label>
-                                                                                    <input type="number"
-                                                                                        name="companies[{{ $index }}][addon_zero_dep]"
-                                                                                        class="form-control form-control-sm addon-field"
-                                                                                        step="0.01"
-                                                                                        value="{{ old("companies.{$index}.addon_zero_dep", 0) }}"
-                                                                                        placeholder="e.g., 4064">
-                                                                                    <input type="text"
-                                                                                        name="companies[{{ $index }}][addon_zero_dep_note]"
-                                                                                        class="form-control form-control-sm mt-1 addon-note"
-                                                                                        maxlength="100"
-                                                                                        placeholder="Add note (e.g., Depreciation Reimbursement - Count of Claim 2)"
-                                                                                        value="{{ old("companies.{$index}.addon_zero_dep_note") }}">
-                                                                                    <small class="text-muted">Coverage
-                                                                                        details, limits etc. (Max 100
-                                                                                        chars)</small>
+                                                                            @php
+                                                                                $columns = $addonCovers->chunk(ceil($addonCovers->count() / 3));
+                                                                            @endphp
+                                                                            @foreach ($columns as $columnCovers)
+                                                                                <div class="col-md-4">
+                                                                                    @foreach ($columnCovers as $addonCover)
+                                                                                        @php
+                                                                                            $slug = \Str::slug($addonCover->name, '_');
+                                                                                        @endphp
+                                                                                        <div class="form-group mb-2 addon-field-container"
+                                                                                            data-addon="{{ $slug }}">
+                                                                                            <div class="form-check">
+                                                                                                <input class="form-check-input addon-checkbox"
+                                                                                                    type="checkbox"
+                                                                                                    id="addon_{{ $slug }}_{{ $index }}"
+                                                                                                    data-slug="{{ $slug }}"
+                                                                                                    {{ old("companies.{$index}.addon_{$slug}") ? 'checked' : '' }}>
+                                                                                                <label class="form-check-label small"
+                                                                                                    for="addon_{{ $slug }}_{{ $index }}">
+                                                                                                    <strong>{{ $addonCover->name }}</strong>
+                                                                                                    @if ($addonCover->description)
+                                                                                                        <br><small class="text-muted">{{ $addonCover->description }}</small>
+                                                                                                    @endif
+                                                                                                </label>
+                                                                                            </div>
+                                                                                            <div class="addon-fields"
+                                                                                                id="fields_{{ $slug }}_{{ $index }}"
+                                                                                                style="{{ old("companies.{$index}.addon_{$slug}") ? 'display: block;' : 'display: none;' }}">
+                                                                                                <label class="small">{{ $addonCover->name }} (₹)</label>
+                                                                                                <input type="number"
+                                                                                                    name="companies[{{ $index }}][addon_{{ $slug }}]"
+                                                                                                    class="form-control form-control-sm addon-field @error("companies.{$index}.addon_{$slug}") is-invalid @enderror"
+                                                                                                    step="1"
+                                                                                                    value="{{ old("companies.{$index}.addon_{$slug}") }}"
+                                                                                                    placeholder="Enter premium">
+                                                                                                @error("companies.{$index}.addon_{$slug}")
+                                                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                                                @enderror
+                                                                                                <input type="text"
+                                                                                                    name="companies[{{ $index }}][addon_{{ $slug }}_note]"
+                                                                                                    class="form-control form-control-sm mt-1 addon-note @error("companies.{$index}.addon_{$slug}_note") is-invalid @enderror"
+                                                                                                    maxlength="100"
+                                                                                                    placeholder="Add note (coverage details, limits etc.)"
+                                                                                                    value="{{ old("companies.{$index}.addon_{$slug}_note") }}">
+                                                                                                @error("companies.{$index}.addon_{$slug}_note")
+                                                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                                                @enderror
+                                                                                                <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    @endforeach
                                                                                 </div>
-                                                                                <div class="form-group mb-2 addon-field-container"
-                                                                                    data-addon="engine_protection"
-                                                                                    style="{{ in_array('Engine Protection', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Engine Protection
-                                                                                        (₹)</label>
-                                                                                    <input type="number"
-                                                                                        name="companies[{{ $index }}][addon_engine_protection]"
-                                                                                        class="form-control form-control-sm addon-field"
-                                                                                        step="0.01"
-                                                                                        value="{{ old("companies.{$index}.addon_engine_protection", 0) }}"
-                                                                                        placeholder="e.g., 1016">
-                                                                                    <input type="text"
-                                                                                        name="companies[{{ $index }}][addon_engine_protection_note]"
-                                                                                        class="form-control form-control-sm mt-1 addon-note"
-                                                                                        maxlength="100"
-                                                                                        placeholder="Add note (e.g., Engine Secure TA 16 - Protects against engine damage)"
-                                                                                        value="{{ old("companies.{$index}.addon_engine_protection_note") }}">
-                                                                                    <small class="text-muted">Coverage
-                                                                                        details, limits etc. (Max 100
-                                                                                        chars)</small>
-                                                                                </div>
-                                                                                <div class="form-group mb-2 addon-field-container"
-                                                                                    data-addon="road_side_assistance"
-                                                                                    style="{{ in_array('Road Side Assistance', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Road Side
-                                                                                        Assistance (₹)</label>
-                                                                                    <input type="number"
-                                                                                        name="companies[{{ $index }}][addon_rsa]"
-                                                                                        class="form-control form-control-sm addon-field"
-                                                                                        step="0.01"
-                                                                                        value="{{ old("companies.{$index}.addon_rsa", 0) }}"
-                                                                                        placeholder="e.g., 180">
-                                                                                    <input type="text"
-                                                                                        name="companies[{{ $index }}][addon_rsa_note]"
-                                                                                        class="form-control form-control-sm mt-1 addon-note"
-                                                                                        maxlength="100"
-                                                                                        placeholder="Add note (e.g., Emergency transport and hotel expenses - Any One Accident: 5000)"
-                                                                                        value="{{ old("companies.{$index}.addon_rsa_note") }}">
-                                                                                    <small class="text-muted">Coverage
-                                                                                        details, limits etc. (Max 100
-                                                                                        chars)</small>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="col-md-4">
-                                                                                <div class="form-group mb-2 addon-field-container"
-                                                                                    data-addon="ncb_protection"
-                                                                                    style="{{ in_array('NCB Protection', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">NCB Protection
-                                                                                        (₹)</label>
-                                                                                    <input type="number"
-                                                                                        name="companies[{{ $index }}][addon_ncb_protection]"
-                                                                                        class="form-control form-control-sm addon-field"
-                                                                                        step="0.01"
-                                                                                        value="{{ old("companies.{$index}.addon_ncb_protection", 0) }}"
-                                                                                        placeholder="e.g., 500">
-                                                                                    <input type="text"
-                                                                                        name="companies[{{ $index }}][addon_ncb_protection_note]"
-                                                                                        class="form-control form-control-sm mt-1 addon-note"
-                                                                                        maxlength="100"
-                                                                                        placeholder="Add note (e.g., Protects No Claim Bonus in case of claim)"
-                                                                                        value="{{ old("companies.{$index}.addon_ncb_protection_note") }}">
-                                                                                    <small class="text-muted">Coverage
-                                                                                        details, limits etc. (Max 100
-                                                                                        chars)</small>
-                                                                                </div>
-                                                                                <div class="form-group mb-2 addon-field-container"
-                                                                                    data-addon="invoice_protection"
-                                                                                    style="{{ in_array('Invoice Protection', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Invoice
-                                                                                        Protection (₹)</label>
-                                                                                    <input type="number"
-                                                                                        name="companies[{{ $index }}][addon_invoice_protection]"
-                                                                                        class="form-control form-control-sm addon-field"
-                                                                                        step="0.01"
-                                                                                        value="{{ old("companies.{$index}.addon_invoice_protection", 0) }}"
-                                                                                        placeholder="e.g., 2336">
-                                                                                    <input type="text"
-                                                                                        name="companies[{{ $index }}][addon_invoice_protection_note]"
-                                                                                        class="form-control form-control-sm mt-1 addon-note"
-                                                                                        maxlength="100"
-                                                                                        placeholder="Add note (e.g., Return to invoice TA 05 - Covers full invoice value)"
-                                                                                        value="{{ old("companies.{$index}.addon_invoice_protection_note") }}">
-                                                                                    <small class="text-muted">Coverage
-                                                                                        details, limits etc. (Max 100
-                                                                                        chars)</small>
-                                                                                </div>
-                                                                                <div class="form-group mb-2 addon-field-container"
-                                                                                    data-addon="key_replacement"
-                                                                                    style="{{ in_array('Key Replacement', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Key Replacement
-                                                                                        (₹)</label>
-                                                                                    <input type="number"
-                                                                                        name="companies[{{ $index }}][addon_key_replacement]"
-                                                                                        class="form-control form-control-sm addon-field"
-                                                                                        step="0.01"
-                                                                                        value="{{ old("companies.{$index}.addon_key_replacement", 0) }}"
-                                                                                        placeholder="e.g., 425">
-                                                                                    <input type="text"
-                                                                                        name="companies[{{ $index }}][addon_key_replacement_note]"
-                                                                                        class="form-control form-control-sm mt-1 addon-note"
-                                                                                        maxlength="100"
-                                                                                        placeholder="Add note (e.g., Key Replacement TA 15 - SI: ₹25,000 per occurrence limit 50% of SI)"
-                                                                                        value="{{ old("companies.{$index}.addon_key_replacement_note") }}">
-                                                                                    <small class="text-muted">Coverage
-                                                                                        details, limits etc. (Max 100
-                                                                                        chars)</small>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="col-md-4">
-                                                                                <div class="form-group mb-2 addon-field-container"
-                                                                                    data-addon="personal_accident"
-                                                                                    style="{{ in_array('Personal Accident', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Personal Accident
-                                                                                        (₹)</label>
-                                                                                    <input type="number"
-                                                                                        name="companies[{{ $index }}][addon_personal_accident]"
-                                                                                        class="form-control form-control-sm addon-field"
-                                                                                        step="0.01"
-                                                                                        value="{{ old("companies.{$index}.addon_personal_accident", 0) }}"
-                                                                                        placeholder="e.g., 450">
-                                                                                    <input type="text"
-                                                                                        name="companies[{{ $index }}][addon_personal_accident_note]"
-                                                                                        class="form-control form-control-sm mt-1 addon-note"
-                                                                                        maxlength="100"
-                                                                                        placeholder="Add note (e.g., Emergency Medical Expenses TA 22 - Sum Insured: ₹25,000)"
-                                                                                        value="{{ old("companies.{$index}.addon_personal_accident_note") }}">
-                                                                                    <small class="text-muted">Coverage
-                                                                                        details, limits etc. (Max 100
-                                                                                        chars)</small>
-                                                                                </div>
-                                                                                <div class="form-group mb-2 addon-field-container"
-                                                                                    data-addon="tyre_protection"
-                                                                                    style="{{ in_array('Tyre Protection', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Tyre Protection
-                                                                                        (₹)</label>
-                                                                                    <input type="number"
-                                                                                        name="companies[{{ $index }}][addon_tyre_protection]"
-                                                                                        class="form-control form-control-sm addon-field"
-                                                                                        step="0.01"
-                                                                                        value="{{ old("companies.{$index}.addon_tyre_protection", 0) }}"
-                                                                                        placeholder="e.g., 1828">
-                                                                                    <input type="text"
-                                                                                        name="companies[{{ $index }}][addon_tyre_protection_note]"
-                                                                                        class="form-control form-control-sm mt-1 addon-note"
-                                                                                        maxlength="100"
-                                                                                        placeholder="Add note (e.g., Tyre Secure TA 17 - Covers tyre and rim damage)"
-                                                                                        value="{{ old("companies.{$index}.addon_tyre_protection_note") }}">
-                                                                                    <small class="text-muted">Coverage
-                                                                                        details, limits etc. (Max 100
-                                                                                        chars)</small>
-                                                                                </div>
-                                                                                <div class="form-group mb-2 addon-field-container"
-                                                                                    data-addon="consumables"
-                                                                                    style="{{ in_array('Consumables', old('addon_covers', [])) ? 'display: block;' : 'display: none;' }}">
-                                                                                    <label class="small">Consumables
-                                                                                        (₹)</label>
-                                                                                    <input type="number"
-                                                                                        name="companies[{{ $index }}][addon_consumables]"
-                                                                                        class="form-control form-control-sm addon-field"
-                                                                                        step="0.01"
-                                                                                        value="{{ old("companies.{$index}.addon_consumables", 0) }}"
-                                                                                        placeholder="e.g., 609">
-                                                                                    <input type="text"
-                                                                                        name="companies[{{ $index }}][addon_consumables_note]"
-                                                                                        class="form-control form-control-sm mt-1 addon-note"
-                                                                                        maxlength="100"
-                                                                                        placeholder="Add note (e.g., Consumables Expenses TA 18 - Nuts, bolts, oils, lubricants etc.)"
-                                                                                        value="{{ old("companies.{$index}.addon_consumables_note") }}">
-                                                                                    <small class="text-muted">Coverage
-                                                                                        details, limits etc. (Max 100
-                                                                                        chars)</small>
-                                                                                </div>
-                                                                                <div class="form-group mb-2">
-                                                                                    <label class="small">Others
-                                                                                        (₹)</label>
-                                                                                    <input type="number"
-                                                                                        name="companies[{{ $index }}][addon_others]"
-                                                                                        class="form-control form-control-sm addon-field"
-                                                                                        step="0.01"
-                                                                                        value="{{ old("companies.{$index}.addon_others", 0) }}"
-                                                                                        placeholder="Additional covers">
-                                                                                    <small class="text-muted">Other addon
-                                                                                        covers</small>
-                                                                                </div>
-                                                                            </div>
+                                                                            @endforeach
                                                                         </div>
                                                                         <hr class="my-2">
                                                                         <div class="row">
@@ -838,23 +517,17 @@
                                                                                         Add-on Premium (₹)</label>
                                                                                     <input type="number"
                                                                                         name="companies[{{ $index }}][total_addon_premium]"
-                                                                                        class="form-control form-control-sm total-addon-premium font-weight-bold"
-                                                                                        step="0.01" readonly
+                                                                                        class="form-control form-control-sm total-addon-premium font-weight-bold @error("companies.{$index}.total_addon_premium") is-invalid @enderror"
+                                                                                        step="1" readonly
                                                                                         style="background: #d1ecf1;"
-                                                                                        value="{{ old("companies.{$index}.total_addon_premium", 0) }}">
+                                                                                        value="{{ old("companies.{$index}.total_addon_premium") }}" placeholder="0">
+                                                                                @error("companies.{$index}.total_addon_premium")
+                                                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                                                @enderror
                                                                                 </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                <div class="form-group">
-                                                                    <label>CNG/LPG Premium (₹)</label>
-                                                                    <input type="number"
-                                                                        name="companies[{{ $index }}][cng_lpg_premium]"
-                                                                        class="form-control premium-field" step="0.01"
-                                                                        value="{{ old("companies.{$index}.cng_lpg_premium", 0) }}">
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -864,7 +537,7 @@
                                                                     <label>Net Premium (₹)</label>
                                                                     <input type="number"
                                                                         name="companies[{{ $index }}][net_premium]"
-                                                                        class="form-control net-premium" step="0.01"
+                                                                        class="form-control net-premium" step="1"
                                                                         readonly
                                                                         value="{{ old("companies.{$index}.net_premium", 0) }}">
                                                                 </div>
@@ -874,7 +547,7 @@
                                                                     <label>GST Amount (₹)</label>
                                                                     <input type="number"
                                                                         name="companies[{{ $index }}][gst_amount]"
-                                                                        class="form-control gst-amount" step="0.01"
+                                                                        class="form-control gst-amount" step="1"
                                                                         readonly
                                                                         value="{{ old("companies.{$index}.gst_amount", 0) }}">
                                                                 </div>
@@ -885,7 +558,7 @@
                                                                     <input type="number"
                                                                         name="companies[{{ $index }}][final_premium]"
                                                                         class="form-control final-premium font-weight-bold"
-                                                                        step="0.01" readonly
+                                                                        step="1" readonly
                                                                         style="background: #d4edda;"
                                                                         value="{{ old("companies.{$index}.final_premium", 0) }}">
                                                                 </div>
@@ -896,10 +569,28 @@
                                                                 <div class="form-check">
                                                                     <input type="checkbox"
                                                                         name="companies[{{ $index }}][is_recommended]"
-                                                                        value="1" class="form-check-input"
+                                                                        value="1" class="form-check-input recommendation-checkbox"
+                                                                        data-index="{{ $index }}"
                                                                         {{ old("companies.{$index}.is_recommended") ? 'checked' : '' }}>
-                                                                    <label class="form-check-label">Mark as
-                                                                        Recommended</label>
+                                                                    <label class="form-check-label font-weight-bold text-success">
+                                                                        <i class="fas fa-star"></i> Mark as Recommended
+                                                                    </label>
+                                                                </div>
+                                                                
+                                                                <!-- Recommendation Note Field (initially hidden) -->
+                                                                <div class="recommendation-note-field mt-3" id="recommendation_note_field_{{ $index }}" style="display: {{ old("companies.{$index}.is_recommended") ? 'block' : 'none' }};">
+                                                                    <label class="small font-weight-bold text-success">
+                                                                        <i class="fas fa-edit"></i> Recommendation Note <span class="text-danger">*</span>
+                                                                    </label>
+                                                                    <textarea name="companies[{{ $index }}][recommendation_note]" 
+                                                                              class="form-control form-control-sm @error("companies.{$index}.recommendation_note") is-invalid @enderror" 
+                                                                              rows="2" maxlength="500"
+                                                                              placeholder="Explain why this quote is recommended (e.g., best price, good coverage, trusted insurer...)"
+                                                                              >{{ old("companies.{$index}.recommendation_note") }}</textarea>
+                                                                    @error("companies.{$index}.recommendation_note")
+                                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                                    @enderror
+                                                                    <small class="text-muted">Explain why you recommend this quote (Max 500 characters)</small>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -972,6 +663,60 @@
         $(document).ready(function() {
             // Initialize Bootstrap tooltips
             $('[data-toggle="tooltip"]').tooltip();
+            
+            // Initialize Select2 for Customer dropdown with enhanced search
+            $('#customer_id').select2({
+                placeholder: 'Search and select customer...',
+                allowClear: true,
+                width: '100%',
+                minimumInputLength: 0,
+                escapeMarkup: function(markup) {
+                    return markup; // Allow HTML in results
+                },
+                templateResult: function(option) {
+                    if (!option.id || option.loading) {
+                        return option.text;
+                    }
+                    
+                    // Get mobile number from data attribute if available  
+                    const $option = $(option.element);
+                    const mobile = $option.data('mobile');
+                    const customerName = option.text.split(' - ')[0];
+                    
+                    if (mobile) {
+                        return '<div style="padding: 5px;"><strong>' + customerName + '</strong><br><small class="text-muted" style="color: #6c757d;">📱 ' + mobile + '</small></div>';
+                    }
+                    
+                    return '<div style="padding: 5px;">' + customerName + '</div>';
+                },
+                templateSelection: function(option) {
+                    if (!option.id) {
+                        return option.text;
+                    }
+                    
+                    // Show just the customer name in the selection
+                    const customerName = option.text.split(' - ')[0];
+                    return customerName;
+                }
+            });
+
+            // Auto-populate WhatsApp number when customer is selected
+            $('#customer_id').on('select2:select', function (e) {
+                const selectedOption = e.params.data;
+                const $selectedElement = $(selectedOption.element);
+                const mobile = $selectedElement.data('mobile');
+                
+                if (mobile) {
+                    $('#whatsapp_number').val(mobile);
+                    console.log('Auto-populated WhatsApp number:', mobile);
+                }
+            });
+
+            // Clear WhatsApp number when customer is cleared
+            $('#customer_id').on('select2:clear', function (e) {
+                $('#whatsapp_number').val('');
+                console.log('Cleared WhatsApp number');
+            });
 
             // Auto-calculate total IDV function
             function calculateTotalIdv() {
@@ -996,14 +741,31 @@
 
             }
 
-            // Add event listeners to all IDV fields
+            // Add event listeners to all IDV fields for main form
             $('#idv_vehicle, #idv_trailer, #idv_cng_lpg_kit, #idv_electrical_accessories, #idv_non_electrical_accessories')
                 .on('input change blur', function() {
+                    console.log('IDV field changed, calculating total IDV');
                     calculateTotalIdv();
                 });
 
-            // Initial calculation
+            // Add event listeners to all IDV fields in quote cards
+            $(document).on('input change blur', '[name*="[idv_vehicle]"], [name*="[idv_trailer]"], [name*="[idv_cng_lpg_kit]"], [name*="[idv_electrical_accessories]"], [name*="[idv_non_electrical_accessories]"], [name*="[total_idv]"]', function() {
+                console.log('Quote card IDV field changed');
+                const quoteCard = $(this).closest('.quote-entry');
+                if (quoteCard.length > 0) {
+                    calculateIdvTotal(quoteCard);
+                } else {
+                    console.log('Warning: Could not find quote-entry parent for IDV field');
+                }
+            });
+
+            // Initial calculation for main form
             calculateTotalIdv();
+            
+            // Initial calculation for any existing quote cards
+            $('.quote-entry').each(function() {
+                calculateIdvTotal($(this));
+            });
 
             // Convert vehicle number to uppercase
             $('#vehicle_number').on('input', function() {
@@ -1050,200 +812,58 @@
             function addQuoteForm(existingData = {}, existingIndex = null) {
                 const currentIndex = existingIndex !== null ? existingIndex : quoteIndex;
 
-                const quoteHtml = `
-                <div class="card border-left-info mb-3 quote-entry" data-index="${currentIndex}">
-                    <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
-                        <h6 class="m-0"><i class="fas fa-quote-left"></i> Quote #${currentIndex + 1}</h6>
-                        <button type="button" class="btn btn-sm btn-danger removeQuoteBtn">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Insurance Company <span class="text-danger">*</span></label>
-                                    <select name="companies[${currentIndex}][insurance_company_id]" class="form-control company-select" required>
-                                        <option value="">Select Company</option>
-                                        @foreach ($insuranceCompanies as $company)
-                                            <option value="{{ $company->id }}">{{ $company->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Plan Name</label>
-                                    <input type="text" name="companies[${currentIndex}][plan_name]" class="form-control" placeholder="e.g., Comprehensive Plus" value="${existingData.plan_name || ''}">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Quote Number</label>
-                                    <input type="text" name="companies[${currentIndex}][quote_number]" class="form-control" placeholder="Company quote reference number" value="${existingData.quote_number || ''}">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                 <div class="form-group">
-                                    <label>Basic OD Premium (₹) <span class="text-danger">*</span></label>
-                                    <input type="number" name="companies[${currentIndex}][basic_od_premium]" class="form-control premium-field" step="0.01" required value="${existingData.basic_od_premium || ''}">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>TP Premium (₹) <span class="text-danger">*</span></label>
-                                    <input type="number" name="companies[${currentIndex}][tp_premium]" class="form-control premium-field" step="0.01" required value="${existingData.tp_premium || ''}">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="card border-left-success mb-3">
-                                    <div class="card-header bg-success text-white py-1">
-                                        <h6 class="m-0 small"><i class="fas fa-plus-circle"></i> Add-on Covers Breakdown</h6>
-                                    </div>
-                                    <div class="card-body p-2">
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="form-group mb-2 addon-field-container" data-addon="zero_dep" style="display: none;">
-                                                    <label class="small">Zero Depreciation (₹)</label>
-                                                    <input type="number" name="companies[${currentIndex}][addon_zero_dep]" class="form-control form-control-sm addon-field" step="0.01" value="${existingData.addon_zero_dep || 0}" placeholder="e.g., 4064">
-                                                    <input type="text" name="companies[${currentIndex}][addon_zero_dep_note]" class="form-control form-control-sm mt-1 addon-note" maxlength="100" placeholder="Add note (e.g., Depreciation Reimbursement - Count of Claim 2)" value="${existingData.addon_zero_dep_note || ''}">
-                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
-                                                </div>
-                                                <div class="form-group mb-2 addon-field-container" data-addon="engine_protection" style="display: none;">
-                                                    <label class="small">Engine Protection (₹)</label>
-                                                    <input type="number" name="companies[${currentIndex}][addon_engine_protection]" class="form-control form-control-sm addon-field" step="0.01" value="${existingData.addon_engine_protection || 0}" placeholder="e.g., 1016">
-                                                    <input type="text" name="companies[${currentIndex}][addon_engine_protection_note]" class="form-control form-control-sm mt-1 addon-note" maxlength="100" placeholder="Add note (e.g., Engine Secure TA 16 - Protects against engine damage)" value="${existingData.addon_engine_protection_note || ''}">
-                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
-                                                </div>
-                                                <div class="form-group mb-2 addon-field-container" data-addon="road_side_assistance" style="display: none;">
-                                                    <label class="small">Road Side Assistance (₹)</label>
-                                                    <input type="number" name="companies[${currentIndex}][addon_rsa]" class="form-control form-control-sm addon-field" step="0.01" value="${existingData.addon_rsa || 0}" placeholder="e.g., 180">
-                                                    <input type="text" name="companies[${currentIndex}][addon_rsa_note]" class="form-control form-control-sm mt-1 addon-note" maxlength="100" placeholder="Add note (e.g., Emergency transport and hotel expenses - Any One Accident: 5000)" value="${existingData.addon_rsa_note || ''}">
-                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="form-group mb-2 addon-field-container" data-addon="ncb_protection" style="display: none;">
-                                                    <label class="small">NCB Protection (₹)</label>
-                                                    <input type="number" name="companies[${currentIndex}][addon_ncb_protection]" class="form-control form-control-sm addon-field" step="0.01" value="${existingData.addon_ncb_protection || 0}" placeholder="e.g., 500">
-                                                    <input type="text" name="companies[${currentIndex}][addon_ncb_protection_note]" class="form-control form-control-sm mt-1 addon-note" maxlength="100" placeholder="Add note (e.g., Protects No Claim Bonus in case of claim)" value="${existingData.addon_ncb_protection_note || ''}">
-                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
-                                                </div>
-                                                <div class="form-group mb-2 addon-field-container" data-addon="invoice_protection" style="display: none;">
-                                                    <label class="small">Invoice Protection (₹)</label>
-                                                    <input type="number" name="companies[${currentIndex}][addon_invoice_protection]" class="form-control form-control-sm addon-field" step="0.01" value="${existingData.addon_invoice_protection || 0}" placeholder="e.g., 2336">
-                                                    <input type="text" name="companies[${currentIndex}][addon_invoice_protection_note]" class="form-control form-control-sm mt-1 addon-note" maxlength="100" placeholder="Add note (e.g., Return to invoice TA 05 - Covers full invoice value)" value="${existingData.addon_invoice_protection_note || ''}">
-                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
-                                                </div>
-                                                <div class="form-group mb-2 addon-field-container" data-addon="key_replacement" style="display: none;">
-                                                    <label class="small">Key Replacement (₹)</label>
-                                                    <input type="number" name="companies[${currentIndex}][addon_key_replacement]" class="form-control form-control-sm addon-field" step="0.01" value="${existingData.addon_key_replacement || 0}" placeholder="e.g., 425">
-                                                    <input type="text" name="companies[${currentIndex}][addon_key_replacement_note]" class="form-control form-control-sm mt-1 addon-note" maxlength="100" placeholder="Add note (e.g., Key Replacement TA 15 - SI: ₹25,000 per occurrence limit 50% of SI)" value="${existingData.addon_key_replacement_note || ''}">
-                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="form-group mb-2 addon-field-container" data-addon="personal_accident" style="display: none;">
-                                                    <label class="small">Personal Accident (₹)</label>
-                                                    <input type="number" name="companies[${currentIndex}][addon_personal_accident]" class="form-control form-control-sm addon-field" step="0.01" value="${existingData.addon_personal_accident || 0}" placeholder="e.g., 450">
-                                                    <input type="text" name="companies[${currentIndex}][addon_personal_accident_note]" class="form-control form-control-sm mt-1 addon-note" maxlength="100" placeholder="Add note (e.g., Emergency Medical Expenses TA 22 - Sum Insured: ₹25,000)" value="${existingData.addon_personal_accident_note || ''}">
-                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
-                                                </div>
-                                                <div class="form-group mb-2 addon-field-container" data-addon="tyre_protection" style="display: none;">
-                                                    <label class="small">Tyre Protection (₹)</label>
-                                                    <input type="number" name="companies[${currentIndex}][addon_tyre_protection]" class="form-control form-control-sm addon-field" step="0.01" value="${existingData.addon_tyre_protection || 0}" placeholder="e.g., 1828">
-                                                    <input type="text" name="companies[${currentIndex}][addon_tyre_protection_note]" class="form-control form-control-sm mt-1 addon-note" maxlength="100" placeholder="Add note (e.g., Tyre Secure TA 17 - Covers tyre and rim damage)" value="${existingData.addon_tyre_protection_note || ''}">
-                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
-                                                </div>
-                                                <div class="form-group mb-2 addon-field-container" data-addon="consumables" style="display: none;">
-                                                    <label class="small">Consumables (₹)</label>
-                                                    <input type="number" name="companies[${currentIndex}][addon_consumables]" class="form-control form-control-sm addon-field" step="0.01" value="${existingData.addon_consumables || 0}" placeholder="e.g., 609">
-                                                    <input type="text" name="companies[${currentIndex}][addon_consumables_note]" class="form-control form-control-sm mt-1 addon-note" maxlength="100" placeholder="Add note (e.g., Consumables Expenses TA 18 - Nuts, bolts, oils, lubricants etc.)" value="${existingData.addon_consumables_note || ''}">
-                                                    <small class="text-muted">Coverage details, limits etc. (Max 100 chars)</small>
-                                                </div>
-                                                <div class="form-group mb-2">
-                                                    <label class="small">Others (₹)</label>
-                                                    <input type="number" name="companies[${currentIndex}][addon_others]" class="form-control form-control-sm addon-field" step="0.01" value="${existingData.addon_others || 0}" placeholder="Additional covers">
-                                                    <small class="text-muted">Other addon covers</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <hr class="my-2">
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="form-group mb-0">
-                                                    <label class="font-weight-bold text-success">Total Add-on Premium (₹)</label>
-                                                    <input type="number" name="companies[${currentIndex}][total_addon_premium]" class="form-control form-control-sm total-addon-premium font-weight-bold" step="0.01" readonly style="background: #d1ecf1;" value="${existingData.total_addon_premium || 0}">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>CNG/LPG Premium (₹)</label>
-                                    <input type="number" name="companies[${currentIndex}][cng_lpg_premium]" class="form-control premium-field" step="0.01" value="${existingData.cng_lpg_premium || 0}">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>Net Premium (₹)</label>
-                                    <input type="number" name="companies[${currentIndex}][net_premium]" class="form-control net-premium" step="0.01" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label>GST Amount (₹)</label>
-                                    <input type="number" name="companies[${currentIndex}][gst_amount]" class="form-control gst-amount" step="0.01" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label><strong>Final Premium (₹)</strong></label>
-                                    <input type="number" name="companies[${currentIndex}][final_premium]" class="form-control final-premium font-weight-bold" step="0.01" readonly style="background: #d4edda;">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-check">
-                                    <input type="checkbox" name="companies[${currentIndex}][is_recommended]" value="1" class="form-check-input" ${existingData.is_recommended ? 'checked' : ''}>
-                                    <label class="form-check-label">Mark as Recommended</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
+                // Make AJAX call to get the quote form HTML
+                $.ajax({
+                    url: '{{ route("quotations.get-quote-form") }}',
+                    type: 'GET',
+                    data: {
+                        index: currentIndex,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        // Append the rendered HTML to the container
+                        $('#quotesContainer').append(response);
+                        $('#noQuotesMessage').hide();
 
-                $('#quotesContainer').append(quoteHtml);
-                $('#noQuotesMessage').hide();
+                        // Set the selected insurance company if restoring data
+                        if (existingData.insurance_company_id) {
+                            $(`[data-index="${currentIndex}"] .company-select`).val(existingData.insurance_company_id);
+                        }
 
-                // Set the selected insurance company if restoring data
-                if (existingData.insurance_company_id) {
-                    $(`[data-index="${currentIndex}"] .company-select`).val(existingData.insurance_company_id);
-                }
+                        // Populate existing form data if provided
+                        if (Object.keys(existingData).length > 0) {
+                            const quoteCard = $(`.quote-entry[data-index="${currentIndex}"]`);
+                            
+                            // Populate all form fields
+                            Object.keys(existingData).forEach(function(key) {
+                                const value = existingData[key];
+                                const input = quoteCard.find(`[name="companies[${currentIndex}][${key}]"]`);
+                                
+                                if (input.is('select')) {
+                                    input.val(value);
+                                } else if (input.is(':checkbox')) {
+                                    input.prop('checked', !!value);
+                                } else {
+                                    input.val(value || '');
+                                }
+                            });
 
-                // Trigger premium calculation if data exists
-                if (existingData.basic_od_premium || existingData.tp_premium || existingData.total_addon_premium ||
-                    existingData
-                    .cng_lpg_premium) {
-                    const quoteCard = $(`.quote-entry[data-index="${currentIndex}"]`);
-                    calculateQuotePremium(quoteCard);
-                }
+                            // Trigger premium calculation if data exists
+                            if (existingData.basic_od_premium || existingData.tp_premium || existingData.total_addon_premium || existingData.cng_lpg_premium) {
+                                calculateQuotePremium(quoteCard);
+                            }
+                        }
 
-                // Only increment quoteIndex when adding new forms (not restoring)
-                if (existingIndex === null) {
-                    quoteIndex++;
-                }
+                        // Only increment quoteIndex when adding new forms (not restoring)
+                        if (existingIndex === null) {
+                            quoteIndex++;
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading quote form:', error);
+                        alert('Error loading quote form. Please try again.');
+                    }
+                });
             }
 
             // Remove quote functionality
@@ -1254,10 +874,38 @@
                 }
             });
 
+            // Auto-calculate IDV total for each company (multiple events to ensure it triggers)
+            $(document).on('input change keyup blur', '.idv-field', function() {
+                const quoteCard = $(this).closest('.quote-entry');
+                if (quoteCard.length > 0) {
+                    console.log('IDV field changed, calculating total...'); // Debug log
+                    calculateIdvTotal(quoteCard);
+                } else {
+                    console.log('Warning: Could not find quote-entry parent for IDV field'); // Debug log
+                }
+            });
+
             // Auto-calculate addon total
             $(document).on('input', '.addon-field', function() {
                 const quoteCard = $(this).closest('.quote-entry');
                 calculateAddonTotal(quoteCard);
+            });
+
+            // Show/hide recommendation note field
+            $(document).on('change', '.recommendation-checkbox', function() {
+                const isChecked = $(this).is(':checked');
+                const index = $(this).data('index');
+                const noteField = $(`#recommendation_note_field_${index}`);
+                
+                if (isChecked) {
+                    noteField.show();
+                    // Make note field required when recommendation is checked
+                    noteField.find('textarea').prop('required', true);
+                } else {
+                    noteField.hide();
+                    // Clear the note field and make it not required
+                    noteField.find('textarea').prop('required', false).val('');
+                }
             });
 
             // Auto-calculate premium fields
@@ -1265,6 +913,40 @@
                 const quoteCard = $(this).closest('.quote-entry');
                 calculateQuotePremium(quoteCard);
             });
+
+            function calculateIdvTotal(quoteCard) {
+                console.log('calculateIdvTotal called for quote card:', quoteCard); // Debug log
+                
+                // Calculate total of all IDV fields for each company
+                let idvTotal = 0;
+                
+                const idvVehicle = parseFloat(quoteCard.find('[name*="[idv_vehicle]"]').val()) || 0;
+                const idvTrailer = parseFloat(quoteCard.find('[name*="[idv_trailer]"]').val()) || 0;
+                const idvCngLpg = parseFloat(quoteCard.find('[name*="[idv_cng_lpg_kit]"]').val()) || 0;
+                const idvElectrical = parseFloat(quoteCard.find('[name*="[idv_electrical_accessories]"]').val()) || 0;
+                const idvNonElectrical = parseFloat(quoteCard.find('[name*="[idv_non_electrical_accessories]"]').val()) || 0;
+                
+                console.log('IDV Values:', {idvVehicle, idvTrailer, idvCngLpg, idvElectrical, idvNonElectrical}); // Debug log
+                
+                idvTotal = idvVehicle + idvTrailer + idvCngLpg + idvElectrical + idvNonElectrical;
+                
+                console.log('Calculated IDV Total:', idvTotal); // Debug log
+                
+                // Update the total IDV field
+                const totalIdvField = quoteCard.find('.total-idv');
+                console.log('Total IDV field found:', totalIdvField.length); // Debug log
+                
+                totalIdvField.val(idvTotal.toFixed(2));
+                
+                // Add visual highlight
+                if (idvTotal > 0) {
+                    totalIdvField.css('background-color', '#d1ecf1');
+                } else {
+                    totalIdvField.css('background-color', '');
+                }
+                
+                console.log('IDV total updated to:', idvTotal.toFixed(2)); // Debug log
+            }
 
             function calculateAddonTotal(quoteCard) {
                 // Calculate total of all addon fields
@@ -1293,59 +975,73 @@
                 const finalPremium = netPremium + gstAmount;
 
                 quoteCard.find('.net-premium').val(netPremium.toFixed(2));
-                quoteCard.find('.gst-amount').val(gstAmount.toFixed(2));
+                
+                // Update SGST and CGST fields (half of total GST each)
+                const sgstAmount = gstAmount / 2;
+                const cgstAmount = gstAmount / 2;
+                
+                // Check if we have separate SGST/CGST fields (new form) or combined GST field (old form)
+                if (quoteCard.find('.sgst-amount').length > 0) {
+                    // New form with separate SGST/CGST fields
+                    quoteCard.find('.sgst-amount').val(sgstAmount.toFixed(2));
+                    quoteCard.find('.cgst-amount').val(cgstAmount.toFixed(2));
+                } else if (quoteCard.find('.gst-amount').length > 0) {
+                    // Old form with combined GST field
+                    quoteCard.find('.gst-amount').val(gstAmount.toFixed(2));
+                }
+                
                 quoteCard.find('.final-premium').val(finalPremium.toFixed(2));
 
-                // Update hidden fields for backend
+                // Update or add hidden fields for backend (for old server-side rendered forms)
                 const index = quoteCard.data('index');
-                quoteCard.find('[name*="[sgst_amount]"]').remove();
-                quoteCard.find('[name*="[cgst_amount]"]').remove();
-                quoteCard.find('[name*="[total_od_premium]"]').remove();
+                if (quoteCard.find('[name*="[sgst_amount]"]').length > 0 && quoteCard.find('[name*="[sgst_amount]"]').attr('type') === 'hidden') {
+                    // Only update hidden fields, not visible ones
+                    quoteCard.find('input[type="hidden"][name*="[sgst_amount]"]').remove();
+                    quoteCard.find('input[type="hidden"][name*="[cgst_amount]"]').remove();
+                    quoteCard.find('input[type="hidden"][name*="[total_od_premium]"]').remove();
 
-                quoteCard.append(`
-                    <input type="hidden" name="companies[${index}][sgst_amount]" value="${(gstAmount/2).toFixed(2)}">
-                    <input type="hidden" name="companies[${index}][cgst_amount]" value="${(gstAmount/2).toFixed(2)}">
-                    <input type="hidden" name="companies[${index}][total_od_premium]" value="${(basicOd + tpPremium + cngLpg).toFixed(2)}">
-                `);
+                    quoteCard.append(`
+                        <input type="hidden" name="companies[${index}][sgst_amount]" value="${sgstAmount.toFixed(2)}">
+                        <input type="hidden" name="companies[${index}][cgst_amount]" value="${cgstAmount.toFixed(2)}">
+                        <input type="hidden" name="companies[${index}][total_od_premium]" value="${(basicOd + tpPremium + cngLpg).toFixed(2)}">
+                    `);
+                }
             }
 
             // Dynamic addon checkbox functionality
-            $('.addon-checkbox').on('change', function() {
-                const addonType = $(this).data('addon');
+            $(document).on('change', '.addon-checkbox', function() {
+                const slug = $(this).data('slug');
                 const isChecked = $(this).is(':checked');
+                const fieldsContainer = $(this).closest('.addon-field-container').find('.addon-fields');
 
-                // Show/hide addon fields in all company quotes
-                $('.quote-entry').each(function() {
-                    const addonContainer = $(this).find(
-                        `.addon-field-container[data-addon="${addonType}"]`);
-                    if (isChecked) {
-                        addonContainer.show();
-                    } else {
-                        addonContainer.hide();
-                        // Clear values when user unchecks (not during initialization)
-                        addonContainer.find('.addon-field, .addon-note').val(0);
-                        // Recalculate addon total
-                        calculateAddonTotal($(this));
-                    }
-                });
+                if (isChecked) {
+                    fieldsContainer.show();
+                } else {
+                    fieldsContainer.hide();
+                    // Clear values when unchecked - set to empty string (null) not 0
+                    fieldsContainer.find('.addon-field, .addon-note').val('');
+                }
+                
+                // Recalculate addon total for the current quote entry
+                const quoteEntry = $(this).closest('.quote-entry');
+                if (quoteEntry.length) {
+                    calculateAddonTotal(quoteEntry);
+                }
             });
 
-            // ✨ UNIFIED ADDON SYNCHRONIZATION SYSTEM ✨
-            // This function ensures both server-side and client-side forms are properly synchronized
+            // Initialize addon field visibility based on checkbox states
             function initializeAddonVisibility(shouldClearValues = false) {
-                // Sync visibility for all addon fields based on checked checkboxes
                 $('.addon-checkbox').each(function() {
-                    const addonType = $(this).data('addon');
                     const isChecked = $(this).is(':checked');
-                    const addonContainers = $(`.addon-field-container[data-addon="${addonType}"]`);
+                    const fieldsContainer = $(this).closest('.addon-field-container').find('.addon-fields');
 
                     if (isChecked) {
-                        addonContainers.show();
+                        fieldsContainer.show();
                     } else {
-                        addonContainers.hide();
+                        fieldsContainer.hide();
                         // Only reset values when explicitly requested (user action, not initialization)
                         if (shouldClearValues) {
-                            addonContainers.find('.addon-field, .addon-note').val(0);
+                            fieldsContainer.find('.addon-field, .addon-note').val('');
                         }
                     }
                 });
@@ -1354,21 +1050,14 @@
             // Initialize on page load (handles server-side rendered forms)
             // Use setTimeout to ensure DOM is fully loaded and server-side values are properly set
             setTimeout(function() {
-                // First, ensure checkboxes reflect server-side state (for validation failures)
-                @if (old('addon_covers'))
-                    var serverAddons = @json(old('addon_covers'));
-                    $('.addon-checkbox').each(function() {
-                        var addonValue = $(this).val();
-                        if (serverAddons.includes(addonValue)) {
-                            $(this).prop('checked', true);
-                        } else {
-                            $(this).prop('checked', false);
-                        }
-                    });
-                @endif
-
-                // Then initialize visibility
+                // Initialize addon field visibility on page load
                 initializeAddonVisibility();
+                
+                // Calculate IDV for all existing quote cards on page load
+                $('.quote-entry').each(function() {
+                    console.log('Initializing IDV calculation for quote card on page load');
+                    calculateIdvTotal($(this));
+                });
             }, 100);
 
             // Enhance the Add Quote button click handler to include addon synchronization
@@ -1378,6 +1067,11 @@
                 // Apply addon synchronization after the form is added
                 setTimeout(function() {
                     initializeAddonVisibility();
+                    
+                    // Calculate IDV for the newly added quote card
+                    const newQuoteCard = $('.quote-entry').last();
+                    console.log('Initializing IDV calculation for newly added quote card');
+                    calculateIdvTotal(newQuoteCard);
                 }, 50);
             });
 

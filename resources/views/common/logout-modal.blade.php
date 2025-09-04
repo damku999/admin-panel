@@ -3,12 +3,14 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close" onclick="hideLogoutModal()" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
-                <a class="btn btn-primary" href="{{ route('logout') }}"
+                <button class="btn btn-secondary" type="button" onclick="hideLogoutModal()">Cancel</button>
+                <a class="btn btn-primary" href="#"
                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     Logout
                 </a>

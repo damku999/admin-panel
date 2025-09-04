@@ -22,6 +22,9 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     
+    <!-- Customer Portal CSS -->
+    <link href="{{ asset('css/customer-portal.css') }}" rel="stylesheet">
+    
     <!-- Custom Customer Portal Styles -->
     <style>
         :root {
@@ -83,30 +86,9 @@
             color: white;
         }
 
-        /* Compact Welcome Card */
-        .compact-welcome-card {
-            background: white;
-            padding: 1rem 1.25rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(32, 178, 170, 0.1);
-            border-left: 4px solid #20b2aa;
-        }
+        /* Compact Welcome Card - moved to customer-portal.css */
 
-        /* Compact styles */
-        .card {
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            margin-bottom: 1rem;
-        }
-
-        .card-header {
-            padding: 0.75rem 1rem;
-            font-size: 0.95rem;
-        }
-
-        .card-body {
-            padding: 1rem;
-        }
+        /* Compact styles - moved to customer-portal.css */
 
         .btn-sm {
             padding: 0.375rem 0.75rem;
@@ -297,12 +279,7 @@
             color: #0f5a56;
         }
 
-        /* Navigation Improvements */
-        .navbar {
-            backdrop-filter: blur(15px);
-            background: rgba(255, 255, 255, 0.95) !important;
-            border-bottom: 1px solid rgba(32, 178, 170, 0.1);
-        }
+        /* Navigation Improvements - moved to customer-portal.css */
 
         /* Auth Pages Styles */
         .auth-card {

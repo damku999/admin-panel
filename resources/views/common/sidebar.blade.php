@@ -216,6 +216,27 @@
         </li>
 
         <li class="nav-item">
+            <a class="nav-link {{ str_starts_with(Route::currentRouteName(), 'addon-covers.') ? '' : 'collapsed' }}"
+                href="#" data-toggle="collapse" data-target="#taTpDropDownAddonCovers"
+                aria-expanded="{{ str_starts_with(Route::currentRouteName(), 'addon-covers.') ? 'true' : 'false' }}"
+                aria-controls="taTpDropDownAddonCovers">
+                <i class="fas fa-shield-alt"></i>
+                <span>Add-on Covers</span>
+            </a>
+            <div id="taTpDropDownAddonCovers"
+                class="collapse {{ str_starts_with(Route::currentRouteName(), 'addon-covers.') ? 'show' : '' }}"
+                aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">Add-on Covers:</h6>
+                    <a class="collapse-item {{ Route::currentRouteName() == 'addon-covers.index' ? 'active' : '' }}"
+                        href="{{ route('addon-covers.index') }}">List</a>
+                    <a class="collapse-item {{ Route::currentRouteName() == 'addon-covers.create' ? 'active' : '' }}"
+                        href="{{ route('addon-covers.create') }}">Add New</a>
+                </div>
+            </div>
+        </li>
+
+        <li class="nav-item">
             <a class="nav-link {{ Route::currentRouteName() == 'fuel_type.index' || Route::currentRouteName() == 'fuel_type.create' || Route::currentRouteName() == 'fuel_type.edit' ? '' : 'collapsed' }}"
                 href="#" data-toggle="collapse" data-target="#taTpDropDownFuelType"
                 aria-expanded="{{ Route::currentRouteName() == 'fuel_type.index' || Route::currentRouteName() == 'fuel_type.create' || Route::currentRouteName() == 'fuel_type.edit' ? 'true' : 'false' }}"
@@ -325,7 +346,7 @@
     @endhasrole
 
     <li class="nav-item">
-        <a class="nav-link" href="#" data-toggle="modal" data-target="#logoutModal">
+        <a class="nav-link" href="#" onclick="showLogoutModal()">
             <i class="fas fa-sign-out-alt"></i>
             <span>Logout</span>
         </a>

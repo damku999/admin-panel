@@ -20,7 +20,6 @@ class Quotation extends Model
         'make_model_variant',
         'rto_location',
         'manufacturing_year',
-        'date_of_registration',
         'cubic_capacity_kw',
         'seating_capacity',
         'fuel_type',
@@ -41,7 +40,6 @@ class Quotation extends Model
     ];
 
     protected $casts = [
-        'date_of_registration' => 'date',
         'ncb_percentage' => 'decimal:2',
         'idv_vehicle' => 'decimal:2',
         'idv_trailer' => 'decimal:2',

@@ -10,6 +10,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\FuelTypeController;
 use App\Http\Controllers\PolicyTypeController;
+use App\Http\Controllers\AddonCoverController;
 use App\Http\Controllers\PremiumTypeController;
 use App\Http\Controllers\ReferenceUsersController;
 use App\Http\Controllers\InsuranceCompanyController;
@@ -242,6 +243,18 @@ Route::middleware('auth')->prefix('policy_type')->name('policy_type.')->group(fu
     Route::get('export/', [PolicyTypeController::class, 'export'])->name('export');
 });
 
+// Add-on Covers
+Route::middleware('auth')->prefix('addon-covers')->name('addon-covers.')->group(function () {
+    Route::get('/', [AddonCoverController::class, 'index'])->name('index');
+    Route::get('/create', [AddonCoverController::class, 'create'])->name('create');
+    Route::post('/store', [AddonCoverController::class, 'store'])->name('store');
+    Route::get('/edit/{addon_cover}', [AddonCoverController::class, 'edit'])->name('edit');
+    Route::put('/update/{addon_cover}', [AddonCoverController::class, 'update'])->name('update');
+    Route::get('/update/status/{addon_cover_id}/{status}', [AddonCoverController::class, 'updateStatus'])->name('status');
+    Route::delete('/delete/{addon_cover}', [AddonCoverController::class, 'delete'])->name('delete');
+    Route::get('export/', [AddonCoverController::class, 'export'])->name('export');
+});
+
 // Premium Type
 Route::middleware('auth')->prefix('premium_type')->name('premium_type.')->group(function () {
     Route::get('/', [PremiumTypeController::class, 'index'])->name('index');
@@ -277,6 +290,7 @@ Route::middleware('auth')->prefix('quotations')->name('quotations.')->group(func
     Route::post('/generate-quotes/{quotation}', [QuotationController::class, 'generateQuotes'])->name('generate-quotes');
     Route::post('/send-whatsapp/{quotation}', [QuotationController::class, 'sendToWhatsApp'])->name('send-whatsapp');
     Route::get('/download-pdf/{quotation}', [QuotationController::class, 'downloadPdf'])->name('download-pdf');
+    Route::get('/get-quote-form', [QuotationController::class, 'getQuoteFormHtml'])->name('get-quote-form');
     Route::delete('/delete/{quotation}', [QuotationController::class, 'delete'])->name('delete');
 });
 

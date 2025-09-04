@@ -51,8 +51,9 @@ class QuotationController extends Controller
     {
         $customers = Customer::where('status', 1)->orderBy('name')->get();
         $insuranceCompanies = InsuranceCompany::where('status', 1)->orderBy('name')->get();
+        $addonCovers = \App\Models\AddonCover::getOrdered(1);
 
-        return view('quotations.create', compact('customers', 'insuranceCompanies'));
+        return view('quotations.create', compact('customers', 'insuranceCompanies', 'addonCovers'));
     }
 
     public function store(CreateQuotationRequest $request): RedirectResponse
@@ -85,8 +86,9 @@ class QuotationController extends Controller
     {
         $customers = Customer::where('status', 1)->orderBy('name')->get();
         $insuranceCompanies = InsuranceCompany::where('status', 1)->orderBy('name')->get();
+        $addonCovers = \App\Models\AddonCover::getOrdered(1);
 
-        return view('quotations.edit', compact('quotation', 'customers', 'insuranceCompanies'));
+        return view('quotations.edit', compact('quotation', 'customers', 'insuranceCompanies', 'addonCovers'));
     }
 
     public function update(UpdateQuotationRequest $request, Quotation $quotation): RedirectResponse
@@ -146,6 +148,17 @@ class QuotationController extends Controller
             return redirect()->back()
                 ->with('error', 'Failed to generate PDF: ' . $th->getMessage());
         }
+    }
+
+    public function getQuoteFormHtml(Request $request)
+    {
+        $customers = Customer::where('status', 1)->orderBy('name')->get();
+        $insuranceCompanies = InsuranceCompany::where('status', 1)->orderBy('name')->get();
+        $addonCovers = \App\Models\AddonCover::getOrdered(1);
+        
+        $currentIndex = $request->input('index', 0);
+        
+        return view('quotations.partials.quote-form', compact('customers', 'insuranceCompanies', 'addonCovers', 'currentIndex'))->render();
     }
 
     public function delete(Quotation $quotation): RedirectResponse

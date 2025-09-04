@@ -264,6 +264,68 @@
                 @endforeach
             </tr>
 
+            <!-- IDV Breakdown Section -->
+            <tr>
+                <td class="section-header" colspan="{{ count($quotation->quotationCompanies) + 1 }}">IDV Breakdown
+                </td>
+            </tr>
+            <tr>
+                <td class="row-header">Policy Type</td>
+                @foreach ($quotation->quotationCompanies as $company)
+                    <td>{{ $company->policy_type ?? $quotation->policy_type ?? 'N/A' }}</td>
+                @endforeach
+            </tr>
+            <tr>
+                <td class="row-header">Policy Tenure</td>
+                @foreach ($quotation->quotationCompanies as $company)
+                    <td>{{ ($company->policy_tenure_years ?? $quotation->policy_tenure_years ?? 1) }} Year(s)</td>
+                @endforeach
+            </tr>
+            <tr>
+                <td class="row-header">Vehicle IDV</td>
+                @foreach ($quotation->quotationCompanies as $company)
+                    <td class="currency">₹{{ number_format($company->idv_vehicle ?? $quotation->idv_vehicle ?? 0, 2) }}</td>
+                @endforeach
+            </tr>
+            @if($quotation->quotationCompanies->where('idv_trailer', '>', 0)->count() > 0 || $quotation->idv_trailer > 0)
+            <tr>
+                <td class="row-header">Trailer IDV</td>
+                @foreach ($quotation->quotationCompanies as $company)
+                    <td class="currency">₹{{ number_format($company->idv_trailer ?? $quotation->idv_trailer ?? 0, 2) }}</td>
+                @endforeach
+            </tr>
+            @endif
+            @if($quotation->quotationCompanies->where('idv_cng_lpg_kit', '>', 0)->count() > 0 || $quotation->idv_cng_lpg_kit > 0)
+            <tr>
+                <td class="row-header">CNG/LPG Kit IDV</td>
+                @foreach ($quotation->quotationCompanies as $company)
+                    <td class="currency">₹{{ number_format($company->idv_cng_lpg_kit ?? $quotation->idv_cng_lpg_kit ?? 0, 2) }}</td>
+                @endforeach
+            </tr>
+            @endif
+            @if($quotation->quotationCompanies->where('idv_electrical_accessories', '>', 0)->count() > 0 || $quotation->idv_electrical_accessories > 0)
+            <tr>
+                <td class="row-header">Electrical Accessories IDV</td>
+                @foreach ($quotation->quotationCompanies as $company)
+                    <td class="currency">₹{{ number_format($company->idv_electrical_accessories ?? $quotation->idv_electrical_accessories ?? 0, 2) }}</td>
+                @endforeach
+            </tr>
+            @endif
+            @if($quotation->quotationCompanies->where('idv_non_electrical_accessories', '>', 0)->count() > 0 || $quotation->idv_non_electrical_accessories > 0)
+            <tr>
+                <td class="row-header">Non-Electrical Accessories IDV</td>
+                @foreach ($quotation->quotationCompanies as $company)
+                    <td class="currency">₹{{ number_format($company->idv_non_electrical_accessories ?? $quotation->idv_non_electrical_accessories ?? 0, 2) }}</td>
+                @endforeach
+            </tr>
+            @endif
+            <tr>
+                <td class="row-header total-row">Total IDV</td>
+                @foreach ($quotation->quotationCompanies as $company)
+                    <td class="currency total-row">₹{{ number_format($company->total_idv ?? $quotation->total_idv ?? 0, 2) }}</td>
+                @endforeach
+            </tr>
+
             <!-- Basic Premium Section -->
             <tr>
                 <td class="section-header" colspan="{{ count($quotation->quotationCompanies) + 1 }}">Premium Breakdown
@@ -405,8 +467,105 @@
                     </td>
                 @endforeach
             </tr>
+            @if($quotation->quotationCompanies->where('recommendation_note', '!=', null)->count() > 0)
+            <tr>
+                <td class="row-header">Recommendation Note</td>
+                @foreach ($quotation->quotationCompanies as $company)
+                    <td style="font-size: 9px; text-align: left;">
+                        {{ $company->recommendation_note ?? '-' }}
+                    </td>
+                @endforeach
+            </tr>
+            @endif
         </tbody>
     </table>
+
+    <!-- Insurance Coverage Details - Company Wise -->
+    @if ($quotation->quotationCompanies->count() > 0)
+        <div style="page-break-inside: avoid; margin-top: 15px;">
+            <h3 style="background: #333; color: white; padding: 8px; margin: 10px 0 8px 0; font-size: 12px; text-align: center;">
+                INSURANCE COVERAGE DETAILS (COMPANY-WISE)
+            </h3>
+            
+            @foreach ($quotation->quotationCompanies->sortBy('ranking') as $company)
+                <div style="border: 1px solid #ddd; margin: 8px 0; padding: 8px; page-break-inside: avoid;">
+                    <!-- Company Header -->
+                    <div style="background: #f5f5f5; padding: 5px; border-bottom: 1px solid #ddd; margin-bottom: 6px;">
+                        <table width="100%" style="border-collapse: collapse;">
+                            <tr>
+                                <td style="font-weight: bold; font-size: 11px;">
+                                    <span style="background: #333; color: white; padding: 2px 5px; border-radius: 3px; font-size: 9px;">{{ $company->ranking }}</span>
+                                    {{ $company->insuranceCompany->name }}
+                                    @if($company->plan_name) - {{ $company->plan_name }}@endif
+                                    @if($company->is_recommended)
+                                        <span style="background: #d4862a; color: white; padding: 1px 4px; border-radius: 2px; font-size: 8px;">⭐ RECOMMENDED</span>
+                                    @endif
+                                </td>
+                                <td style="text-align: right; font-weight: bold; font-size: 11px;">
+                                    ₹{{ number_format($company->final_premium ?? 0, 2) }}
+                                    @if($company->quote_number)<br><span style="font-size: 8px; font-weight: normal;">Quote: {{ $company->quote_number }}</span>@endif
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Coverage Details Table -->
+                    <table width="100%" style="border-collapse: collapse; font-size: 9px;">
+                        <tr style="background: #f8f9fa;">
+                            <td style="padding: 3px; font-weight: bold; color: #666;">Plan Name:</td>
+                            <td style="padding: 3px;">{{ $company->plan_name ?? 'Standard Plan' }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 3px; font-weight: bold; color: #666;">Quote Number:</td>
+                            <td style="padding: 3px;">
+                                @if($company->quote_number)
+                                    {{ $company->quote_number }}
+                                @else
+                                    Auto-generated
+                                @endif
+                            </td>
+                        </tr>
+                        <tr style="border-top: 1px solid #ddd; background: #f0f9ff;">
+                            <td style="padding: 3px; font-weight: bold; color: #2c5f2d;">Basic OD Premium:</td>
+                            <td style="padding: 3px; font-weight: bold;">₹{{ number_format($company->basic_od_premium ?? 0) }}</td>
+                        </tr>
+                        <tr style="background: #f0f9ff;">
+                            <td style="padding: 3px; font-weight: bold; color: #2c5f2d;">TP Premium:</td>
+                            <td style="padding: 3px; font-weight: bold;">₹{{ number_format($company->tp_premium ?? 0) }}</td>
+                        </tr>
+                        <tr style="background: #f0f9ff;">
+                            <td style="padding: 3px; font-weight: bold; color: #2c5f2d;">Add-on Premium:</td>
+                            <td style="padding: 3px; font-weight: bold;">₹{{ number_format($company->total_addon_premium ?? 0) }}</td>
+                        </tr>
+                        @if($company->cng_lpg_premium > 0)
+                        <tr style="background: #f0f9ff;">
+                            <td style="padding: 3px; font-weight: bold; color: #2c5f2d;">CNG/LPG Premium:</td>
+                            <td style="padding: 3px; font-weight: bold;">₹{{ number_format($company->cng_lpg_premium) }}</td>
+                        </tr>
+                        @endif
+                        <tr style="border-top: 1px solid #ddd; background: #e3f2fd;">
+                            <td style="padding: 3px; font-weight: bold; color: #1976d2;">Net Premium:</td>
+                            <td style="padding: 3px; font-weight: bold; color: #1976d2;">₹{{ number_format($company->net_premium ?? 0) }}</td>
+                        </tr>
+                        <tr style="background: #fff3cd;">
+                            <td style="padding: 3px; font-weight: bold; color: #856404;">Total GST:</td>
+                            <td style="padding: 3px; font-weight: bold;">₹{{ number_format(($company->sgst_amount ?? 0) + ($company->cgst_amount ?? 0)) }}</td>
+                        </tr>
+                        @if($company->roadside_assistance > 0)
+                        <tr style="background: #d1ecf1;">
+                            <td style="padding: 3px; font-weight: bold; color: #0c5460;">RSA:</td>
+                            <td style="padding: 3px; font-weight: bold;">₹{{ number_format($company->roadside_assistance) }}</td>
+                        </tr>
+                        @endif
+                        <tr style="border-top: 2px solid #dc3545; background: #f8d7da;">
+                            <td style="padding: 4px; font-weight: bold; color: #721c24; font-size: 10px;">Final Premium:</td>
+                            <td style="padding: 4px; font-weight: bold; color: #721c24; font-size: 10px;">₹{{ number_format($company->final_premium ?? 0, 2) }}</td>
+                        </tr>
+                    </table>
+                </div>
+            @endforeach
+        </div>
+    @endif
 
     <div class="footer">
         <p>This quotation comparison is generated automatically. Please verify all details before making any decisions.

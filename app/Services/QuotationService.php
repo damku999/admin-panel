@@ -80,7 +80,6 @@ class QuotationService
             'quotation_id' => $quotation->id,
             'insurance_company_id' => $company->id,
             'quote_number' => $this->generateQuoteNumber($quotation, $company),
-            'plan_name' => $this->getCompanyPlanName($company),
             'basic_od_premium' => $baseData['basic_od_premium'],
             'cng_lpg_premium' => $baseData['cng_lpg_premium'],
             'total_od_premium' => $baseData['total_od_premium'],
@@ -217,9 +216,6 @@ class QuotationService
             $message .= "💰 *Best Premium:*\n";
             $message .= "• *{$bestQuote->insuranceCompany->name}*\n";
             $message .= "• Premium: *{$bestQuote->getFormattedPremium()}*";
-            if ($bestQuote->plan_name) {
-                $message .= "\n• Plan: {$bestQuote->plan_name}";
-            }
             $message .= "\n\n";
         }
 
@@ -328,17 +324,6 @@ class QuotationService
         return 136.88; // Standard rate
     }
 
-    private function getCompanyPlanName(InsuranceCompany $company): string
-    {
-        return match ($company->name) {
-            'TATA AIG' => 'SAPPHIRE PLUS',
-            'HDFC ERGO' => 'COMPLETE CARE',
-            'ICICI Lombard' => 'COMPREHENSIVE PLUS',
-            'Bajaj Allianz' => 'COMPLETE PROTECTION',
-            'Reliance General' => 'TOTAL SECURE',
-            default => 'COMPREHENSIVE PLAN',
-        };
-    }
 
     private function getCompanyBenefits(InsuranceCompany $company): string
     {
@@ -358,7 +343,6 @@ class QuotationService
             // Create unique key based on multiple fields to allow same company with different plans
             $quoteKey = $companyData['insurance_company_id'] . '_' .
                        ($companyData['quote_number'] ?? '') . '_' .
-                       ($companyData['plan_name'] ?? '') . '_' .
                        ($companyData['basic_od_premium'] ?? '') . '_' .
                        $index; // Include index to ensure each form entry is processed
 
@@ -404,25 +388,17 @@ class QuotationService
 
     private function createManualCompanyQuote(Quotation $quotation, array $data): QuotationCompany
     {
-        // Process individual addon fields into breakdown
+        // Process individual addon fields into breakdown (dynamic based on addon_covers table)
         $addonBreakdown = [];
-        $addonFields = [
-            'addon_zero_dep' => 'Zero Depreciation',
-            'addon_engine_protection' => 'Engine Protection',
-            'addon_rsa' => 'Road Side Assistance',
-            'addon_ncb_protection' => 'NCB Protection',
-            'addon_invoice_protection' => 'Invoice Protection',
-            'addon_key_replacement' => 'Key Replacement',
-            'addon_personal_accident' => 'Personal Accident',
-            'addon_tyre_protection' => 'Tyre Protection',
-            'addon_consumables' => 'Consumables',
-            'addon_others' => 'Others'
-        ];
-
-        foreach ($addonFields as $field => $addonName) {
+        $addonCovers = \App\Models\AddonCover::getOrdered(1);
+        
+        foreach ($addonCovers as $addonCover) {
+            $slug = \Str::slug($addonCover->name, '_');
+            $field = "addon_{$slug}";
+            
             if (isset($data[$field]) && $data[$field] > 0) {
                 $noteField = $field . '_note';
-                $addonBreakdown[$addonName] = [
+                $addonBreakdown[$addonCover->name] = [
                     'price' => floatval($data[$field]),
                     'field' => $field,
                     'note' => $data[$noteField] ?? ''
@@ -441,8 +417,19 @@ class QuotationService
             'quotation_id' => $quotation->id,
             'insurance_company_id' => $data['insurance_company_id'],
             'quote_number' => $data['quote_number'] ?? $this->generateQuoteNumber($quotation, $data['insurance_company_id']),
-            'plan_name' => $data['plan_name'] ?? '',
+            // Policy and coverage fields
+            'policy_type' => $data['policy_type'] ?? 'Comprehensive',
+            'policy_tenure_years' => $data['policy_tenure_years'] ?? 1,
+            // IDV fields
+            'idv_vehicle' => $data['idv_vehicle'] ?? 0,
+            'idv_trailer' => $data['idv_trailer'] ?? 0,
+            'idv_cng_lpg_kit' => $data['idv_cng_lpg_kit'] ?? 0,
+            'idv_electrical_accessories' => $data['idv_electrical_accessories'] ?? 0,
+            'idv_non_electrical_accessories' => $data['idv_non_electrical_accessories'] ?? 0,
+            'total_idv' => $data['total_idv'] ?? 0,
+            // Premium fields
             'basic_od_premium' => $data['basic_od_premium'],
+            'tp_premium' => $data['tp_premium'] ?? 0,
             'cng_lpg_premium' => $data['cng_lpg_premium'] ?? 0,
             'total_od_premium' => $data['total_od_premium'] ?? $data['basic_od_premium'],
             'addon_covers_breakdown' => $data['addon_covers_breakdown'] ?? [],
@@ -454,6 +441,7 @@ class QuotationService
             'roadside_assistance' => $data['roadside_assistance'] ?? 0,
             'final_premium' => $data['final_premium'] ?? 0,
             'is_recommended' => $data['is_recommended'] ?? false,
+            'recommendation_note' => $data['recommendation_note'] ?? null,
             'ranking' => $data['ranking'] ?? 1,
             'benefits' => $data['benefits'] ?? null,
             'exclusions' => $data['exclusions'] ?? null,

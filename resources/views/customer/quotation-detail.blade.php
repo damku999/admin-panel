@@ -3,33 +3,37 @@
 @section('title', 'Quotation Details')
 
 @section('content')
+<div class="container-fluid">
     <!-- Page Heading -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">
-            <i class="fas fa-calculator"></i> Quotation Details
+        <h1 class="h3 mb-0 text-dark fw-bold">
+            <i class="fas fa-file-alt me-2"></i> Quotation Details
         </h1>
         <div class="d-flex">
             @if ($quotation->quotationCompanies->count() > 0)
                 <a href="{{ route('customer.quotations.download', $quotation->id) }}"
-                    class="btn btn-primary btn-block btn-sm me-2">
-                    <i class="fas fa-download"></i> Download PDF
+                    class="btn btn-webmonks btn-sm me-2">
+                    <i class="fas fa-download me-1"></i> Download PDF
                 </a>
             @endif
-            <a href="{{ route('customer.quotations') }}" class="btn btn-secondary btn-sm me-2">
-                <i class="fas fa-arrow-left"></i> Back to List
+            <a href="{{ route('customer.quotations') }}" class="btn btn-outline-secondary btn-sm me-2">
+                <i class="fas fa-arrow-left me-1"></i> Back to List
             </a>
-            <a href="{{ route('customer.dashboard') }}" class="btn btn-primary btn-sm me-2">
-                <i class="fas fa-home"></i> Dashboard
+            <a href="{{ route('customer.dashboard') }}" class="btn btn-webmonks-dashboard">
+                <i class="fas fa-home me-1"></i> Dashboard
             </a>
         </div>
     </div>
 
+    {{-- Alert Messages --}}
+    @include('common.alert')
+
     <div class="row">
         <!-- Quotation Summary -->
         <div class="col-lg-4 col-md-12 mb-4">
-            <div class="card shadow">
+            <div class="card border-0 shadow-sm">
                 <div class="card-header py-3 d-flex justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-white">Quotation Summary</h6>
+                    <h6 class="m-0 fw-bold text-dark">Quotation Summary</h6>
                     @php
                         $statusColors = [
                             'Draft' => 'secondary',
@@ -39,21 +43,21 @@
                             'Rejected' => 'danger',
                         ];
                     @endphp
-                    <span class="badge badge-{{ $statusColors[$quotation->status] ?? 'secondary' }}">
+                    <span class="badge bg-{{ $statusColors[$quotation->status] ?? 'secondary' }}">
                         {{ ucfirst($quotation->status ?? 'Draft') }}
                     </span>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
                         <strong>Quote Reference:</strong><br>
-                        <span class="h6 text-white">{{ $quotation->getQuoteReference() }}</span>
+                        <span class="h6 fw-bold quote-reference">{{ $quotation->getQuoteReference() }}</span>
                     </div>
 
                     <div class="mb-3">
                         <strong>Policy Holder:</strong><br>
                         {{ $quotation->customer->name }}
                         @if ($quotation->customer_id === $customer->id)
-                            <span class="badge badge-info ml-2">You</span>
+                            <span class="badge bg-info ms-2">You</span>
                         @endif
                         <br>
                         <small class="text-muted">
@@ -74,10 +78,6 @@
                                 <strong>Fuel:</strong> {{ $quotation->fuel_type }} |
                                 <strong>NCB:</strong> {{ $quotation->ncb_percentage ?? 0 }}%<br>
                                 <strong>Year:</strong> {{ $quotation->manufacturing_year }}
-                                @if ($quotation->date_of_registration)
-                                    | <strong>Registration:</strong>
-                                    {{ \Carbon\Carbon::parse($quotation->date_of_registration)->format('d M Y') }}
-                                @endif
                                 <br>
                                 @if ($quotation->cubic_capacity_kw)
                                     <strong>CC/KW:</strong> {{ number_format($quotation->cubic_capacity_kw) }} |
@@ -91,26 +91,32 @@
 
                     <div class="mb-3">
                         <strong>Policy Details:</strong><br>
-                        {{ $quotation->policy_type }} - {{ $quotation->policy_tenure_years }} Year(s)<br>
+                        {{ $quotation->policy_type ?? 'Comprehensive' }} - {{ $quotation->policy_tenure_years ?? 1 }} Year(s)<br>
                         <small class="text-muted">
-                            @if ($quotation->idv_vehicle)
-                                Vehicle IDV: ₹{{ number_format($quotation->idv_vehicle) }}
-                            @endif
-                            @if ($quotation->idv_trailer > 0)
-                                | Trailer: ₹{{ number_format($quotation->idv_trailer) }}
-                            @endif
-                            @if ($quotation->idv_cng_lpg_kit > 0)
-                                | CNG/LPG: ₹{{ number_format($quotation->idv_cng_lpg_kit) }}
-                            @endif
-                            @if ($quotation->idv_electrical_accessories > 0)
-                                | Elec. Acc.: ₹{{ number_format($quotation->idv_electrical_accessories) }}
-                            @endif
-                            @if ($quotation->idv_non_electrical_accessories > 0)
-                                | Non-Elec. Acc.: ₹{{ number_format($quotation->idv_non_electrical_accessories) }}
-                            @endif
-                            @if ($quotation->total_idv)
-                                <br><strong>Total IDV: ₹{{ number_format($quotation->total_idv) }}</strong>
-                            @endif
+                            <div class="mt-2">
+                                <strong>Vehicle Valuation (IDV):</strong><br>
+                                <div class="ms-2">
+                                    @if ($quotation->idv_vehicle)
+                                        Vehicle: ₹{{ number_format($quotation->idv_vehicle) }}<br>
+                                    @endif
+                                    @if ($quotation->idv_trailer > 0)
+                                        Trailer: ₹{{ number_format($quotation->idv_trailer) }}<br>
+                                    @endif
+                                    @if ($quotation->idv_cng_lpg_kit > 0)
+                                        CNG/LPG Kit: ₹{{ number_format($quotation->idv_cng_lpg_kit) }}<br>
+                                    @endif
+                                    @if ($quotation->idv_electrical_accessories > 0)
+                                        Electrical Accessories: ₹{{ number_format($quotation->idv_electrical_accessories) }}<br>
+                                    @endif
+                                    @if ($quotation->idv_non_electrical_accessories > 0)
+                                        Non-Electrical Accessories: ₹{{ number_format($quotation->idv_non_electrical_accessories) }}<br>
+                                    @endif
+                                </div>
+                                @if ($quotation->total_idv)
+                                    <strong class="text-info">Total Vehicle Value (IDV): ₹{{ number_format($quotation->total_idv) }}</strong><br>
+                                    <small class="text-muted">This is the maximum claim amount for total loss/theft</small>
+                                @endif
+                            </div>
                         </small>
                     </div>
 
@@ -118,7 +124,7 @@
                         <div class="mb-3">
                             <strong>Add-on Covers:</strong><br>
                             @foreach ($quotation->addon_covers as $addon)
-                                <span class="badge badge-light">{{ $addon }}</span>
+                                <span class="badge bg-light text-dark me-1">{{ $addon }}</span>
                             @endforeach
                         </div>
                     @endif
@@ -151,19 +157,18 @@
 
         <!-- Company Quotes -->
         <div class="col-lg-8 col-md-12">
-            <div class="card shadow mb-4">
+            <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-white">
-                        <i class="fas fa-building"></i> Insurance Company Quotes
+                    <h6 class="m-0 fw-bold text-dark">
+                        <i class="fas fa-building me-2"></i> Insurance Company Quotes
                         @if ($quotation->quotationCompanies->count() > 0)
-                            <span class="badge badge-info">{{ $quotation->quotationCompanies->count() }}</span>
+                            <span class="badge bg-info ms-2">{{ $quotation->quotationCompanies->count() }}</span>
                         @endif
                     </h6>
                     @if ($quotation->quotationCompanies->count() > 0 && $quotation->bestQuote())
-                        <div class="text-right">
-                            <small class="text-muted">Best Quote:</small><br>
-                            <strong
-                                class="text-white">₹{{ number_format($quotation->bestQuote()->final_premium, 2) }}</strong>
+                        <div class="text-end">
+                            <small class="text-white fw-bold">Best Quote:</small><br>
+                            <span class="h5 fw-bold mb-0 text-white">₹{{ number_format($quotation->bestQuote()->final_premium, 2) }}</span>
                         </div>
                     @endif
                 </div>
@@ -186,23 +191,43 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($quotation->quotationCompanies->sortBy('ranking') as $company)
-                                        <tr class="{{ $company->is_recommended ? 'table-warning' : '' }}">
+                                        <tr class="{{ $company->is_recommended ? 'table-success' : '' }}">
                                             <td>
                                                 @if ($company->is_recommended)
-                                                    <span class="badge badge-warning">⭐ {{ $company->ranking }}</span>
+                                                    <span class="badge bg-success text-white" data-bs-toggle="tooltip" 
+                                                          title="{{ $company->recommendation_note ?? 'Recommended by our experts' }}">
+                                                        <i class="fas fa-star"></i> {{ $company->ranking }}
+                                                    </span>
                                                 @else
-                                                    <span class="badge badge-secondary">{{ $company->ranking }}</span>
+                                                    <span class="badge bg-secondary">{{ $company->ranking }}</span>
                                                 @endif
                                             </td>
                                             <td>
-                                                <strong>{{ $company->insuranceCompany->name }}</strong><br>
+                                                <strong>{{ $company->insuranceCompany->name }}</strong>
+                                                @if ($company->is_recommended)
+                                                    <span class="badge bg-success text-white ms-1">
+                                                        <i class="fas fa-thumbs-up"></i> Recommended
+                                                    </span>
+                                                @endif
+                                                <br>
                                                 <small class="text-muted">
                                                     @if ($company->quote_number)
                                                         Quote: {{ $company->quote_number }}
                                                     @else
                                                         Auto-generated
                                                     @endif
+                                                    @if ($company->policy_type)
+                                                        | {{ $company->policy_type }}
+                                                    @endif
+                                                    @if ($company->policy_tenure_years)
+                                                        | {{ $company->policy_tenure_years }} Year(s)
+                                                    @endif
                                                 </small>
+                                                @if ($company->is_recommended && $company->recommendation_note)
+                                                    <br><small class="text-success fw-bold">
+                                                        <i class="fas fa-quote-left me-1"></i> {{ $company->recommendation_note }}
+                                                    </small>
+                                                @endif
                                             </td>
                                             <td>{{ $company->plan_name ?? 'Standard Plan' }}</td>
                                             <td>₹{{ number_format($company->basic_od_premium ?? 0) }}</td>
@@ -213,7 +238,7 @@
                                             </td>
                                             <td>
                                                 <strong
-                                                    class="text-primary">₹{{ number_format($company->final_premium ?? 0, 2) }}</strong>
+                                                    class="fw-bold final-premium-amount">₹{{ number_format($company->final_premium ?? 0, 2) }}</strong>
                                                 @if ($company->roadside_assistance > 0)
                                                     <br><small class="text-muted">+RSA</small>
                                                 @endif
@@ -227,20 +252,20 @@
                         <!-- Add-on Coverage Breakdown -->
                         @if ($quotation->quotationCompanies->where('total_addon_premium', '>', 0)->count() > 0)
                             <div class="mt-4">
-                                <h6 class="font-weight-bold text-white">
-                                    <i class="fas fa-plus-circle"></i> Add-on Coverage Breakdown
+                                <h6 class="fw-bold text-success">
+                                    <i class="fas fa-plus-circle me-2"></i> Add-on Coverage Breakdown
                                 </h6>
                                 <div class="row">
                                     @foreach ($quotation->quotationCompanies->where('total_addon_premium', '>', 0) as $company)
                                         <div class="col-md-12 mb-4">
-                                            <div class="card border-left-success">
-                                                <div class="card-header bg-success text-white py-2">
-                                                    <h6 class="m-0 font-weight-bold">
+                                            <div class="card border-start border-success border-3">
+                                                <div class="card-header py-2" style="background: var(--webmonks-success); color: white;">
+                                                    <h6 class="m-0 fw-bold">
                                                         {{ $company->insuranceCompany->name }}
                                                         @if ($company->quote_number)
-                                                            <small class="ml-2">({{ $company->quote_number }})</small>
+                                                            <small class="ms-2">({{ $company->quote_number }})</small>
                                                         @endif
-                                                        <span class="float-right">Total:
+                                                        <span class="float-end">Total:
                                                             ₹{{ number_format($company->total_addon_premium) }}</span>
                                                     </h6>
                                                 </div>
@@ -265,13 +290,12 @@
                                                                         <div class="mb-2">
                                                                             <div class="d-flex justify-content-between">
                                                                                 <strong
-                                                                                    class="small text-primary">{{ $addon }}:</strong>
+                                                                                    class="small fw-bold addon-label">{{ $addon }}:</strong>
                                                                                 <strong
-                                                                                    class="small">₹{{ number_format($data['price']) }}</strong>
+                                                                                    class="small fw-bold">₹{{ number_format($data['price']) }}</strong>
                                                                             </div>
                                                                             @if (!empty($data['note']))
-                                                                                <div class="text-muted"
-                                                                                    style="font-size: 0.75rem;">
+                                                                                <div class="text-muted addon-note">
                                                                                     <em>{{ $data['note'] }}</em>
                                                                                 </div>
                                                                             @endif
@@ -287,8 +311,8 @@
                                                         <div class="mb-2">
                                                             <div class="d-flex justify-content-between">
                                                                 <strong
-                                                                    class="small text-primary">{{ $addon }}:</strong>
-                                                                <strong class="small">₹{{ number_format($data) }}</strong>
+                                                                    class="small fw-bold addon-label">{{ $addon }}:</strong>
+                                                                <strong class="small fw-bold">₹{{ number_format($data) }}</strong>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -311,6 +335,7 @@
     </div>
     </div>
     @endif
+
 @else
     <div class="text-center py-5">
         <i class="fas fa-building fa-3x text-muted mb-3"></i>
@@ -325,5 +350,51 @@
     </div>
     </div>
     </div>
-    </div>
+</div>
+@endsection
+
+@section('scripts')
+    <style>
+        /* Page-specific styles only */
+    </style>
+    
+    <script>
+        $(document).ready(function() {
+            // Initialize tooltips using jQuery (compatible with both Bootstrap versions)
+            $('[data-bs-toggle="tooltip"]').tooltip();
+            
+            // Add hover effects for recommended quotes
+            $('.table-success').hover(
+                function() {
+                    $(this).addClass('bg-success text-white');
+                },
+                function() {
+                    $(this).removeClass('bg-success text-white');
+                }
+            );
+            
+            // Add visual emphasis to best quote
+            $('.table tbody tr:first-child').addClass('border-primary').css('border-width', '2px');
+            
+            // Fix layout on page load
+            $('.container-fluid').css('max-width', '100%');
+            $('.row').css('margin', '0 -15px');
+            
+            // Show informational alerts for first-time users
+            if (sessionStorage.getItem('quotation_info_shown') !== 'true') {
+                setTimeout(function() {
+                    if ($('.bg-success').length > 0) {
+                        // Use a more subtle notification instead of alert
+                        if ($('.alert').length === 0) {
+                            $('<div class="alert alert-info alert-dismissible fade show" role="alert">' +
+                              '<i class="fas fa-lightbulb"></i> <strong>Tip:</strong> Look for the <span class="badge bg-success text-white"><i class="fas fa-star"></i> Recommended</span> badges - these are quotes our experts suggest based on coverage and value!' +
+                              '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>' +
+                              '</div>').insertAfter('.mb-4:first');
+                        }
+                        sessionStorage.setItem('quotation_info_shown', 'true');
+                    }
+                }, 2000);
+            }
+        });
+    </script>
 @endsection

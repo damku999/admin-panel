@@ -169,6 +169,75 @@
                 var isExpanded = $(this).attr('aria-expanded') === 'true';
                 $(this).attr('aria-expanded', !isExpanded);
             });
+
+            // =======================================================
+            // CENTRALIZED MODAL UTILITY FUNCTIONS (jQuery-only)
+            // =======================================================
+            
+            // Generic Modal Functions
+            window.showModal = function(modalId) {
+                $('#' + modalId).css('display', 'block').addClass('show');
+                $('body').addClass('modal-open');
+                $('.modal-backdrop').remove();
+                $('body').append('<div class="modal-backdrop fade show"></div>');
+            };
+
+            window.hideModal = function(modalId) {
+                $('#' + modalId).css('display', 'none').removeClass('show');
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+            };
+
+            // WhatsApp Modal Functions 
+            window.showSendWhatsAppModal = function(quotationId) {
+                var modalId = quotationId ? 'sendWhatsAppModal' + quotationId : 'sendWhatsAppModal';
+                showModal(modalId);
+            };
+
+            window.showResendWhatsAppModal = function(quotationId) {
+                var modalId = quotationId ? 'resendWhatsAppModal' + quotationId : 'resendWhatsAppModal';
+                showModal(modalId);
+            };
+
+            window.hideWhatsAppModal = function(modalId) {
+                hideModal(modalId);
+            };
+
+            // Delete Modal Functions
+            window.showDeleteQuotationModal = function(quotationId) {
+                var modalId = quotationId ? 'deleteQuotationModal' + quotationId : 'deleteQuotationModal';
+                showModal(modalId);
+            };
+
+            window.hideDeleteModal = function(modalId) {
+                hideModal(modalId);
+            };
+
+            // Logout Modal Functions
+            window.showLogoutModal = function() {
+                showModal('logoutModal');
+            };
+
+            window.hideLogoutModal = function() {
+                hideModal('logoutModal');
+            };
+
+            // Global Modal Event Handlers
+            $(document).on('click', '.modal-backdrop', function() {
+                // Close all visible modals
+                $('.modal.show').each(function() {
+                    hideModal(this.id);
+                });
+            });
+
+            // Close modals on Escape key
+            $(document).keydown(function(e) {
+                if (e.keyCode === 27) { // ESC key
+                    $('.modal.show').each(function() {
+                        hideModal(this.id);
+                    });
+                }
+            });
         });
     </script>
 </body>

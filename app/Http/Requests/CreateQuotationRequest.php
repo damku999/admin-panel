@@ -21,58 +21,44 @@ class CreateQuotationRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'customer_id' => 'required|exists:customers,id',
             'vehicle_number' => 'nullable|string|max:20',
             'make_model_variant' => 'required|string|max:255',
             'rto_location' => 'required|string|max:255',
             'manufacturing_year' => 'required|integer|min:1980|max:' . (date('Y') + 1),
-            'date_of_registration' => 'required|date|before_or_equal:today',
             'cubic_capacity_kw' => 'required|integer|min:1',
             'seating_capacity' => 'required|integer|min:1|max:50',
             'fuel_type' => 'required|in:Petrol,Diesel,CNG,Electric,Hybrid',
             'ncb_percentage' => 'nullable|numeric|min:0|max:50',
-            'idv_vehicle' => 'required|numeric|min:10000|max:10000000',
+            'whatsapp_number' => 'nullable|string|regex:/^[6-9]\d{9}$/',
+            'notes' => 'nullable|string|max:1000',
+            // Quotation-level policy and IDV fields (optional, as they can be company-specific too)
+            'policy_type' => 'nullable|in:Comprehensive,Own Damage,Third Party',
+            'policy_tenure_years' => 'nullable|integer|in:1,2,3',
+            'idv_vehicle' => 'nullable|numeric|min:10000|max:10000000',
             'idv_trailer' => 'nullable|numeric|min:0',
             'idv_cng_lpg_kit' => 'nullable|numeric|min:0',
             'idv_electrical_accessories' => 'nullable|numeric|min:0',
             'idv_non_electrical_accessories' => 'nullable|numeric|min:0',
-            'policy_type' => 'required|in:Comprehensive,Own Damage,Third Party',
-            'policy_tenure_years' => 'required|integer|in:1,2,3',
-            'whatsapp_number' => 'nullable|string|regex:/^[6-9]\d{9}$/',
-            'addon_covers' => 'nullable|array',
-            'addon_covers.*' => 'string|max:255',
-            'notes' => 'nullable|string|max:1000',
+            'total_idv' => 'nullable|numeric|min:0',
             'companies' => 'nullable|array',
             'companies.*.insurance_company_id' => 'required_with:companies|exists:insurance_companies,id',
             'companies.*.quote_number' => 'nullable|string|max:255',
-            'companies.*.plan_name' => 'nullable|string|max:255',
+            // Coverage fields at company level
+            'companies.*.policy_type' => 'required_with:companies|in:Comprehensive,Own Damage,Third Party',
+            'companies.*.policy_tenure_years' => 'required_with:companies|integer|in:1,2,3',
+            'companies.*.idv_vehicle' => 'required_with:companies|numeric|min:10000|max:10000000',
+            'companies.*.idv_trailer' => 'nullable|numeric|min:0',
+            'companies.*.idv_cng_lpg_kit' => 'nullable|numeric|min:0',
+            'companies.*.idv_electrical_accessories' => 'nullable|numeric|min:0',
+            'companies.*.idv_non_electrical_accessories' => 'nullable|numeric|min:0',
+            'companies.*.total_idv' => 'nullable|numeric|min:0',
+            // Premium fields
             'companies.*.basic_od_premium' => 'required_with:companies|numeric|min:0',
             'companies.*.tp_premium' => 'required_with:companies|numeric|min:0',
             'companies.*.total_addon_premium' => 'nullable|numeric|min:0',
             'companies.*.cng_lpg_premium' => 'nullable|numeric|min:0',
-            // Individual addon fields
-            'companies.*.addon_zero_dep' => 'nullable|numeric|min:0',
-            'companies.*.addon_engine_protection' => 'nullable|numeric|min:0',
-            'companies.*.addon_rsa' => 'nullable|numeric|min:0',
-            'companies.*.addon_ncb_protection' => 'nullable|numeric|min:0',
-            'companies.*.addon_invoice_protection' => 'nullable|numeric|min:0',
-            'companies.*.addon_key_replacement' => 'nullable|numeric|min:0',
-            'companies.*.addon_personal_accident' => 'nullable|numeric|min:0',
-            'companies.*.addon_tyre_protection' => 'nullable|numeric|min:0',
-            'companies.*.addon_consumables' => 'nullable|numeric|min:0',
-            'companies.*.addon_others' => 'nullable|numeric|min:0',
-            // Addon note fields
-            'companies.*.addon_zero_dep_note' => 'nullable|string|max:100',
-            'companies.*.addon_engine_protection_note' => 'nullable|string|max:100',
-            'companies.*.addon_rsa_note' => 'nullable|string|max:100',
-            'companies.*.addon_ncb_protection_note' => 'nullable|string|max:100',
-            'companies.*.addon_invoice_protection_note' => 'nullable|string|max:100',
-            'companies.*.addon_key_replacement_note' => 'nullable|string|max:100',
-            'companies.*.addon_personal_accident_note' => 'nullable|string|max:100',
-            'companies.*.addon_tyre_protection_note' => 'nullable|string|max:100',
-            'companies.*.addon_consumables_note' => 'nullable|string|max:100',
-            'companies.*.addon_others_note' => 'nullable|string|max:100',
             'companies.*.net_premium' => 'nullable|numeric|min:0',
             'companies.*.sgst_amount' => 'nullable|numeric|min:0',
             'companies.*.cgst_amount' => 'nullable|numeric|min:0',
@@ -80,7 +66,18 @@ class CreateQuotationRequest extends FormRequest
             'companies.*.final_premium' => 'nullable|numeric|min:0',
             'companies.*.total_od_premium' => 'nullable|numeric|min:0',
             'companies.*.is_recommended' => 'nullable|boolean',
+            'companies.*.recommendation_note' => 'nullable|string|max:500',
         ];
+
+        // Add dynamic addon field validations
+        $addonCovers = \App\Models\AddonCover::getOrdered(1);
+        foreach ($addonCovers as $addonCover) {
+            $slug = \Str::slug($addonCover->name, '_');
+            $rules["companies.*.addon_{$slug}"] = 'nullable|numeric|min:0';
+            $rules["companies.*.addon_{$slug}_note"] = 'nullable|string|max:100';
+        }
+
+        return $rules;
     }
 
     public function messages(): array
@@ -93,8 +90,6 @@ class CreateQuotationRequest extends FormRequest
             'manufacturing_year.required' => 'Manufacturing year is required.',
             'manufacturing_year.min' => 'Manufacturing year must be 1980 or later.',
             'manufacturing_year.max' => 'Manufacturing year cannot be in the future.',
-            'date_of_registration.required' => 'Date of registration is required.',
-            'date_of_registration.before_or_equal' => 'Registration date cannot be in the future.',
             'cubic_capacity_kw.required' => 'Engine capacity is required.',
             'seating_capacity.required' => 'Seating capacity is required.',
             'fuel_type.required' => 'Fuel type is required.',
@@ -102,13 +97,14 @@ class CreateQuotationRequest extends FormRequest
             'ncb_percentage.numeric' => 'NCB percentage must be a valid number.',
             'ncb_percentage.min' => 'NCB percentage cannot be negative.',
             'ncb_percentage.max' => 'NCB percentage cannot exceed 50%.',
-            'idv_vehicle.required' => 'Vehicle IDV is required.',
-            'idv_vehicle.min' => 'Vehicle IDV must be at least ₹10,000.',
-            'idv_vehicle.max' => 'Vehicle IDV cannot exceed ₹1,00,00,000.',
-            'policy_type.required' => 'Policy type is required.',
-            'policy_type.in' => 'Please select a valid policy type.',
-            'policy_tenure_years.required' => 'Policy tenure is required.',
-            'policy_tenure_years.in' => 'Policy tenure must be 1, 2, or 3 years.',
+            // Company-level coverage validation messages
+            'companies.*.policy_type.required_with' => 'Policy type is required for each company quote.',
+            'companies.*.policy_type.in' => 'Please select a valid policy type for each company quote.',
+            'companies.*.policy_tenure_years.required_with' => 'Policy tenure is required for each company quote.',
+            'companies.*.policy_tenure_years.in' => 'Policy tenure must be 1, 2, or 3 years for each company quote.',
+            'companies.*.idv_vehicle.required_with' => 'Vehicle IDV is required for each company quote.',
+            'companies.*.idv_vehicle.min' => 'Vehicle IDV must be at least ₹10,000.',
+            'companies.*.idv_vehicle.max' => 'Vehicle IDV cannot exceed ₹1,00,00,000.',
             'whatsapp_number.regex' => 'Please enter a valid 10-digit mobile number.',
             'notes.max' => 'Notes cannot exceed 1000 characters.',
         ];

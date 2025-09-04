@@ -140,15 +140,13 @@
                                                         @if($quotation->status === 'Sent')
                                                             <button type="button" class="btn btn-warning btn-sm" 
                                                                     title="Resend via WhatsApp"
-                                                                    data-toggle="modal" 
-                                                                    data-target="#resendWhatsAppModal{{ $quotation->id }}">
+                                                                    onclick="showResendWhatsAppModal({{ $quotation->id }})">
                                                                 <i class="fab fa-whatsapp"></i>
                                                             </button>
                                                         @else
                                                             <button type="button" class="btn btn-success btn-sm" 
                                                                     title="Send via WhatsApp"
-                                                                    data-toggle="modal" 
-                                                                    data-target="#sendWhatsAppModal{{ $quotation->id }}">
+                                                                    onclick="showSendWhatsAppModal({{ $quotation->id }})">
                                                                 <i class="fab fa-whatsapp"></i>
                                                             </button>
                                                         @endif
@@ -169,8 +167,7 @@
                                                 @can('quotation-delete')
                                                     <button type="button" class="btn btn-danger btn-sm" 
                                                             title="Delete Quotation"
-                                                            data-toggle="modal" 
-                                                            data-target="#deleteQuotationModal{{ $quotation->id }}">
+                                                            onclick="showDeleteQuotationModal({{ $quotation->id }})">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 @endcan
@@ -218,7 +215,7 @@
                         <h6 class="modal-title" id="sendWhatsAppModalLabel{{ $quotation->id }}">
                             <i class="fab fa-whatsapp"></i> Send Quotation via WhatsApp
                         </h6>
-                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <button type="button" class="close text-white" onclick="hideWhatsAppModal('sendWhatsAppModal{{ $quotation->id }}')" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -234,7 +231,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideWhatsAppModal('sendWhatsAppModal{{ $quotation->id }}')">Cancel</button>
                         <form method="POST" action="{{ route('quotations.send-whatsapp', $quotation) }}" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-success">
@@ -254,7 +251,7 @@
                         <h6 class="modal-title" id="resendWhatsAppModalLabel{{ $quotation->id }}">
                             <i class="fab fa-whatsapp"></i> Resend Quotation via WhatsApp
                         </h6>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <button type="button" class="close" onclick="hideWhatsAppModal('resendWhatsAppModal{{ $quotation->id }}')" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -271,7 +268,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideWhatsAppModal('resendWhatsAppModal{{ $quotation->id }}')">Cancel</button>
                         <form method="POST" action="{{ route('quotations.send-whatsapp', $quotation) }}" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-warning">
@@ -292,7 +289,7 @@
                     <h6 class="modal-title" id="deleteQuotationModalLabel{{ $quotation->id }}">
                         <i class="fas fa-trash"></i> Delete Quotation
                     </h6>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close text-white" onclick="hideDeleteModal('deleteQuotationModal{{ $quotation->id }}')" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -312,7 +309,7 @@
                     <p class="text-warning small"><strong>Warning:</strong> This action cannot be undone.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="hideDeleteModal('deleteQuotationModal{{ $quotation->id }}')">Cancel</button>
                     <form method="POST" action="{{ route('quotations.delete', $quotation) }}" class="d-inline">
                         @csrf
                         @method('DELETE')
@@ -325,5 +322,73 @@
         </div>
     </div>
 @endforeach
+
+@section('scripts')
+    <script>
+        // WhatsApp Modal Functions (jQuery-only, no Bootstrap JS)
+        function showSendWhatsAppModal(quotationId) {
+            $('#sendWhatsAppModal' + quotationId).css('display', 'block').addClass('show');
+            $('body').addClass('modal-open');
+            $('.modal-backdrop').remove();
+            $('body').append('<div class="modal-backdrop fade show"></div>');
+        }
+
+        function showResendWhatsAppModal(quotationId) {
+            $('#resendWhatsAppModal' + quotationId).css('display', 'block').addClass('show');
+            $('body').addClass('modal-open');
+            $('.modal-backdrop').remove();
+            $('body').append('<div class="modal-backdrop fade show"></div>');
+        }
+
+        function hideWhatsAppModal(modalId) {
+            $('#' + modalId).css('display', 'none').removeClass('show');
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+        }
+
+        // Close modal when clicking on backdrop
+        $(document).on('click', '.modal-backdrop', function() {
+            $('[id^="sendWhatsAppModal"], [id^="resendWhatsAppModal"]').each(function() {
+                hideWhatsAppModal(this.id);
+            });
+        });
+
+        // Close modal on Escape key
+        $(document).keydown(function(e) {
+            if (e.keyCode === 27) { // ESC key
+                $('[id^="sendWhatsAppModal"], [id^="resendWhatsAppModal"]').each(function() {
+                    hideWhatsAppModal(this.id);
+                });
+                $('[id^="deleteQuotationModal"]').each(function() {
+                    hideDeleteModal(this.id);
+                });
+            }
+        });
+
+        // Delete Modal Functions
+        function showDeleteQuotationModal(quotationId) {
+            $('#deleteQuotationModal' + quotationId).css('display', 'block').addClass('show');
+            $('body').addClass('modal-open');
+            $('.modal-backdrop').remove();
+            $('body').append('<div class="modal-backdrop fade show"></div>');
+        }
+
+        function hideDeleteModal(modalId) {
+            $('#' + modalId).css('display', 'none').removeClass('show');
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop').remove();
+        }
+
+        // Update backdrop click handler
+        $(document).on('click', '.modal-backdrop', function() {
+            $('[id^="sendWhatsAppModal"], [id^="resendWhatsAppModal"]').each(function() {
+                hideWhatsAppModal(this.id);
+            });
+            $('[id^="deleteQuotationModal"]').each(function() {
+                hideDeleteModal(this.id);
+            });
+        });
+    </script>
+@endsection
 
 @endsection

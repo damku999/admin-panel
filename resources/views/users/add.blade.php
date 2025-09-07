@@ -1,91 +1,94 @@
 @extends('layouts.app')
 
-@section('title', 'Add Users')
+@section('title', 'Add User')
 
 @section('content')
-
     <div class="container-fluid">
-
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Add Users</h1>
-            <a href="{{ route('users.index') }}" onclick="window.history.go(-1); return false;"
-                class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                    class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
-        </div>
-
-        {{-- Alert Messages --}}
-        @include('common.alert')
-
-        <!-- DataTales Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Add New User</h6>
+        <div class="card shadow">
+            <div class="card-header py-1">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Add User</h6>
+                    <a href="{{ route('users.index') }}" onclick="window.history.go(-1); return false;"
+                        class="btn btn-back-compact" title="Back"><i class="fas fa-arrow-left"></i></a>
+                </div>
             </div>
             <form method="POST" action="{{ route('users.store') }}">
                 @csrf
-                <div class="card-body">
-                    <div class="form-group row">
-
+                <div class="card-body p-2">
+                    @if ($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Please fix the following errors:</strong>
+                            <ul class="mb-0 mt-2">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="close" data-dismiss="alert">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                    @endif
+                    
+                    <div class="row g-2">
                         {{-- First Name --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;">*</span>First Name</label>
-                            <input type="text"
-                                class="form-control form-control-user @error('first_name') is-invalid @enderror"
-                                id="exampleFirstName" placeholder="First Name" name="first_name"
+                        <div class="col-md-4 col-sm-6 mb-1">
+                            <label for="first_name" class="form-label text-sm"><span class="text-danger">*</span>First Name</label>
+                            <input type="text" class="form-control form-control-sm @error('first_name') is-invalid @enderror"
+                                id="first_name" placeholder="Enter first name" name="first_name"
                                 value="{{ old('first_name') }}">
-
                             @error('first_name')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
 
                         {{-- Last Name --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;">*</span>Last Name</label>
-                            <input type="text"
-                                class="form-control form-control-user @error('last_name') is-invalid @enderror"
-                                id="exampleLastName" placeholder="Last Name" name="last_name"
+                        <div class="col-md-4 col-sm-6 mb-1">
+                            <label for="last_name" class="form-label text-sm"><span class="text-danger">*</span>Last Name</label>
+                            <input type="text" class="form-control form-control-sm @error('last_name') is-invalid @enderror"
+                                id="last_name" placeholder="Enter last name" name="last_name"
                                 value="{{ old('last_name') }}">
-
                             @error('last_name')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
 
                         {{-- Email --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;">*</span>Email</label>
-                            <input type="email"
-                                class="form-control form-control-user @error('email') is-invalid @enderror"
-                                id="exampleEmail" placeholder="Email" name="email" value="{{ old('email') }}">
-
+                        <div class="col-md-4 col-sm-6 mb-1">
+                            <label for="email" class="form-label text-sm"><span class="text-danger">*</span>Email</label>
+                            <input type="email" class="form-control form-control-sm @error('email') is-invalid @enderror"
+                                id="email" placeholder="Enter email address" name="email"
+                                value="{{ old('email') }}">
                             @error('email')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
 
-                        {{-- Mobile Number --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;">*</span>Mobile Number</label>
-                            <input type="text"
-                                class="form-control form-control-user @error('mobile_number') is-invalid @enderror"
-                                id="exampleMobile" placeholder="Mobile Number" name="mobile_number"
-                                value="{{ old('mobile_number') }}">
-
-                            @error('mobile_number')
+                        {{-- Password --}}
+                        <div class="col-md-4 col-sm-6 mb-1">
+                            <label for="password" class="form-label text-sm"><span class="text-danger">*</span>Password</label>
+                            <input type="password" class="form-control form-control-sm @error('password') is-invalid @enderror"
+                                id="password" placeholder="Enter password" name="password">
+                            @error('password')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
 
+                        {{-- Confirm Password --}}
+                        <div class="col-md-4 col-sm-6 mb-1">
+                            <label for="confirm_password" class="form-label text-sm"><span class="text-danger">*</span>Confirm Password</label>
+                            <input type="password" class="form-control form-control-sm"
+                                id="confirm_password" placeholder="Confirm password" name="password_confirmation">
+                        </div>
+
                         {{-- Role --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;">*</span>Role</label>
-                            <select class="form-control form-control-user @error('role_id') is-invalid @enderror"
-                                name="role_id">
-                                <option selected disabled>Select Role</option>
-                                @foreach ($roles as $role)
-                                    <option value="{{ $role->id }}">{{ $role->name }}</option>
+                        <div class="col-md-4 col-sm-6 mb-1">
+                            <label for="role_id" class="form-label text-sm"><span class="text-danger">*</span>Role</label>
+                            <select class="form-control form-control-sm @error('role_id') is-invalid @enderror" name="role_id">
+                                <option value="" disabled {{ !old('role_id') ? 'selected' : '' }}>Select Role</option>
+                                @foreach($roles as $role)
+                                    <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
+                                        {{ $role->name }}
+                                    </option>
                                 @endforeach
                             </select>
                             @error('role_id')
@@ -93,57 +96,36 @@
                             @enderror
                         </div>
 
-                        {{-- Status --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;">*</span>Status</label>
-                            <select class="form-control form-control-user @error('status') is-invalid @enderror"
-                                name="status">
-                                <option selected disabled>Select Status</option>
-                                <option value="1" selected>Active</option>
-                                <option value="0">Inactive</option>
-                            </select>
-                            @error('status')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                    </div>
-                    <div class="p-3 py-5">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h4 class="text-right">Password</h4>
-                        </div>
-
-                        @csrf
-                        <div class="row mt-2">
-                            <div class="col-md-4">
-                                <label class="labels">Password</label>
-                                <input type="password" name="new_password" autocomplete="off" required
-                                    class="form-control @error('new_password') is-invalid @enderror" placeholder="Password">
-                                @error('new_password')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                            <div class="col-md-4">
-                                <label class="labels">Confirm Password</label>
-                                <input type="password" name="new_confirm_password"
-                                    class="form-control @error('new_confirm_password') is-invalid @enderror"
-                                    placeholder="Confirm Password" autocomplete="off" required>
-                                @error('new_confirm_password')
-                                    <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
-                        </div>
                     </div>
                 </div>
 
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-user float-right mb-3">Save</button>
-                    <a class="btn btn-primary float-right mr-3 mb-3" href="{{ route('users.index') }}">Cancel</a>
+                <div class="card-footer py-1">
+                    <div class="d-flex justify-content-end">
+                        <a class="btn btn-secondary btn-sm mr-2" href="{{ route('users.index') }}">Cancel</a>
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="fas fa-save mr-1"></i>Create User
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
-
     </div>
 
+@endsection
 
+@section('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Convert text inputs to uppercase
+            const textInputs = document.querySelectorAll('input[type="text"]');
+            textInputs.forEach(input => {
+                // Skip certain fields that shouldn't be uppercase
+                if (!input.name.includes('email') && !input.name.includes('password')) {
+                    input.addEventListener('input', function(e) {
+                        e.target.value = e.target.value.toUpperCase();
+                    });
+                }
+            });
+        });
+    </script>
 @endsection

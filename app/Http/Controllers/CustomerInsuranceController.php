@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\CustomerInsurancesExport;
 use App\Models\Branch;
 use App\Models\Broker;
 use App\Models\Customer;
@@ -14,17 +13,17 @@ use App\Models\PremiumType;
 use App\Models\ReferenceUser;
 use App\Models\RelationshipManager;
 use App\Traits\WhatsAppApiTrait;
+use App\Traits\ExportableTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Facades\Excel;
 
 class CustomerInsuranceController extends Controller
 {
-    use WhatsAppApiTrait;
+    use WhatsAppApiTrait, ExportableTrait;
     /**
      * Create a new controller instance.
      *
@@ -567,11 +566,7 @@ class CustomerInsuranceController extends Controller
         return view('customer_insurances.import');
     }
 
-    public function export()
-    {
-        return Excel::download(new CustomerInsurancesExport, 'customer_insurances.xlsx');
-    }
-
+        // Export method is now provided by ExportableTrait with advanced features
     /**
      * Renew CustomerInsurance
      * @param Integer $customer_insurance
@@ -739,5 +734,45 @@ class CustomerInsuranceController extends Controller
             DB::rollBack();
             return redirect()->back()->withInput()->with('error', $th->getMessage());
         }
+    }
+
+    // Export method is now provided by ExportableTrait with advanced features
+    
+    protected function getSearchableFields(): array
+    {
+        return ['policy_number', 'vehicle_registration_no'];
+    }
+    
+    protected function getExportConfig(Request $request): array
+    {
+        return array_merge($this->getBaseExportConfig($request), [
+            'relations' => ['customer', 'insuranceCompany', 'broker', 'relationshipManager'],
+            'headings' => [
+                'Policy Number', 'Customer Name', 'Insurance Company', 'Policy Type', 'Vehicle Number',
+                'Premium Amount', 'Start Date', 'End Date', 'Status', 'Broker', 'RM', 'Created Date'
+            ],
+            'mapping' => function($insurance) {
+                return [
+                    $insurance->policy_number,
+                    $insurance->customer ? $insurance->customer->name : '',
+                    $insurance->insuranceCompany ? $insurance->insuranceCompany->name : '',
+                    $insurance->insurance_type,
+                    $insurance->vehicle_registration_no,
+                    $insurance->final_premium_with_gst,
+                    $insurance->start_date ? $insurance->start_date->format('Y-m-d') : '',
+                    $insurance->end_date ? $insurance->end_date->format('Y-m-d') : '',
+                    $insurance->status ? 'Active' : 'Inactive',
+                    $insurance->broker ? $insurance->broker->name : '',
+                    $insurance->relationshipManager ? $insurance->relationshipManager->name : '',
+                    $insurance->created_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ]);
+    }
+    
+    protected function getExportFilename(): string
+    {
+        return 'customer_insurances';
     }
 }

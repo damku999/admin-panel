@@ -18,10 +18,18 @@
                     </div>
                     <div class="d-flex flex-wrap align-items-center gap-2">
                         @if (auth()->user()->hasPermissionTo('permission-create'))
-                            <a href="{{ route('permissions.create') }}" class="btn btn-primary">
+                            <a href="{{ route('permissions.create') }}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add New</span>
                             </a>
                         @endif
+                        <x-buttons.export-button 
+                            export-url="{{ route('permissions.export') }}"
+                            :formats="['xlsx', 'csv']"
+                            :show-dropdown="true"
+                            :with-filters="true"
+                            title="Export Permissions">
+                            Export Permissions
+                        </x-buttons.export-button>
                     </div>
                 </div>
             </div>

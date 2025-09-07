@@ -18,13 +18,18 @@
                     </div>
                     <div class="d-flex flex-wrap align-items-center gap-2">
                         @if (auth()->user()->hasPermissionTo('reference-user-create'))
-                            <a href="{{ route('reference_users.create') }}" class="btn btn-primary">
+                            <a href="{{ route('reference_users.create') }}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add New</span>
                             </a>
                         @endif
-                        <a href="{{ route('reference_users.export') }}" class="btn btn-success">
-                            <i class="fas fa-file-excel"></i> <span class="d-none d-sm-inline">Export</span>
-                        </a>
+                        <x-buttons.export-button 
+                            export-url="{{ route('reference_users.export') }}"
+                            :formats="['xlsx', 'csv']"
+                            :show-dropdown="true"
+                            :with-filters="true"
+                            title="Export Reference Users">
+                            Export Reference Users
+                        </x-buttons.export-button>
                     </div>
                 </div>
                 <form action="{{ route('reference_users.index') }}" method="GET" role="search">

@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ReferenceUser;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\ReferenceUsersExport;
+use App\Traits\ExportableTrait;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
 class ReferenceUsersController extends Controller
 {
+    use ExportableTrait;
     /**
      * Create a new controller instance.
      *
@@ -209,13 +209,35 @@ class ReferenceUsersController extends Controller
         return view('reference_users.import');
     }
 
-    /**
-     * Export ReferenceUsers
-     *
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
-     */
-    public function export()
+    // Export method is now provided by ExportableTrait with advanced features
+    
+    protected function getSearchableFields(): array
     {
-        return Excel::download(new ReferenceUsersExport, 'reference_users.xlsx');
+        return ['name', 'email', 'mobile_number'];
+    }
+    
+    protected function getExportConfig(Request $request): array
+    {
+        return array_merge($this->getBaseExportConfig($request), [
+            'headings' => [
+                'ID', 'Reference User Name', 'Email', 'Mobile Number', 'Status', 'Created Date'
+            ],
+            'mapping' => function($referenceUser) {
+                return [
+                    $referenceUser->id,
+                    $referenceUser->name,
+                    $referenceUser->email,
+                    $referenceUser->mobile_number,
+                    $referenceUser->status ? 'Active' : 'Inactive',
+                    $referenceUser->created_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ]);
+    }
+    
+    protected function getExportFilename(): string
+    {
+        return 'reference_users';
     }
 }

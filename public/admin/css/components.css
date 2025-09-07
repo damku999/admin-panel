@@ -1,0 +1,1159 @@
+/**
+ * Advanced Component System Styles
+ * Comprehensive styling for all component managers
+ */
+
+/* ========================================
+   CORE COMPONENT SYSTEM STYLES
+======================================== */
+
+/* Loading Overlay Styles */
+.datatable-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    border-radius: 6px;
+}
+
+.datatable-loading-overlay .loading-content {
+    text-align: center;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.datatable-loading-overlay .spinner-border {
+    width: 2rem;
+    height: 2rem;
+}
+
+/* ========================================
+   NOTIFICATION SYSTEM STYLES
+======================================== */
+
+/* Enhanced Notification Container */
+.notification-container {
+    position: fixed;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+.notification-container.top-right {
+    top: 20px;
+    right: 20px;
+}
+
+.notification-container.top-left {
+    top: 20px;
+    left: 20px;
+}
+
+.notification-container.bottom-right {
+    bottom: 20px;
+    right: 20px;
+}
+
+.notification-container.bottom-left {
+    bottom: 20px;
+    left: 20px;
+}
+
+/* Notification Items */
+.notification-item {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-bottom: 10px;
+    padding: 16px 20px;
+    min-width: 300px;
+    max-width: 400px;
+    pointer-events: auto;
+    border-left: 4px solid;
+    animation: slideInRight 0.3s ease-out;
+}
+
+.notification-item.success {
+    border-left-color: #28a745;
+}
+
+.notification-item.error {
+    border-left-color: #dc3545;
+}
+
+.notification-item.warning {
+    border-left-color: #ffc107;
+}
+
+.notification-item.info {
+    border-left-color: #17a2b8;
+}
+
+.notification-item .notification-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.notification-item .notification-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+}
+
+.notification-item .notification-close {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    line-height: 1;
+}
+
+.notification-item .notification-message {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.4;
+}
+
+/* Progress Notification */
+.notification-item .notification-progress {
+    margin-top: 10px;
+    height: 4px;
+    background: #e9ecef;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.notification-item .notification-progress-bar {
+    height: 100%;
+    background: #007bff;
+    transition: width 0.3s ease;
+}
+
+/* Animation keyframes */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* ========================================
+   MODAL SYSTEM STYLES
+======================================== */
+
+/* Enhanced Modal Backdrop */
+.modal-backdrop-enhanced {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+/* Modal Stack Management */
+.modal.modal-stacked {
+    z-index: 1060;
+}
+
+.modal.modal-stacked + .modal.modal-stacked {
+    z-index: 1070;
+}
+
+.modal.modal-stacked + .modal.modal-stacked + .modal.modal-stacked {
+    z-index: 1080;
+}
+
+/* Modal Animation */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+    transform: translate(0, -50px) scale(0.95);
+    opacity: 0;
+}
+
+.modal.show .modal-dialog {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+}
+
+/* Modal Content Enhancements */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    border-bottom: 1px solid #e9ecef;
+    padding: 20px 24px 16px;
+}
+
+.modal-body {
+    padding: 20px 24px;
+}
+
+.modal-footer {
+    border-top: 1px solid #e9ecef;
+    padding: 16px 24px 20px;
+}
+
+/* ========================================
+   FILE UPLOAD SYSTEM STYLES
+======================================== */
+
+/* Upload Area */
+.upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: #fafafa;
+}
+
+.upload-area:hover,
+.upload-area.drag-over {
+    border-color: #007bff;
+    background: #f8f9ff;
+}
+
+.upload-area.drag-over {
+    border-style: solid;
+    background: #e3f2fd;
+}
+
+.upload-area .upload-icon {
+    font-size: 48px;
+    color: #ddd;
+    margin-bottom: 16px;
+}
+
+.upload-area:hover .upload-icon,
+.upload-area.drag-over .upload-icon {
+    color: #007bff;
+}
+
+.upload-area .upload-text {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.upload-area .upload-hint {
+    font-size: 14px;
+    color: #999;
+}
+
+/* File List */
+.file-list {
+    margin-top: 20px;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background: #fff;
+}
+
+.file-item .file-icon {
+    font-size: 20px;
+    margin-right: 12px;
+    color: #007bff;
+}
+
+.file-item .file-info {
+    flex: 1;
+}
+
+.file-item .file-name {
+    font-weight: 500;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.file-item .file-size {
+    font-size: 12px;
+    color: #666;
+}
+
+.file-item .file-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.file-item .file-progress {
+    margin-top: 8px;
+    height: 4px;
+    background: #e9ecef;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.file-item .file-progress-bar {
+    height: 100%;
+    background: #28a745;
+    transition: width 0.3s ease;
+}
+
+/* Image Preview */
+.file-preview {
+    width: 60px;
+    height: 60px;
+    border-radius: 4px;
+    margin-right: 12px;
+    object-fit: cover;
+    border: 1px solid #e9ecef;
+}
+
+/* ========================================
+   DATA TABLE ENHANCEMENTS
+======================================== */
+
+/* Enhanced DataTable Container */
+.dataTables_wrapper {
+    position: relative;
+}
+
+/* Column Filters */
+.datatable-column-filters {
+    background: #f8f9fa;
+    padding: 15px;
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 15px;
+}
+
+.datatable-column-filters .form-control {
+    font-size: 13px;
+    height: 32px;
+}
+
+/* Bulk Actions */
+.datatable-bulk-actions {
+    background: #e3f2fd;
+    padding: 10px 15px;
+    border-left: 4px solid #2196f3;
+    margin-bottom: 15px;
+    border-radius: 0 4px 4px 0;
+    display: none;
+}
+
+.datatable-bulk-actions.show {
+    display: block;
+}
+
+.datatable-bulk-actions .bulk-info {
+    font-size: 13px;
+    color: #1565c0;
+    font-weight: 500;
+}
+
+/* Row Selection */
+.datatable-checkbox {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+}
+
+/* Inline Editing */
+.editable-cell {
+    cursor: pointer;
+    position: relative;
+}
+
+.editable-cell:hover {
+    background: #f8f9fa;
+}
+
+.editable-cell .edit-indicator {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 10px;
+    color: #007bff;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.editable-cell:hover .edit-indicator {
+    opacity: 1;
+}
+
+/* ========================================
+   UTILITY CLASSES
+======================================== */
+
+/* Enhanced Button Styles */
+.btn-enhanced {
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-enhanced:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.status-badge.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.warning {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-badge.danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-badge.info {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+/* Loading States */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+======================================== */
+
+/* Mobile First Approach - Small devices (landscape phones, 576px and up) */
+@media (max-width: 575.98px) {
+    .notification-item {
+        min-width: 260px;
+        max-width: calc(100vw - 20px);
+        font-size: 0.875rem;
+    }
+    
+    .modal-dialog {
+        margin: 5px;
+        max-width: calc(100vw - 10px);
+    }
+    
+    .upload-area {
+        padding: 20px 10px;
+        margin: 10px 0;
+    }
+    
+    .file-item {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+    
+    /* Form responsiveness */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-label, label {
+        font-size: 0.8rem !important;
+        margin-bottom: 0.25rem;
+    }
+    
+    .form-control {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .btn {
+        font-size: 0.875rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    /* Card adjustments */
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    /* Table responsiveness */
+    .table-responsive {
+        border: none;
+        margin-bottom: 1rem;
+    }
+    
+    .table {
+        margin-bottom: 0;
+        font-size: 0.875rem;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.5rem;
+        vertical-align: middle;
+    }
+    
+    /* Content wrapper adjustments */
+    #content-wrapper {
+        padding: 0;
+    }
+    
+    #content {
+        padding: 0.5rem;
+    }
+    
+    /* Date picker adjustments */
+    .datepicker {
+        width: 100% !important;
+    }
+}
+
+/* Tablet devices (768px and up) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .notification-item {
+        min-width: 300px;
+        max-width: calc(100vw - 40px);
+    }
+    
+    .modal-dialog {
+        margin: 10px;
+        max-width: calc(100vw - 20px);
+    }
+    
+    .upload-area {
+        padding: 25px 15px;
+    }
+    
+    .file-item {
+        padding: 10px 12px;
+    }
+    
+    /* Form adjustments for tablet */
+    .form-control {
+        font-size: 0.9rem;
+    }
+    
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    /* Table improvements */
+    .table th,
+    .table td {
+        padding: 0.6rem;
+    }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .notification-item {
+        min-width: 320px;
+        max-width: 400px;
+    }
+    
+    .modal-dialog {
+        margin: 15px auto;
+    }
+    
+    .upload-area {
+        padding: 30px 20px;
+    }
+    
+    /* Enhanced form layout for medium screens */
+    .row .col-md-6 .form-group {
+        margin-bottom: 1.25rem;
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+    .notification-item {
+        min-width: 350px;
+        max-width: 450px;
+    }
+    
+    /* Optimal form spacing for desktop */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .card-body {
+        padding: 2rem;
+    }
+}
+
+/* ========================================
+   FORM AND TABLE ENHANCEMENTS
+======================================== */
+
+/* Enhanced dropdown styling for better visibility */
+.custom-dropdown {
+    background-color: #fff;
+}
+
+/* ========================================
+   SELECT2 DROPDOWN ENHANCEMENTS
+======================================== */
+
+/* Select2 Container Styling */
+.select2-container {
+    width: 100% !important;
+    font-size: 0.875rem;
+    min-width: 200px;
+}
+
+.select2-container .select2-selection {
+    outline: none !important;
+}
+
+.select2-container--default .select2-selection--single {
+    height: calc(2.25rem + 2px) !important;
+    border: 1px solid #d1d3e2 !important;
+    border-radius: 0.35rem !important;
+    background-color: #fff !important;
+    padding: 0;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #5a5c69 !important;
+    line-height: calc(2.25rem) !important;
+    padding-left: 12px !important;
+    padding-right: 30px !important;
+    font-size: 0.875rem !important;
+    font-weight: 400 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #858796 !important;
+    font-size: 0.875rem !important;
+    opacity: 1 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: calc(2.25rem) !important;
+    right: 8px !important;
+    top: 1px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: #858796 transparent transparent transparent !important;
+    border-width: 5px 4px 0 4px !important;
+}
+
+/* Select2 Dropdown Styling */
+.select2-container--default .select2-dropdown {
+    border: 1px solid #d1d3e2 !important;
+    border-radius: 0.35rem !important;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+    z-index: 1060 !important;
+}
+
+.select2-container--default .select2-results__options {
+    max-height: 200px !important;
+    font-size: 0.875rem !important;
+}
+
+.select2-container--default .select2-results__option {
+    padding: 10px 12px !important;
+    color: #5a5c69 !important;
+    background-color: #fff !important;
+    border-bottom: 1px solid #f8f9fc !important;
+    font-size: 0.875rem !important;
+    line-height: 1.4 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #eaecf4 !important;
+    color: #5a5c69 !important;
+}
+
+.select2-container--default .select2-results__option[aria-selected=true] {
+    background-color: #4e73df !important;
+    color: #fff !important;
+    font-weight: 500 !important;
+}
+
+.select2-container--default .select2-results__option[aria-selected=true]:hover {
+    background-color: #2e59d9 !important;
+}
+
+/* Select2 Focus State */
+.select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: #bac8f3 !important;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25) !important;
+}
+
+/* Select2 Error State */
+.select2-container--default .select2-selection--single.is-invalid,
+.is-invalid ~ .select2-container--default .select2-selection--single {
+    border-color: #e74a3b !important;
+    box-shadow: 0 0 0 0.2rem rgba(231, 74, 59, 0.25) !important;
+}
+
+/* Select2 Search Box */
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    border: 1px solid #d1d3e2 !important;
+    border-radius: 0.25rem !important;
+    padding: 6px 12px !important;
+    font-size: 0.875rem !important;
+    color: #5a5c69 !important;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field:focus {
+    border-color: #bac8f3 !important;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25) !important;
+    outline: none !important;
+}
+
+/* Select2 No Results */
+.select2-container--default .select2-results__message {
+    color: #858796 !important;
+    font-size: 0.875rem !important;
+    padding: 12px 12px !important;
+    font-style: italic !important;
+}
+
+/* Select2 Small Size Variant */
+.form-select-sm ~ .select2-container--default .select2-selection--single {
+    height: calc(1.8125rem + 2px) !important;
+    font-size: 0.8125rem !important;
+}
+
+.form-select-sm ~ .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: calc(1.8125rem) !important;
+    padding-left: 8px !important;
+    font-size: 0.8125rem !important;
+}
+
+.form-select-sm ~ .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: calc(1.8125rem) !important;
+}
+
+.custom-dropdown:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    background-color: #fff;
+    color: #5a5c69;
+}
+
+.custom-dropdown option {
+    color: #5a5c69;
+    background-color: #fff;
+    font-weight: 400;
+    padding: 8px 12px;
+}
+
+.custom-dropdown option:hover {
+    background-color: #f8f9fc;
+}
+
+/* Enhanced table header styling with sorting indicators */
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: background-color 0.2s ease;
+}
+
+.sortable:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sortable .sort-icon {
+    transition: all 0.2s ease;
+    opacity: 0.7;
+    font-size: 0.875rem;
+}
+
+.sortable:hover .sort-icon {
+    opacity: 1;
+}
+
+/* Active sort column styling */
+.sortable .sort-icon.text-primary {
+    opacity: 1 !important;
+    color: #4e73df !important;
+}
+
+/* Make sure sort icons are visible */
+.sort-icon {
+    min-width: 12px;
+    display: inline-block;
+}
+
+/* Form label styling */
+.form-label.text-sm {
+    color: #5a5c69;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Enhanced search field styling */
+.customers-search-form .form-control,
+.search-form .form-control {
+    border: 1px solid #d1d3e2;
+    border-radius: 0.35rem;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.customers-search-form .form-control:focus,
+.search-form .form-control:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+/* Global form select styling */
+.form-select {
+    background-color: #fff;
+    border: 1px solid #d1d3e2;
+    color: #5a5c69;
+}
+
+.form-select:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    background-color: #fff;
+}
+
+/* ========================================
+   FORM VISIBILITY IMPROVEMENTS
+======================================== */
+
+/* Enhanced input styling for better visibility */
+.form-control {
+    background-color: #fff !important;
+    border: 1px solid #d1d3e2 !important;
+    color: #5a5c69 !important;
+    font-size: 0.875rem;
+    padding: 0.625rem 0.75rem;
+}
+
+.form-control:focus {
+    background-color: #fff !important;
+    border-color: #4e73df !important;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25) !important;
+    color: #5a5c69 !important;
+}
+
+/* Fix placeholder visibility */
+.form-control::placeholder {
+    color: #858796 !important;
+    opacity: 1 !important;
+    font-weight: 400;
+}
+
+.form-control:focus::placeholder {
+    color: #a6a9b8 !important;
+}
+
+/* Enhanced form labels */
+.form-label, 
+label {
+    color: #5a5c69 !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Required field indicators */
+label[required]::after,
+.form-label[required]::after,
+label:has(+ .form-control[required])::after {
+    content: ' *';
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+/* Help text visibility */
+.form-text,
+.text-muted,
+small.text-muted {
+    color: #6c757d !important;
+    font-size: 0.8125rem;
+    font-weight: 400;
+}
+
+/* Info icons and help text */
+.text-info {
+    color: #4e73df !important;
+}
+
+/* File input styling */
+.form-control[type="file"] {
+    padding: 0.5rem 0.75rem;
+    border: 2px dashed #d1d3e2 !important;
+    background-color: #f8f9fc !important;
+    transition: all 0.2s ease;
+}
+
+.form-control[type="file"]:hover {
+    border-color: #4e73df !important;
+    background-color: #f4f6ff !important;
+}
+
+.form-control[type="file"]:focus {
+    border-style: solid !important;
+    border-color: #4e73df !important;
+    background-color: #fff !important;
+}
+
+/* Date input styling */
+input[type="date"].form-control {
+    color: #5a5c69 !important;
+    background-color: #fff !important;
+}
+
+input[type="date"].form-control::-webkit-datetime-edit-text {
+    color: #858796;
+}
+
+input[type="date"].form-control::-webkit-datetime-edit-month-field,
+input[type="date"].form-control::-webkit-datetime-edit-day-field,
+input[type="date"].form-control::-webkit-datetime-edit-year-field {
+    color: #5a5c69;
+}
+
+/* Select dropdown styling */
+.form-select option {
+    color: #5a5c69 !important;
+    background-color: #fff !important;
+}
+
+/* Input group styling */
+.input-group-text {
+    background-color: #f8f9fc !important;
+    border: 1px solid #d1d3e2 !important;
+    color: #5a5c69 !important;
+}
+
+.input-group .form-control:not(:first-child) {
+    border-left: 0;
+}
+
+.input-group .form-control:not(:last-child) {
+    border-right: 0;
+}
+
+/* Form section headers */
+.card-header h5,
+.card-header h6,
+.section-header {
+    color: #5a5c69 !important;
+    font-weight: 700;
+}
+
+/* Icon visibility in form sections */
+.card-header i,
+.section-header i {
+    color: #4e73df !important;
+    opacity: 0.8;
+}
+
+/* Button styling improvements */
+.btn {
+    font-weight: 500;
+    border-radius: 0.35rem;
+    padding: 0.5rem 1rem;
+}
+
+.btn-primary {
+    background-color: #4e73df;
+    border-color: #4e73df;
+}
+
+.btn-primary:hover {
+    background-color: #2e59d9;
+    border-color: #2653d4;
+}
+
+.btn-success {
+    background-color: #1cc88a;
+    border-color: #1cc88a;
+}
+
+.btn-success:hover {
+    background-color: #17a673;
+    border-color: #169b6b;
+}
+
+/* Form validation styling */
+.is-invalid {
+    border-color: #e74c3c !important;
+}
+
+.is-valid {
+    border-color: #1cc88a !important;
+}
+
+.invalid-feedback {
+    color: #e74c3c !important;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+.valid-feedback {
+    color: #1cc88a !important;
+    font-size: 0.8125rem;
+    font-weight: 500;
+}
+
+/* Custom radio and checkbox styling */
+.form-check-input:checked {
+    background-color: #4e73df;
+    border-color: #4e73df;
+}
+
+.form-check-label {
+    color: #5a5c69 !important;
+    font-weight: 500;
+}
+
+/* Card styling improvements */
+.card {
+    border: 1px solid #e3e6f0;
+    border-radius: 0.35rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    color: #5a5c69;
+}
+
+/* Progress indicator styling */
+.progress {
+    background-color: #e3e6f0;
+    border-radius: 0.35rem;
+}
+
+.progress-bar {
+    background-color: #4e73df;
+}
+
+/* Table responsive improvements */
+.table-responsive {
+    border-radius: 0.35rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.table thead th {
+    vertical-align: middle;
+    border-bottom: 1px solid #e3e6f0;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.1rem;
+}
+
+/* ========================================
+   DARK MODE SUPPORT (Future Enhancement)
+======================================== */
+
+@media (prefers-color-scheme: dark) {
+    .notification-item {
+        background: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .notification-item .notification-title {
+        color: #f7fafc;
+    }
+    
+    .modal-content {
+        background: #2d3748;
+        color: #e2e8f0;
+    }
+    
+    .upload-area {
+        background: #2d3748;
+        border-color: #4a5568;
+    }
+    
+    .file-item {
+        background: #2d3748;
+        border-color: #4a5568;
+    }
+
+    .custom-dropdown {
+        background-color: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+
+    .form-select {
+        background-color: #2d3748;
+        border-color: #4a5568;
+        color: #e2e8f0;
+    }
+}

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\CrossSellingExport;
 use App\Exports\CustomerInsurancesExport1;
+use App\Traits\ExportableTrait;
 use App\Models\Branch;
 use App\Models\Broker;
 use App\Models\Customer;
@@ -20,6 +21,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
+    use ExportableTrait;
     /**
      * Create a new controller instance.
      *

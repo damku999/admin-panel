@@ -12,23 +12,20 @@
             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown"
                 aria-expanded="false">
                 <span
-                    class="me-2 d-none d-lg-inline text-gray-600 small">{{ auth()->user()->full_name ?? 'Guest' }}</span>
+                    class="mr-2 d-none d-lg-inline text-gray-600 small">{{ auth()->user()->full_name ?? 'Guest' }}</span>
                 <img class="img-profile rounded-circle" src="{{ asset('admin/img/undraw_profile.svg') }}">
             </a>
             <!-- Dropdown - User Information -->
-            <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in" aria-labelledby="userDropdown">
+            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
                 <a class="dropdown-item" href="{{ route('profile.detail') }}">
-                    <i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>
+                    <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
                     Profile
                 </a>
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#" onclick="event.preventDefault(); if(confirm('Are you sure you want to logout?')) { document.getElementById('logout-form').submit(); }">
-                    <i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>
+                <a class="dropdown-item" href="#" onclick="event.preventDefault(); showLogoutModal();">
+                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                     Logout
                 </a>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                    @csrf
-                </form>
             </div>
         </li>
 

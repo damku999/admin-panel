@@ -1,44 +1,26 @@
 @extends('layouts.app')
 
-@section('title', 'Add Customer Insurance')
+@section('title', 'Edit Customer Insurance')
 
 @section('content')
-
     <div class="container-fluid">
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Edit Customer Insurance</h1>
-            <a href="{{ route('customer_insurances.index') }}" onclick="window.history.go(-1); return false;"
-                class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                    class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
-        </div>
-
-        {{-- Alert Messages --}}
-        @include('common.alert')
-
-        <!-- DataTales Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Edit Customer Insurance</h6>
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+        <div class="card shadow">
+            <div class="card-header py-1">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Edit Customer Insurance</h6>
+                    <a href="{{ route('customer_insurances.index') }}" onclick="window.history.go(-1); return false;"
+                        class="btn btn-back-compact" title="Back"><i class="fas fa-arrow-left"></i></a>
+                </div>
             </div>
             <form method="POST"
                 action="{{ route('customer_insurances.update', ['customer_insurance' => $customer_insurance->id]) }}"
                 enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
-                <div class="card-body">
-                    <div class="form-group row mb-12">
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0"><span style="color: red;">*</span>Customer
-                            <select name="customer_id" class="form-control" id="customer_id">
+                <div class="card-body p-2">
+                    <div class="form-group row mb-1">
+                        <div class="col-md-4 col-sm-6 mb-1"><span style="color: red;">*</span>Customer
+                            <select name="customer_id" class="form-control form-control-sm" id="customer_id">
                                 <option selected="selected" disabled="disabled">Select Customer</option>
                                 @foreach ($customers as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
@@ -57,11 +39,11 @@
                         </div>
 
                         {{-- Issue Date --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label><span style="color: red;">*</span>Issue Date</label>
                             <div class="input-group date" id="issue_date">
                                 <input type="text"
-                                    class="form-control datepicker @error('issue_date') is-invalid @enderror"
+                                    class="form-control form-control-sm datepicker @error('issue_date') is-invalid @enderror"
                                     id="issue_date" name="issue_date"
                                     value="{{ old('issue_date', date('d-m-Y', strtotime($customer_insurance->issue_date))) }}" />
                             </div>
@@ -71,10 +53,10 @@
                         </div>
 
                         {{-- Policy Type --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label><span style="color: red;">*</span>Policy Type</label>
 
-                            <select name="policy_type_id" class="form-control" id="policy_type_id">
+                            <select name="policy_type_id" class="form-control form-control-sm" id="policy_type_id">
                                 <option selected="selected" disabled="disabled">Select Policy Type</option>
                                 @foreach ($policy_type as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
@@ -89,9 +71,9 @@
                         </div>
 
                         {{-- Branch --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label><span style="color: red;">*</span>Branch</label>
-                            <select name="branch_id" class="form-control" id="branch_id">
+                            <select name="branch_id" class="form-control form-control-sm" id="branch_id">
                                 <option selected="selected" disabled="disabled">Select Branch</option>
                                 @foreach ($branches as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
@@ -106,9 +88,9 @@
                         </div>
 
                         {{-- Broker --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label><span style="color: red;">*</span>Broker</label>
-                            <select name="broker_id" class="form-control" id="broker_id">
+                            <select name="broker_id" class="form-control form-control-sm" id="broker_id">
                                 <option selected="selected" disabled="disabled">Select Broker</option>
                                 @foreach ($brokers as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
@@ -122,9 +104,9 @@
                             @enderror
                         </div>
                         {{-- RM --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label><span style="color: red;">*</span>Relationship Manager</label>
-                            <select name="relationship_manager_id" class="form-control" id="relationship_manager_id">
+                            <select name="relationship_manager_id" class="form-control form-control-sm" id="relationship_manager_id">
                                 <option selected="selected" disabled="disabled">Select Broker</option>
                                 @foreach ($relationship_managers as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
@@ -139,9 +121,9 @@
                         </div>
 
                         {{-- Insurance Company Name --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label><span style="color: red;">*</span>Insurance Company Name</label>
-                            <select name="insurance_company_id" class="form-control" id="insurance_company_id">
+                            <select name="insurance_company_id" class="form-control form-control-sm" id="insurance_company_id">
                                 <option selected="selected" disabled="disabled">Select Company</option>
                                 @foreach ($insurance_companies as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
@@ -155,9 +137,9 @@
                             @enderror
                         </div>
                         {{-- Type OF Policy --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label><span style="color: red;">*</span>Premium Type</label>
-                            <select name="premium_type_id" class="form-control" id="premium_type_id"
+                            <select name="premium_type_id" class="form-control form-control-sm" id="premium_type_id"
                                 onchange="premiumTypeChanged()">
                                 <option selected="selected" disabled="disabled">Select Premium Type</option>
                                 @foreach ($premium_types as $item)
@@ -174,10 +156,10 @@
                             @enderror
                         </div>
                         {{-- Policy No. --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label><span style="color: red;">*</span>Policy No.</label>
                             <input type="text"
-                                class="form-control form-control-customer @error('policy_no') is-invalid @enderror"
+                                class="form-control form-control-sm @error('policy_no') is-invalid @enderror"
                                 id="policy_no" placeholder="Policy No." name="policy_no"
                                 value="{{ old('policy_no', $customer_insurance->policy_no) }}">
 
@@ -187,11 +169,11 @@
                         </div>
 
                         {{-- Start Date --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label><span style="color: red;">*</span>Start Date</label>
                             <div class="input-group date">
                                 <input type="text"
-                                    class="form-control datepicker @error('start_date') is-invalid @enderror"
+                                    class="form-control form-control-sm datepicker @error('start_date') is-invalid @enderror"
                                     id="start_date" name="start_date"
                                     value="{{ old('start_date', date('d-m-Y', strtotime($customer_insurance->start_date))) }}"
                                     onchange="setExpiredDate()" />
@@ -202,11 +184,11 @@
                         </div>
 
                         {{-- Expired Date --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label><span style="color: red;">*</span>Expired Date</label>
                             <div class="input-group date">
                                 <input type="text"
-                                    class="form-control datepicker @error('expired_date') is-invalid @enderror"
+                                    class="form-control form-control-sm datepicker @error('expired_date') is-invalid @enderror"
                                     id="expired_date" name="expired_date"
                                     value="{{ old('expired_date', date('d-m-Y', strtotime($customer_insurance->expired_date))) }}" />
                             </div>
@@ -219,7 +201,7 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                             <label><span style="color: red;">*</span>Registration No.</label>
                             <input type="text"
-                                class="form-control form-control-customer @error('registration_no') is-invalid @enderror"
+                                class="form-control form-control-sm @error('registration_no') is-invalid @enderror"
                                 id="registration_no" placeholder="Registration No." name="registration_no"
                                 value="{{ old('registration_no', $customer_insurance->registration_no) }}">
 
@@ -231,7 +213,7 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                             <label>Location</label>
                             <input type="text"
-                                class="form-control form-control-customer @error('rto') is-invalid @enderror"
+                                class="form-control form-control-sm @error('rto') is-invalid @enderror"
                                 id="rto" placeholder="Location" name="rto"
                                 value="{{ old('rto', $customer_insurance->rto) }}">
 
@@ -244,7 +226,7 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                             <label>Make & Model</label>
                             <input type="text"
-                                class="form-control form-control-customer @error('make_model') is-invalid @enderror"
+                                class="form-control form-control-sm @error('make_model') is-invalid @enderror"
                                 id="make_model" placeholder="Make & Model" name="make_model"
                                 value="{{ old('make_model', $customer_insurance->make_model) }}">
 
@@ -255,7 +237,7 @@
                         {{-- Fuel Type --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                             <label>Fuel Type</label>
-                            <select name="fuel_type_id" class="form-control" id="fuel_type_id">
+                            <select name="fuel_type_id" class="form-control form-control-sm" id="fuel_type_id">
                                 <option selected="selected" disabled="disabled">Select Fuel Type</option>
                                 @foreach ($fuel_type as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
@@ -274,7 +256,7 @@
                             <label><span style="color: red;">*</span>TP Expiry Date</label>
                             <div class="input-group date">
                                 <input type="text"
-                                    class="form-control datepicker @error('tp_expiry_date') is-invalid @enderror"
+                                    class="form-control form-control-sm datepicker @error('tp_expiry_date') is-invalid @enderror"
                                     id="tp_expiry_date" name="tp_expiry_date"
                                     value="{{ old('tp_expiry_date', date('d-m-Y', strtotime($customer_insurance->tp_expiry_date))) }}" />
                             </div>
@@ -314,7 +296,7 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
                             <label><span style="color: red;">*</span>GVW </label>
                             <input type="text"
-                                class="decimal-input form-control form-control-customer @error('gross_vehicle_weight') is-invalid @enderror"
+                                class="decimal-input form-control form-control-sm @error('gross_vehicle_weight') is-invalid @enderror"
                                 id="gross_vehicle_weight" placeholder="GVW" name="gross_vehicle_weight"
                                 value="{{ old('gross_vehicle_weight', $customer_insurance->gross_vehicle_weight) }}">
 
@@ -327,7 +309,7 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
                             <label>Plan Name</label>
                             <input type="text"
-                                class="form-control form-control-customer @error('plan_name') is-invalid @enderror"
+                                class="form-control form-control-sm @error('plan_name') is-invalid @enderror"
                                 id="plan_name" placeholder="Plan Name" name="plan_name"
                                 value="{{ old('plan_name', $customer_insurance->plan_name) }}">
                             @error('plan_name')
@@ -338,7 +320,7 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
                             <label>Premium Paying Term</label>
                             <input type="text"
-                                class="decimal-input form-control form-control-customer @error('premium_paying_term') is-invalid @enderror"
+                                class="decimal-input form-control form-control-sm @error('premium_paying_term') is-invalid @enderror"
                                 id="premium_paying_term" placeholder="Premium Paying Term" name="premium_paying_term"
                                 value="{{ old('premium_paying_term', $customer_insurance->premium_paying_term) }}">
                             @error('premium_paying_term')
@@ -349,7 +331,7 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
                             <label>Policy Term</label>
                             <input type="text"
-                                class="decimal-input form-control form-control-customer @error('policy_term') is-invalid @enderror"
+                                class="decimal-input form-control form-control-sm @error('policy_term') is-invalid @enderror"
                                 id="policy_term" placeholder="Policy Term" name="policy_term"
                                 value="{{ old('policy_term', $customer_insurance->policy_term) }}">
                             @error('policy_term')
@@ -360,7 +342,7 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
                             <label>Sum Insured</label>
                             <input type="text"
-                                class="decimal-input form-control form-control-customer @error('sum_insured') is-invalid @enderror"
+                                class="decimal-input form-control form-control-sm @error('sum_insured') is-invalid @enderror"
                                 id="sum_insured" placeholder="Sum Insured" name="sum_insured"
                                 value="{{ old('sum_insured', $customer_insurance->sum_insured) }}">
                             @error('sum_insured')
@@ -371,7 +353,7 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
                             <label>Pension Amount Yearly </label>
                             <input type="text"
-                                class="decimal-input form-control form-control-customer @error('pension_amount_yearly') is-invalid @enderror"
+                                class="decimal-input form-control form-control-sm @error('pension_amount_yearly') is-invalid @enderror"
                                 id="pension_amount_yearly" placeholder="Pension Amount Yearly "
                                 name="pension_amount_yearly"
                                 value="{{ old('pension_amount_yearly', $customer_insurance->pension_amount_yearly) }}">
@@ -383,7 +365,7 @@
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
                             <label>Approx Maturity Amount </label>
                             <input type="text"
-                                class="decimal-input form-control form-control-customer @error('approx_maturity_amount') is-invalid @enderror"
+                                class="decimal-input form-control form-control-sm @error('approx_maturity_amount') is-invalid @enderror"
                                 id="approx_maturity_amount" placeholder="Approx Maturity Amount "
                                 name="approx_maturity_amount"
                                 value="{{ old('approx_maturity_amount', $customer_insurance->approx_maturity_amount) }}">
@@ -394,7 +376,7 @@
                         {{-- Life Insurance Payment Mode --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
                             <label><span style="color: red;">*</span>Life Insurance Payment Mode</label>
-                            <select name="life_insurance_payment_mode" class="form-control"
+                            <select name="life_insurance_payment_mode" class="form-control form-control-sm"
                                 id="life_insurance_payment_mode">
                                 <option selected="selected">Select Life Insurance Payment Mode
                                 </option>
@@ -416,7 +398,7 @@
                             <label><span style="color: red;">*</span>Maturity Date</label>
                             <div class="input-group date" id="maturity_date">
                                 <input type="text"
-                                    class="form-control datepicker @error('maturity_date') is-invalid @enderror"
+                                    class="form-control form-control-sm datepicker @error('maturity_date') is-invalid @enderror"
                                     id="maturity_date" name="maturity_date"
                                     value="{{ old('maturity_date', date('d-m-Y', strtotime($customer_insurance->maturity_date))) }}" />
                             </div>
@@ -428,7 +410,7 @@
                         {{-- Remarks --}}
                         <div class="col-sm-6 col-md-8 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
                             <label>Remarks</label>
-                            <textarea class="form-control form-control-customer @error('remarks') is-invalid @enderror" id="remarks"
+                            <textarea class="form-control form-control-sm @error('remarks') is-invalid @enderror" id="remarks"
                                 placeholder="Remarks" name="remarks" rows="4">{{ old('remarks', $customer_insurance->remarks) }}</textarea>
                             @error('remarks')
                                 <span class="text-danger">{{ $message }}</span>
@@ -436,10 +418,10 @@
                         </div>
 
                         {{-- Mode of Payment --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label>Mode of Payment</label>
                             <input type="text"
-                                class="form-control form-control-customer @error('mode_of_payment') is-invalid @enderror"
+                                class="form-control form-control-sm @error('mode_of_payment') is-invalid @enderror"
                                 id="mode_of_payment" placeholder="Mode of Payment" name="mode_of_payment"
                                 value="{{ old('mode_of_payment', $customer_insurance->mode_of_payment) }}">
 
@@ -449,10 +431,10 @@
                         </div>
 
                         {{-- Cheque No. --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label>Cheque No.</label>
                             <input type="text"
-                                class="form-control form-control-customer @error('cheque_no') is-invalid @enderror"
+                                class="form-control form-control-sm @error('cheque_no') is-invalid @enderror"
                                 id="cheque_no" placeholder="Cheque No." name="cheque_no"
                                 value="{{ old('cheque_no', $customer_insurance->cheque_no) }}">
 
@@ -461,7 +443,7 @@
                             @enderror
                         </div>
                         {{-- Policy Document --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label for="policy_document_path">Policy Document</label>
                             <div class="input-group">
                                 <div class="custom-file">
@@ -484,9 +466,9 @@
                         </div>
 
                         {{-- Reference Name --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label>Reference By :</label>
-                            <select name="reference_by" class="form-control" id="reference_by">
+                            <select name="reference_by" class="form-control form-control-sm" id="reference_by">
                                 <option selected="selected" value="0">Select Reference By</option>
                                 @foreach ($reference_by_user as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
@@ -501,13 +483,13 @@
                         </div>
                     </div>
 
-                    <div class="card mb-12 col-md-12 border-left-success">
+                    <div class="card mb-1 col-md-12 border-left-success">
                         <div class="form-group row">
                             {{-- OD Premium --}}
                             <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                                 <label>OD Premium</label>
                                 <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('od_premium') is-invalid @enderror"
+                                    class="decimal-input form-control form-control-sm @error('od_premium') is-invalid @enderror"
                                     id="od_premium" placeholder="OD Premium" name="od_premium"
                                     value="{{ old('od_premium', $customer_insurance->od_premium) }}">
 
@@ -520,7 +502,7 @@
                             <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                                 <label>TP Premium</label>
                                 <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('tp_premium') is-invalid @enderror"
+                                    class="decimal-input form-control form-control-sm @error('tp_premium') is-invalid @enderror"
                                     id="tp_premium" placeholder="TP Premium" name="tp_premium"
                                     value="{{ old('tp_premium', $customer_insurance->tp_premium) }}">
 
@@ -543,10 +525,10 @@
                             </div>
 
                             {{-- Net Premium --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <div class="col-md-4 col-sm-6 mb-1">
                                 <label><span style="color: red;">*</span>Net Premium</label>
                                 <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('net_premium') is-invalid @enderror"
+                                    class="decimal-input form-control form-control-sm @error('net_premium') is-invalid @enderror"
                                     id="net_premium" placeholder="Net Premium" name="net_premium"
                                     value="{{ old('net_premium', $customer_insurance->net_premium) }}">
 
@@ -556,10 +538,10 @@
                             </div>
 
                             {{-- CGST --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <div class="col-md-4 col-sm-6 mb-1">
                                 <label><span style="color: red;">*</span>CGST 1</label>
                                 <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('cgst1') is-invalid @enderror"
+                                    class="decimal-input form-control form-control-sm @error('cgst1') is-invalid @enderror"
                                     id="cgst1" placeholder="CGST" name="cgst1"
                                     value="{{ old('cgst1', $customer_insurance->cgst1) }}">
 
@@ -568,10 +550,10 @@
                                 @enderror
                             </div>
                             {{-- SGST --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <div class="col-md-4 col-sm-6 mb-1">
                                 <label><span style="color: red;">*</span>SGST 1</label>
                                 <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('sgst1') is-invalid @enderror"
+                                    class="decimal-input form-control form-control-sm @error('sgst1') is-invalid @enderror"
                                     id="sgst1" placeholder="SGST" name="sgst1"
                                     value="{{ old('sgst1', $customer_insurance->sgst1) }}">
 
@@ -584,7 +566,7 @@
                             <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
                                 <label><span style="color: red;">*</span>CGST 2 </label>
                                 <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('cgst2') is-invalid @enderror"
+                                    class="decimal-input form-control form-control-sm @error('cgst2') is-invalid @enderror"
                                     id="cgst2" placeholder="CGST 2" name="cgst2"
                                     value="{{ old('cgst2', $customer_insurance->cgst2) }}">
 
@@ -597,7 +579,7 @@
                             <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
                                 <label><span style="color: red;">*</span>SGST 2 </label>
                                 <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('sgst2') is-invalid @enderror"
+                                    class="decimal-input form-control form-control-sm @error('sgst2') is-invalid @enderror"
                                     id="sgst2" placeholder="SGST 2" name="sgst2"
                                     value="{{ old('sgst2', $customer_insurance->sgst2) }}">
 
@@ -607,10 +589,10 @@
                             </div>
 
                             {{-- Final Premium With GST --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <div class="col-md-4 col-sm-6 mb-1">
                                 <label><span style="color: red;">*</span>Final Premium With GST</label>
                                 <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('final_premium_with_gst') is-invalid @enderror"
+                                    class="decimal-input form-control form-control-sm @error('final_premium_with_gst') is-invalid @enderror"
                                     id="final_premium_with_gst" placeholder="Final Premium With GST"
                                     name="final_premium_with_gst"
                                     value="{{ old('final_premium_with_gst', $customer_insurance->final_premium_with_gst) }}"
@@ -624,11 +606,11 @@
                     </div>
                     <br>
                     @if (auth()->user()->hasRole('Admin'))
-                        <div class="card mt-12 col-md-12 border-left-dark">
+                        <div class="card mt-1 col-md-12 border-left-dark">
                             <div class="form-group row">
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <div class="col-md-4 col-sm-6 mb-1">
                                     <label>Commission On</label>
-                                    <select name="commission_on" class="form-control" id="commission_on">
+                                    <select name="commission_on" class="form-control form-control-sm" id="commission_on">
                                         <option value="net_premium" @if (old('commission_on', $customer_insurance->commission_on) == 'net_premium') selected @endif> Net
                                             Premium </option>
                                         <option value="od_premium" @if (old('commission_on', $customer_insurance->commission_on) == 'od_premium') selected @endif>OD
@@ -641,10 +623,10 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <div class="col-md-4 col-sm-6 mb-1">
                                     <label>My Commission Percentage</label>
                                     <input type="text"
-                                        class="decimal-input form-control form-control-customer @error('my_commission_percentage') is-invalid @enderror"
+                                        class="decimal-input form-control form-control-sm @error('my_commission_percentage') is-invalid @enderror"
                                         id="my_commission_percentage" placeholder="My Commission Percentage"
                                         name="my_commission_percentage"
                                         value="{{ old('my_commission_percentage', $customer_insurance->my_commission_percentage) }}">
@@ -653,10 +635,10 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <div class="col-md-4 col-sm-6 mb-1">
                                     <label>My Commission Amount</label>
                                     <input type="text"
-                                        class="decimal-input form-control form-control-customer @error('my_commission_amount') is-invalid @enderror"
+                                        class="decimal-input form-control form-control-sm @error('my_commission_amount') is-invalid @enderror"
                                         id="my_commission_amount" placeholder="My Commission Amount"
                                         name="my_commission_amount"
                                         value="{{ old('my_commission_amount', $customer_insurance->my_commission_amount) }}"
@@ -666,10 +648,10 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <div class="col-md-4 col-sm-6 mb-1">
                                     <label><span style="color: red;">*</span>Transfer Commission Percentage</label>
                                     <input type="text"
-                                        class="decimal-input form-control form-control-customer @error('transfer_commission_percentage') is-invalid @enderror"
+                                        class="decimal-input form-control form-control-sm @error('transfer_commission_percentage') is-invalid @enderror"
                                         id="transfer_commission_percentage" placeholder="Transfer Commission Percentage"
                                         name="transfer_commission_percentage"
                                         value="{{ old('transfer_commission_percentage', $customer_insurance->transfer_commission_percentage) }}">
@@ -678,10 +660,10 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <div class="col-md-4 col-sm-6 mb-1">
                                     <label><span style="color: red;">*</span>Transfer Commission Amount</label>
                                     <input type="text"
-                                        class="decimal-input form-control form-control-customer @error('transfer_commission_amount') is-invalid @enderror"
+                                        class="decimal-input form-control form-control-sm @error('transfer_commission_amount') is-invalid @enderror"
                                         id="transfer_commission_amount" placeholder="Transfer Commission Amount"
                                         name="transfer_commission_amount"
                                         value="{{ old('transfer_commission_amount', $customer_insurance->transfer_commission_amount) }}"
@@ -691,10 +673,10 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <div class="col-md-4 col-sm-6 mb-1">
                                     <label>Reference Commission Percentage</label>
                                     <input type="text"
-                                        class="decimal-input form-control form-control-customer @error('reference_commission_percentage') is-invalid @enderror"
+                                        class="decimal-input form-control form-control-sm @error('reference_commission_percentage') is-invalid @enderror"
                                         id="reference_commission_percentage" placeholder="Reference Commission Percentage"
                                         name="reference_commission_percentage"
                                         value="{{ old('reference_commission_percentage', $customer_insurance->reference_commission_percentage) }}">
@@ -703,10 +685,10 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <div class="col-md-4 col-sm-6 mb-1">
                                     <label>Reference Commission Amount</label>
                                     <input type="text"
-                                        class="decimal-input form-control form-control-customer @error('reference_commission_amount') is-invalid @enderror"
+                                        class="decimal-input form-control form-control-sm @error('reference_commission_amount') is-invalid @enderror"
                                         id="reference_commission_amount" placeholder="Reference Commission Amount"
                                         name="reference_commission_amount"
                                         value="{{ old('reference_commission_amount', $customer_insurance->reference_commission_amount) }}"
@@ -716,10 +698,10 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <div class="col-md-4 col-sm-6 mb-1">
                                     <label><span style="color: red;">*</span>Actual Earnings</label>
                                     <input type="text"
-                                        class="decimal-input form-control form-control-customer @error('actual_earnings') is-invalid @enderror"
+                                        class="decimal-input form-control form-control-sm @error('actual_earnings') is-invalid @enderror"
                                         id="actual_earnings" placeholder="Actual Earnings" name="actual_earnings"
                                         value="{{ old('actual_earnings', $customer_insurance->actual_earnings) }}"
                                         readonly>
@@ -731,10 +713,12 @@
                         </div>
                     @endif
                 </div>
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-customer_insurance float-right mb-3">Save</button>
-                    <a class="btn btn-primary float-right mr-3 mb-3"
-                        href="{{ route('customer_insurances.index') }}">Cancel</a>
+                <div class="card-footer p-2">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <a class="btn btn-secondary btn-sm mr-2"
+                            href="{{ route('customer_insurances.index') }}">Cancel</a>
+                        <button type="submit" class="btn btn-success btn-sm">Update</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -1001,11 +985,13 @@
             // Set the formatted expired date to the input field
             $('#expired_date').datepicker('update', formattedExpiredDate);
         }
-        const inputElements = document.querySelectorAll('input[type="text"]');
+        const inputElements = document.querySelectorAll('input[type="text"]:not([type="email"])');
 
         function convertToUppercase(event) {
             const input = event.target;
-            input.value = input.value.toUpperCase();
+            if (!input.type.includes('email') && !input.name.includes('email')) {
+                input.value = input.value.toUpperCase();
+            }
         }
         inputElements.forEach(input => {
             input.addEventListener('input', convertToUppercase);

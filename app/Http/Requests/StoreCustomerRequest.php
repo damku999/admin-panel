@@ -25,7 +25,6 @@ class StoreCustomerRequest extends FormRequest
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:customers,email',
             'mobile_number' => 'required|numeric|digits:10',
-            'status' => 'required|numeric|in:0,1',
             'type' => 'required|in:Retail,Corporate',
             'pan_card_number' => 'required_if:type,Retail|nullable|string|max:10',
             'pan_card_path' => 'nullable|file|max:1024|mimetypes:application/pdf,image/jpeg,image/png',

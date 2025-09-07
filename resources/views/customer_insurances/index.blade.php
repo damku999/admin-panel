@@ -22,9 +22,14 @@
                                 <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add New</span>
                             </a>
                         @endif
-                        <a href="{{ route('customer_insurances.export') }}" class="btn btn-success btn-sm">
-                            <i class="fas fa-file-excel"></i> <span class="d-none d-sm-inline">Export</span>
-                        </a>
+                        <x-buttons.export-button 
+                            export-url="{{ route('customer_insurances.export') }}"
+                            :formats="['xlsx', 'csv', 'pdf']"
+                            :show-dropdown="true"
+                            :with-filters="true"
+                            title="Export Customer Insurances">
+                            Export Insurances
+                        </x-buttons.export-button>
                     </div>
                 </div>
                 <form action="{{ route('customer_insurances.index') }}" method="GET" role="search">

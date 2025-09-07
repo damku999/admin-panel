@@ -1,6 +1,6 @@
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ route('home') }}">
-        <img src=" {{ asset('images/parth_logo.png') }}" style="max-width: 224px;">
+        <img src="{{ asset(\App\Services\AppSettingService::get('app_logo', 'images/parth_logo.png')) }}" style="max-width: 224px;" alt="{{ config('app.name') }}">
     </a>
 
     <hr class="sidebar-divider my-0">
@@ -65,6 +65,32 @@
             </div>
         </div>
     </li>
+
+    <!-- Claims Management -->
+    @can('claim-list')
+        <li class="nav-item">
+            <a class="nav-link {{ str_contains(Route::currentRouteName(), 'claims.') ? '' : 'collapsed' }}"
+                href="#" data-toggle="collapse" data-target="#taTpDropDownClaims"
+                aria-expanded="{{ str_contains(Route::currentRouteName(), 'claims.') ? 'true' : 'false' }}"
+                aria-controls="taTpDropDownClaims">
+                <i class="fas fa-file-medical"></i>
+                <span>Claims Management</span>
+            </a>
+            <div id="taTpDropDownClaims"
+                class="collapse {{ str_contains(Route::currentRouteName(), 'claims.') ? 'show' : '' }}"
+                aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">Insurance Claims:</h6>
+                    <a class="collapse-item {{ Route::currentRouteName() == 'claims.index' ? 'active' : '' }}"
+                        href="{{ route('claims.index') }}">List Claims</a>
+                    @can('claim-create')
+                        <a class="collapse-item {{ str_contains(Route::currentRouteName(), 'claims.create') ? 'active' : '' }}"
+                            href="{{ route('claims.create') }}">Create New Claim</a>
+                    @endcan
+                </div>
+            </div>
+        </li>
+    @endcan
 
     <!-- Family Groups -->
     <li class="nav-item">
@@ -186,12 +212,12 @@
 
         <!-- Settings Dropdown -->
         <li class="nav-item">
-            <a class="nav-link {{ Route::currentRouteName() == 'users.index' || Route::currentRouteName() == 'users.create' || Route::currentRouteName() == 'users.edit' || Route::currentRouteName() == 'roles.index' || Route::currentRouteName() == 'roles.create' || Route::currentRouteName() == 'roles.edit' || Route::currentRouteName() == 'permissions.index' || Route::currentRouteName() == 'permissions.create' || Route::currentRouteName() == 'permissions.edit' || Route::currentRouteName() == 'brokers.index' || Route::currentRouteName() == 'brokers.create' || Route::currentRouteName() == 'brokers.edit' || Route::currentRouteName() == 'relationship_managers.index' || Route::currentRouteName() == 'relationship_managers.create' || Route::currentRouteName() == 'relationship_managers.edit' || Route::currentRouteName() == 'reference_users.index' || Route::currentRouteName() == 'reference_users.create' || Route::currentRouteName() == 'reference_users.edit' ? '' : 'collapsed' }}" href="#" data-toggle="collapse" data-target="#collapseSettings"
-                aria-expanded="{{ Route::currentRouteName() == 'users.index' || Route::currentRouteName() == 'users.create' || Route::currentRouteName() == 'users.edit' || Route::currentRouteName() == 'roles.index' || Route::currentRouteName() == 'roles.create' || Route::currentRouteName() == 'roles.edit' || Route::currentRouteName() == 'permissions.index' || Route::currentRouteName() == 'permissions.create' || Route::currentRouteName() == 'permissions.edit' || Route::currentRouteName() == 'brokers.index' || Route::currentRouteName() == 'brokers.create' || Route::currentRouteName() == 'brokers.edit' || Route::currentRouteName() == 'relationship_managers.index' || Route::currentRouteName() == 'relationship_managers.create' || Route::currentRouteName() == 'relationship_managers.edit' || Route::currentRouteName() == 'reference_users.index' || Route::currentRouteName() == 'reference_users.create' || Route::currentRouteName() == 'reference_users.edit' ? 'true' : 'false' }}" aria-controls="collapseSettings">
+            <a class="nav-link {{ Route::currentRouteName() == 'users.index' || Route::currentRouteName() == 'users.create' || Route::currentRouteName() == 'users.edit' || Route::currentRouteName() == 'roles.index' || Route::currentRouteName() == 'roles.create' || Route::currentRouteName() == 'roles.edit' || Route::currentRouteName() == 'permissions.index' || Route::currentRouteName() == 'permissions.create' || Route::currentRouteName() == 'permissions.edit' || str_contains(Route::currentRouteName(), 'app-settings') || Route::currentRouteName() == 'brokers.index' || Route::currentRouteName() == 'brokers.create' || Route::currentRouteName() == 'brokers.edit' || Route::currentRouteName() == 'relationship_managers.index' || Route::currentRouteName() == 'relationship_managers.create' || Route::currentRouteName() == 'relationship_managers.edit' || Route::currentRouteName() == 'reference_users.index' || Route::currentRouteName() == 'reference_users.create' || Route::currentRouteName() == 'reference_users.edit' ? '' : 'collapsed' }}" href="#" data-toggle="collapse" data-target="#collapseSettings"
+                aria-expanded="{{ Route::currentRouteName() == 'users.index' || Route::currentRouteName() == 'users.create' || Route::currentRouteName() == 'users.edit' || Route::currentRouteName() == 'roles.index' || Route::currentRouteName() == 'roles.create' || Route::currentRouteName() == 'roles.edit' || Route::currentRouteName() == 'permissions.index' || Route::currentRouteName() == 'permissions.create' || Route::currentRouteName() == 'permissions.edit' || str_contains(Route::currentRouteName(), 'app-settings') || Route::currentRouteName() == 'brokers.index' || Route::currentRouteName() == 'brokers.create' || Route::currentRouteName() == 'brokers.edit' || Route::currentRouteName() == 'relationship_managers.index' || Route::currentRouteName() == 'relationship_managers.create' || Route::currentRouteName() == 'relationship_managers.edit' || Route::currentRouteName() == 'reference_users.index' || Route::currentRouteName() == 'reference_users.create' || Route::currentRouteName() == 'reference_users.edit' ? 'true' : 'false' }}" aria-controls="collapseSettings">
                 <i class="fas fa-tools"></i>
                 <span>Settings</span>
             </a>
-            <div id="collapseSettings" class="collapse {{ Route::currentRouteName() == 'users.index' || Route::currentRouteName() == 'users.create' || Route::currentRouteName() == 'users.edit' || Route::currentRouteName() == 'roles.index' || Route::currentRouteName() == 'roles.create' || Route::currentRouteName() == 'roles.edit' || Route::currentRouteName() == 'permissions.index' || Route::currentRouteName() == 'permissions.create' || Route::currentRouteName() == 'permissions.edit' || Route::currentRouteName() == 'brokers.index' || Route::currentRouteName() == 'brokers.create' || Route::currentRouteName() == 'brokers.edit' || Route::currentRouteName() == 'relationship_managers.index' || Route::currentRouteName() == 'relationship_managers.create' || Route::currentRouteName() == 'relationship_managers.edit' || Route::currentRouteName() == 'reference_users.index' || Route::currentRouteName() == 'reference_users.create' || Route::currentRouteName() == 'reference_users.edit' ? 'show' : '' }}" aria-labelledby="headingSettings" data-parent="#accordionSidebar">
+            <div id="collapseSettings" class="collapse {{ Route::currentRouteName() == 'users.index' || Route::currentRouteName() == 'users.create' || Route::currentRouteName() == 'users.edit' || Route::currentRouteName() == 'roles.index' || Route::currentRouteName() == 'roles.create' || Route::currentRouteName() == 'roles.edit' || Route::currentRouteName() == 'permissions.index' || Route::currentRouteName() == 'permissions.create' || Route::currentRouteName() == 'permissions.edit' || str_contains(Route::currentRouteName(), 'app-settings') || Route::currentRouteName() == 'brokers.index' || Route::currentRouteName() == 'brokers.create' || Route::currentRouteName() == 'brokers.edit' || Route::currentRouteName() == 'relationship_managers.index' || Route::currentRouteName() == 'relationship_managers.create' || Route::currentRouteName() == 'relationship_managers.edit' || Route::currentRouteName() == 'reference_users.index' || Route::currentRouteName() == 'reference_users.create' || Route::currentRouteName() == 'reference_users.edit' ? 'show' : '' }}" aria-labelledby="headingSettings" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">System Settings:</h6>
                     
@@ -211,6 +237,12 @@
                     <a class="collapse-item {{ Route::currentRouteName() == 'permissions.index' || Route::currentRouteName() == 'permissions.create' || Route::currentRouteName() == 'permissions.edit' ? 'active' : '' }}" 
                        href="{{ route('permissions.index') }}">
                         <i class="fas fa-user-shield mr-1"></i>Permissions
+                    </a>
+
+                    <!-- App Settings -->
+                    <a class="collapse-item {{ Route::currentRouteName() == 'app-settings.index' || Route::currentRouteName() == 'app-settings.create' || Route::currentRouteName() == 'app-settings.edit' ? 'active' : '' }}" 
+                       href="{{ route('app-settings.index') }}">
+                        <i class="fas fa-cogs mr-1"></i>App Settings
                     </a>
 
                     <!-- Broker Management -->

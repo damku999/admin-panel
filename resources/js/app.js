@@ -23,11 +23,20 @@ Vue.component('example-component', require('./components/ExampleComponent.vue').
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
+ * specific Vue component containers only. This prevents Vue from trying
+ * to compile the entire page including script tags.
  */
 
-const app = new Vue({
-    el: '#wrapper',
+// Only mount Vue if there are Vue component containers on the page
+$(document).ready(function() {
+    // Check if there are any Vue components to mount
+    if ($('.vue-app').length > 0) {
+        const app = new Vue({
+            el: '.vue-app',
+        });
+        console.log('Vue.js mounted to .vue-app containers');
+    } else {
+        console.log('No Vue.js components found, skipping Vue mounting');
+    }
 });
 

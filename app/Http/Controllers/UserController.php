@@ -3,18 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Exports\UsersExport;
 use App\Imports\UsersImport;
+use App\Traits\ExportableTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
+    use ExportableTrait;
     /**
      * Create a new controller instance.
      *
@@ -274,8 +274,10 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'User Imported Successfully');
     }
 
-    public function export()
+        // Export method is now provided by ExportableTrait with advanced features
+    
+    protected function getSearchableFields(): array
     {
-        return Excel::download(new UsersExport, 'users.xlsx');
+        return ['name', 'email'];
     }
 }

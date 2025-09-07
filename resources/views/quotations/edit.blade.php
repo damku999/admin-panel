@@ -4,62 +4,54 @@
 
 @section('content')
     <div class="container-fluid">
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-edit"></i> Edit Insurance Quotation
-            </h1>
-            <div class="d-flex">
-                @if($quotation->quotationCompanies->count() > 0)
-                    @can('quotation-download-pdf')
-                        <a href="{{ route('quotations.download-pdf', $quotation) }}" 
-                           class="btn btn-sm btn-primary shadow-sm mr-2">
-                            <i class="fas fa-download fa-sm text-white-50"></i> Download PDF
-                        </a>
-                    @endcan
-
-                    @can('quotation-send-whatsapp')
-                        @if($quotation->status === 'Sent')
-                            <button type="button" class="btn btn-sm btn-warning shadow-sm mr-2" 
-                                    onclick="showResendWhatsAppModal()">
-                                <i class="fab fa-whatsapp fa-sm text-white-50"></i> Resend via WhatsApp
-                            </button>
-                        @else
-                            <button type="button" class="btn btn-sm btn-success shadow-sm mr-2" 
-                                    onclick="showSendWhatsAppModal()">
-                                <i class="fab fa-whatsapp fa-sm text-white-50"></i> Send via WhatsApp
-                            </button>
-                        @endif
-                    @endcan
-                @endif
-                
-                <a href="{{ route('quotations.show', $quotation) }}" class="btn btn-sm btn-info shadow-sm mr-2">
-                    <i class="fas fa-eye fa-sm text-white-50"></i> View Quotation
-                </a>
-                <a href="{{ route('quotations.index') }}" class="btn btn-sm btn-secondary shadow-sm">
-                    <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to List
-                </a>
-            </div>
-        </div>
-
         {{-- Alert Messages --}}
         @include('common.alert')
 
         <!-- Quotation Form -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-edit"></i> Edit Quotation: {{ $quotation->getQuoteReference() }}
-                </h6>
-                <div class="d-flex">
-                    <span
-                        class="badge badge-{{ $quotation->status == 'Draft' ? 'secondary' : ($quotation->status == 'Generated' ? 'info' : ($quotation->status == 'Sent' ? 'warning' : ($quotation->status == 'Accepted' ? 'success' : 'danger'))) }} mr-2">
-                        {{ $quotation->status }}
-                    </span>
-                    <span class="badge badge-info">{{ $quotation->quotationCompanies->count() }} Companies</span>
+        <div class="card shadow mb-1">
+            <div class="card-header py-1">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary mr-3">Edit Quotation: {{ $quotation->getQuoteReference() }}</h6>
+                        <span
+                            class="badge badge-{{ $quotation->status == 'Draft' ? 'secondary' : ($quotation->status == 'Generated' ? 'info' : ($quotation->status == 'Sent' ? 'warning' : ($quotation->status == 'Accepted' ? 'success' : 'danger'))) }} mr-2">
+                            {{ $quotation->status }}
+                        </span>
+                        <span class="badge badge-info">{{ $quotation->quotationCompanies->count() }} Companies</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        @if($quotation->quotationCompanies->count() > 0)
+                            @can('quotation-download-pdf')
+                                <a href="{{ route('quotations.download-pdf', $quotation) }}" 
+                                   class="btn btn-primary btn-sm mr-1" title="Download PDF">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            @endcan
+
+                            @can('quotation-send-whatsapp')
+                                @if($quotation->status === 'Sent')
+                                    <button type="button" class="btn btn-warning btn-sm mr-1" 
+                                            onclick="showResendWhatsAppModal()" title="Resend via WhatsApp">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </button>
+                                @else
+                                    <button type="button" class="btn btn-success btn-sm mr-1" 
+                                            onclick="showSendWhatsAppModal()" title="Send via WhatsApp">
+                                        <i class="fab fa-whatsapp"></i>
+                                    </button>
+                                @endif
+                            @endcan
+                        @endif
+                        
+                        <a href="{{ route('quotations.show', $quotation) }}" class="btn btn-info btn-sm mr-1" title="View Quotation">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{{ route('quotations.index') }}" onclick="window.history.go(-1); return false;"
+                            class="btn btn-back-compact" title="Back"><i class="fas fa-arrow-left"></i></a>
+                    </div>
                 </div>
             </div>
-            <div class="card-body">
+            <div class="card-body p-2">
                 @if ($errors->any())
                     <div class="alert alert-danger">
                         <h6><i class="fas fa-exclamation-triangle"></i> Please fix the following errors:</h6>
@@ -78,17 +70,17 @@
                     <!-- Customer Selection -->
                     <div class="row">
                         <div class="col-12">
-                            <div class="card border-left-primary mb-4">
-                                <div class="card-header bg-primary text-white py-2">
+                            <div class="card border-left-primary mb-1">
+                                <div class="card-header bg-primary text-white py-1">
                                     <h6 class="m-0"><i class="fas fa-user"></i> Customer Information</h6>
                                 </div>
-                                <div class="card-body">
+                                <div class="card-body p-2">
                                     <div class="row">
-                                        <div class="col-md-8">
+                                        <div class="col-md-8 col-sm-12 mb-1">
                                             <div class="form-group">
                                                 <label for="customer_id"><span class="text-danger">*</span> Customer</label>
                                                 <select name="customer_id" id="customer_id"
-                                                    class="form-control select2 @error('customer_id') is-invalid @enderror"
+                                                    class="form-control form-control-sm select2 @error('customer_id') is-invalid @enderror"
                                                     required>
                                                     <option value="">Select Customer</option>
                                                     @foreach ($customers as $customer)
@@ -107,11 +99,11 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-4 col-sm-6 mb-1">
                                             <div class="form-group">
                                                 <label for="whatsapp_number">WhatsApp Number</label>
                                                 <input type="text" name="whatsapp_number" id="whatsapp_number"
-                                                    class="form-control @error('whatsapp_number') is-invalid @enderror"
+                                                    class="form-control form-control-sm @error('whatsapp_number') is-invalid @enderror"
                                                     placeholder="For sending quotation"
                                                     value="{{ old('whatsapp_number') ?? $quotation->whatsapp_number }}">
                                                 @error('whatsapp_number')
@@ -128,17 +120,17 @@
                     <!-- Vehicle Information -->
                     <div class="row">
                         <div class="col-12">
-                            <div class="card border-left-info mb-4">
-                                <div class="card-header bg-info text-white py-2">
+                            <div class="card border-left-info mb-1">
+                                <div class="card-header bg-info text-white py-1">
                                     <h6 class="m-0"><i class="fas fa-car"></i> Vehicle Information</h6>
                                 </div>
-                                <div class="card-body">
+                                <div class="card-body p-2">
                                     <div class="row">
-                                        <div class="col-md-4">
+                                        <div class="col-md-4 col-sm-6 mb-1">
                                             <div class="form-group">
                                                 <label for="vehicle_number">Vehicle Number</label>
                                                 <input type="text" name="vehicle_number" id="vehicle_number"
-                                                    class="form-control @error('vehicle_number') is-invalid @enderror"
+                                                    class="form-control form-control-sm @error('vehicle_number') is-invalid @enderror"
                                                     placeholder="e.g., GJ05AB1234 (Leave blank if new vehicle)"
                                                     style="text-transform: uppercase"
                                                     value="{{ old('vehicle_number') ?? $quotation->vehicle_number }}">
@@ -147,12 +139,12 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-4 col-sm-6 mb-1">
                                             <div class="form-group">
                                                 <label for="make_model_variant"><span class="text-danger">*</span>
                                                     Make/Model/Variant</label>
                                                 <input type="text" name="make_model_variant" id="make_model_variant"
-                                                    class="form-control @error('make_model_variant') is-invalid @enderror"
+                                                    class="form-control form-control-sm @error('make_model_variant') is-invalid @enderror"
                                                     placeholder="e.g., Maruti Swift VDI"
                                                     value="{{ old('make_model_variant') ?? $quotation->make_model_variant }}"
                                                     required>
@@ -161,12 +153,12 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-4 col-sm-6 mb-1">
                                             <div class="form-group">
                                                 <label for="rto_location"><span class="text-danger">*</span> RTO
                                                     Location</label>
                                                 <input type="text" name="rto_location" id="rto_location"
-                                                    class="form-control @error('rto_location') is-invalid @enderror"
+                                                    class="form-control form-control-sm @error('rto_location') is-invalid @enderror"
                                                     placeholder="e.g., Ahmedabad"
                                                     value="{{ old('rto_location') ?? $quotation->rto_location }}" required>
                                                 @error('rto_location')
@@ -177,12 +169,12 @@
                                     </div>
 
                                     <div class="row">
-                                        <div class="col-md-4">
+                                        <div class="col-md-4 col-sm-6 mb-1">
                                             <div class="form-group">
                                                 <label for="manufacturing_year"><span class="text-danger">*</span>
                                                     Manufacturing Year</label>
                                                 <select name="manufacturing_year" id="manufacturing_year"
-                                                    class="form-control @error('manufacturing_year') is-invalid @enderror"
+                                                    class="form-control form-control-sm @error('manufacturing_year') is-invalid @enderror"
                                                     required>
                                                     <option value="">Select Year</option>
                                                     @for ($year = date('Y'); $year >= 1990; $year--)
@@ -197,12 +189,12 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-4 col-sm-6 mb-1">
                                             <div class="form-group">
                                                 <label for="fuel_type"><span class="text-danger">*</span> Fuel
                                                     Type</label>
                                                 <select name="fuel_type" id="fuel_type"
-                                                    class="form-control @error('fuel_type') is-invalid @enderror" required>
+                                                    class="form-control form-control-sm @error('fuel_type') is-invalid @enderror" required>
                                                     <option value="">Select Fuel Type</option>
                                                     <option value="Petrol"
                                                         {{ (old('fuel_type') ?? $quotation->fuel_type) == 'Petrol' ? 'selected' : '' }}>
@@ -237,7 +229,7 @@
                                                 <label for="ncb_percentage">NCB Percentage</label>
                                                 <div class="input-group">
                                                     <input type="number" name="ncb_percentage" id="ncb_percentage"
-                                                        class="form-control @error('ncb_percentage') is-invalid @enderror"
+                                                        class="form-control form-control-sm @error('ncb_percentage') is-invalid @enderror"
                                                         value="{{ old('ncb_percentage', $quotation->ncb_percentage ?? 0) }}"
                                                         min="0" max="50" step="1" placeholder="0">
                                                     <div class="input-group-append">
@@ -255,7 +247,7 @@
                                                 <label for="cubic_capacity_kw"><span class="text-danger">*</span> Cubic
                                                     Capacity (CC/KW)</label>
                                                 <input type="number" name="cubic_capacity_kw" id="cubic_capacity_kw"
-                                                    class="form-control @error('cubic_capacity_kw') is-invalid @enderror"
+                                                    class="form-control form-control-sm @error('cubic_capacity_kw') is-invalid @enderror"
                                                     placeholder="e.g., 1200"
                                                     value="{{ old('cubic_capacity_kw') ?? $quotation->cubic_capacity_kw }}"
                                                     required>
@@ -269,7 +261,7 @@
                                                 <label for="seating_capacity"><span class="text-danger">*</span> Seating
                                                     Capacity</label>
                                                 <input type="number" name="seating_capacity" id="seating_capacity"
-                                                    class="form-control @error('seating_capacity') is-invalid @enderror"
+                                                    class="form-control form-control-sm @error('seating_capacity') is-invalid @enderror"
                                                     placeholder="e.g., 5"
                                                     value="{{ old('seating_capacity') ?? $quotation->seating_capacity }}"
                                                     required>
@@ -281,11 +273,11 @@
                                     </div>
                                     
                                     <div class="row">
-                                        <div class="col-md-4">
+                                        <div class="col-md-4 col-sm-6 mb-1">
                                             <div class="form-group">
                                                 <label for="policy_type"><span class="text-danger">*</span> Policy Type</label>
                                                 <select name="policy_type" id="policy_type"
-                                                    class="form-control @error('policy_type') is-invalid @enderror" required>
+                                                    class="form-control form-control-sm @error('policy_type') is-invalid @enderror" required>
                                                     <option value="">Select Policy Type</option>
                                                     <option value="Comprehensive"
                                                         {{ (old('policy_type') ?? $quotation->policy_type) == 'Comprehensive' ? 'selected' : '' }}>
@@ -305,11 +297,11 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
+                                        <div class="col-md-4 col-sm-6 mb-1">
                                             <div class="form-group">
                                                 <label for="policy_tenure_years"><span class="text-danger">*</span> Policy Tenure</label>
                                                 <select name="policy_tenure_years" id="policy_tenure_years"
-                                                    class="form-control @error('policy_tenure_years') is-invalid @enderror" required>
+                                                    class="form-control form-control-sm @error('policy_tenure_years') is-invalid @enderror" required>
                                                     <option value="">Select Tenure</option>
                                                     <option value="1"
                                                         {{ (old('policy_tenure_years') ?? $quotation->policy_tenure_years) == '1' ? 'selected' : '' }}>
@@ -338,9 +330,9 @@
                     <!-- Insurance Company Quotes -->
                     <div class="row">
                         <div class="col-12">
-                            <div class="card border-left-primary mb-4">
+                            <div class="card border-left-primary mb-1">
                                 <div
-                                    class="card-header bg-primary text-white py-2 d-flex justify-content-between align-items-center">
+                                    class="card-header bg-primary text-white py-1 d-flex justify-content-between align-items-center">
                                     <h6 class="m-0"><i class="fas fa-building"></i> Insurance Company Quotes</h6>
                                     <div class="d-flex align-items-center">
                                         <span class="badge badge-light mr-2">{{ $quotation->quotationCompanies->count() }}
@@ -350,7 +342,7 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div class="card-body">
+                                <div class="card-body p-2">
                                     <div class="alert alert-info">
                                         <small><i class="fas fa-info-circle"></i> You can edit existing company quotes or
                                             add new ones. All quotes use the same addon covers selection from create mode.</small>
@@ -389,9 +381,9 @@
                                             </h6>
                                             <div class="row">
                                                 @foreach($quotation->quotationCompanies->where('total_addon_premium', '>', 0) as $company)
-                                                    <div class="col-md-6 mb-4">
+                                                    <div class="col-md-6 mb-1">
                                                         <div class="card border-left-success">
-                                                            <div class="card-header bg-success text-white py-2">
+                                                            <div class="card-header bg-success text-white py-1">
                                                                 <h6 class="m-0 font-weight-bold">
                                                                     {{ $company->insuranceCompany->name }}
                                                                     @if($company->quote_number)
@@ -400,7 +392,7 @@
                                                                     <span class="float-right">Total: ₹{{ number_format($company->total_addon_premium) }}</span>
                                                                 </h6>
                                                             </div>
-                                                            <div class="card-body py-2">
+                                                            <div class="card-body py-1">
                                                                 @if($company->addon_covers_breakdown)
                                                                     <div class="row">
                                                                         @php
@@ -458,7 +450,7 @@
                         <div class="col-12">
                             <div class="form-group">
                                 <label for="notes">Additional Notes</label>
-                                <textarea name="notes" id="notes" rows="3" class="form-control @error('notes') is-invalid @enderror"
+                                <textarea name="notes" id="notes" rows="3" class="form-control form-control-sm @error('notes') is-invalid @enderror"
                                     placeholder="Any specific requirements or notes for this quotation...">{{ old('notes') ?? $quotation->notes }}</textarea>
                                 @error('notes')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -467,21 +459,13 @@
                         </div>
                     </div>
 
-                    <!-- Form Actions -->
-                    <div class="row">
-                        <div class="col-12">
-                            <hr>
-                            <div class="d-flex justify-content-between">
-                                <a href="{{ route('quotations.show', $quotation) }}" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i> Cancel
-                                </a>
-                                <button type="submit" class="btn btn-success" id="submitBtn">
-                                    <i class="fas fa-save"></i> Update Quotation
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </form>
+            </div>
+            <div class="card-footer p-2">
+                <div class="d-flex justify-content-end align-items-center">
+                    <a href="{{ route('quotations.show', $quotation) }}" class="btn btn-secondary btn-sm mr-2">Cancel</a>
+                    <button type="submit" form="quotationForm" class="btn btn-success btn-sm" id="submitBtn">Update Quotation</button>
+                </div>
             </div>
         </div>
     </div>

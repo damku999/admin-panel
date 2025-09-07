@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Exports\FuelTypesExport;
 use App\Models\FuelType;
+use App\Traits\ExportableTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Facades\Excel;
+
 
 class FuelTypeController extends Controller
 {
+    use ExportableTrait;
+    
     /**
      * Create a new controller instance.
      * @return void
@@ -186,8 +189,10 @@ class FuelTypeController extends Controller
         return view('fuel_type.import');
     }
 
-    public function export()
+        // Export method is now provided by ExportableTrait with advanced features
+    
+    protected function getSearchableFields(): array
     {
-        return Excel::download(new FuelTypesExport, 'fuel_type.xlsx');
+        return ['name'];
     }
 }

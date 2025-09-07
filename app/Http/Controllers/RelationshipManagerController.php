@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\RelationshipManager;
 use Illuminate\Http\Request;
-use App\Exports\RelationshipManagersExport;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
+use App\Traits\ExportableTrait;
 use Illuminate\Support\Facades\Validator;
 
 class RelationshipManagerController extends Controller
 {
+    use ExportableTrait;
     /**
      * Create a new controller instance.
      *
@@ -206,8 +206,35 @@ class RelationshipManagerController extends Controller
     }
 
 
-    public function export()
+    // Export method is now provided by ExportableTrait with advanced features
+    
+    protected function getSearchableFields(): array
     {
-        return Excel::download(new RelationshipManagersExport(), 'relationship_managers.xlsx');
+        return ['name', 'email', 'mobile_number'];
+    }
+    
+    protected function getExportConfig(Request $request): array
+    {
+        return array_merge($this->getBaseExportConfig($request), [
+            'headings' => [
+                'ID', 'Relationship Manager Name', 'Email', 'Mobile Number', 'Status', 'Created Date'
+            ],
+            'mapping' => function($relationshipManager) {
+                return [
+                    $relationshipManager->id,
+                    $relationshipManager->name,
+                    $relationshipManager->email,
+                    $relationshipManager->mobile_number,
+                    $relationshipManager->status ? 'Active' : 'Inactive',
+                    $relationshipManager->created_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ]);
+    }
+    
+    protected function getExportFilename(): string
+    {
+        return 'relationship_managers';
     }
 }

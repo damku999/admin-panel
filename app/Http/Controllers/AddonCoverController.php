@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\AddonCover;
 use Illuminate\Http\Request;
-use App\Exports\AddonCoversExport;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
+use App\Traits\ExportableTrait;
 
 class AddonCoverController extends Controller
 {
+    use ExportableTrait;
     /**
      * Create a new controller instance.
      *
@@ -214,9 +214,51 @@ class AddonCoverController extends Controller
         return view('addon_covers.import');
     }
 
-    public function export()
+    /**
+     * Get export configuration specific to addon covers
+     */
+    protected function getExportConfig(Request $request): array
     {
-        return Excel::download(new AddonCoversExport, 'addon_covers.xlsx');
+        $config = $this->getBaseExportConfig($request);
+        
+        return array_merge($config, [
+            'headings' => ['ID', 'Name', 'Description', 'Order', 'Status', 'Created', 'Updated'],
+            'mapping' => function($addonCover) {
+                return [
+                    $addonCover->id,
+                    $addonCover->name,
+                    $addonCover->description ?? '-',
+                    $addonCover->order_no,
+                    $addonCover->status ? 'Active' : 'Inactive',
+                    $addonCover->created_at->format('Y-m-d H:i:s'),
+                    $addonCover->updated_at->format('Y-m-d H:i:s')
+                ];
+            }
+        ]);
+    }
+    
+    /**
+     * Get searchable fields for export filtering
+     */
+    protected function getSearchableFields(): array
+    {
+        return ['name', 'description'];
+    }
+    
+    /**
+     * Get export filename
+     */
+    protected function getExportFilename(): string
+    {
+        return 'addon_covers_' . date('Y-m-d_His');
+    }
+    
+    /**
+     * Get export order by
+     */
+    protected function getExportOrderBy(): array
+    {
+        return ['column' => 'order_no', 'direction' => 'asc'];
     }
 
 }

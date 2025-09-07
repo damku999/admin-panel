@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\CustomerAuditLog;
+use App\Services\AppSettingService;
 use Closure;
 use Illuminate\Cache\RateLimiter;
 use Illuminate\Http\Request;
@@ -80,7 +81,7 @@ class SecurityRateLimiter
                 'lockout_minutes' => 30
             ],
             'api_requests' => [
-                'max_attempts' => 200,
+                'max_attempts' => (int) AppSettingService::get('api_rate_limit_per_minute', 200),
                 'decay_minutes' => 60,
                 'lockout_minutes' => 15
             ],

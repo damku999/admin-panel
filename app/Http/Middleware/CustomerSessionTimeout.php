@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\CustomerAuditLog;
+use App\Services\AppSettingService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,7 +22,7 @@ class CustomerSessionTimeout
         }
 
         $customer = Auth::guard('customer')->user();
-        $sessionTimeoutMinutes = config('session.customer_timeout', 60);
+        $sessionTimeoutMinutes = (int) AppSettingService::get('session_timeout_minutes', 60);
         $lastActivity = session('customer_last_activity');
 
         // Skip timeout check for critical operations to prevent interruption

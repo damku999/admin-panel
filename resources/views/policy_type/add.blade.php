@@ -3,35 +3,39 @@
 @section('title', 'Add Policy Type')
 
 @section('content')
-
     <div class="container-fluid">
-
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Add Policy Type</h1>
-            <a href="{{ route('policy_type.index') }}" onclick="window.history.go(-1); return false;"
-                class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                    class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
-        </div>
-
-        {{-- Alert Messages --}}
-        @include('common.alert')
-
-        <!-- DataTales Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Add New Policy Type</h6>
+        <div class="card shadow">
+            <div class="card-header py-1">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Add Policy Type</h6>
+                    <a href="{{ route('policy_type.index') }}" onclick="window.history.go(-1); return false;"
+                        class="btn btn-back-compact" title="Back"><i class="fas fa-arrow-left"></i></a>
+                </div>
             </div>
             <form method="POST" action="{{ route('policy_type.store') }}">
                 @csrf
-                <div class="card-body">
-                    <div class="form-group row">
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;">*</span>Name</label>
-                            <input type="text"
-                                class="form-control form-control-policy_type @error('name') is-invalid @enderror"
-                                id="exampleFirstName" placeholder="Name" name="name" value="{{ old('name') }}">
-
+                <div class="card-body p-2">
+                    @if ($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Please fix the following errors:</strong>
+                            <ul class="mb-0 mt-2">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="close" data-dismiss="alert">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                    @endif
+                    
+                    <div class="row g-2">
+                        {{-- Name --}}
+                        <div class="col-md-6 col-sm-12 mb-1">
+                            <label for="name" class="form-label text-sm"><span class="text-danger">*</span>Name</label>
+                            <input type="text" class="form-control form-control-sm @error('name') is-invalid @enderror"
+                                id="name" placeholder="Enter policy type name" name="name"
+                                value="{{ old('name') }}">
                             @error('name')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
@@ -39,27 +43,30 @@
                     </div>
                 </div>
 
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-policy_type float-right mb-3">Save</button>
-                    <a class="btn btn-primary float-right mr-3 mb-3" href="{{ route('policy_type.index') }}">Cancel</a>
+                <div class="card-footer py-1">
+                    <div class="d-flex justify-content-end">
+                        <a class="btn btn-secondary btn-sm mr-2" href="{{ route('policy_type.index') }}">Cancel</a>
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="fas fa-save mr-1"></i>Create Policy Type
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
-
     </div>
 
 @endsection
 
 @section('scripts')
     <script>
-        const inputElements = document.querySelectorAll('input[type="text"]');
-
-        function convertToUppercase(event) {
-            const input = event.target;
-            input.value = input.value.toUpperCase();
-        }
-        inputElements.forEach(input => {
-            input.addEventListener('input', convertToUppercase);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Convert text inputs to uppercase
+            const textInputs = document.querySelectorAll('input[type="text"]');
+            textInputs.forEach(input => {
+                input.addEventListener('input', function(e) {
+                    e.target.value = e.target.value.toUpperCase();
+                });
+            });
         });
     </script>
 @endsection

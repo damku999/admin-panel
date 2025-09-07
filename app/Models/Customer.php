@@ -206,6 +206,11 @@ class Customer extends Authenticatable
         return $this->hasMany(Quotation::class);
     }
 
+    public function claims(): HasMany
+    {
+        return $this->hasMany(Claim::class);
+    }
+
     /**
      * Get the family group this customer belongs to.
      */

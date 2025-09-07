@@ -18,13 +18,18 @@
                     </div>
                     <div class="d-flex flex-wrap align-items-center gap-2">
                         @if (auth()->user()->hasPermissionTo('addon-cover-create'))
-                            <a href="{{ route('addon-covers.create') }}" class="btn btn-primary">
+                            <a href="{{ route('addon-covers.create') }}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add New</span>
                             </a>
                         @endif
-                        <a href="{{ route('addon-covers.export') }}" class="btn btn-success">
-                            <i class="fas fa-file-excel"></i> <span class="d-none d-sm-inline">Export</span>
-                        </a>
+                        <x-buttons.export-button 
+                            export-url="{{ route('addon-covers.export') }}"
+                            :formats="['xlsx', 'csv']"
+                            :show-dropdown="true"
+                            :with-filters="true"
+                            title="Export Add-on Covers">
+                            Export Add-on Covers
+                        </x-buttons.export-button>
                     </div>
                 </div>
                 <form action="{{ route('addon-covers.index') }}" method="GET" role="search">
@@ -95,7 +100,7 @@
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="button" class="btn btn-danger btn-sm" title="Delete Add-on Cover"
-                                                        onclick="if(confirm('Are you sure you want to delete this Add-on Cover?')) { this.closest('form').submit(); }">
+                                                        onclick="deleteAddonCover(this)">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
@@ -120,5 +125,17 @@
 @endsection
 
 @section('scripts')
-    <script></script>
+    <script>
+        function deleteAddonCover(button) {
+            showConfirmationModal({
+                title: 'Delete Add-on Cover',
+                message: 'Are you sure you want to delete this Add-on Cover? This action cannot be undone.',
+                confirmText: 'Yes, Delete',
+                confirmClass: 'btn-danger',
+                onConfirm: function() {
+                    button.closest('form').submit();
+                }
+            });
+        }
+    </script>
 @endsection

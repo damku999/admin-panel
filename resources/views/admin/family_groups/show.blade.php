@@ -185,7 +185,7 @@
                                             @if(!$member->is_head)
                                                 <form method="POST" action="{{ route('family_groups.member.remove', $member) }}" 
                                                       style="display: inline;"
-                                                      onsubmit="return confirm('Are you sure you want to remove {{ $member->customer->name }} from this family? This will reset their login credentials.')">
+                                                      onsubmit="return removeFamilyMember(event, '{{ $member->customer->name }}')"
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove Member">
@@ -260,7 +260,7 @@
                         @endif
 
                         <form method="POST" action="{{ route('family_groups.destroy', $familyGroup) }}" 
-                              onsubmit="return confirm('Are you sure you want to delete {{ $familyGroup->name }}? This will remove all family associations. This action cannot be undone.')">
+                              onsubmit="return deleteFamilyGroup(event, '{{ $familyGroup->name }}')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm btn-block">
@@ -288,4 +288,36 @@
     </div>
 </div>
 
+@endsection
+
+@section('scripts')
+    <script>
+        function removeFamilyMember(event, memberName) {
+            event.preventDefault();
+            showConfirmationModal({
+                title: 'Remove Family Member',
+                message: `Are you sure you want to remove ${memberName} from this family? This will reset their login credentials.`,
+                confirmText: 'Yes, Remove',
+                confirmClass: 'btn-danger',
+                onConfirm: function() {
+                    event.target.submit();
+                }
+            });
+            return false;
+        }
+
+        function deleteFamilyGroup(event, groupName) {
+            event.preventDefault();
+            showConfirmationModal({
+                title: 'Delete Family Group',
+                message: `Are you sure you want to delete ${groupName}? This will remove all family associations. This action cannot be undone.`,
+                confirmText: 'Yes, Delete',
+                confirmClass: 'btn-danger',
+                onConfirm: function() {
+                    event.target.submit();
+                }
+            });
+            return false;
+        }
+    </script>
 @endsection

@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\InsuranceCompanyExport;
 use App\Models\InsuranceCompany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Facades\Excel;
+use App\Traits\ExportableTrait;
 
 class InsuranceCompanyController extends Controller
 {
+    use ExportableTrait;
     /**
      * Create a new controller instance.
      *
@@ -203,8 +203,36 @@ class InsuranceCompanyController extends Controller
         return view('insurance_companies.import');
     }
 
-    public function export()
+    // Export method is now provided by ExportableTrait with advanced features
+    
+    protected function getSearchableFields(): array
     {
-        return Excel::download(new InsuranceCompanyExport, 'insurance_companies.xlsx');
+        return ['name', 'email'];
+    }
+    
+    protected function getExportConfig(Request $request): array
+    {
+        return array_merge($this->getBaseExportConfig($request), [
+            'headings' => [
+                'ID', 'Company Name', 'Email', 'Contact Number', 'Address', 'Status', 'Created Date'
+            ],
+            'mapping' => function($company) {
+                return [
+                    $company->id,
+                    $company->name,
+                    $company->email,
+                    $company->contact_number,
+                    $company->address,
+                    $company->status ? 'Active' : 'Inactive',
+                    $company->created_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ]);
+    }
+    
+    protected function getExportFilename(): string
+    {
+        return 'insurance_companies';
     }
 }

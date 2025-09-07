@@ -18,13 +18,18 @@
                     </div>
                     <div class="d-flex flex-wrap align-items-center gap-2">
                         @if (auth()->user()->hasPermissionTo('policy-type-create'))
-                            <a href="{{ route('policy_type.create') }}" class="btn btn-primary">
+                            <a href="{{ route('policy_type.create') }}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add New</span>
                             </a>
                         @endif
-                        <a href="{{ route('policy_type.export') }}" class="btn btn-success">
-                            <i class="fas fa-file-excel"></i> <span class="d-none d-sm-inline">Export</span>
-                        </a>
+                        <x-buttons.export-button 
+                            export-url="{{ route('policy_type.export') }}"
+                            :formats="['xlsx', 'csv']"
+                            :show-dropdown="true"
+                            :with-filters="true"
+                            title="Export Policy Types">
+                            Export Policy Types
+                        </x-buttons.export-button>
                     </div>
                 </div>
                 <form action="{{ route('policy_type.index') }}" method="GET" role="search">

@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\InsuranceCompany;
 use App\Models\Quotation;
 use App\Services\QuotationService;
+use App\Traits\ExportableTrait;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,7 @@ use Illuminate\View\View;
 
 class QuotationController extends Controller
 {
+    use ExportableTrait;
     public function __construct(private QuotationService $quotationService)
     {
         $this->middleware('auth');
@@ -186,5 +188,40 @@ class QuotationController extends Controller
             return redirect()->back()
                 ->with('error', 'Failed to delete quotation: ' . $th->getMessage());
         }
+    }
+
+    // Export method is now provided by ExportableTrait with advanced features
+    
+    protected function getSearchableFields(): array
+    {
+        return ['quote_reference', 'vehicle_number'];
+    }
+    
+    protected function getExportConfig(Request $request): array
+    {
+        return array_merge($this->getBaseExportConfig($request), [
+            'relations' => ['customer'],
+            'headings' => [
+                'Quote Reference', 'Customer Name', 'Vehicle Number', 'Status', 'Premium Amount', 
+                'Created Date', 'Updated Date'
+            ],
+            'mapping' => function($quotation) {
+                return [
+                    $quotation->quote_reference,
+                    $quotation->customer ? $quotation->customer->name : '',
+                    $quotation->vehicle_number,
+                    $quotation->status,
+                    $quotation->total_premium,
+                    $quotation->created_at->format('Y-m-d H:i:s'),
+                    $quotation->updated_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ]);
+    }
+    
+    protected function getExportFilename(): string
+    {
+        return 'quotations';
     }
 }

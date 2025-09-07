@@ -8,9 +8,11 @@ use App\Models\FamilyMember;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use App\Traits\ExportableTrait;
 
 class FamilyGroupController extends Controller
 {
+    use ExportableTrait;
     public function __construct()
     {
         $this->middleware('auth');
@@ -369,36 +371,38 @@ class FamilyGroupController extends Controller
     /**
      * Export family groups.
      */
-    public function export()
+    // Export method is now provided by ExportableTrait with advanced features
+    
+    protected function getSearchableFields(): array
     {
-        $familyGroups = FamilyGroup::with(['familyHead', 'familyMembers.customer'])->get();
-        
-        // Simple CSV export
-        $filename = 'family_groups_' . date('Y_m_d_H_i_s') . '.csv';
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"$filename\"",
-        ];
-
-        $callback = function () use ($familyGroups) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, ['ID', 'Family Name', 'Family Head', 'Members Count', 'Status', 'Created Date']);
-
-            foreach ($familyGroups as $group) {
-                fputcsv($file, [
-                    $group->id,
-                    $group->name,
-                    $group->familyHead->name ?? 'N/A',
-                    $group->familyMembers->count(),
-                    $group->status ? 'Active' : 'Inactive',
-                    $group->created_at->format('Y-m-d H:i:s'),
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return ['name'];
+    }
+    
+    protected function getExportConfig(Request $request): array
+    {
+        return array_merge($this->getBaseExportConfig($request), [
+            'relations' => ['familyHead'],
+            'headings' => [
+                'ID', 'Family Group Name', 'Family Head', 'Family Head Email', 'Members Count', 'Status', 'Created Date'
+            ],
+            'mapping' => function($familyGroup) {
+                return [
+                    $familyGroup->id,
+                    $familyGroup->name,
+                    $familyGroup->familyHead ? $familyGroup->familyHead->name : '',
+                    $familyGroup->familyHead ? $familyGroup->familyHead->email : '',
+                    $familyGroup->familyMembers ? $familyGroup->familyMembers->count() : 0,
+                    $familyGroup->status ? 'Active' : 'Inactive',
+                    $familyGroup->created_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ]);
+    }
+    
+    protected function getExportFilename(): string
+    {
+        return 'family_groups';
     }
 
     /**

@@ -216,6 +216,11 @@ class CustomerInsurance extends Authenticatable
         return $this->belongsTo(FuelType::class, 'fuel_type_id');
     }
 
+    public function claims()
+    {
+        return $this->hasMany(Claim::class);
+    }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults();

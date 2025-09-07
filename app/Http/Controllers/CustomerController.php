@@ -2,22 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\CustomersExport;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
 use App\Services\FileUploadService;
 use App\Traits\WhatsAppApiTrait;
+use App\Traits\NotificationControlTrait;
+use App\Traits\ExportableTrait;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
-use Maatwebsite\Excel\Facades\Excel;
 
 class CustomerController extends Controller
 {
-    use WhatsAppApiTrait;
+    use WhatsAppApiTrait, NotificationControlTrait, ExportableTrait;
 
     public function __construct(private FileUploadService $fileUploadService)
     {
@@ -28,18 +28,24 @@ class CustomerController extends Controller
         $this->middleware('permission:customer-delete', ['only' => ['delete']]);
     }
 
-    /**
-     * List Customer
-     * @param Nill
-     * @return Array $customer
-     * @author Darshan Baraiya
-     */
     public function index(Request $request): View
     {
         $customer_obj = Customer::select('*');
-        // Sorting
-        $sortField = $request->input('sort_field', 'name'); // Default sort by name
-        $sortOrder = $request->input('sort_order', 'asc'); // Default sort order ascending
+        
+        // Sorting - support both old and new parameter names
+        $sortField = $request->input('sort', $request->input('sort_field', 'name')); // Default sort by name
+        $sortOrder = $request->input('direction', $request->input('sort_order', 'asc')); // Default sort order ascending
+        
+        // Validate sort field to prevent SQL injection
+        $allowedSortFields = ['name', 'email', 'mobile_number', 'type', 'status', 'created_at'];
+        if (!in_array($sortField, $allowedSortFields)) {
+            $sortField = 'name';
+        }
+        
+        // Validate sort order
+        if (!in_array(strtolower($sortOrder), ['asc', 'desc'])) {
+            $sortOrder = 'asc';
+        }
 
         $customer_obj->orderBy($sortField, $sortOrder);
         // Apply search filter
@@ -62,24 +68,10 @@ class CustomerController extends Controller
         $customers = $customer_obj->paginate(10);
         return view('customers.index', ['customers' => $customers, 'sortField' => $sortField, 'sortOrder' => $sortOrder, 'request' => $request->all()]);
     }
-
-    /**
-     * Create Customer
-     * @param Nill
-     * @return Array $customer
-     * @author Darshan Baraiya
-     */
     public function create(): View
     {
         return view('customers.add');
     }
-
-    /**
-     * Store Customer
-     * @param Request $request
-     * @return View Customers
-     * @author Darshan Baraiya
-     */
     public function store(StoreCustomerRequest $request): RedirectResponse
     {
         DB::beginTransaction();
@@ -90,7 +82,7 @@ class CustomerController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'mobile_number' => $request->mobile_number,
-                'status' => $request->status,
+                'status' => true,
                 'wedding_anniversary_date' => $request->wedding_anniversary_date,
                 'engagement_anniversary_date' => $request->engagement_anniversary_date,
                 'date_of_birth' => $request->date_of_birth,
@@ -104,7 +96,10 @@ class CustomerController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            $this->whatsAppSendMessage($this->newCustomerAdd($customer), $customer->mobile_number);
+            
+            // Send WhatsApp notification if enabled
+            $this->sendWhatsAppIfEnabled($this->newCustomerAdd($customer), $customer->mobile_number);
+            
             return redirect()->back()->with('success', 'Customer Created Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
@@ -145,12 +140,7 @@ class CustomerController extends Controller
         $customer->save();
     }
 
-    /**
-     * Update Status Of Customer
-     * @param Integer $status
-     * @return List Page With Success
-     * @author Darshan Baraiya
-     */
+   
     public function updateStatus(int $customer_id, int $status): RedirectResponse
     {
         $validate = Validator::make([
@@ -184,12 +174,7 @@ class CustomerController extends Controller
         }
     }
 
-    /**
-     * Edit Customer
-     * @param Integer $customer
-     * @return Collection $customer
-     * @author Darshan Baraiya
-     */
+   
     public function edit(Customer $customer): View
     {
         return view('customers.edit')->with([
@@ -198,12 +183,6 @@ class CustomerController extends Controller
         ]);
     }
 
-    /**
-     * Update Customer
-     * @param Request $request, Customer $customer
-     * @return View Customers
-     * @author Darshan Baraiya
-     */
     public function update(UpdateCustomerRequest $request, Customer $customer): RedirectResponse
     {
 
@@ -236,12 +215,7 @@ class CustomerController extends Controller
         }
     }
 
-    /**
-     * Delete Customer
-     * @param Customer $customer
-     * @return Index Customers
-     * @author Darshan Baraiya
-     */
+    
     public function delete(Customer $customer): RedirectResponse
     {
         DB::beginTransaction();
@@ -257,26 +231,59 @@ class CustomerController extends Controller
         }
     }
 
-    /**
-     * Import Customers
-     * @param Null
-     * @return View File
-     */
     public function importCustomers(): View
     {
         return view('customers.import');
     }
 
-    public function export()
+    // Export method is now provided by ExportableTrait with advanced features
+    
+    protected function getExportRelations(): array
     {
-        return Excel::download(new CustomersExport, 'customers.xlsx');
+        return ['familyGroup'];
+    }
+    
+    protected function getSearchableFields(): array
+    {
+        return ['name', 'email', 'mobile_number', 'pan_card_number', 'aadhar_card_number'];
+    }
+    
+    protected function getExportConfig(Request $request): array
+    {
+        return array_merge($this->getBaseExportConfig($request), [
+            'headings' => [
+                'ID', 'Customer Name', 'Email Address', 'Mobile Number', 'Status',
+                'Date of Birth', 'PAN Number', 'Aadhar Number', 'GST Number',
+                'Family Group', 'Customer Type', 'Registration Date'
+            ],
+            'mapping' => function($customer) {
+                return [
+                    $customer->id,
+                    $customer->name,
+                    $customer->email,
+                    $customer->mobile_number,
+                    ucfirst($customer->status),
+                    $customer->date_of_birth ? $customer->date_of_birth->format('d-m-Y') : '',
+                    $customer->pan_card_number,
+                    $customer->aadhar_card_number,
+                    $customer->gst_number,
+                    $customer->familyGroup ? $customer->familyGroup->name : 'Individual',
+                    ucfirst($customer->type),
+                    $customer->created_at->format('d-m-Y H:i:s')
+                ];
+            },
+            'with_headings' => true,
+            'with_mapping' => true
+        ]);
     }
 
     public function resendOnBoardingWA(Customer $customer): RedirectResponse
     {
-        $this->whatsAppSendMessage($this->newCustomerAdd($customer), $customer->mobile_number);
+        // Send WhatsApp notification if enabled
+        $sent = $this->sendWhatsAppIfEnabled($this->newCustomerAdd($customer), $customer->mobile_number);
+        $message = $sent ? 'Onboarding message sent successfully!' : 'WhatsApp notifications are disabled. Message not sent.';
 
-        return redirect()->back()->with('success', 'Renewal Reminder Sent Successfully!');
+        return redirect()->back()->with('success', $message);
     }
 
 }

@@ -6,3 +6,238 @@
 
 // Bootstrap
 @import '~bootstrap/scss/bootstrap';
+
+/* Compact Form Styles */
+.text-sm {
+    font-size: 0.875rem;
+}
+
+.form-label {
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.form-control-sm {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.card-body.p-2 {
+    padding: 0.5rem !important;
+}
+
+.card-header.py-1 {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+}
+
+.card-footer.py-1 {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+}
+
+.row.g-2 {
+    --bs-gutter-x: 0.25rem;
+    --bs-gutter-y: 0.25rem;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 576px) {
+    .col-md-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    
+    .d-flex.justify-content-end {
+        flex-direction: column;
+    }
+    
+    .d-flex.justify-content-end .btn {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* File input styling */
+.form-control[type="file"] {
+    padding: 0.375rem 0.5rem;
+}
+
+/* Input group styling */
+.input-group-sm .btn {
+    padding: 0.375rem 0.5rem;
+}
+
+/* Button group for table actions */
+.btn-group .btn {
+    margin: 0;
+}
+
+/* Compact table styling */
+.table-sm td, .table-sm th {
+    padding: 0.4rem;
+    font-size: 0.875rem;
+}
+
+/* Ultra compact back button */
+.btn-back-compact {
+    padding: 2px 6px;
+    font-size: 12px;
+    border: none;
+    background: none;
+    color: #6c757d;
+    
+    &:hover {
+        color: #495057;
+        background: rgba(0,0,0,0.05);
+    }
+}
+
+/* Component styles */
+.date-range-picker-container .form-control:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Search field component styles */
+.search-field-container .input-group .clear-search-btn {
+    border-left: 0;
+    z-index: 3;
+}
+
+.search-field-container .search-input:focus + .clear-search-btn {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.date-range-picker-container .clear-date-range-btn {
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .date-range-picker-container .col-md-2 {
+        display: none;
+    }
+}
+
+/* Export button styles */
+.export-button-group .dropdown-toggle-split {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.export-formats-menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+}
+
+.export-formats-menu .dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.export-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.export-progress-spinner .spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+#exportProgressModal .modal-content {
+    border: none;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Format-specific colors for dropdown items */
+.export-formats-menu .text-success { color: #28a745 !important; }
+.export-formats-menu .text-info { color: #17a2b8 !important; }
+.export-formats-menu .text-danger { color: #dc3545 !important; }
+.export-formats-menu .text-secondary { color: #6c757d !important; }
+
+/* Bootstrap 4 Dropdown positioning and behavior */
+.btn-group, .dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 10rem;
+    padding: 0.5rem 0;
+    margin: 0.125rem 0 0;
+    font-size: 1rem;
+    color: #212529;
+    text-align: left;
+    list-style: none;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 0.25rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.175);
+}
+
+.dropdown-menu.show {
+    display: block !important;
+}
+
+.dropdown-menu .dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.25rem 1.5rem;
+    clear: both;
+    font-weight: 400;
+    color: #212529;
+    text-align: inherit;
+    text-decoration: none;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+    color: #16181b;
+    text-decoration: none;
+    background-color: #f8f9fa;
+}
+
+.dropdown-menu .dropdown-divider {
+    height: 0;
+    margin: 0.5rem 0;
+    overflow: hidden;
+    border-top: 1px solid #e9ecef;
+}
+
+/* Right-aligned dropdown menus */
+.dropdown-menu-right {
+    right: 0;
+    left: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .export-btn .d-none.d-sm-inline {
+        display: none !important;
+    }
+    
+    .export-button-group {
+        width: 100%;
+    }
+    
+    .export-button-group .btn {
+        flex: 1;
+    }
+    
+    .dropdown-menu {
+        min-width: 8rem;
+        font-size: 0.875rem;
+    }
+}

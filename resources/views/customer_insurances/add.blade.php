@@ -3,44 +3,40 @@
 @section('title', 'Add Customer Insurance')
 
 @section('content')
-
     <div class="container-fluid">
-
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Add Customer Insurance</h1>
-            <a href="{{ route('customer_insurances.index') }}" onclick="window.history.go(-1); return false;"
-                class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                    class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
-        </div>
-
-        {{-- Alert Messages --}}
-        @include('common.alert')
-
-        <!-- DataTales Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Add New Customer Insurance</h6>
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+        <div class="card shadow">
+            <div class="card-header py-1">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Add Customer Insurance</h6>
+                    <a href="{{ route('customer_insurances.index') }}" onclick="window.history.go(-1); return false;"
+                        class="btn btn-back-compact" title="Back"><i class="fas fa-arrow-left"></i></a>
+                </div>
             </div>
             <form method="POST" action="{{ route('customer_insurances.store') }}" enctype="multipart/form-data">
                 @csrf
-                <div class="card-body">
-                    <div class="form-group row mb-12">
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0"><span style="color: red;">*</span>Customer
-                            <select name="customer_id" class="form-control" id="customer_id">
-                                <option selected="selected" disabled="disabled">Select Customer</option>
+                <div class="card-body p-2">
+                    @if ($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <strong>Please fix the following errors:</strong>
+                            <ul class="mb-0 mt-2">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="close" data-dismiss="alert">
+                                <span>&times;</span>
+                            </button>
+                        </div>
+                    @endif
+                    
+                    <div class="row g-2">
+                        {{-- Customer --}}
+                        <div class="col-md-4 col-sm-6 mb-1">
+                            <label for="customer_id" class="form-label text-sm"><span class="text-danger">*</span>Customer</label>
+                            <select name="customer_id" class="form-control form-control-sm @error('customer_id') is-invalid @enderror" id="customer_id">
+                                <option value="">Select Customer</option>
                                 @foreach ($customers as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        data-mobile="{{ $item->mobile_number }}"
+                                    <option value="{{ $item->id }}" data-mobile="{{ $item->mobile_number }}"
                                         {{ old('customer_id') == $item->id ? 'selected' : '' }}>
                                         {{ $item->name }}
                                         @if ($item->mobile_number)
@@ -55,26 +51,22 @@
                         </div>
 
                         {{-- Issue Date --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Issue Date</label>
-                            <div class="input-group date" id="issue_date">
-                                <input type="text"
-                                    class="form-control datepicker @error('issue_date') is-invalid @enderror"
-                                    id="issue_date" name="issue_date" value="{{ old('issue_date') }}" />
-                            </div>
+                        <div class="col-md-4 col-sm-6 mb-1">
+                            <label for="issue_date" class="form-label text-sm"><span class="text-danger">*</span>Issue Date</label>
+                            <input type="text" class="form-control form-control-sm datepicker @error('issue_date') is-invalid @enderror"
+                                id="issue_date" name="issue_date" value="{{ old('issue_date') }}" placeholder="dd-mm-yyyy">
                             @error('issue_date')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
 
                         {{-- Policy Type --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Policy Type</label>
-                            <select name="policy_type_id" class="form-control" id="policy_type_id">
-                                <option selected="selected" disabled="disabled">Select Policy Type</option>
+                        <div class="col-md-4 col-sm-6 mb-1">
+                            <label for="policy_type_id" class="form-label text-sm"><span class="text-danger">*</span>Policy Type</label>
+                            <select name="policy_type_id" class="form-control form-control-sm @error('policy_type_id') is-invalid @enderror" id="policy_type_id">
+                                <option value="">Select Policy Type</option>
                                 @foreach ($policy_type as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ old('policy_type_id') == $item->id ? 'selected' : '' }}>
+                                    <option value="{{ $item->id }}" {{ old('policy_type_id') == $item->id ? 'selected' : '' }}>
                                         {{ $item->name }}
                                     </option>
                                 @endforeach
@@ -85,13 +77,13 @@
                         </div>
 
                         {{-- Branch --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Branch</label>
-                            <select name="branch_id" class="form-control" id="branch_id">
-                                <option selected="selected" disabled="disabled">Select Branch</option>
+                        <div class="col-md-4 col-sm-6 mb-1">
+                            <label for="branch_id" class="form-label text-sm"><span class="text-danger">*</span>Branch</label>
+                            <select name="branch_id" class="form-control form-control-sm @error('branch_id') is-invalid @enderror" id="branch_id">
+                                <option value="">Select Branch</option>
                                 @foreach ($branches as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ old('branch_id') == $item->id ? 'selected' : '' }}>{{ $item->name }}
+                                    <option value="{{ $item->id }}" {{ old('branch_id') == $item->id ? 'selected' : '' }}>
+                                        {{ $item->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -101,13 +93,13 @@
                         </div>
 
                         {{-- Broker --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Broker</label>
-                            <select name="broker_id" class="form-control" id="broker_id">
-                                <option selected="selected" disabled="disabled">Select Broker</option>
+                        <div class="col-md-4 col-sm-6 mb-1">
+                            <label for="broker_id" class="form-label text-sm"><span class="text-danger">*</span>Broker</label>
+                            <select name="broker_id" class="form-control form-control-sm @error('broker_id') is-invalid @enderror" id="broker_id">
+                                <option value="">Select Broker</option>
                                 @foreach ($brokers as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ old('broker_id') == $item->id ? 'selected' : '' }}>{{ $item->name }}
+                                    <option value="{{ $item->id }}" {{ old('broker_id') == $item->id ? 'selected' : '' }}>
+                                        {{ $item->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -115,14 +107,14 @@
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
                         </div>
-                        {{-- RM --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Relationship Manager</label>
-                            <select name="relationship_manager_id" class="form-control" id="relationship_manager_id">
-                                <option selected="selected" disabled="disabled">Select Broker</option>
+
+                        {{-- Relationship Manager --}}
+                        <div class="col-md-4 col-sm-6 mb-1">
+                            <label for="relationship_manager_id" class="form-label text-sm"><span class="text-danger">*</span>Relationship Manager</label>
+                            <select name="relationship_manager_id" class="form-control form-control-sm @error('relationship_manager_id') is-invalid @enderror" id="relationship_manager_id">
+                                <option value="">Select Relationship Manager</option>
                                 @foreach ($relationship_managers as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ old('relationship_manager_id') == $item->id ? 'selected' : '' }}>
+                                    <option value="{{ $item->id }}" {{ old('relationship_manager_id') == $item->id ? 'selected' : '' }}>
                                         {{ $item->name }}
                                     </option>
                                 @endforeach
@@ -133,9 +125,9 @@
                         </div>
 
                         {{-- Insurance Company Name --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label><span style="color: red;">*</span>Insurance Company Name</label>
-                            <select name="insurance_company_id" class="form-control" id="insurance_company_id">
+                            <select name="insurance_company_id" class="form-control form-control-sm" id="insurance_company_id">
                                 <option selected="selected" disabled="disabled">Select Company</option>
                                 @foreach ($insurance_companies as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
@@ -150,9 +142,9 @@
                         </div>
 
                         {{-- Type OF Policy --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label><span style="color: red;">*</span>Premium Type</label>
-                            <select name="premium_type_id" class="form-control" id="premium_type_id"
+                            <select name="premium_type_id" class="form-control form-control-sm" id="premium_type_id"
                                 onchange="premiumTypeChanged()">
                                 <option selected="selected" disabled="disabled">Select Premium Type</option>
                                 @foreach ($premium_types as $item)
@@ -169,7 +161,7 @@
                         </div>
 
                         {{-- Policy No. --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label><span style="color: red;">*</span>Policy No.</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('policy_no') is-invalid @enderror"
@@ -182,7 +174,7 @@
                         </div>
 
                         {{-- Start Date --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label><span style="color: red;">*</span>Start Date</label>
                             <div class="input-group date">
                                 <input type="text"
@@ -196,7 +188,7 @@
                         </div>
 
                         {{-- Expired Date --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label><span style="color: red;">*</span>Expired Date</label>
                             <div class="input-group date">
                                 <input type="text"
@@ -209,7 +201,7 @@
                         </div>
 
                         {{-- Registration No. --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                        <div class="col-md-4 col-sm-6 mb-1 premium-fields">
                             <label><span style="color: red;">*</span>Registration No.</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('registration_no') is-invalid @enderror"
@@ -222,7 +214,7 @@
                         </div>
 
                         {{-- Location --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                        <div class="col-md-4 col-sm-6 mb-1 premium-fields">
                             <label>Location</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('rto') is-invalid @enderror"
@@ -234,7 +226,7 @@
                         </div>
 
                         {{-- Make & Model --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                        <div class="col-md-4 col-sm-6 mb-1 premium-fields">
                             <label>Make & Model</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('make_model') is-invalid @enderror"
@@ -247,9 +239,9 @@
                         </div>
 
                         {{-- Fuel Type --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                        <div class="col-md-4 col-sm-6 mb-1 premium-fields">
                             <label>Fuel Type</label>
-                            <select name="fuel_type_id" class="form-control" id="fuel_type_id">
+                            <select name="fuel_type_id" class="form-control form-control-sm" id="fuel_type_id">
                                 <option selected="selected" disabled="disabled">Select Fuel Type</option>
                                 @foreach ($fuel_type as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
@@ -264,7 +256,7 @@
                         </div>
 
                         {{-- TP Expiry Date --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                        <div class="col-md-4 col-sm-6 mb-1 premium-fields">
                             <label><span style="color: red;">*</span>TP Expiry Date</label>
                             <div class="input-group date">
                                 <input type="text"
@@ -277,7 +269,7 @@
                         </div>
 
                         {{-- MFG Year --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                        <div class="col-md-4 col-sm-6 mb-1 premium-fields">
                             <label><span style="color: red;">*</span>MFG Year</label>
                             <div class="input-group date">
                                 <input type="number" min="1900" max="2099" step="1"
@@ -290,7 +282,7 @@
                         </div>
 
                         {{-- NCB % --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                        <div class="col-md-4 col-sm-6 mb-1 premium-fields">
                             <label><span style="color: red;">*</span>NCB %</label>
                             <div class="input-group">
                                 <input type="text" class="form-control @error('ncb_percentage') is-invalid @enderror"
@@ -303,7 +295,7 @@
                         </div>
 
                         {{-- GVW --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
+                        <div class="col-md-4 col-sm-6 mb-1 cgst_sgt2">
                             <label><span style="color: red;">*</span>GVW </label>
                             <input type="text"
                                 class="decimal-input form-control form-control-customer @error('gross_vehicle_weight') is-invalid @enderror"
@@ -316,7 +308,7 @@
                         </div>
 
                         {{-- Plan Name --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                        <div class="col-md-4 col-sm-6 mb-1 life-insurance-policies-fields">
                             <label>Plan Name</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('plan_name') is-invalid @enderror"
@@ -326,7 +318,7 @@
                             @enderror
                         </div>
                         {{-- Premium Paying Term --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                        <div class="col-md-4 col-sm-6 mb-1 life-insurance-policies-fields">
                             <label>Premium Paying Term</label>
                             <input type="text"
                                 class="decimal-input form-control form-control-customer @error('premium_paying_term') is-invalid @enderror"
@@ -337,7 +329,7 @@
                             @enderror
                         </div>
                         {{-- Policy Term --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                        <div class="col-md-4 col-sm-6 mb-1 life-insurance-policies-fields">
                             <label>Policy Term</label>
                             <input type="text"
                                 class="decimal-input form-control form-control-customer @error('policy_term') is-invalid @enderror"
@@ -348,7 +340,7 @@
                             @enderror
                         </div>
                         {{-- Sum Insured --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                        <div class="col-md-4 col-sm-6 mb-1 life-insurance-policies-fields">
                             <label>Sum Insured</label>
                             <input type="text"
                                 class="decimal-input form-control form-control-customer @error('sum_insured') is-invalid @enderror"
@@ -359,7 +351,7 @@
                             @enderror
                         </div>
                         {{-- Pension Amount Yearly  --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                        <div class="col-md-4 col-sm-6 mb-1 life-insurance-policies-fields">
                             <label>Pension Amount Yearly </label>
                             <input type="text"
                                 class="decimal-input form-control form-control-customer @error('pension_amount_yearly') is-invalid @enderror"
@@ -370,7 +362,7 @@
                             @enderror
                         </div>
                         {{-- Approx Maturity Amount  --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                        <div class="col-md-4 col-sm-6 mb-1 life-insurance-policies-fields">
                             <label>Approx Maturity Amount </label>
                             <input type="text"
                                 class="decimal-input form-control form-control-customer @error('approx_maturity_amount') is-invalid @enderror"
@@ -382,9 +374,9 @@
                         </div>
 
                         {{-- Life Insurance Payment Mode --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                        <div class="col-md-4 col-sm-6 mb-1 life-insurance-policies-fields">
                             <label><span style="color: red;">*</span>Life Insurance Payment Mode (Reminder)</label>
-                            <select name="life_insurance_payment_mode" class="form-control"
+                            <select name="life_insurance_payment_mode" class="form-control form-control-sm"
                                 id="life_insurance_payment_mode">
                                 <option selected="selected">Select Life Insurance Payment Mode
                                 </option>
@@ -412,7 +404,7 @@
                         </div>
 
                         {{-- Maturity Date --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                        <div class="col-md-4 col-sm-6 mb-1 life-insurance-policies-fields">
                             <label><span style="color: red;">*</span>Maturity Date</label>
                             <div class="input-group date" id="maturity_date">
                                 <input type="text"
@@ -425,7 +417,7 @@
                         </div>
 
                         {{-- Mode of Payment --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label>Mode of Payment</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('mode_of_payment') is-invalid @enderror"
@@ -438,7 +430,7 @@
                         </div>
 
                         {{-- Cheque No. --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label>Cheque No.</label>
                             <input type="text"
                                 class="form-control form-control-customer @error('cheque_no') is-invalid @enderror"
@@ -451,7 +443,7 @@
                         </div>
 
                         {{-- Policy Document --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label for="policy_document_path">Policy Document</label>
                             <input type="file"
                                 class="form-control form-control-customer @error('policy_document_path') is-invalid @enderror"
@@ -463,9 +455,9 @@
                         </div>
 
                         {{-- Reference Name --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                        <div class="col-md-4 col-sm-6 mb-1">
                             <label>Reference By :</label>
-                            <select name="reference_by" class="form-control" id="reference_by">
+                            <select name="reference_by" class="form-control form-control-sm" id="reference_by">
                                 <option selected="selected" value="0">Select Reference By</option>
                                 @foreach ($reference_by_user as $item)
                                     <option id="{{ $item->id }}" value="{{ $item->id }}"
@@ -483,7 +475,7 @@
                     <div class="card mb-12 col-md-12 border-left-success">
                         <div class="form-group row">
                             {{-- OD Premium --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                            <div class="col-md-4 col-sm-6 mb-1 premium-fields">
                                 <label>OD Premium</label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('od_premium') is-invalid @enderror"
@@ -496,7 +488,7 @@
                             </div>
 
                             {{-- TP Premium --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
+                            <div class="col-md-4 col-sm-6 mb-1 premium-fields">
                                 <label>TP Premium</label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('tp_premium') is-invalid @enderror"
@@ -508,7 +500,7 @@
                                 @enderror
                             </div>
                             {{-- Premium Amount --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
+                            <div class="col-md-4 col-sm-6 mb-1 life-insurance-policies-fields">
                                 <label><span style="color: red;">*</span>Premium Amount</label>
                                 <div class="input-group">
                                     <input type="text"
@@ -522,7 +514,7 @@
                             </div>
 
                             {{-- Net Premium --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <div class="col-md-4 col-sm-6 mb-1">
                                 <label><span style="color: red;">*</span>Net Premium</label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('net_premium') is-invalid @enderror"
@@ -535,7 +527,7 @@
                             </div>
 
                             {{-- CGST --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <div class="col-md-4 col-sm-6 mb-1">
                                 <label><span style="color: red;">*</span>CGST 1</label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('cgst1') is-invalid @enderror"
@@ -546,7 +538,7 @@
                                 @enderror
                             </div>
                             {{-- SGST --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <div class="col-md-4 col-sm-6 mb-1">
                                 <label><span style="color: red;">*</span>SGST 1</label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('sgst1') is-invalid @enderror"
@@ -558,7 +550,7 @@
                             </div>
 
                             {{-- CGST 2 --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
+                            <div class="col-md-4 col-sm-6 mb-1 cgst_sgt2">
                                 <label><span style="color: red;">*</span>CGST 2 </label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('cgst2') is-invalid @enderror"
@@ -570,7 +562,7 @@
                             </div>
 
                             {{-- SGST 2 --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
+                            <div class="col-md-4 col-sm-6 mb-1 cgst_sgt2">
                                 <label><span style="color: red;">*</span>SGST 2 </label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('sgst2') is-invalid @enderror"
@@ -582,7 +574,7 @@
                             </div>
 
                             {{-- Final Premium With GST --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                            <div class="col-md-4 col-sm-6 mb-1">
                                 <label><span style="color: red;">*</span>Final Premium With GST</label>
                                 <input type="text"
                                     class="decimal-input form-control form-control-customer @error('final_premium_with_gst') is-invalid @enderror"
@@ -599,9 +591,9 @@
                     @if (auth()->user()->hasRole('Admin'))
                         <div class="card mt-12 col-md-12 border-left-dark">
                             <div class="form-group row">
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <div class="col-md-4 col-sm-6 mb-1">
                                     <label>Commission On</label>
-                                    <select name="commission_on" class="form-control" id="commission_on">
+                                    <select name="commission_on" class="form-control form-control-sm" id="commission_on">
                                         <option value="net_premium" @if (old('commission_on') == 'net_premium') selected @endif> Net
                                             Premium </option>
                                         <option value="od_premium" @if (old('commission_on') == 'od_premium') selected @endif>OD
@@ -614,7 +606,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <div class="col-md-4 col-sm-6 mb-1">
                                     <label>My Commission Percentage</label>
                                     <input type="text"
                                         class="decimal-input form-control form-control-customer @error('my_commission_percentage') is-invalid @enderror"
@@ -625,7 +617,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <div class="col-md-4 col-sm-6 mb-1">
                                     <label>My Commission Amount</label>
                                     <input type="text"
                                         class="decimal-input form-control form-control-customer @error('my_commission_amount') is-invalid @enderror"
@@ -636,7 +628,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <div class="col-md-4 col-sm-6 mb-1">
                                     <label>Transfer Commission Percentage</label>
                                     <input type="text"
                                         class="decimal-input form-control form-control-customer @error('transfer_commission_percentage') is-invalid @enderror"
@@ -648,7 +640,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <div class="col-md-4 col-sm-6 mb-1">
                                     <label>Transfer Commission Amount</label>
                                     <input type="text"
                                         class="decimal-input form-control form-control-customer @error('transfer_commission_amount') is-invalid @enderror"
@@ -659,7 +651,7 @@
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 reference_commission_fields">
+                                <div class="col-md-4 col-sm-6 mb-1 reference_commission_fields">
                                     <label>Reference Commission Percentage</label>
                                     <input type="text"
                                         class="decimal-input form-control form-control-customer @error('reference_commission_percentage') is-invalid @enderror"
@@ -671,7 +663,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 reference_commission_fields">
+                                <div class="col-md-4 col-sm-6 mb-1 reference_commission_fields">
                                     <label>Reference Commission Amount</label>
                                     <input type="text"
                                         class="decimal-input form-control form-control-customer @error('reference_commission_amount') is-invalid @enderror"
@@ -683,7 +675,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
+                                <div class="col-md-4 col-sm-6 mb-1 ">
                                     <label><span style="color: red;">*</span>Actual Earnings</label>
                                     <input type="text"
                                         class="decimal-input form-control form-control-customer @error('actual_earnings') is-invalid @enderror"
@@ -698,10 +690,13 @@
                     @endif
                 </div>
 
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-customer_insurance float-right mb-3">Save</button>
-                    <a class="btn btn-primary float-right mr-3 mb-3"
-                        href="{{ route('customer_insurances.index') }}">Cancel</a>
+                <div class="card-footer py-1">
+                    <div class="d-flex justify-content-end">
+                        <a class="btn btn-secondary btn-sm mr-2" href="{{ route('customer_insurances.index') }}">Cancel</a>
+                        <button type="submit" class="btn btn-success btn-sm">
+                            <i class="fas fa-save mr-1"></i>Create Customer Insurance
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -970,16 +965,14 @@
             $('#expired_date').datepicker('update', formattedExpiredDate);
         }
 
-        const inputElements = document.querySelectorAll('input[type="text"]');
-
-        function convertToUppercase(event) {
-            const input = event.target;
-            input.value = input.value.toUpperCase();
-        }
-        inputElements.forEach(input => {
-            input.addEventListener('input', convertToUppercase);
+        // Convert text inputs to uppercase (skip email)
+        const textInputs = document.querySelectorAll('input[type="text"]');
+        textInputs.forEach(input => {
+            if (!input.name.includes('email')) {
+                input.addEventListener('input', function(e) {
+                    e.target.value = e.target.value.toUpperCase();
+                });
+            }
         });
     </script>
-@endsection
-@section('stylesheets')
 @endsection

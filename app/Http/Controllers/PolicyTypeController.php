@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\PolicyType;
 use Illuminate\Http\Request;
 use App\Exports\PolicyTypesExport;
+use App\Traits\ExportableTrait;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
+
 use Illuminate\Support\Facades\Validator;
 
 class PolicyTypeController extends Controller
 {
+    use ExportableTrait;
+    
     /**
      * Create a new controller instance.
      *
@@ -200,8 +203,10 @@ class PolicyTypeController extends Controller
         return view('policy_type.import');
     }
 
-    public function export()
+        // Export method is now provided by ExportableTrait with advanced features
+    
+    protected function getSearchableFields(): array
     {
-        return Excel::download(new PolicyTypesExport, 'policy_type.xlsx');
+        return ['name'];
     }
 }

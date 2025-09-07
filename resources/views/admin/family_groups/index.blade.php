@@ -13,12 +13,17 @@
                     <small class="text-muted">Manage family group records</small>
                 </div>
                 <div class="d-flex flex-wrap align-items-center gap-2">
-                    <a href="{{ route('family_groups.create') }}" class="btn btn-primary">
+                    <a href="{{ route('family_groups.create') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Create Group</span>
                     </a>
-                    <a href="{{ route('family_groups.export') }}" class="btn btn-success">
-                        <i class="fas fa-file-excel"></i> <span class="d-none d-sm-inline">Export</span>
-                    </a>
+                    <x-buttons.export-button 
+                        export-url="{{ route('family_groups.export') }}"
+                        :formats="['xlsx', 'csv']"
+                        :show-dropdown="true"
+                        :with-filters="true"
+                        title="Export Family Groups">
+                        Export Family Groups
+                    </x-buttons.export-button>
                 </div>
             </div>
         </div>
@@ -160,7 +165,7 @@
                 <i class="fas fa-users fa-3x text-gray-300 mb-3"></i>
                 <h5 class="text-gray-600">No Family Groups Found</h5>
                 <p class="text-gray-500">Start by creating your first family group.</p>
-                <a href="{{ route('family_groups.create') }}" class="btn btn-primary">
+                <a href="{{ route('family_groups.create') }}" class="btn btn-primary btn-sm">
                     <i class="fas fa-plus"></i> Create Family Group
                 </a>
             </div>

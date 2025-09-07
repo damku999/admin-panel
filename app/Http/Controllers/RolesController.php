@@ -6,9 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use App\Traits\ExportableTrait;
 
 class RolesController extends Controller
 {
+    use ExportableTrait;
     /**
      * Create a new controller instance.
      *
@@ -156,5 +158,41 @@ class RolesController extends Controller
             DB::rollback();
             return redirect()->back()->with('error', $th->getMessage());
         }
+    }
+
+    // Export method is now provided by ExportableTrait with advanced features
+    
+    protected function getExportModelClass(): string
+    {
+        return \Spatie\Permission\Models\Role::class;
+    }
+    
+    protected function getSearchableFields(): array
+    {
+        return ['name'];
+    }
+    
+    protected function getExportConfig(Request $request): array
+    {
+        return array_merge($this->getBaseExportConfig($request), [
+            'headings' => [
+                'ID', 'Role Name', 'Guard Name', 'Created Date', 'Updated Date'
+            ],
+            'mapping' => function($role) {
+                return [
+                    $role->id,
+                    $role->name,
+                    $role->guard_name,
+                    $role->created_at->format('Y-m-d H:i:s'),
+                    $role->updated_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ]);
+    }
+    
+    protected function getExportFilename(): string
+    {
+        return 'roles';
     }
 }

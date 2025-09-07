@@ -17,6 +17,7 @@ use App\Http\Controllers\InsuranceCompanyController;
 use App\Http\Controllers\CustomerInsuranceController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RelationshipManagerController;
+use App\Http\Controllers\AppSettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -113,10 +114,25 @@ Route::prefix('profile')->name('profile.')->middleware('auth')->group(function (
 });
 
 // Roles
+Route::middleware('auth')->prefix('roles')->name('roles.')->group(function () {
+    Route::get('export/', [App\Http\Controllers\RolesController::class, 'export'])->name('export');
+});
 Route::resource('roles', App\Http\Controllers\RolesController::class);
 
 // Permissions
+Route::middleware('auth')->prefix('permissions')->name('permissions.')->group(function () {
+    Route::get('export/', [App\Http\Controllers\PermissionsController::class, 'export'])->name('export');
+});
 Route::resource('permissions', App\Http\Controllers\PermissionsController::class);
+
+// App Settings
+Route::middleware('auth')->group(function () {
+    Route::resource('app-settings', App\Http\Controllers\AppSettingController::class);
+    Route::post('app-settings/{app_setting}/toggle', [App\Http\Controllers\AppSettingController::class, 'toggle'])->name('app-settings.toggle');
+    Route::get('app-settings-clear-cache', [App\Http\Controllers\AppSettingController::class, 'clearCache'])->name('app-settings.clear-cache');
+    Route::get('app-settings/{app_setting}/view-encrypted', [App\Http\Controllers\AppSettingController::class, 'viewEncrypted'])->name('app-settings.view-encrypted');
+    Route::get('app-settings/export/', [App\Http\Controllers\AppSettingController::class, 'export'])->name('app-settings.export');
+});
 
 
 // Customer
@@ -291,6 +307,28 @@ Route::middleware('auth')->prefix('quotations')->name('quotations.')->group(func
     Route::get('/download-pdf/{quotation}', [QuotationController::class, 'downloadPdf'])->name('download-pdf');
     Route::get('/get-quote-form', [QuotationController::class, 'getQuoteFormHtml'])->name('get-quote-form');
     Route::delete('/delete/{quotation}', [QuotationController::class, 'delete'])->name('delete');
+    Route::get('export/', [QuotationController::class, 'export'])->name('export');
+});
+
+// Claims Management
+Route::middleware('auth')->prefix('claims')->name('claims.')->group(function () {
+    Route::get('/', [App\Http\Controllers\ClaimController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\ClaimController::class, 'create'])->name('create');
+    Route::post('/store', [App\Http\Controllers\ClaimController::class, 'store'])->name('store');
+    Route::get('/show/{claim}', [App\Http\Controllers\ClaimController::class, 'show'])->name('show');
+    Route::get('/edit/{claim}', [App\Http\Controllers\ClaimController::class, 'edit'])->name('edit');
+    Route::put('/update/{claim}', [App\Http\Controllers\ClaimController::class, 'update'])->name('update');
+    Route::delete('/delete/{claim}', [App\Http\Controllers\ClaimController::class, 'destroy'])->name('destroy');
+    Route::post('/intimate-document/{claim}', [App\Http\Controllers\ClaimController::class, 'intimateDocument'])->name('intimateDocument');
+    Route::post('/assign-claim-number/{claim}', [App\Http\Controllers\ClaimController::class, 'assignClaimNumber'])->name('assignClaimNumber');
+    Route::post('/resend-claim-number/{claim}', [App\Http\Controllers\ClaimController::class, 'resendClaimNumber'])->name('resendClaimNumber');
+    Route::post('/close-claim/{claim}', [App\Http\Controllers\ClaimController::class, 'closeClaim'])->name('closeClaim');
+    Route::get('export/', [App\Http\Controllers\ClaimController::class, 'export'])->name('export');
+    Route::get('lookup/{type}', [App\Http\Controllers\ClaimController::class, 'lookup'])->name('lookup');
+    Route::get('search', [App\Http\Controllers\ClaimController::class, 'universalSearch'])->name('search');
+    Route::get('test-lookup', function() {
+        return response()->json(['success' => true, 'message' => 'Test route working', 'auth' => auth()->check()]);
+    })->name('test-lookup');
 });
 
 // Reports

@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
+use App\Traits\ExportableTrait;
 
 class PermissionsController extends Controller
 {
+    use ExportableTrait;
     /**
      * Create a new controller instance.
      *
@@ -144,5 +146,41 @@ class PermissionsController extends Controller
             DB::rollback();
             return redirect()->back()->with('error', $th->getMessage());
         }
+    }
+
+    // Export method is now provided by ExportableTrait with advanced features
+    
+    protected function getExportModelClass(): string
+    {
+        return \Spatie\Permission\Models\Permission::class;
+    }
+    
+    protected function getSearchableFields(): array
+    {
+        return ['name'];
+    }
+    
+    protected function getExportConfig(Request $request): array
+    {
+        return array_merge($this->getBaseExportConfig($request), [
+            'headings' => [
+                'ID', 'Permission Name', 'Guard Name', 'Created Date', 'Updated Date'
+            ],
+            'mapping' => function($permission) {
+                return [
+                    $permission->id,
+                    $permission->name,
+                    $permission->guard_name,
+                    $permission->created_at->format('Y-m-d H:i:s'),
+                    $permission->updated_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ]);
+    }
+    
+    protected function getExportFilename(): string
+    {
+        return 'permissions';
     }
 }

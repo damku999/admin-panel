@@ -395,7 +395,7 @@
                             .replace(':reportName', reportName))
                         .then(function(response) {
                             console.log(response);
-                            $('#myModal').modal('show');
+                            showModal('myModal');
                             var responseData = response.data;
                             document.querySelector('#sortableTableBody').innerHTML = responseData;
                             toastr.success('Data fetched successfully!', 'Success');
@@ -450,7 +450,7 @@
                     },
                     success: function(response) {
                         console.log(response);
-                        $('#myModal').modal('hide');
+                        hideModal('myModal');
 
                         toastr.success('Form submitted successfully!', 'Success');
                     },

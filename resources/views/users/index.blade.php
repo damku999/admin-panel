@@ -18,13 +18,18 @@
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         @if (auth()->user()->hasPermissionTo('user-create'))
-                            <a href="{{ route('users.create') }}" class="btn btn-primary">
+                            <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-plus"></i> Add New
                             </a>
                         @endif
-                        <a href="{{ route('users.export') }}" class="btn btn-success">
-                            <i class="fas fa-file-excel"></i> Export To Excel
-                        </a>
+                        <x-buttons.export-button 
+                            export-url="{{ route('users.export') }}"
+                            :formats="['xlsx', 'csv']"
+                            :show-dropdown="true"
+                            :with-filters="true"
+                            title="Export Users">
+                            Export Users
+                        </x-buttons.export-button>
                     </div>
                 </div>
             </div>

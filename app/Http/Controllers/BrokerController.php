@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\BrokersExport;
 use App\Http\Requests\StoreBrokerRequest;
 use App\Http\Requests\UpdateBrokerRequest;
 use App\Models\Broker;
+use App\Traits\ExportableTrait;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
-use Maatwebsite\Excel\Facades\Excel;
 
 class BrokerController extends Controller
 {
+    use ExportableTrait;
     /**
      * Create a new controller instance.
      *
@@ -195,8 +195,10 @@ class BrokerController extends Controller
         return view('brokers.import');
     }
 
-    public function export()
+    // Export method is now provided by ExportableTrait with advanced features
+    
+    protected function getSearchableFields(): array
     {
-        return Excel::download(new BrokersExport, 'brokers.xlsx');
+        return ['name', 'email', 'mobile_number', 'company_name'];
     }
 }

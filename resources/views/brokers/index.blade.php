@@ -17,12 +17,17 @@
                         <small class="text-muted">Manage all broker records</small>
                     </div>
                     <div class="d-flex flex-wrap align-items-center gap-2">
-                        <a href="{{ route('brokers.create') }}" class="btn btn-primary">
+                        <a href="{{ route('brokers.create') }}" class="btn btn-primary btn-sm">
                             <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add New</span>
                         </a>
-                        <a href="{{ route('brokers.export') }}" class="btn btn-success">
-                            <i class="fas fa-file-excel"></i> <span class="d-none d-sm-inline">Export</span>
-                        </a>
+                        <x-buttons.export-button 
+                            export-url="{{ route('brokers.export') }}"
+                            :formats="['xlsx', 'csv']"
+                            :show-dropdown="true"
+                            :with-filters="true"
+                            title="Export Brokers">
+                            Export
+                        </x-buttons.export-button>
                     </div>
                 </div>
                 <form action="{{ route('brokers.index') }}" method="GET" role="search">

@@ -18,13 +18,18 @@
                     </div>
                     <div class="d-flex flex-wrap align-items-center gap-2">
                         @if (auth()->user()->hasPermissionTo('insurance_company-create'))
-                            <a href="{{ route('insurance_companies.create') }}" class="btn btn-primary">
+                            <a href="{{ route('insurance_companies.create') }}" class="btn btn-primary btn-sm">
                                 <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add New</span>
                             </a>
                         @endif
-                        <a href="{{ route('insurance_companies.export') }}" class="btn btn-success">
-                            <i class="fas fa-file-excel"></i> <span class="d-none d-sm-inline">Export</span>
-                        </a>
+                        <x-buttons.export-button 
+                            export-url="{{ route('insurance_companies.export') }}"
+                            :formats="['xlsx', 'csv']"
+                            :show-dropdown="true"
+                            :with-filters="true"
+                            title="Export Insurance Companies">
+                            Export Insurance Companies
+                        </x-buttons.export-button>
                     </div>
                 </div>
                 <form action="{{ route('insurance_companies.index') }}" method="GET" role="search">

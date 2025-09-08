@@ -1,7 +1,7 @@
 <footer class="sticky-footer bg-white">
     <div class="container my-auto">
         <div class="copyright text-center my-auto">
-            <span>Copyright &copy; {{ config('app.name', 'Laravel') }} @ {{ date('Y') }}</span>
+            <span>Copyright &copy; {{ config('app.name', 'Midas Tech') }} @ {{ date('Y') }}</span>
         </div>
     </div>
 </footer>
@@ -24,7 +24,8 @@
                 <button type="button" class="btn btn-primary btn-sm" id="delete-btn">
                     <span class="module_action">Delete</span>
                 </button>
-                <button type="button" class="btn btn-default btn-sm" onclick="hideModal('delete_confirm')">Close</button>
+                <button type="button" class="btn btn-default btn-sm"
+                    onclick="hideModal('delete_confirm')">Close</button>
             </div>
         </div>
     </div>

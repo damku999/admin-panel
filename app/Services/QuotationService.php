@@ -2,19 +2,25 @@
 
 namespace App\Services;
 
+use App\Contracts\Repositories\QuotationRepositoryInterface;
+use App\Contracts\Services\QuotationServiceInterface;
+use App\Models\Customer;
 use App\Models\InsuranceCompany;
 use App\Models\Quotation;
 use App\Models\QuotationCompany;
 use App\Services\PdfGenerationService;
 use App\Traits\WhatsAppApiTrait;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class QuotationService
+class QuotationService implements QuotationServiceInterface
 {
     use WhatsAppApiTrait;
 
     public function __construct(
-        private PdfGenerationService $pdfService
+        private PdfGenerationService $pdfService,
+        private QuotationRepositoryInterface $quotationRepository
     ) {
     }
 
@@ -474,5 +480,52 @@ class QuotationService
                 $quote->update(['ranking' => $index + 1]);
             }
         }
+    }
+
+    // Interface implementation methods
+
+    public function getQuotations(Request $request): LengthAwarePaginator
+    {
+        $filters = [
+            'search' => $request->input('search'),
+            'status' => $request->input('status'),
+            'customer_id' => $request->input('customer_id'),
+        ];
+
+        return $this->quotationRepository->getPaginated($filters, 15);
+    }
+
+    public function deleteQuotation(Quotation $quotation): bool
+    {
+        DB::beginTransaction();
+
+        try {
+            $deleted = $this->quotationRepository->delete($quotation->id);
+            
+            if ($deleted) {
+                DB::commit();
+                return true;
+            }
+
+            DB::rollBack();
+            return false;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+
+    public function calculatePremium(array $data): float
+    {
+        return $this->calculateTotalIdv($data);
+    }
+
+    public function getQuotationFormData(): array
+    {
+        return [
+            'customers' => Customer::where('status', 1)->orderBy('name')->get(),
+            'insuranceCompanies' => InsuranceCompany::where('status', 1)->orderBy('name')->get(),
+            'addonCovers' => \App\Models\AddonCover::getOrdered(1),
+        ];
     }
 }

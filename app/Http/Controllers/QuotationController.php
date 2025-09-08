@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Services\QuotationServiceInterface;
 use App\Http\Requests\CreateQuotationRequest;
 use App\Http\Requests\UpdateQuotationRequest;
-use App\Models\Customer;
-use App\Models\InsuranceCompany;
 use App\Models\Quotation;
-use App\Services\QuotationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +13,7 @@ use Illuminate\View\View;
 
 class QuotationController extends Controller
 {
-    public function __construct(private QuotationService $quotationService)
+    public function __construct(private QuotationServiceInterface $quotationService)
     {
         $this->middleware('auth');
         $this->middleware('permission:quotation-list|quotation-create|quotation-edit|quotation-delete', ['only' => ['index']]);
@@ -29,31 +27,14 @@ class QuotationController extends Controller
 
     public function index(Request $request): View
     {
-        $quotations = Quotation::with(['customer', 'quotationCompanies.insuranceCompany'])
-            ->when($request->search, function ($query, $search) {
-                $query->whereHas('customer', function ($q) use ($search) {
-                    $q->where('name', 'LIKE', '%' . $search . '%')
-                      ->orWhere('mobile_number', 'LIKE', '%' . $search . '%');
-                })
-                ->orWhere('vehicle_number', 'LIKE', '%' . $search . '%')
-                ->orWhere('make_model_variant', 'LIKE', '%' . $search . '%');
-            })
-            ->when($request->status, function ($query, $status) {
-                $query->where('status', $status);
-            })
-            ->latest()
-            ->paginate(15);
-
+        $quotations = $this->quotationService->getQuotations($request);
         return view('quotations.index', compact('quotations'));
     }
 
     public function create(): View
     {
-        $customers = Customer::where('status', 1)->orderBy('name')->get();
-        $insuranceCompanies = InsuranceCompany::where('status', 1)->orderBy('name')->get();
-        $addonCovers = \App\Models\AddonCover::getOrdered(1);
-
-        return view('quotations.create', compact('customers', 'insuranceCompanies', 'addonCovers'));
+        $formData = $this->quotationService->getQuotationFormData();
+        return view('quotations.create', $formData);
     }
 
     public function store(CreateQuotationRequest $request): RedirectResponse
@@ -84,11 +65,10 @@ class QuotationController extends Controller
 
     public function edit(Quotation $quotation): View
     {
-        $customers = Customer::where('status', 1)->orderBy('name')->get();
-        $insuranceCompanies = InsuranceCompany::where('status', 1)->orderBy('name')->get();
-        $addonCovers = \App\Models\AddonCover::getOrdered(1);
-
-        return view('quotations.edit', compact('quotation', 'customers', 'insuranceCompanies', 'addonCovers'));
+        $formData = $this->quotationService->getQuotationFormData();
+        $formData['quotation'] = $quotation;
+        
+        return view('quotations.edit', $formData);
     }
 
     public function update(UpdateQuotationRequest $request, Quotation $quotation): RedirectResponse
@@ -152,39 +132,32 @@ class QuotationController extends Controller
 
     public function getQuoteFormHtml(Request $request)
     {
-        $customers = Customer::where('status', 1)->orderBy('name')->get();
-        $insuranceCompanies = InsuranceCompany::where('status', 1)->orderBy('name')->get();
-        $addonCovers = \App\Models\AddonCover::getOrdered(1);
+        $formData = $this->quotationService->getQuotationFormData();
+        $formData['currentIndex'] = $request->input('index', 0);
         
-        $currentIndex = $request->input('index', 0);
-        
-        return view('quotations.partials.quote-form', compact('customers', 'insuranceCompanies', 'addonCovers', 'currentIndex'))->render();
+        return view('quotations.partials.quote-form', $formData)->render();
     }
 
     public function delete(Quotation $quotation): RedirectResponse
     {
-        DB::beginTransaction();
-
         try {
             $quoteReference = $quotation->getQuoteReference();
             $companiesCount = $quotation->quotationCompanies()->count();
             
-            // Delete the quotation (related company records will be deleted automatically)
-            $quotation->delete();
-
-            DB::commit();
-
-            $message = "Quotation {$quoteReference} deleted successfully!";
-            if ($companiesCount > 0) {
-                $message .= " ({$companiesCount} company quote(s) also removed)";
+            $deleted = $this->quotationService->deleteQuotation($quotation);
+            
+            if ($deleted) {
+                $message = "Quotation {$quoteReference} deleted successfully!";
+                if ($companiesCount > 0) {
+                    $message .= " ({$companiesCount} company quote(s) also removed)";
+                }
+                
+                return redirect()->route('quotations.index')->with('success', $message);
             }
-
-            return redirect()->route('quotations.index')
-                ->with('success', $message);
+            
+            return redirect()->back()->with('error', 'Failed to delete quotation.');
         } catch (\Throwable $th) {
-            DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'Failed to delete quotation: ' . $th->getMessage());
+            return redirect()->back()->with('error', 'Failed to delete quotation: ' . $th->getMessage());
         }
     }
 }

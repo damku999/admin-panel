@@ -234,7 +234,7 @@
                         <h5 class="modal-title" id="exampleModalLabel">Select and Reorder Columns</h5>
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                             <button type="button" class="btn btn-secondary float-right ml-2"
-                                data-dismiss="modal">Close</button>
+                                onclick="hideModal('modalPopUpColumn')">Close</button>
                             <button type="button" class="btn btn-primary float-right ml-2 saveColumns">Save
                                 changes</button>
                         </div>
@@ -247,7 +247,7 @@
                         </table>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideModal('modalPopUpColumn')">Close</button>
                         <button type="button" class="btn btn-primary saveColumns">Save changes</button>
                     </div>
                 </form>

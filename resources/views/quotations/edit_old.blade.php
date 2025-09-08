@@ -1356,7 +1356,7 @@
                 <h5 class="modal-title" id="sendWhatsAppModalLabel">
                     <i class="fab fa-whatsapp"></i> Send Quotation via WhatsApp
                 </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close text-white" onclick="hideWhatsAppModal(this.closest('.modal').id)" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -1373,7 +1373,7 @@
                 <p class="text-muted small">This will generate and attach a PDF comparison of all quotes.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" onclick="hideWhatsAppModal(this.closest('.modal').id)">Cancel</button>
                 <form method="POST" action="{{ route('quotations.send-whatsapp', $quotation) }}" class="d-inline">
                     @csrf
                     <button type="submit" class="btn btn-success">
@@ -1393,7 +1393,7 @@
                 <h5 class="modal-title" id="resendWhatsAppModalLabel">
                     <i class="fab fa-whatsapp"></i> Resend Quotation via WhatsApp
                 </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" onclick="hideWhatsAppModal(this.closest('.modal').id)" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -1411,7 +1411,7 @@
                 <p class="text-muted small">This will generate a fresh PDF with current quotes and send it again.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" onclick="hideWhatsAppModal(this.closest('.modal').id)">Cancel</button>
                 <form method="POST" action="{{ route('quotations.send-whatsapp', $quotation) }}" class="d-inline">
                     @csrf
                     <button type="submit" class="btn btn-warning">

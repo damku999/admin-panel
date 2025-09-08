@@ -12,7 +12,7 @@
                 <h4 class="modal-title">
                     <span class="module_action">Delete</span> Confirmation
                 </h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" onclick="hideModal('delete_confirm')" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -24,7 +24,7 @@
                 <button type="button" class="btn btn-primary btn-sm" id="delete-btn">
                     <span class="module_action">Delete</span>
                 </button>
-                <button type="button" class="btn btn-default btn-sm" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-default btn-sm" onclick="hideModal('delete_confirm')">Close</button>
             </div>
         </div>
     </div>

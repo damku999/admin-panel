@@ -24,15 +24,12 @@
   DB_USERNAME=your_production_user
   DB_PASSWORD=your_secure_password
   
-  # Cache Configuration (Redis recommended)
-  CACHE_DRIVER=redis
-  QUEUE_CONNECTION=redis
-  REDIS_HOST=127.0.0.1
-  REDIS_PASSWORD=null
-  REDIS_PORT=6379
+  # Cache Configuration (File-based for shared hosting)
+  CACHE_DRIVER=file
+  QUEUE_CONNECTION=database
   
   # Session Configuration
-  SESSION_DRIVER=redis
+  SESSION_DRIVER=database
   SESSION_LIFETIME=120
   
   # Security
@@ -43,9 +40,7 @@
 - [ ] PHP 8.2+ with required extensions:
   - BCMath, Ctype, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML
   - GD extension (for Excel exports)
-  - Redis extension (for caching)
 - [ ] MySQL 8.0+ or MariaDB 10.3+
-- [ ] Redis server for caching and sessions
 - [ ] Nginx or Apache with SSL certificate
 - [ ] Composer 2.0+
 - [ ] Node.js 16+ and NPM (for asset compilation)
@@ -154,34 +149,33 @@ chmod 600 .env
 ## Performance Optimization ✅
 
 ### 1. Caching Setup
-- [ ] Redis server running and accessible
+- [ ] File-based cache directory writable (storage/framework/cache)
+- [ ] Database sessions table exists (run migration if needed)
 - [ ] Test cache functionality:
   ```bash
   php artisan tinker
   Cache::put('test', 'value', 60);
   Cache::get('test'); // Should return 'value'
+  
+  # Test session storage
+  php artisan migrate # Ensure sessions table exists
   ```
 
 ### 2. Queue Configuration
-- [ ] Configure queue worker:
+- [ ] Configure database queue table:
   ```bash
-  # Install supervisor for queue management
-  sudo apt-get install supervisor
-  
-  # Create supervisor config
-  sudo nano /etc/supervisor/conf.d/insurance-worker.conf
+  # Create jobs table for database queue
+  php artisan queue:table
+  php artisan migrate
   ```
   
-  ```ini
-  [program:insurance-worker]
-  process_name=%(program_name)s_%(process_num)02d
-  command=php /var/www/insurance-system/artisan queue:work redis --sleep=3 --tries=3
-  autostart=true
-  autorestart=true
-  user=www-data
-  numprocs=2
-  redirect_stderr=true
-  stdout_logfile=/var/log/insurance-worker.log
+- [ ] Configure queue worker (shared hosting alternative):
+  ```bash
+  # For shared hosting, use cron job instead of supervisor
+  # Add to crontab: * * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1
+  
+  # Manual queue processing (if supervisor not available)
+  php artisan queue:work database --sleep=3 --tries=3 --timeout=60
   ```
 
 ### 3. Performance Monitoring

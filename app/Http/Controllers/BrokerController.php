@@ -2,26 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\BrokersExport;
+use App\Contracts\Services\BrokerServiceInterface;
 use App\Http\Requests\StoreBrokerRequest;
 use App\Http\Requests\UpdateBrokerRequest;
 use App\Models\Broker;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
-use Maatwebsite\Excel\Facades\Excel;
 
 class BrokerController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
+    public function __construct(
+        private BrokerServiceInterface $brokerService
+    ) {
         $this->middleware('auth');
         $this->middleware('permission:broker-list|broker-create|broker-edit|broker-delete', ['only' => ['index']]);
         $this->middleware('permission:broker-create', ['only' => ['create', 'store', 'updateStatus']]);
@@ -37,12 +30,7 @@ class BrokerController extends Controller
      */
     public function index(Request $request): View
     {
-        $broker_obj = Broker::select('*');
-        if (!empty($request->search)) {
-            $broker_obj->where('name', 'LIKE', '%' . trim($request->search) . '%')->orWhere('email', 'LIKE', '%' . trim($request->search) . '%')->orWhere('mobile_number', 'LIKE', '%' . trim($request->search) . '%');
-        }
-
-        $brokers = $broker_obj->paginate(10);
+        $brokers = $this->brokerService->getBrokers($request);
         return view('brokers.index', ['brokers' => $brokers, 'request' => $request->all()]);
     }
 

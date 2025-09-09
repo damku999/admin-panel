@@ -2,22 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\InsuranceCompanyExport;
+use App\Contracts\Services\InsuranceCompanyServiceInterface;
 use App\Models\InsuranceCompany;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Facades\Excel;
 
 class InsuranceCompanyController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
+    public function __construct(
+        private InsuranceCompanyServiceInterface $insuranceCompanyService
+    ) {
         $this->middleware('auth');
         $this->middleware('permission:insurance_company-list|insurance_company-create|insurance_company-edit|insurance_company-delete', ['only' => ['index']]);
         $this->middleware('permission:insurance_company-create', ['only' => ['create', 'store', 'updateStatus']]);
@@ -33,12 +26,7 @@ class InsuranceCompanyController extends Controller
      */
     public function index(Request $request)
     {
-        $insurance_company_obj = InsuranceCompany::select('*');
-        if (!empty($request->search)) {
-            $insurance_company_obj->where('name', 'LIKE', '%' . trim($request->search) . '%')->orWhere('email', 'LIKE', '%' . trim($request->search) . '%')->orWhere('mobile_number', 'LIKE', '%' . trim($request->search) . '%');
-        }
-
-        $insurance_companies = $insurance_company_obj->paginate(10);
+        $insurance_companies = $this->insuranceCompanyService->getInsuranceCompanies($request);
         return view('insurance_companies.index', ['insurance_companies' => $insurance_companies, 'request' => $request->all()]);
     }
 
@@ -61,28 +49,19 @@ class InsuranceCompanyController extends Controller
      */
     public function store(Request $request)
     {
-        // Validations
-        $validation_array = [
+        $request->validate([
             'name' => 'required',
-        ];
-
-        $request->validate($validation_array);
-        DB::beginTransaction();
+        ]);
 
         try {
-            // Store Data
-            $insurance_company = InsuranceCompany::create([
+            $this->insuranceCompanyService->createInsuranceCompany([
                 'name' => $request->name,
                 'email' => $request->email,
                 'mobile_number' => $request->mobile_number,
             ]);
 
-            // Commit And Redirected To Listing
-            DB::commit();
             return redirect()->back()->with('success', 'InsuranceCompany Created Successfully.');
         } catch (\Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
             return redirect()->back()->withInput()->with('error', $th->getMessage());
         }
     }
@@ -95,33 +74,10 @@ class InsuranceCompanyController extends Controller
      */
     public function updateStatus($insurance_company_id, $status)
     {
-        // Validation
-        $validate = Validator::make([
-            'insurance_company_id' => $insurance_company_id,
-            'status' => $status,
-        ], [
-            'insurance_company_id' => 'required|exists:insurance_companies,id',
-            'status' => 'required|in:0,1',
-        ]);
-
-        // If Validations Fails
-        if ($validate->fails()) {
-            return redirect()->back()->with('error', $validate->errors()->first());
-        }
-
         try {
-            DB::beginTransaction();
-
-            // Update Status
-            InsuranceCompany::whereId($insurance_company_id)->update(['status' => $status]);
-
-            // Commit And Redirect on index with Success Message
-            DB::commit();
+            $this->insuranceCompanyService->updateStatus($insurance_company_id, $status);
             return redirect()->back()->with('success', 'InsuranceCompany Status Updated Successfully!');
         } catch (\Throwable $th) {
-
-            // Rollback & Return Error Message
-            DB::rollBack();
             return redirect()->back()->with('error', $th->getMessage());
         }
     }
@@ -147,27 +103,19 @@ class InsuranceCompanyController extends Controller
      */
     public function update(Request $request, InsuranceCompany $insurance_company)
     {
-        // Validations
-        $validation_array = [
+        $request->validate([
             'name' => 'required',
-        ];
+        ]);
 
-        $request->validate($validation_array);
-
-        DB::beginTransaction($validation_array);
         try {
-            // Store Data
-            $insurance_company_updated = InsuranceCompany::whereId($insurance_company->id)->update([
+            $this->insuranceCompanyService->updateInsuranceCompany($insurance_company, [
                 'name' => $request->name,
                 'email' => $request->email,
                 'mobile_number' => $request->mobile_number,
             ]);
-            // Commit And Redirected To Listing
-            DB::commit();
+
             return redirect()->back()->with('success', 'InsuranceCompany Updated Successfully.');
         } catch (\Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
             return redirect()->back()->withInput()->with('error', $th->getMessage());
         }
     }
@@ -180,24 +128,14 @@ class InsuranceCompanyController extends Controller
      */
     public function delete(InsuranceCompany $insurance_company)
     {
-        DB::beginTransaction();
         try {
-            // Delete InsuranceCompany
-            InsuranceCompany::whereId($insurance_company->id)->delete();
-
-            DB::commit();
+            $this->insuranceCompanyService->deleteInsuranceCompany($insurance_company);
             return redirect()->back()->with('success', 'InsuranceCompany Deleted Successfully!.');
         } catch (\Throwable $th) {
-            DB::rollBack();
             return redirect()->back()->with('error', $th->getMessage());
         }
     }
 
-    /**
-     * Import InsuranceCompanys
-     * @param Null
-     * @return View File
-     */
     public function importInsuranceCompanys()
     {
         return view('insurance_companies.import');
@@ -205,6 +143,6 @@ class InsuranceCompanyController extends Controller
 
     public function export()
     {
-        return Excel::download(new InsuranceCompanyExport, 'insurance_companies.xlsx');
+        return $this->insuranceCompanyService->exportInsuranceCompanies();
     }
 }

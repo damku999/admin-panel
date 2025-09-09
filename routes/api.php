@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CustomerController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +16,25 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Public API routes
+Route::prefix('v1')->group(function () {
+    // Authentication routes
+    Route::post('/login', [AuthController::class, 'login']);
+    
+    // Protected routes
+    Route::middleware('auth:sanctum')->group(function () {
+        // Auth management
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/me', [AuthController::class, 'me']);
+        Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
+        
+        // Customer management
+        Route::apiResource('customers', CustomerController::class);
+        Route::patch('/customers/{customer}/status', [CustomerController::class, 'updateStatus']);
+        
+        // General user info
+        Route::get('/user', function (Request $request) {
+            return $request->user();
+        });
+    });
 });

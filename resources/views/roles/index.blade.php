@@ -63,8 +63,8 @@
                             @endforeach
                         </tbody>
                     </table>
-
-                    {{ $roles->links() }}
+                    
+                    <x-pagination-with-info :paginator="$roles" />
                 </div>
             </div>
         </div>

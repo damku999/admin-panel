@@ -100,8 +100,8 @@
                             @endforelse
                         </tbody>
                     </table>
-
-                    {{ $policy_type->links() }}
+                    
+                    <x-pagination-with-info :paginator="$policy_type" />
                 </div>
             </div>
         </div>

@@ -104,8 +104,8 @@
                             @endforelse
                         </tbody>
                     </table>
-
-                    {{ $relationship_managers->links() }}
+                    
+                    <x-pagination-with-info :paginator="$relationship_managers" />
                 </div>
             </div>
         </div>

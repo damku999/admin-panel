@@ -5,13 +5,12 @@ namespace App\Services;
 use App\Contracts\Services\CustomerInsuranceServiceInterface;
 use App\Contracts\Repositories\CustomerInsuranceRepositoryInterface;
 use App\Exports\CustomerInsurancesExport;
-use App\Models\CustomerInsurance;
+use App\Models\{Branch, Broker, Customer, CustomerInsurance, FuelType, InsuranceCompany, PolicyType, PremiumType, ReferenceUser, RelationshipManager};
 use App\Traits\WhatsAppApiTrait;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\{Carbon, Facades\DB, Facades\Storage};
 use Maatwebsite\Excel\Facades\Excel;
 
 class CustomerInsuranceService implements CustomerInsuranceServiceInterface
@@ -19,14 +18,270 @@ class CustomerInsuranceService implements CustomerInsuranceServiceInterface
     use WhatsAppApiTrait;
     
     public function __construct(
-        private CustomerInsuranceRepositoryInterface $customerInsuranceRepository
+        private CustomerInsuranceRepositoryInterface $customerInsuranceRepository,
+        private CacheService $cacheService
     ) {}
     
     public function getCustomerInsurances(Request $request): LengthAwarePaginator
     {
-        return $this->customerInsuranceRepository->getPaginated($request);
+        $query = CustomerInsurance::select([
+            'customer_insurances.*', 
+            'customers.name as customer_name', 
+            'branches.name as branch_name', 
+            'brokers.name as broker_name', 
+            'relationship_managers.name as relationship_manager_name', 
+            'premium_types.name AS policy_type_name'
+        ])
+        ->join('customers', 'customers.id', 'customer_insurances.customer_id')
+        ->leftJoin('branches', 'branches.id', 'customer_insurances.branch_id')
+        ->leftJoin('premium_types', 'premium_types.id', 'customer_insurances.premium_type_id')
+        ->leftJoin('brokers', 'brokers.id', 'customer_insurances.broker_id')
+        ->leftJoin('relationship_managers', 'relationship_managers.id', 'customer_insurances.relationship_manager_id');
+
+        // Apply search filter
+        if (!empty($request->search)) {
+            $search = trim($request->search);
+            $query->where(function($q) use ($search) {
+                $q->where('registration_no', 'LIKE', '%' . $search . '%')
+                  ->orWhere('policy_no', 'LIKE', '%' . $search . '%')
+                  ->orWhere('customers.name', 'LIKE', '%' . $search . '%')
+                  ->orWhere('customers.mobile_number', 'LIKE', '%' . $search . '%');
+            });
+        }
+
+        // Status filter - default to active (unless filtering by renewal due dates)
+        if (!$request->filled('renewal_due_start') && !$request->filled('renewal_due_end')) {
+            $query->where('customer_insurances.status', 1);
+        }
+        
+        // Apply explicit status filter if provided
+        if ($request->filled('status')) {
+            $query->where('customer_insurances.status', $request->input('status'));
+        }
+
+        // Customer filter
+        if (!empty($request->customer_id)) {
+            $query->where('customer_insurances.customer_id', $request->customer_id);
+        }
+
+        // Renewal filters
+        if (!empty($request->already_renewed_this_month)) {
+            $query->where('customer_insurances.is_renewed', 1);
+        }
+        if (!empty($request->pending_renewal_this_month)) {
+            $query->where('customer_insurances.is_renewed', 0);
+        }
+
+        // Date range filter for expiring policies
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $start_date = Carbon::parse($request->input('start_date'))->startOfDay();
+            $end_date = Carbon::parse($request->input('end_date'))->endOfDay();
+            $query->whereBetween('expired_date', [$start_date, $end_date]);
+        }
+        
+        // Renewal due date filter (from dashboard)
+        if ($request->filled('renewal_due_start') && $request->filled('renewal_due_end')) {
+            $renewal_start = Carbon::createFromFormat('d-m-Y', $request->input('renewal_due_start'))->startOfDay();
+            $renewal_end = Carbon::createFromFormat('d-m-Y', $request->input('renewal_due_end'))->endOfDay();
+            $query->whereBetween('expired_date', [$renewal_start, $renewal_end]);
+        }
+
+        // Sorting
+        $sort = $request->input('sort', 'id');
+        $direction = $request->input('direction', 'desc');
+        $query->orderBy($sort, $direction);
+
+        return $query->paginate(10);
     }
     
+    public function getFormData(): array
+    {
+        return [
+            'customers' => Customer::select('id', 'name')->get(),
+            'brokers' => Broker::select('id', 'name')->get(),
+            'relationship_managers' => RelationshipManager::select('id', 'name')->get(),
+            'branches' => Branch::select('id', 'name')->get(),
+            'insurance_companies' => InsuranceCompany::select('id', 'name')->get(),
+            'policy_type' => PolicyType::select('id', 'name')->get(),
+            'fuel_type' => FuelType::select('id', 'name')->get(),
+            'premium_types' => PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies')->get(),
+            'reference_by_user' => ReferenceUser::select('id', 'name')->get(),
+            'life_insurance_payment_mode' => config('constants.LIFE_INSURANCE_PAYMENT_MODE'),
+        ];
+    }
+
+    public function getStoreValidationRules(): array
+    {
+        return [
+            'customer_id' => 'required|exists:customers,id',
+            'branch_id' => 'required|exists:branches,id',
+            'broker_id' => 'required|exists:brokers,id',
+            'relationship_manager_id' => 'required|exists:relationship_managers,id',
+            'insurance_company_id' => 'required|exists:insurance_companies,id',
+            'policy_type_id' => 'required|exists:policy_types,id',
+            'fuel_type_id' => 'nullable|exists:fuel_types,id',
+            'premium_type_id' => 'required|exists:premium_types,id',
+            'issue_date' => 'required|date_format:Y-m-d',
+            'expired_date' => 'required|date_format:Y-m-d',
+            'start_date' => 'required|date_format:Y-m-d',
+            'tp_expiry_date' => 'nullable|date_format:Y-m-d',
+            'policy_no' => 'required',
+            'net_premium' => 'nullable|numeric',
+            'premium_amount' => 'nullable|numeric',
+            'gst' => 'nullable|numeric',
+            'final_premium_with_gst' => 'required|numeric',
+            'mode_of_payment' => 'nullable|string',
+            'cheque_no' => 'nullable|string',
+            'rto' => 'nullable|string',
+            'registration_no' => 'nullable|string',
+            'make_model' => 'nullable|string',
+            'od_premium' => 'nullable|numeric',
+            'tp_premium' => 'nullable|numeric',
+            'cgst1' => 'nullable|numeric',
+            'sgst1' => 'nullable|numeric',
+            'cgst2' => 'nullable|numeric',
+            'sgst2' => 'nullable|numeric',
+            'commission_on' => 'nullable|in:net_premium,od_premium,tp_premium',
+            'my_commission_percentage' => 'nullable|numeric',
+            'my_commission_amount' => 'nullable|numeric',
+            'transfer_commission_percentage' => 'nullable|numeric',
+            'transfer_commission_amount' => 'nullable|numeric',
+            'reference_commission_percentage' => 'nullable|numeric',
+            'reference_commission_amount' => 'nullable|numeric',
+            'actual_earnings' => 'nullable|numeric',
+            'ncb_percentage' => 'nullable|numeric',
+            'gross_vehicle_weight' => 'nullable|numeric',
+            'mfg_year' => 'nullable|numeric',
+            'plan_name' => 'nullable|string',
+            'premium_paying_term' => 'nullable|string',
+            'policy_term' => 'nullable|string',
+            'sum_insured' => 'nullable|string',
+            'pension_amount_yearly' => 'nullable|string',
+            'approx_maturity_amount' => 'nullable|string',
+            'remarks' => 'nullable|string',
+        ];
+    }
+
+    public function getUpdateValidationRules(): array
+    {
+        return [
+            'customer_id',
+            'branch_id',
+            'broker_id',
+            'relationship_manager_id',
+            'insurance_company_id',
+            'premium_type_id',
+            'policy_type_id',
+            'fuel_type_id',
+            'issue_date',
+            'expired_date',
+            'start_date',
+            'tp_expiry_date',
+            'policy_no',
+            'net_premium',
+            'gst',
+            'final_premium_with_gst',
+            'mode_of_payment',
+            'cheque_no',
+            'rto',
+            'registration_no',
+            'make_model',
+            'od_premium',
+            'premium_amount',
+            'tp_premium',
+            'cgst1',
+            'sgst1',
+            'cgst2',
+            'sgst2',
+            'commission_on',
+            'my_commission_percentage',
+            'my_commission_amount',
+            'transfer_commission_percentage',
+            'transfer_commission_amount',
+            'actual_earnings',
+            'ncb_percentage',
+            'gross_vehicle_weight',
+            'mfg_year',
+            'reference_commission_percentage',
+            'reference_commission_amount',
+            'plan_name',
+            'premium_paying_term',
+            'policy_term',
+            'sum_insured',
+            'pension_amount_yearly',
+            'approx_maturity_amount',
+            'remarks',
+            'maturity_date',
+            'life_insurance_payment_mode',
+            'reference_by',
+        ];
+    }
+
+    public function getRenewalValidationRules(): array
+    {
+        return $this->getStoreValidationRules();
+    }
+
+    public function prepareStorageData(Request $request): array
+    {
+        $data_to_store = $request->only([
+            'customer_id',
+            'branch_id',
+            'broker_id',
+            'relationship_manager_id',
+            'insurance_company_id',
+            'premium_type_id',
+            'policy_type_id',
+            'fuel_type_id',
+            'policy_no',
+            'net_premium',
+            'gst',
+            'final_premium_with_gst',
+            'mode_of_payment',
+            'cheque_no',
+            'rto',
+            'registration_no',
+            'make_model',
+            'od_premium',
+            'premium_amount',
+            'tp_premium',
+            'cgst1',
+            'sgst1',
+            'cgst2',
+            'sgst2',
+            'commission_on',
+            'my_commission_percentage',
+            'my_commission_amount',
+            'transfer_commission_percentage',
+            'transfer_commission_amount',
+            'actual_earnings',
+            'ncb_percentage',
+            'gross_vehicle_weight',
+            'mfg_year',
+            'reference_commission_percentage',
+            'reference_commission_amount',
+            'plan_name',
+            'premium_paying_term',
+            'policy_term',
+            'sum_insured',
+            'pension_amount_yearly',
+            'approx_maturity_amount',
+            'remarks',
+            'life_insurance_payment_mode',
+            'reference_by',
+        ]);
+
+        // Handle date fields
+        $dateFields = ['issue_date', 'expired_date', 'start_date', 'tp_expiry_date', 'maturity_date'];
+        foreach ($dateFields as $field) {
+            if (!empty($request->$field)) {
+                $data_to_store[$field] = $request->$field;
+            }
+        }
+
+        return $data_to_store;
+    }
+
     public function createCustomerInsurance(array $data): CustomerInsurance
     {
         DB::beginTransaction();
@@ -35,11 +290,6 @@ class CustomerInsuranceService implements CustomerInsuranceServiceInterface
             $data = $this->calculateCommissionFields($data);
             
             $customerInsurance = $this->customerInsuranceRepository->create($data);
-            
-            // Handle policy document upload if present
-            if (isset($data['policy_document']) && $data['policy_document']) {
-                $this->handlePolicyDocument($customerInsurance, $data['policy_document']);
-            }
             
             DB::commit();
             return $customerInsurance;
@@ -102,18 +352,82 @@ class CustomerInsuranceService implements CustomerInsuranceServiceInterface
         }
     }
     
+    public function handleFileUpload(Request $request, CustomerInsurance $customerInsurance): void
+    {
+        if ($request->hasFile('policy_document_path')) {
+            $file = $request->file('policy_document_path');
+            $timestamp = time();
+            
+            // Extract necessary information
+            $customerName = $customerInsurance->customer->name;
+            $premiumType = $customerInsurance->premiumType->name;
+            $policyNo = $customerInsurance->policy_no;
+            $registrationNo = $customerInsurance->registration_no;
+            $currentYear = date('Y');
+            
+            if (!empty($registrationNo)) {
+                $fileName = $registrationNo . '-' . $currentYear . '-POLICY COPY-' . $timestamp;
+            } else {
+                $fileName = $customerName . '-' . $premiumType . '-' . $policyNo . '-' . $currentYear . '-POLICY COPY-' . $timestamp;
+            }
+            
+            // Clean filename
+            $fileName = trim($fileName, '-');
+            $fileName = str_replace('--', '-', $fileName);
+            $fileName .= '-' . time();
+            $fileName = preg_replace('/[^A-Za-z0-9_\-]/', '', str_replace(' ', '-', $fileName));
+            
+            // Store the file
+            $path = $file->storeAs(
+                'customer_insurances/' . $customerInsurance->id . '/policy_document_path', 
+                $fileName . '.' . $file->getClientOriginalExtension(), 
+                'public'
+            );
+            
+            // Update the policy_document_path
+            $customerInsurance->update(['policy_document_path' => $path]);
+        }
+    }
+
+    public function sendWhatsAppDocument(CustomerInsurance $customerInsurance): bool
+    {
+        if (!empty($customerInsurance->policy_document_path)) {
+            $message = $this->insuranceAdded($customerInsurance);
+            $filePath = Storage::path('public' . DIRECTORY_SEPARATOR . $customerInsurance->policy_document_path);
+            $this->whatsAppSendMessageWithAttachment($message, $customerInsurance->customer->mobile_number, $filePath);
+            return true;
+        }
+        return false;
+    }
+
+    public function sendRenewalReminderWhatsApp(CustomerInsurance $customerInsurance): bool
+    {
+        $messageText = $customerInsurance->premiumType->is_vehicle == 1 
+            ? $this->renewalReminderVehicle($customerInsurance) 
+            : $this->renewalReminder($customerInsurance);
+        
+        $receiverId = $customerInsurance->customer->mobile_number;
+        $this->whatsAppSendMessage($messageText, $receiverId);
+        
+        return true;
+    }
+
     public function renewPolicy(CustomerInsurance $customerInsurance, array $data): CustomerInsurance
     {
         DB::beginTransaction();
         try {
+            // Calculate commission breakdown for renewal data
+            $data = $this->calculateCommissionFields($data);
+            
             // Create new policy record for renewal
-            $renewalData = $this->prepareRenewalData($customerInsurance, $data);
+            $renewalData = $this->prepareRenewalStorageData($data);
             $newPolicy = $this->customerInsuranceRepository->create($renewalData);
             
             // Mark original policy as renewed
             $this->customerInsuranceRepository->update($customerInsurance, [
-                'is_renewed' => true,
-                'renewed_date' => now(),
+                'status' => 0,
+                'is_renewed' => 1,
+                'renewed_date' => Carbon::now(),
                 'new_insurance_id' => $newPolicy->id
             ]);
             
@@ -202,30 +516,18 @@ class CustomerInsuranceService implements CustomerInsuranceServiceInterface
         return $data;
     }
     
-    private function handlePolicyDocument(CustomerInsurance $customerInsurance, $document): void
+    
+    private function prepareRenewalStorageData(array $renewalData): array
     {
-        $path = $document->store('policy-documents');
-        $customerInsurance->update(['policy_document_path' => $path]);
+        // Remove fields that shouldn't be copied to new record
+        unset($renewalData['id']);
+        $renewalData['is_renewed'] = 0;
+        $renewalData['renewed_date'] = null;
+        $renewalData['new_insurance_id'] = null;
+        $renewalData['created_at'] = now();
+        $renewalData['updated_at'] = now();
+        
+        return $renewalData;
     }
     
-    private function prepareRenewalData(CustomerInsurance $originalPolicy, array $renewalData): array
-    {
-        return array_merge($originalPolicy->toArray(), [
-            'id' => null,
-            'start_date' => $renewalData['start_date'],
-            'expired_date' => $renewalData['expired_date'],
-            'tp_expiry_date' => $renewalData['tp_expiry_date'] ?? null,
-            'premium_amount' => $renewalData['premium_amount'],
-            'net_premium' => $renewalData['net_premium'],
-            'od_premium' => $renewalData['od_premium'] ?? 0,
-            'tp_premium' => $renewalData['tp_premium'] ?? 0,
-            'gst' => $renewalData['gst'] ?? 0,
-            'final_premium_with_gst' => $renewalData['final_premium_with_gst'],
-            'is_renewed' => false,
-            'renewed_date' => null,
-            'new_insurance_id' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-    }
 }

@@ -110,8 +110,8 @@
                             @endforelse
                         </tbody>
                     </table>
-
-                    {{ $addon_covers->links() }}
+                    
+                    <x-pagination-with-info :paginator="$addon_covers" />
                 </div>
             </div>
         </div>

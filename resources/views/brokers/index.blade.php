@@ -102,8 +102,8 @@
                             @endforelse
                         </tbody>
                     </table>
-
-                    {{ $brokers->appends($request)->links()}}
+                    
+                    <x-pagination-with-info :paginator="$brokers" :request="$request" />
                 </div>
             </div>
         </div>

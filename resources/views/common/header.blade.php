@@ -1,37 +1,63 @@
-<nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+<nav class="navbar navbar-expand navbar-light bg-white border-bottom shadow-sm py-2">
+    <div class="container-fluid px-3">
+        <!-- Left side - Sidebar Toggle -->
+        <div class="d-flex align-items-center">
+            <!-- Sidebar Toggle (Mobile) -->
+            <button id="sidebarToggleTop" class="btn btn-outline-secondary btn-sm d-md-none me-2" style="border: none;">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
 
-    <!-- Sidebar Toggle (Topbar) -->
-    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-        <i class="fa fa-bars"></i>
-    </button>
-    <!-- Topbar Navbar -->
-    <ul class="navbar-nav ml-auto">
-
-        <!-- Nav Item - User Information -->
-        <li class="nav-item dropdown no-arrow">
-            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown"
-                aria-expanded="false">
-                <span
-                    class="me-2 d-none d-lg-inline text-gray-600 small">{{ auth()->user()->full_name ?? 'Guest' }}</span>
-                <img class="img-profile rounded-circle" src="{{ asset('admin/img/undraw_profile.svg') }}">
-            </a>
-            <!-- Dropdown - User Information -->
-            <div class="dropdown-menu dropdown-menu-end shadow animated--grow-in" aria-labelledby="userDropdown">
-                <a class="dropdown-item" href="{{ route('profile.detail') }}">
-                    <i class="fas fa-user fa-sm fa-fw me-2 text-gray-400"></i>
-                    Profile
+        <!-- Right side - User Profile Only -->
+        <ul class="navbar-nav">
+            <!-- User Profile Dropdown -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center py-1 px-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none;">
+                    <!-- Simple User Avatar -->
+                    @if(auth()->user()->profile_photo_path ?? false)
+                        <img class="rounded-circle me-2" src="{{ Storage::url(auth()->user()->profile_photo_path) }}" 
+                             style="width: 28px; height: 28px; object-fit: cover;">
+                    @else
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" 
+                             style="width: 28px; height: 28px; font-size: 11px; font-weight: 500;">
+                            {{ strtoupper(substr(auth()->user()->full_name ?? 'G', 0, 1)) }}
+                        </div>
+                    @endif
+                    
+                    <!-- Simple User Name (desktop only) -->
+                    <span class="d-none d-md-inline text-dark" style="font-size: 13px; font-weight: 500;">
+                        {{ explode(' ', auth()->user()->full_name ?? 'Guest')[0] }}
+                    </span>
                 </a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#" onclick="event.preventDefault(); if(confirm('Are you sure you want to logout?')) { document.getElementById('logout-form').submit(); }">
-                    <i class="fas fa-sign-out-alt fa-sm fa-fw me-2 text-gray-400"></i>
-                    Logout
-                </a>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                    @csrf
-                </form>
-            </div>
-        </li>
-
-    </ul>
-
+                
+                <!-- Simplified Dropdown -->
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="min-width: 200px;">
+                    <!-- User Info Header -->
+                    <li class="dropdown-header bg-light px-3 py-2">
+                        <strong>{{ auth()->user()->full_name ?? 'Guest User' }}</strong><br>
+                        <small class="text-muted">{{ auth()->user()->email ?? 'guest@example.com' }}</small>
+                    </li>
+                    
+                    <li><hr class="dropdown-divider"></li>
+                    
+                    <!-- Menu Items -->
+                    <li><a class="dropdown-item py-2" href="{{ route('profile.detail') }}">
+                        <i class="fas fa-user me-2 text-primary"></i> My Profile
+                    </a></li>
+                    <li><a class="dropdown-item py-2" href="#">
+                        <i class="fas fa-cog me-2 text-secondary"></i> Settings
+                    </a></li>
+                    <li><a class="dropdown-item py-2" href="#">
+                        <i class="fas fa-question-circle me-2 text-info"></i> Help
+                    </a></li>
+                    
+                    <li><hr class="dropdown-divider"></li>
+                    
+                    <li><a class="dropdown-item py-2 text-danger" href="#" onclick="showLogoutModal()">
+                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                    </a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
 </nav>

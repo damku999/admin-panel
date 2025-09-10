@@ -104,8 +104,8 @@
                             @endforelse
                         </tbody>
                     </table>
-
-                    {{ $reference_users->links() }}
+                    
+                    <x-pagination-with-info :paginator="$reference_users" />
                 </div>
             </div>
         </div>

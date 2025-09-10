@@ -99,8 +99,8 @@
                             @endforelse
                         </tbody>
                     </table>
-
-                    {{ $fuel_type->appends($request)->links() }}
+                    
+                    <x-pagination-with-info :paginator="$fuel_type" :request="$request" />
                 </div>
             </div>
         </div>

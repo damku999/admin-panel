@@ -90,8 +90,8 @@
                             @endforeach
                         </tbody>
                     </table>
-
-                    {{ $users->links() }}
+                    
+                    <x-pagination-with-info :paginator="$users" />
                 </div>
             </div>
         </div>

@@ -114,12 +114,12 @@
                                             </span>
                                             @if($quotation->sent_at)
                                                 <br><small class="text-muted">
-                                                    Sent: {{ $quotation->sent_at->format('M d, Y H:i') }}
+                                                    Sent: {{ formatDateForUi($quotation->sent_at, 'M d, Y H:i') }}
                                                 </small>
                                             @endif
                                         </td>
                                         <td>
-                                            {{ $quotation->created_at->format('M d, Y') }}<br>
+                                            {{ formatDateForUi($quotation->created_at, 'M d, Y') }}<br>
                                             <small class="text-muted">{{ $quotation->created_at->format('H:i') }}</small>
                                         </td>
                                         <td>
@@ -212,12 +212,8 @@
                         </table>
                     </div>
 
-                    <!-- Pagination -->
-                    @if($quotations->hasPages())
-                        <div class="d-flex justify-content-center">
-                            {{ $quotations->appends(request()->query())->links() }}
-                        </div>
-                    @endif
+                    <!-- Pagination with Record Count -->
+                    <x-pagination-with-info :paginator="$quotations" :request="request()->query()" />
                 </div>
             </div>
         </div>
@@ -284,7 +280,7 @@
                             <strong>{{ $quotation->getQuoteReference() }}</strong><br>
                             <strong>Customer:</strong> {{ $quotation->customer->name }}<br>
                             <strong>WhatsApp:</strong> {{ $quotation->whatsapp_number ?? $quotation->customer->mobile_number }}<br>
-                            <strong>Last Sent:</strong> {{ $quotation->sent_at ? $quotation->sent_at->format('d M Y, H:i') : 'Not available' }}
+                            <strong>Last Sent:</strong> {{ $quotation->sent_at ? formatDateForUi($quotation->sent_at, 'd M Y, H:i') : 'Not available' }}
                         </div>
                     </div>
                     <div class="modal-footer">

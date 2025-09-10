@@ -187,8 +187,8 @@
                             @endforelse
                         </tbody>
                     </table>
-
-                    {{ $customers->appends($request)->links() }}
+                    
+                    <x-pagination-with-info :paginator="$customers" :request="$request" />
                 </div>
             </div>
         </div>

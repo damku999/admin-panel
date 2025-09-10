@@ -1,19 +1,28 @@
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalExample"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalExample">Are you Sure You wanted to Delete?</h5>
-                <button class="close" type="button" onclick="hideModal('deleteModal')" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
+<!-- Modern Broker Delete Modal (Bootstrap 5) -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalExample" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-semibold text-dark" id="deleteModalExample">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    Delete Broker
+                </h5>
+                <button type="button" class="btn-close" onclick="hideModal('deleteModal')" aria-label="Close"></button>
             </div>
-            <div class="modal-body">Select "Delete" below if you want to delete Broker!.</div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" onclick="hideModal('deleteModal')">Cancel</button>
+            <div class="modal-body text-center py-4">
+                <div class="mb-3">
+                    <i class="fas fa-user-tie fa-3x text-danger mb-3"></i>
+                </div>
+                <h6 class="mb-2">Are you sure you want to delete this broker?</h6>
+                <p class="text-muted small mb-0">This action cannot be undone and will permanently remove the broker record and all associated data.</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button class="btn btn-outline-secondary me-2" type="button" onclick="hideModal('deleteModal')">
+                    <i class="fas fa-times me-1"></i> Cancel
+                </button>
                 <a class="btn btn-danger" href="{{ route('logout') }}"
                     onclick="event.preventDefault(); document.getElementById('broker-delete-form').submit();">
-                    Delete
+                    <i class="fas fa-trash me-1"></i> Delete Broker
                 </a>
                 <form id="broker-delete-form" method="POST" action="{{ route('brokers.destroy', ['broker' => $broker->id]) }}">
                     @csrf

@@ -126,7 +126,7 @@
                                 @endif
                             </td>
                             <td>
-                                <small>{{ $familyGroup->created_at->format('d M Y') }}<br>
+                                <small>{{ formatDateForUi($familyGroup->created_at) }}<br>
                                 {{ $familyGroup->created_at->format('h:i A') }}</small>
                             </td>
                             <td>
@@ -151,10 +151,8 @@
                 </table>
             </div>
             
-            <!-- Pagination -->
-            <div class="d-flex justify-content-center">
-                {{ $familyGroups->appends(request()->query())->links() }}
-            </div>
+            <!-- Pagination with Record Count -->
+            <x-pagination-with-info :paginator="$familyGroups" :request="request()->query()" />
             @else
             <div class="text-center py-4">
                 <i class="fas fa-users fa-3x text-gray-300 mb-3"></i>

@@ -104,8 +104,8 @@
                             @endforelse
                         </tbody>
                     </table>
-
-                    {{ $insurance_companies->appends($request)->links() }}
+                    
+                    <x-pagination-with-info :paginator="$insurance_companies" :request="$request" />
                 </div>
             </div>
         </div>

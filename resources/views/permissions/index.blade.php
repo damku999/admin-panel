@@ -63,8 +63,8 @@
                             @endforeach
                         </tbody>
                     </table>
-
-                    {{ $permissions->links() }}
+                    
+                    <x-pagination-with-info :paginator="$permissions" />
                 </div>
             </div>
         </div>

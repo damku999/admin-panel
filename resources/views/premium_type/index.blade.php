@@ -109,8 +109,8 @@
                             @endforelse
                         </tbody>
                     </table>
-
-                    {{ $premium_type->links() }}
+                    
+                    <x-pagination-with-info :paginator="$premium_type" />
                 </div>
             </div>
         </div>

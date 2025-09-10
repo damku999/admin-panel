@@ -14,7 +14,13 @@
                 <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-3">
                     <div class="mb-2 mb-md-0">
                         <h1 class="h4 mb-0 text-primary font-weight-bold">Customer Insurances Management</h1>
-                        <small class="text-muted">Manage all active insurance policies</small>
+                        @if(request('renewal_due_start') && request('renewal_due_end'))
+                            <small class="text-warning">
+                                <i class="fas fa-filter"></i> Showing policies expiring between {{ request('renewal_due_start') }} and {{ request('renewal_due_end') }}
+                            </small>
+                        @else
+                            <small class="text-muted">Manage all active insurance policies</small>
+                        @endif
                     </div>
                     <div class="d-flex flex-wrap align-items-center gap-2">
                         @if (auth()->user()->hasPermissionTo('customer-insurance-create'))
@@ -33,10 +39,18 @@
                             class="form-control float-right filter_by_key mr-2" value="{{ request('search') }}">
 
                         <input type="text" placeholder="Exp Start Date" name="start_date"
-                            class="form-control datepicker mr-2" value="{{ request('start_date') }}">
+                            class="form-control datepicker mr-2" value="{{ request('start_date') ?: request('renewal_due_start') }}">
 
                         <input type="text" placeholder="Exp End Date" name="end_date"
-                            class="form-control datepicker mr-2" value="{{ request('end_date') }}">
+                            class="form-control datepicker mr-2" value="{{ request('end_date') ?: request('renewal_due_end') }}">
+                        
+                        <!-- Hidden fields to preserve renewal filter parameters -->
+                        @if(request('renewal_due_start'))
+                            <input type="hidden" name="renewal_due_start" value="{{ request('renewal_due_start') }}">
+                        @endif
+                        @if(request('renewal_due_end'))
+                            <input type="hidden" name="renewal_due_end" value="{{ request('renewal_due_end') }}">
+                        @endif
 
                         {{-- <select name="status" class="form-control" id="status">
                             <option value="all" {{ request('status', '1') == 'all' ? 'selected' : '' }}>All</option>
@@ -175,8 +189,8 @@
                                     <td>{{ $customer_insurance->customer_name }}</td>
                                     <td>{{ $customer_insurance->policy_no }}</td>
                                     <td>{{ $customer_insurance->registration_no }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($customer_insurance->start_date)->format('d/m/Y') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($customer_insurance->expired_date)->format('d/m/Y') }}
+                                    <td>{{ formatDateForUi($customer_insurance->start_date) }}</td>
+                                    <td>{{ formatDateForUi($customer_insurance->expired_date) }}
                                     </td>
                                     <td>{{ $customer_insurance->policy_type_name }}</td>
                                     <td>
@@ -267,7 +281,7 @@
                             @endforelse
                         </tbody>
                     </table>
-                    {{ $customer_insurances->appends($request)->links() }}
+                    <x-pagination-with-info :paginator="$customer_insurances" :request="$request" />
                 </div>
             </div>
         </div>

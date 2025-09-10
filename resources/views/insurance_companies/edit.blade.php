@@ -1,81 +1,83 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Relationship Manager')
+@section('title', 'Edit Insurance Company')
 
 @section('content')
 
     <div class="container-fluid">
 
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Edit Insurance Companies</h1>
-            <a href="{{ route('insurance_companies.index') }}" onclick="window.history.go(-1); return false;"
-                class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                    class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
-        </div>
-
         {{-- Alert Messages --}}
         @include('common.alert')
 
-        <!-- DataTales Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Edit Relationship Manager</h6>
+        <!-- Insurance Company Form -->
+        <div class="card shadow mb-3 mt-2">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold text-primary">Edit Insurance Company</h6>
+                <a href="{{ route('insurance_companies.index') }}" onclick="window.history.go(-1); return false;"
+                    class="btn btn-outline-secondary btn-sm d-flex align-items-center">
+                    <i class="fas fa-chevron-left me-2"></i>
+                    <span>Back</span>
+                </a>
             </div>
-            <form method="POST"
-                action="{{ route('insurance_companies.update', ['insurance_company' => $insurance_company->id]) }}">
+            @if ($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3 mb-0" role="alert">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+            <form method="POST" action="{{ route('insurance_companies.update', ['insurance_company' => $insurance_company->id]) }}">
                 @csrf
                 @method('PUT')
-
-                <div class="card-body">
-                    <div class="form-group row">
-
-                        {{-- First Name --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            Name</label>
-                            <input type="text"
-                                class="form-control form-control-insurance_company @error('name') is-invalid @enderror"
-                                id="exampleFirstName" placeholder="Name" name="name"
-                                value="{{ old('name') ? old('name') : $insurance_company->name }}">
-
-                            @error('name')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Email --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            Email</label>
-                            <input type="email"
-                                class="form-control form-control-insurance_company @error('email') is-invalid @enderror"
-                                id="exampleEmail" placeholder="Email" name="email"
-                                value="{{ old('email') ? old('email') : $insurance_company->email }}">
-
-                            @error('email')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Mobile Number --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            Mobile Number</label>
-                            <input type="text"
-                                class="form-control form-control-insurance_company @error('mobile_number') is-invalid @enderror"
-                                id="exampleMobile" placeholder="Mobile Number" name="mobile_number"
-                                value="{{ old('mobile_number') ? old('mobile_number') : $insurance_company->mobile_number }}">
-
-                            @error('mobile_number')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
+                <div class="card-body py-3">
+                    <!-- Section: Insurance Company Information -->
+                    <div class="mb-3">
+                        <h6 class="text-muted fw-bold mb-3"><i class="fas fa-building me-2"></i>Insurance Company Information</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Name</label>
+                                <input type="text" class="form-control form-control-sm @error('name') is-invalid @enderror"
+                                    name="name" placeholder="Enter company name" 
+                                    value="{{ old('name') ? old('name') : $insurance_company->name }}">
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Email</label>
+                                <input type="email" class="form-control form-control-sm @error('email') is-invalid @enderror"
+                                    name="email" placeholder="Enter email address" 
+                                    value="{{ old('email') ? old('email') : $insurance_company->email }}">
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Mobile Number</label>
+                                <input type="text" class="form-control form-control-sm @error('mobile_number') is-invalid @enderror"
+                                    name="mobile_number" placeholder="Enter mobile number" 
+                                    value="{{ old('mobile_number') ? old('mobile_number') : $insurance_company->mobile_number }}">
+                                @error('mobile_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="card-footer">
-                        <button type="submit"
-                            class="btn btn-success btn-insurance_company float-right mb-3">Update</button>
-                        <a class="btn btn-primary float-right mr-3 mb-3"
-                            href="{{ route('insurance_companies.index') }}">Cancel</a>
+                <div class="card-footer py-2 bg-light">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a class="btn btn-secondary btn-sm px-4" href="{{ route('insurance_companies.index') }}">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-sm px-4">
+                            <i class="fas fa-save me-1"></i>Update Insurance Company
+                        </button>
                     </div>
+                </div>
             </form>
         </div>
 

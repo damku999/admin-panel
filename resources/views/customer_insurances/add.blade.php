@@ -6,702 +6,593 @@
 
     <div class="container-fluid">
 
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Add Customer Insurance</h1>
-            <a href="{{ route('customer_insurances.index') }}" onclick="window.history.go(-1); return false;"
-                class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                    class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
-        </div>
-
         {{-- Alert Messages --}}
         @include('common.alert')
 
-        <!-- DataTales Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Add New Customer Insurance</h6>
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+        <!-- Customer Insurance Form -->
+        <div class="card shadow mb-3 mt-2">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold text-primary">Add New Customer Insurance</h6>
+                <a href="{{ route('customer_insurances.index') }}" onclick="window.history.go(-1); return false;"
+                    class="btn btn-outline-secondary btn-sm d-flex align-items-center">
+                    <i class="fas fa-chevron-left me-2"></i>
+                    <span>Back</span>
+                </a>
             </div>
+            @if ($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3 mb-0" role="alert">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
             <form method="POST" action="{{ route('customer_insurances.store') }}" enctype="multipart/form-data">
                 @csrf
-                <div class="card-body">
-                    <div class="form-group row mb-12">
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0"><span style="color: red;">*</span>Customer
-                            <select name="customer_id" class="form-control" id="customer_id">
-                                <option selected="selected" disabled="disabled">Select Customer</option>
-                                @foreach ($customers as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        data-mobile="{{ $item->mobile_number }}"
-                                        {{ old('customer_id') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                        @if ($item->mobile_number)
-                                            - {{ $item->mobile_number }}
-                                        @endif
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('customer_id')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Issue Date --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Issue Date</label>
-                            <div class="input-group date" id="issue_date">
-                                <input type="text"
-                                    class="form-control datepicker @error('issue_date') is-invalid @enderror"
-                                    id="issue_date" name="issue_date" value="{{ old('issue_date') ? formatDateForUi(old('issue_date')) : '' }}" />
+                <div class="card-body py-3">
+                    <!-- Section 1: Basic Insurance Information -->
+                    <div class="mb-4">
+                        <h6 class="text-muted fw-bold mb-3"><i class="fas fa-shield-alt me-2"></i>Basic Insurance Information</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Customer</label>
+                                <select name="customer_id" class="form-select form-select-sm @error('customer_id') is-invalid @enderror" id="customer_id">
+                                    <option selected disabled>Select Customer</option>
+                                    @foreach ($customers as $item)
+                                        <option value="{{ $item->id }}" data-mobile="{{ $item->mobile_number }}"
+                                            {{ old('customer_id') == $item->id ? 'selected' : '' }}>
+                                            {{ $item->name }}
+                                            @if ($item->mobile_number)
+                                                - {{ $item->mobile_number }}
+                                            @endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('customer_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
-                            @error('issue_date')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Policy Type --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Policy Type</label>
-                            <select name="policy_type_id" class="form-control" id="policy_type_id">
-                                <option selected="selected" disabled="disabled">Select Policy Type</option>
-                                @foreach ($policy_type as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ old('policy_type_id') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('policy_type_id')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Branch --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Branch</label>
-                            <select name="branch_id" class="form-control" id="branch_id">
-                                <option selected="selected" disabled="disabled">Select Branch</option>
-                                @foreach ($branches as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ old('branch_id') == $item->id ? 'selected' : '' }}>{{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('branch_id')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Broker --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Broker</label>
-                            <select name="broker_id" class="form-control" id="broker_id">
-                                <option selected="selected" disabled="disabled">Select Broker</option>
-                                @foreach ($brokers as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ old('broker_id') == $item->id ? 'selected' : '' }}>{{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('broker_id')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        {{-- RM --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Relationship Manager</label>
-                            <select name="relationship_manager_id" class="form-control" id="relationship_manager_id">
-                                <option selected="selected" disabled="disabled">Select Broker</option>
-                                @foreach ($relationship_managers as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ old('relationship_manager_id') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('relationship_manager_id')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Insurance Company Name --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Insurance Company Name</label>
-                            <select name="insurance_company_id" class="form-control" id="insurance_company_id">
-                                <option selected="selected" disabled="disabled">Select Company</option>
-                                @foreach ($insurance_companies as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ old('insurance_company_id') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('insurance_company_id')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Type OF Policy --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Premium Type</label>
-                            <select name="premium_type_id" class="form-control" id="premium_type_id"
-                                onchange="premiumTypeChanged()">
-                                <option selected="selected" disabled="disabled">Select Premium Type</option>
-                                @foreach ($premium_types as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        data-is_vehicle={{ $item->is_vehicle }}
-                                        data-is_life_insurance_policies={{ $item->is_life_insurance_policies }}
-                                        {{ old('premium_type_id') == $item->id ? 'selected' : '' }}>{{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('premium_type_id')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Policy No. --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Policy No.</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('policy_no') is-invalid @enderror"
-                                id="policy_no" placeholder="Policy No." name="policy_no"
-                                value="{{ old('policy_no') }}">
-
-                            @error('policy_no')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Start Date --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Start Date</label>
-                            <div class="input-group date">
-                                <input type="text"
-                                    class="form-control datepicker @error('start_date') is-invalid @enderror"
-                                    id="start_date" name="start_date" value="{{ old('start_date') ? formatDateForUi(old('start_date')) : '' }}"
-                                    onchange="setExpiredDate()" />
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Issue Date</label>
+                                <input type="text" class="form-control form-control-sm datepicker @error('issue_date') is-invalid @enderror"
+                                    name="issue_date" placeholder="DD/MM/YYYY" value="{{ old('issue_date') ? formatDateForUi(old('issue_date')) : '' }}">
+                                @error('issue_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
-                            @error('start_date')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Expired Date --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label><span style="color: red;">*</span>Expired Date</label>
-                            <div class="input-group date">
-                                <input type="text"
-                                    class="form-control datepicker @error('expired_date') is-invalid @enderror"
-                                    id="expired_date" name="expired_date" value="{{ old('expired_date') ? formatDateForUi(old('expired_date')) : '' }}" />
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Policy Type</label>
+                                <select name="policy_type_id" class="form-select form-select-sm @error('policy_type_id') is-invalid @enderror" id="policy_type_id">
+                                    <option selected disabled>Select Policy Type</option>
+                                    @foreach ($policy_type as $item)
+                                        <option value="{{ $item->id }}" {{ old('policy_type_id') == $item->id ? 'selected' : '' }}>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('policy_type_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
-                            @error('expired_date')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Registration No. --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
-                            <label><span style="color: red;">*</span>Registration No.</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('registration_no') is-invalid @enderror"
-                                id="registration_no" placeholder="Registration No." name="registration_no"
-                                value="{{ old('registration_no') }}">
-
-                            @error('registration_no')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Location --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
-                            <label>Location</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('rto') is-invalid @enderror"
-                                id="rto" placeholder="Location" name="rto" value="{{ old('rto') }}">
-
-                            @error('rto')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Make & Model --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
-                            <label>Make & Model</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('make_model') is-invalid @enderror"
-                                id="make_model" placeholder="Make & Model" name="make_model"
-                                value="{{ old('make_model') }}">
-
-                            @error('make_model')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Fuel Type --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
-                            <label>Fuel Type</label>
-                            <select name="fuel_type_id" class="form-control" id="fuel_type_id">
-                                <option selected="selected" disabled="disabled">Select Fuel Type</option>
-                                @foreach ($fuel_type as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ old('fuel_type_id') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('fuel_type_id')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- TP Expiry Date --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
-                            <label><span style="color: red;">*</span>TP Expiry Date</label>
-                            <div class="input-group date">
-                                <input type="text"
-                                    class="form-control datepicker @error('tp_expiry_date') is-invalid @enderror"
-                                    id="tp_expiry_date" name="tp_expiry_date" value="{{ old('tp_expiry_date') ? formatDateForUi(old('tp_expiry_date')) : '' }}" />
-                            </div>
-                            @error('tp_expiry_date')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- MFG Year --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
-                            <label><span style="color: red;">*</span>MFG Year</label>
-                            <div class="input-group date">
-                                <input type="number" min="1900" max="2099" step="1"
-                                    class="form-control @error('mfg_year') is-invalid @enderror" id="mfg_year"
-                                    name="mfg_year" value="{{ old('mfg_year') }}" />
-                            </div>
-                            @error('mfg_year')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- NCB % --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
-                            <label><span style="color: red;">*</span>NCB %</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control @error('ncb_percentage') is-invalid @enderror"
-                                    id="ncb_percentage" name="ncb_percentage" value="{{ old('ncb_percentage') }}"
-                                    placeholder="NCB %" />
-                            </div>
-                            @error('ncb_percentage')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- GVW --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
-                            <label><span style="color: red;">*</span>GVW </label>
-                            <input type="text"
-                                class="decimal-input form-control form-control-customer @error('gross_vehicle_weight') is-invalid @enderror"
-                                id="gross_vehicle_weight" placeholder="GVW" name="gross_vehicle_weight"
-                                value="{{ old('gross_vehicle_weight') }}">
-
-                            @error('gross_vehicle_weight')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Plan Name --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
-                            <label>Plan Name</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('plan_name') is-invalid @enderror"
-                                id="plan_name" placeholder="Plan Name" name="plan_name" value="{{ old('plan_name') }}">
-                            @error('plan_name')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        {{-- Premium Paying Term --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
-                            <label>Premium Paying Term</label>
-                            <input type="text"
-                                class="decimal-input form-control form-control-customer @error('premium_paying_term') is-invalid @enderror"
-                                id="premium_paying_term" placeholder="Premium Paying Term" name="premium_paying_term"
-                                value="{{ old('premium_paying_term') }}">
-                            @error('premium_paying_term')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        {{-- Policy Term --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
-                            <label>Policy Term</label>
-                            <input type="text"
-                                class="decimal-input form-control form-control-customer @error('policy_term') is-invalid @enderror"
-                                id="policy_term" placeholder="Policy Term" name="policy_term"
-                                value="{{ old('policy_term') }}">
-                            @error('policy_term')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        {{-- Sum Insured --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
-                            <label>Sum Insured</label>
-                            <input type="text"
-                                class="decimal-input form-control form-control-customer @error('sum_insured') is-invalid @enderror"
-                                id="sum_insured" placeholder="Sum Insured" name="sum_insured"
-                                value="{{ old('sum_insured') }}">
-                            @error('sum_insured')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        {{-- Pension Amount Yearly  --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
-                            <label>Pension Amount Yearly </label>
-                            <input type="text"
-                                class="decimal-input form-control form-control-customer @error('pension_amount_yearly') is-invalid @enderror"
-                                id="pension_amount_yearly" placeholder="Pension Amount Yearly "
-                                name="pension_amount_yearly" value="{{ old('pension_amount_yearly') }}">
-                            @error('pension_amount_yearly')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        {{-- Approx Maturity Amount  --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
-                            <label>Approx Maturity Amount </label>
-                            <input type="text"
-                                class="decimal-input form-control form-control-customer @error('approx_maturity_amount') is-invalid @enderror"
-                                id="approx_maturity_amount" placeholder="Approx Maturity Amount "
-                                name="approx_maturity_amount" value="{{ old('approx_maturity_amount') }}">
-                            @error('approx_maturity_amount')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Life Insurance Payment Mode --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
-                            <label><span style="color: red;">*</span>Life Insurance Payment Mode (Reminder)</label>
-                            <select name="life_insurance_payment_mode" class="form-control"
-                                id="life_insurance_payment_mode">
-                                <option selected="selected">Select Life Insurance Payment Mode
-                                </option>
-                                @foreach ($life_insurance_payment_mode as $item)
-                                    <option id="{{ $item['id'] }}" value="{{ $item['id'] }}"
-                                        data-multiply_by={{ $item['multiply_by'] }}
-                                        {{ old('life_insurance_payment_mode') == $item['id'] ? 'selected' : '' }}>
-                                        {{ $item['name'] }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('life_insurance_payment_mode')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Remarks --}}
-                        <div class="col-sm-6 col-md-8 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
-                            <label>Remarks</label>
-                            <textarea class="form-control form-control-customer @error('remarks') is-invalid @enderror" id="remarks"
-                                placeholder="Remarks" name="remarks" rows="4">{{ old('remarks') }}</textarea>
-                            @error('remarks')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Maturity Date --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
-                            <label><span style="color: red;">*</span>Maturity Date</label>
-                            <div class="input-group date" id="maturity_date">
-                                <input type="text"
-                                    class="form-control datepicker @error('maturity_date') is-invalid @enderror"
-                                    id="maturity_date" name="maturity_date" value="{{ old('maturity_date') ? formatDateForUi(old('maturity_date')) : '' }}" />
-                            </div>
-                            @error('maturity_date')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Mode of Payment --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Mode of Payment</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('mode_of_payment') is-invalid @enderror"
-                                id="mode_of_payment" placeholder="Mode of Payment" name="mode_of_payment"
-                                value="{{ old('mode_of_payment') }}">
-
-                            @error('mode_of_payment')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Cheque No. --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Cheque No.</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('cheque_no') is-invalid @enderror"
-                                id="cheque_no" placeholder="Cheque No." name="cheque_no"
-                                value="{{ old('cheque_no') }}">
-
-                            @error('cheque_no')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Policy Document --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label for="policy_document_path">Policy Document</label>
-                            <input type="file"
-                                class="form-control form-control-customer @error('policy_document_path') is-invalid @enderror"
-                                id="policy_document_path" placeholder="Policy Document" name="policy_document_path"
-                                value="{{ old('policy_document_path') }}">
-                            @error('policy_document_path')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Reference Name --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label>Reference By :</label>
-                            <select name="reference_by" class="form-control" id="reference_by">
-                                <option selected="selected" value="0">Select Reference By</option>
-                                @foreach ($reference_by_user as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ old('reference_by') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('reference_by')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
                         </div>
                     </div>
 
-                    <div class="card mb-12 col-md-12 border-left-success">
-                        <div class="form-group row">
-                            {{-- OD Premium --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
-                                <label>OD Premium</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('od_premium') is-invalid @enderror"
-                                    id="od_premium" placeholder="OD Premium" name="od_premium"
-                                    value="{{ old('od_premium') }}">
+                    <!-- Section 2: Company & Branch Information -->
+                    <div class="mb-4">
+                        <h6 class="text-muted fw-bold mb-3"><i class="fas fa-building me-2"></i>Company & Branch Information</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Branch</label>
+                                <select name="branch_id" class="form-select form-select-sm @error('branch_id') is-invalid @enderror" id="branch_id">
+                                    <option selected disabled>Select Branch</option>
+                                    @foreach ($branches as $item)
+                                        <option value="{{ $item->id }}" {{ old('branch_id') == $item->id ? 'selected' : '' }}>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('branch_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Broker</label>
+                                <select name="broker_id" class="form-select form-select-sm @error('broker_id') is-invalid @enderror" id="broker_id">
+                                    <option selected disabled>Select Broker</option>
+                                    @foreach ($brokers as $item)
+                                        <option value="{{ $item->id }}" {{ old('broker_id') == $item->id ? 'selected' : '' }}>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('broker_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Relationship Manager</label>
+                                <select name="relationship_manager_id" class="form-select form-select-sm @error('relationship_manager_id') is-invalid @enderror" id="relationship_manager_id">
+                                    <option selected disabled>Select Relationship Manager</option>
+                                    @foreach ($relationship_managers as $item)
+                                        <option value="{{ $item->id }}" {{ old('relationship_manager_id') == $item->id ? 'selected' : '' }}>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('relationship_manager_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Insurance Company Name</label>
+                                <select name="insurance_company_id" class="form-select form-select-sm @error('insurance_company_id') is-invalid @enderror" id="insurance_company_id">
+                                    <option selected disabled>Select Company</option>
+                                    @foreach ($insurance_companies as $item)
+                                        <option value="{{ $item->id }}" {{ old('insurance_company_id') == $item->id ? 'selected' : '' }}>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('insurance_company_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Premium Type</label>
+                                <select name="premium_type_id" class="form-select form-select-sm @error('premium_type_id') is-invalid @enderror" 
+                                    id="premium_type_id" onchange="premiumTypeChanged()">
+                                    <option selected disabled>Select Premium Type</option>
+                                    @foreach ($premium_types as $item)
+                                        <option value="{{ $item->id }}" 
+                                            data-is_vehicle="{{ $item->is_vehicle }}"
+                                            data-is_life_insurance_policies="{{ $item->is_life_insurance_policies }}"
+                                            {{ old('premium_type_id') == $item->id ? 'selected' : '' }}>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('premium_type_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Reference By</label>
+                                <select name="reference_by" class="form-select form-select-sm @error('reference_by') is-invalid @enderror" id="reference_by">
+                                    <option value="0">Select Reference By</option>
+                                    @foreach ($reference_by_user as $item)
+                                        <option value="{{ $item->id }}" {{ old('reference_by') == $item->id ? 'selected' : '' }}>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('reference_by')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
 
+                    <!-- Section 3: Policy Details -->
+                    <div class="mb-4">
+                        <h6 class="text-muted fw-bold mb-3"><i class="fas fa-file-contract me-2"></i>Policy Details</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Policy No.</label>
+                                <input type="text" class="form-control form-control-sm @error('policy_no') is-invalid @enderror"
+                                    name="policy_no" placeholder="Enter policy number" value="{{ old('policy_no') }}">
+                                @error('policy_no')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Start Date</label>
+                                <input type="text" class="form-control form-control-sm datepicker @error('start_date') is-invalid @enderror"
+                                    name="start_date" placeholder="DD/MM/YYYY" value="{{ old('start_date') ? formatDateForUi(old('start_date')) : '' }}"
+                                    onchange="setExpiredDate()">
+                                @error('start_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Expired Date</label>
+                                <input type="text" class="form-control form-control-sm datepicker @error('expired_date') is-invalid @enderror"
+                                    name="expired_date" placeholder="DD/MM/YYYY" value="{{ old('expired_date') ? formatDateForUi(old('expired_date')) : '' }}">
+                                @error('expired_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Mode of Payment</label>
+                                <input type="text" class="form-control form-control-sm @error('mode_of_payment') is-invalid @enderror"
+                                    name="mode_of_payment" placeholder="Enter mode of payment" value="{{ old('mode_of_payment') }}">
+                                @error('mode_of_payment')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Cheque No.</label>
+                                <input type="text" class="form-control form-control-sm @error('cheque_no') is-invalid @enderror"
+                                    name="cheque_no" placeholder="Enter cheque number" value="{{ old('cheque_no') }}">
+                                @error('cheque_no')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Policy Document</label>
+                                <input type="file" class="form-control form-control-sm @error('policy_document_path') is-invalid @enderror"
+                                    name="policy_document_path" accept=".pdf,.jpg,.jpeg,.png">
+                                @error('policy_document_path')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Vehicle Information (Premium Fields) -->
+                    <div class="mb-4 premium-fields" style="display: none;">
+                        <h6 class="text-muted fw-bold mb-3"><i class="fas fa-car me-2"></i>Vehicle Information</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Registration No.</label>
+                                <input type="text" class="form-control form-control-sm @error('registration_no') is-invalid @enderror"
+                                    name="registration_no" placeholder="Enter registration number" value="{{ old('registration_no') }}">
+                                @error('registration_no')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Location</label>
+                                <input type="text" class="form-control form-control-sm @error('rto') is-invalid @enderror"
+                                    name="rto" placeholder="Enter location" value="{{ old('rto') }}">
+                                @error('rto')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Make & Model</label>
+                                <input type="text" class="form-control form-control-sm @error('make_model') is-invalid @enderror"
+                                    name="make_model" placeholder="Enter make and model" value="{{ old('make_model') }}">
+                                @error('make_model')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Fuel Type</label>
+                                <select name="fuel_type_id" class="form-select form-select-sm @error('fuel_type_id') is-invalid @enderror" id="fuel_type_id">
+                                    <option selected disabled>Select Fuel Type</option>
+                                    @foreach ($fuel_type as $item)
+                                        <option value="{{ $item->id }}" {{ old('fuel_type_id') == $item->id ? 'selected' : '' }}>
+                                            {{ $item->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('fuel_type_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> TP Expiry Date</label>
+                                <input type="text" class="form-control form-control-sm datepicker @error('tp_expiry_date') is-invalid @enderror"
+                                    name="tp_expiry_date" placeholder="DD/MM/YYYY" value="{{ old('tp_expiry_date') ? formatDateForUi(old('tp_expiry_date')) : '' }}">
+                                @error('tp_expiry_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> MFG Year</label>
+                                <input type="number" min="1900" max="2099" step="1" class="form-control form-control-sm @error('mfg_year') is-invalid @enderror"
+                                    name="mfg_year" placeholder="Enter manufacturing year" value="{{ old('mfg_year') }}">
+                                @error('mfg_year')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> NCB %</label>
+                                <input type="text" class="form-control form-control-sm @error('ncb_percentage') is-invalid @enderror"
+                                    name="ncb_percentage" placeholder="Enter NCB percentage" value="{{ old('ncb_percentage') }}">
+                                @error('ncb_percentage')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4 cgst_sgt2">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> GVW</label>
+                                <input type="text" class="decimal-input form-control form-control-sm @error('gross_vehicle_weight') is-invalid @enderror"
+                                    name="gross_vehicle_weight" placeholder="Enter GVW" value="{{ old('gross_vehicle_weight') }}">
+                                @error('gross_vehicle_weight')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <!-- Empty column for consistent 3-column layout -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Life Insurance Information -->
+                    <div class="mb-4 life-insurance-policies-fields" style="display: none;">
+                        <h6 class="text-muted fw-bold mb-3"><i class="fas fa-heartbeat me-2"></i>Life Insurance Information</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Plan Name</label>
+                                <input type="text" class="form-control form-control-sm @error('plan_name') is-invalid @enderror"
+                                    name="plan_name" placeholder="Enter plan name" value="{{ old('plan_name') }}">
+                                @error('plan_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Premium Paying Term</label>
+                                <input type="text" class="decimal-input form-control form-control-sm @error('premium_paying_term') is-invalid @enderror"
+                                    name="premium_paying_term" placeholder="Enter premium paying term" value="{{ old('premium_paying_term') }}">
+                                @error('premium_paying_term')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Policy Term</label>
+                                <input type="text" class="decimal-input form-control form-control-sm @error('policy_term') is-invalid @enderror"
+                                    name="policy_term" placeholder="Enter policy term" value="{{ old('policy_term') }}">
+                                @error('policy_term')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Sum Insured</label>
+                                <input type="text" class="decimal-input form-control form-control-sm @error('sum_insured') is-invalid @enderror"
+                                    name="sum_insured" placeholder="Enter sum insured" value="{{ old('sum_insured') }}">
+                                @error('sum_insured')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Pension Amount Yearly</label>
+                                <input type="text" class="decimal-input form-control form-control-sm @error('pension_amount_yearly') is-invalid @enderror"
+                                    name="pension_amount_yearly" placeholder="Enter pension amount yearly" value="{{ old('pension_amount_yearly') }}">
+                                @error('pension_amount_yearly')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Approx Maturity Amount</label>
+                                <input type="text" class="decimal-input form-control form-control-sm @error('approx_maturity_amount') is-invalid @enderror"
+                                    name="approx_maturity_amount" placeholder="Enter approx maturity amount" value="{{ old('approx_maturity_amount') }}">
+                                @error('approx_maturity_amount')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Life Insurance Payment Mode</label>
+                                <select name="life_insurance_payment_mode" class="form-select form-select-sm @error('life_insurance_payment_mode') is-invalid @enderror" 
+                                    id="life_insurance_payment_mode">
+                                    <option selected disabled>Select Life Insurance Payment Mode</option>
+                                    @foreach ($life_insurance_payment_mode as $item)
+                                        <option value="{{ $item['id'] }}" data-multiply_by="{{ $item['multiply_by'] }}"
+                                            {{ old('life_insurance_payment_mode') == $item['id'] ? 'selected' : '' }}>
+                                            {{ $item['name'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('life_insurance_payment_mode')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Maturity Date</label>
+                                <input type="text" class="form-control form-control-sm datepicker @error('maturity_date') is-invalid @enderror"
+                                    name="maturity_date" placeholder="DD/MM/YYYY" value="{{ old('maturity_date') ? formatDateForUi(old('maturity_date')) : '' }}">
+                                @error('maturity_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <!-- Empty column for consistent 3-column layout -->
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-8">
+                                <label class="form-label fw-semibold">Remarks</label>
+                                <textarea class="form-control form-control-sm @error('remarks') is-invalid @enderror"
+                                    name="remarks" placeholder="Enter remarks" rows="3">{{ old('remarks') }}</textarea>
+                                @error('remarks')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <!-- Empty column for consistent layout -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 6: Premium & Financial Details -->
+                    <div class="mb-4">
+                        <h6 class="text-muted fw-bold mb-3"><i class="fas fa-money-bill-wave me-2"></i>Premium & Financial Details</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4 premium-fields">
+                                <label class="form-label fw-semibold">OD Premium</label>
+                                <input type="text" class="decimal-input form-control form-control-sm @error('od_premium') is-invalid @enderror"
+                                    name="od_premium" placeholder="Enter OD premium" value="{{ old('od_premium') }}">
                                 @error('od_premium')
-                                    <span class="text-danger">{{ $message }}</span>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-
-                            {{-- TP Premium --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
-                                <label>TP Premium</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('tp_premium') is-invalid @enderror"
-                                    id="tp_premium" placeholder="TP Premium" name="tp_premium"
-                                    value="{{ old('tp_premium') }}">
-
+                            <div class="col-md-4 premium-fields">
+                                <label class="form-label fw-semibold">TP Premium</label>
+                                <input type="text" class="decimal-input form-control form-control-sm @error('tp_premium') is-invalid @enderror"
+                                    name="tp_premium" placeholder="Enter TP premium" value="{{ old('tp_premium') }}">
                                 @error('tp_premium')
-                                    <span class="text-danger">{{ $message }}</span>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            {{-- Premium Amount --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 life-insurance-policies-fields">
-                                <label><span style="color: red;">*</span>Premium Amount</label>
-                                <div class="input-group">
-                                    <input type="text"
-                                        class="decimal-input form-control form-control-customer  @error('premium_amount') is-invalid @enderror"
-                                        id="premium_amount" name="premium_amount" value="{{ old('premium_amount') }}"
-                                        placeholder="*Premium Amount " />
-                                </div>
+                            <div class="col-md-4 life-insurance-policies-fields">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Premium Amount</label>
+                                <input type="text" class="decimal-input form-control form-control-sm @error('premium_amount') is-invalid @enderror"
+                                    name="premium_amount" placeholder="Enter premium amount" value="{{ old('premium_amount') }}">
                                 @error('premium_amount')
-                                    <span class="text-danger">{{ $message }}</span>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-
-                            {{-- Net Premium --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                                <label><span style="color: red;">*</span>Net Premium</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('net_premium') is-invalid @enderror"
-                                    id="net_premium" placeholder="Net Premium" name="net_premium"
-                                    value="{{ old('net_premium') }}">
-
+                        </div>
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Net Premium</label>
+                                <input type="text" class="decimal-input form-control form-control-sm @error('net_premium') is-invalid @enderror"
+                                    name="net_premium" placeholder="Enter net premium" value="{{ old('net_premium') }}">
                                 @error('net_premium')
-                                    <span class="text-danger">{{ $message }}</span>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-
-                            {{-- CGST --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                                <label><span style="color: red;">*</span>CGST 1</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('cgst1') is-invalid @enderror"
-                                    id="cgst1" placeholder="CGST" name="cgst1" value="{{ old('cgst1') }}">
-
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> CGST 1</label>
+                                <input type="text" class="decimal-input form-control form-control-sm @error('cgst1') is-invalid @enderror"
+                                    name="cgst1" placeholder="Enter CGST 1" value="{{ old('cgst1') }}">
                                 @error('cgst1')
-                                    <span class="text-danger">{{ $message }}</span>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            {{-- SGST --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                                <label><span style="color: red;">*</span>SGST 1</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('sgst1') is-invalid @enderror"
-                                    id="sgst1" placeholder="SGST" name="sgst1" value="{{ old('sgst1') }}">
-
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> SGST 1</label>
+                                <input type="text" class="decimal-input form-control form-control-sm @error('sgst1') is-invalid @enderror"
+                                    name="sgst1" placeholder="Enter SGST 1" value="{{ old('sgst1') }}">
                                 @error('sgst1')
-                                    <span class="text-danger">{{ $message }}</span>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-
-                            {{-- CGST 2 --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
-                                <label><span style="color: red;">*</span>CGST 2 </label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('cgst2') is-invalid @enderror"
-                                    id="cgst2" placeholder="CGST 2" name="cgst2" value="{{ old('cgst2') }}">
-
+                        </div>
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-4 cgst_sgt2">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> CGST 2</label>
+                                <input type="text" class="decimal-input form-control form-control-sm @error('cgst2') is-invalid @enderror"
+                                    name="cgst2" placeholder="Enter CGST 2" value="{{ old('cgst2') }}">
                                 @error('cgst2')
-                                    <span class="text-danger">{{ $message }}</span>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-
-                            {{-- SGST 2 --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 cgst_sgt2">
-                                <label><span style="color: red;">*</span>SGST 2 </label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('sgst2') is-invalid @enderror"
-                                    id="sgst2" placeholder="SGST 2" name="sgst2" value="{{ old('sgst2') }}">
-
+                            <div class="col-md-4 cgst_sgt2">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> SGST 2</label>
+                                <input type="text" class="decimal-input form-control form-control-sm @error('sgst2') is-invalid @enderror"
+                                    name="sgst2" placeholder="Enter SGST 2" value="{{ old('sgst2') }}">
                                 @error('sgst2')
-                                    <span class="text-danger">{{ $message }}</span>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-
-                            {{-- Final Premium With GST --}}
-                            <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                                <label><span style="color: red;">*</span>Final Premium With GST</label>
-                                <input type="text"
-                                    class="decimal-input form-control form-control-customer @error('final_premium_with_gst') is-invalid @enderror"
-                                    id="final_premium_with_gst" placeholder="Final Premium With GST"
-                                    name="final_premium_with_gst" value="{{ old('final_premium_with_gst') }}" readonly>
-
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Final Premium With GST</label>
+                                <input type="text" class="decimal-input form-control form-control-sm @error('final_premium_with_gst') is-invalid @enderror"
+                                    name="final_premium_with_gst" placeholder="Final premium with GST" value="{{ old('final_premium_with_gst') }}" readonly>
                                 @error('final_premium_with_gst')
-                                    <span class="text-danger">{{ $message }}</span>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                     </div>
-                    <br>
+
+                    <!-- Section 7: Commission Details (Admin Only) -->
                     @if (auth()->user()->hasRole('Admin'))
-                        <div class="card mt-12 col-md-12 border-left-dark">
-                            <div class="form-group row">
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                                    <label>Commission On</label>
-                                    <select name="commission_on" class="form-control" id="commission_on">
-                                        <option value="net_premium" @if (old('commission_on') == 'net_premium') selected @endif> Net
-                                            Premium </option>
-                                        <option value="od_premium" @if (old('commission_on') == 'od_premium') selected @endif>OD
-                                            Premium </option>
-                                        <option value="tp_premium" @if (old('commission_on') == 'tp_premium') selected @endif>TP
-                                            Premium </option>
+                        <div class="mb-3">
+                            <h6 class="text-muted fw-bold mb-3"><i class="fas fa-percentage me-2"></i>Commission Details</h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Commission On</label>
+                                    <select name="commission_on" class="form-select form-select-sm @error('commission_on') is-invalid @enderror" id="commission_on">
+                                        <option value="net_premium" @if (old('commission_on') == 'net_premium') selected @endif>Net Premium</option>
+                                        <option value="od_premium" @if (old('commission_on') == 'od_premium') selected @endif>OD Premium</option>
+                                        <option value="tp_premium" @if (old('commission_on') == 'tp_premium') selected @endif>TP Premium</option>
                                     </select>
                                     @error('commission_on')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                                    <label>My Commission Percentage</label>
-                                    <input type="text"
-                                        class="decimal-input form-control form-control-customer @error('my_commission_percentage') is-invalid @enderror"
-                                        id="my_commission_percentage" placeholder="My Commission Percentage"
-                                        name="my_commission_percentage" value="{{ old('my_commission_percentage') }}">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">My Commission Percentage</label>
+                                    <input type="text" class="decimal-input form-control form-control-sm @error('my_commission_percentage') is-invalid @enderror"
+                                        name="my_commission_percentage" placeholder="Enter my commission %" value="{{ old('my_commission_percentage') }}">
                                     @error('my_commission_percentage')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                                    <label>My Commission Amount</label>
-                                    <input type="text"
-                                        class="decimal-input form-control form-control-customer @error('my_commission_amount') is-invalid @enderror"
-                                        id="my_commission_amount" placeholder="My Commission Amount"
-                                        name="my_commission_amount" value="{{ old('my_commission_amount') }}" readonly>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">My Commission Amount</label>
+                                    <input type="text" class="decimal-input form-control form-control-sm @error('my_commission_amount') is-invalid @enderror"
+                                        name="my_commission_amount" placeholder="My commission amount" value="{{ old('my_commission_amount') }}" readonly>
                                     @error('my_commission_amount')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                                    <label>Transfer Commission Percentage</label>
-                                    <input type="text"
-                                        class="decimal-input form-control form-control-customer @error('transfer_commission_percentage') is-invalid @enderror"
-                                        id="transfer_commission_percentage" placeholder="Transfer Commission Percentage"
-                                        name="transfer_commission_percentage"
-                                        value="{{ old('transfer_commission_percentage') }}">
+                            </div>
+                            <div class="row g-3 mt-1">
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Transfer Commission Percentage</label>
+                                    <input type="text" class="decimal-input form-control form-control-sm @error('transfer_commission_percentage') is-invalid @enderror"
+                                        name="transfer_commission_percentage" placeholder="Enter transfer commission %" value="{{ old('transfer_commission_percentage') }}">
                                     @error('transfer_commission_percentage')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                                    <label>Transfer Commission Amount</label>
-                                    <input type="text"
-                                        class="decimal-input form-control form-control-customer @error('transfer_commission_amount') is-invalid @enderror"
-                                        id="transfer_commission_amount" placeholder="Transfer Commission Amount"
-                                        name="transfer_commission_amount"
-                                        value="{{ old('transfer_commission_amount') }}" readonly>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">Transfer Commission Amount</label>
+                                    <input type="text" class="decimal-input form-control form-control-sm @error('transfer_commission_amount') is-invalid @enderror"
+                                        name="transfer_commission_amount" placeholder="Transfer commission amount" value="{{ old('transfer_commission_amount') }}" readonly>
                                     @error('transfer_commission_amount')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 reference_commission_fields">
-                                    <label>Reference Commission Percentage</label>
-                                    <input type="text"
-                                        class="decimal-input form-control form-control-customer @error('reference_commission_percentage') is-invalid @enderror"
-                                        id="reference_commission_percentage" placeholder="Reference Commission Percentage"
-                                        name="reference_commission_percentage"
-                                        value="{{ old('reference_commission_percentage') }}">
-                                    @error('reference_commission_percentage')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 reference_commission_fields">
-                                    <label>Reference Commission Amount</label>
-                                    <input type="text"
-                                        class="decimal-input form-control form-control-customer @error('reference_commission_amount') is-invalid @enderror"
-                                        id="reference_commission_amount" placeholder="Reference Commission Amount"
-                                        name="reference_commission_amount"
-                                        value="{{ old('reference_commission_amount') }}" readonly>
-                                    @error('reference_commission_amount')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
-                                    <label><span style="color: red;">*</span>Actual Earnings</label>
-                                    <input type="text"
-                                        class="decimal-input form-control form-control-customer @error('actual_earnings') is-invalid @enderror"
-                                        id="actual_earnings" placeholder="Actual Earnings" name="actual_earnings"
-                                        value="{{ old('actual_earnings') }}" readonly>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold"><span class="text-danger">*</span> Actual Earnings</label>
+                                    <input type="text" class="decimal-input form-control form-control-sm @error('actual_earnings') is-invalid @enderror"
+                                        name="actual_earnings" placeholder="Actual earnings" value="{{ old('actual_earnings') }}" readonly>
                                     @error('actual_earnings')
-                                        <span class="text-danger">{{ $message }}</span>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
+                                </div>
+                            </div>
+                            <div class="row g-3 mt-1">
+                                <div class="col-md-4 reference_commission_fields">
+                                    <label class="form-label fw-semibold">Reference Commission Percentage</label>
+                                    <input type="text" class="decimal-input form-control form-control-sm @error('reference_commission_percentage') is-invalid @enderror"
+                                        name="reference_commission_percentage" placeholder="Enter reference commission %" value="{{ old('reference_commission_percentage') }}">
+                                    @error('reference_commission_percentage')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-4 reference_commission_fields">
+                                    <label class="form-label fw-semibold">Reference Commission Amount</label>
+                                    <input type="text" class="decimal-input form-control form-control-sm @error('reference_commission_amount') is-invalid @enderror"
+                                        name="reference_commission_amount" placeholder="Reference commission amount" value="{{ old('reference_commission_amount') }}" readonly>
+                                    @error('reference_commission_amount')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-4">
+                                    <!-- Empty column for consistent 3-column layout -->
                                 </div>
                             </div>
                         </div>
                     @endif
                 </div>
 
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-customer_insurance float-right mb-3">Save</button>
-                    <a class="btn btn-primary float-right mr-3 mb-3"
-                        href="{{ route('customer_insurances.index') }}">Cancel</a>
+                <div class="card-footer py-2 bg-light">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a class="btn btn-secondary btn-sm px-4" href="{{ route('customer_insurances.index') }}">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success btn-sm px-4">
+                            <i class="fas fa-save me-1"></i>Save Customer Insurance
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

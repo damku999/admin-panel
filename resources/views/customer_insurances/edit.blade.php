@@ -9,7 +9,7 @@
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
             <h1 class="h3 mb-0 text-gray-800">Edit Customer Insurance</h1>
             <a href="{{ route('customer_insurances.index') }}" onclick="window.history.go(-1); return false;"
-                class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+                class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm"><i
                     class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
         </div>
 
@@ -18,8 +18,10 @@
 
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Edit Customer Insurance</h6>
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-edit mr-2"></i>Edit Customer Insurance
+                </h6>
                 @if ($errors->any())
                     <div class="alert alert-danger">
                         <ul>
@@ -731,10 +733,14 @@
                         </div>
                     @endif
                 </div>
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-customer_insurance float-right mb-3">Save</button>
-                    <a class="btn btn-primary float-right mr-3 mb-3"
-                        href="{{ route('customer_insurances.index') }}">Cancel</a>
+                <div class="card-footer bg-light">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save mr-1"></i> Update Customer Insurance
+                    </button>
+                    <a class="btn btn-secondary"
+                        href="{{ route('customer_insurances.index') }}">
+                        <i class="fas fa-times mr-1"></i> Cancel
+                    </a>
                 </div>
             </form>
         </div>

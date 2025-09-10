@@ -6,72 +6,84 @@
 
     <div class="container-fluid">
 
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Add Premium Type</h1>
-            <a href="{{ route('premium_type.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"
-                onclick="window.history.go(-1); return false;"><i class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
-        </div>
-
         {{-- Alert Messages --}}
         @include('common.alert')
 
-        <!-- DataTales Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Add New Premium Type</h6>
+        <!-- Premium Type Form -->
+        <div class="card shadow mb-3 mt-2">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold text-primary">Add New Premium Type</h6>
+                <a href="{{ route('premium_type.index') }}" onclick="window.history.go(-1); return false;"
+                    class="btn btn-outline-secondary btn-sm d-flex align-items-center">
+                    <i class="fas fa-chevron-left me-2"></i>
+                    <span>Back</span>
+                </a>
             </div>
+            @if ($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3 mb-0" role="alert">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
             <form method="POST" action="{{ route('premium_type.store') }}">
                 @csrf
-                <div class="card-body">
-                    <div class="form-group row">
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;">*</span>Name</label>
-                            <input type="text"
-                                class="form-control form-control-premium_type @error('name') is-invalid @enderror"
-                                id="exampleFirstName" placeholder="Name" name="name" value="{{ old('name') }}">
-
-                            @error('name')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;">*</span> Is it for Vehicle ?</label>
-                            <br>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input permission-input" type="radio" name="is_vehicle"
-                                    value="1" id="vehicle_yes">
-                                <label class="form-check-label" for="vehicle_yes">Yes</label>
-                                &nbsp;
-                                &nbsp;
-                                <input class="form-check-input permission-input" type="radio" name="is_vehicle"
-                                    value="0" checked id="vehicle_no">
-                                <label class="form-check-label" for="vehicle_no">No</label>
+                <div class="card-body py-3">
+                    <!-- Section: Premium Type Information -->
+                    <div class="mb-3">
+                        <h6 class="text-muted fw-bold mb-3"><i class="fas fa-percentage me-2"></i>Premium Type Information</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Name</label>
+                                <input type="text" class="form-control form-control-sm @error('name') is-invalid @enderror"
+                                    name="name" placeholder="Enter premium type name" value="{{ old('name') }}">
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
-                        </div>
-
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;">*</span> Is Life Insurance Policies ? like(LIC,Endowment Plans, Term
-                            plans, Ulip plans)</label>
-                            <br>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input permission-input" type="radio"
-                                    name="is_life_insurance_policies" value="1" id="life_insurance_yes">
-                                <label class="form-check-label" for="life_insurance_yes">Yes</label>
-                                &nbsp;
-                                &nbsp;
-                                <input class="form-check-input permission-input" type="radio"
-                                    name="is_life_insurance_policies" value="0" checked id="life_insurance_no">
-                                <label class="form-check-label" for="life_insurance_no">No</label>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Is it for Vehicle?</label>
+                                <div class="mt-2">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="is_vehicle" value="1" id="vehicle_yes">
+                                        <label class="form-check-label" for="vehicle_yes">Yes</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="is_vehicle" value="0" checked id="vehicle_no">
+                                        <label class="form-check-label" for="vehicle_no">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Is Life Insurance Policy?</label>
+                                <small class="text-muted d-block">LIC, Endowment Plans, Term Plans, ULIP Plans</small>
+                                <div class="mt-1">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="is_life_insurance_policies" value="1" id="life_insurance_yes">
+                                        <label class="form-check-label" for="life_insurance_yes">Yes</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="is_life_insurance_policies" value="0" checked id="life_insurance_no">
+                                        <label class="form-check-label" for="life_insurance_no">No</label>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-premium_type float-right mb-3">Save</button>
-                    <a class="btn btn-primary float-right mr-3 mb-3" href="{{ route('premium_type.index') }}"
-                        onclick="window.history.go(-1); return false;">Cancel</a>
+                <div class="card-footer py-2 bg-light">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a class="btn btn-secondary btn-sm px-4" href="{{ route('premium_type.index') }}">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success btn-sm px-4">
+                            <i class="fas fa-save me-1"></i>Save Premium Type
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

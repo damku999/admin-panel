@@ -4,13 +4,8 @@
 
 @section('content')
 <div class="container-fluid">
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Create Family Group</h1>
-        <a href="{{ route('family_groups.index') }}" class="btn btn-secondary btn-sm">
-            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to Family Groups
-        </a>
-    </div>
+    {{-- Alert Messages --}}
+    @include('common.alert')
 
     <form action="{{ route('family_groups.store') }}" method="POST">
         @csrf
@@ -18,27 +13,43 @@
         <div class="row">
             <!-- Basic Information -->
             <div class="col-lg-8">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Family Group Information</h6>
+                <!-- Family Group Form -->
+                <div class="card shadow mb-3 mt-2">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold text-primary">Create Family Group</h6>
+                        <a href="{{ route('family_groups.index') }}" onclick="window.history.go(-1); return false;"
+                            class="btn btn-outline-secondary btn-sm d-flex align-items-center">
+                            <i class="fas fa-chevron-left me-2"></i>
+                            <span>Back</span>
+                        </a>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="name">Family Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                    @if ($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3 mb-0" role="alert">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+                    <div class="card-body py-3">
+                        <!-- Section 1: Basic Information -->
+                        <div class="mb-4">
+                            <h6 class="text-muted fw-bold mb-3"><i class="fas fa-users me-2"></i>Family Group Information</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold"><span class="text-danger">*</span> Family Name</label>
+                                    <input type="text" class="form-control form-control-sm @error('name') is-invalid @enderror" 
                                            id="name" name="name" value="{{ old('name') }}" 
                                            placeholder="Enter family name (e.g., Smith Family)" required>
                                     @error('name')
-                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="family_head_id">Family Head <span class="text-danger">*</span></label>
-                                    <select class="form-control select2 @error('family_head_id') is-invalid @enderror" 
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold"><span class="text-danger">*</span> Family Head</label>
+                                    <select class="form-select form-select-sm select2 @error('family_head_id') is-invalid @enderror" 
                                             id="family_head_id" name="family_head_id" required>
                                         <option value="">Select Family Head</option>
                                         @foreach($availableCustomers as $customer)
@@ -48,117 +59,101 @@
                                         @endforeach
                                     </select>
                                     @error('family_head_id')
-                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                     <small class="form-text text-muted">Only customers not already in a family group are shown</small>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="card border-left-primary">
-                                    <div class="card-body py-3">
-                                        <h6 class="font-weight-bold text-primary mb-3">
-                                            <i class="fas fa-key mr-2"></i>Family Head Password Settings
-                                        </h6>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="family_head_password">Set Password for Family Head</label>
-                                                    <input type="password" class="form-control @error('family_head_password') is-invalid @enderror" 
-                                                           id="family_head_password" name="family_head_password" 
-                                                           value="{{ old('family_head_password') }}"
-                                                           placeholder="Leave blank to auto-generate">
-                                                    @error('family_head_password')
-                                                        <span class="invalid-feedback">{{ $message }}</span>
-                                                    @enderror
-                                                    <small class="form-text text-muted">
-                                                        <i class="fas fa-info-circle mr-1"></i>
-                                                        If left blank, a secure password will be auto-generated
-                                                    </small>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="family_head_password_confirmation">Confirm Password</label>
-                                                    <input type="password" class="form-control" 
-                                                           id="family_head_password_confirmation" name="family_head_password_confirmation" 
-                                                           placeholder="Re-enter password to confirm">
-                                                    <small class="form-text text-muted">
-                                                        <i class="fas fa-shield-alt mr-1"></i>
-                                                        Password must be at least 8 characters long
-                                                    </small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="form-check mt-2">
-                                            <input class="form-check-input" type="checkbox" value="1" id="force_password_change" name="force_password_change" {{ old('force_password_change', 1) ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="force_password_change">
-                                                Force password change on first login
-                                            </label>
-                                        </div>
+
+                        <!-- Section 2: Password Settings -->
+                        <div class="mb-4">
+                            <h6 class="text-muted fw-bold mb-3"><i class="fas fa-key me-2"></i>Family Head Password Settings</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Set Password for Family Head</label>
+                                    <input type="password" class="form-control form-control-sm @error('family_head_password') is-invalid @enderror" 
+                                           id="family_head_password" name="family_head_password" 
+                                           value="{{ old('family_head_password') }}"
+                                           placeholder="Leave blank to auto-generate">
+                                    @error('family_head_password')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        If left blank, a secure password will be auto-generated
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Confirm Password</label>
+                                    <input type="password" class="form-control form-control-sm" 
+                                           id="family_head_password_confirmation" name="family_head_password_confirmation" 
+                                           placeholder="Re-enter password to confirm">
+                                    <small class="form-text text-muted">
+                                        <i class="fas fa-shield-alt me-1"></i>
+                                        Password must be at least 8 characters long
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row g-3 mt-1">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="1" id="force_password_change" name="force_password_change" {{ old('force_password_change', 1) ? 'checked' : '' }}>
+                                        <label class="form-check-label fw-semibold" for="force_password_change">
+                                            Force password change on first login
+                                        </label>
                                     </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="status" name="status" value="1" {{ old('status', true) ? 'checked' : '' }}>
+                                        <label class="form-check-label fw-semibold" for="status">Active Family Group</label>
+                                    </div>
+                                    <small class="form-text text-muted">Only active family groups can be used for customer login</small>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Family Members -->
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Family Members</h6>
-                        <small class="text-muted">Add other family members (optional)</small>
-                    </div>
-                    <div class="card-body">
-                        <div id="family-members-container">
-                            <!-- Dynamic family members will be added here -->
-                        </div>
-                        
-                        <button type="button" id="add-member-btn" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-plus"></i> Add Family Member
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Status & Actions -->
-            <div class="col-lg-4">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Status & Actions</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <div class="custom-control custom-switch">
-                                <input type="checkbox" class="custom-control-input" id="status" name="status" value="1" {{ old('status', true) ? 'checked' : '' }}>
-                                <label class="custom-control-label" for="status">Active Family Group</label>
+                        <!-- Section 3: Family Members -->
+                        <div class="mb-3">
+                            <h6 class="text-muted fw-bold mb-3"><i class="fas fa-user-friends me-2"></i>Family Members</h6>
+                            <small class="text-muted d-block mb-3">Add other family members (optional)</small>
+                            <div id="family-members-container">
+                                <!-- Dynamic family members will be added here -->
                             </div>
-                            <small class="form-text text-muted">Only active family groups can be used for customer login</small>
+                            
+                            <button type="button" id="add-member-btn" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-plus me-1"></i>Add Family Member
+                            </button>
                         </div>
+                    </div>
 
-                        <hr>
-
-                        <div class="form-group mb-0">
-                            <button type="submit" class="btn btn-primary btn-block">
-                                <i class="fas fa-save"></i> Create Family Group
+                    <div class="card-footer py-2 bg-light">
+                        <div class="d-flex justify-content-end gap-2">
+                            <a class="btn btn-secondary btn-sm px-4" href="{{ route('family_groups.index') }}">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success btn-sm px-4">
+                                <i class="fas fa-save me-1"></i>Create Family Group
                             </button>
                         </div>
                     </div>
                 </div>
+            </div>
 
+            <!-- Instructions Sidebar -->
+            <div class="col-lg-4">
                 <!-- Instructions -->
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Instructions</h6>
+                <div class="card shadow mb-3 mt-2">
+                    <div class="card-header py-2">
+                        <h6 class="mb-0 fw-bold text-primary">Instructions</h6>
                     </div>
-                    <div class="card-body">
-                        <ul class="list-unstyled small">
-                            <li><i class="fas fa-check-circle text-success mr-2"></i>Select a family head who will have access to all family policies</li>
-                            <li><i class="fas fa-check-circle text-success mr-2"></i>Add other family members as needed</li>
-                            <li><i class="fas fa-check-circle text-success mr-2"></i>Only customers not in other families can be selected</li>
-                            <li><i class="fas fa-check-circle text-success mr-2"></i>Family head will automatically be added as a member</li>
+                    <div class="card-body py-3">
+                        <ul class="list-unstyled small mb-0">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Select a family head who will have access to all family policies</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Add other family members as needed</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Only customers not in other families can be selected</li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i>Family head will automatically be added as a member</li>
                         </ul>
                     </div>
                 </div>
@@ -170,40 +165,34 @@
 <!-- Family Member Template (Hidden) -->
 <div id="member-template" style="display: none;">
     <div class="member-row border rounded p-3 mb-3 bg-light">
-        <div class="row">
+        <div class="row g-3">
             <div class="col-md-6">
-                <div class="form-group">
-                    <label>Family Member</label>
-                    <select class="form-control member-select" name="member_ids[]">
-                        <option value="">Select Member</option>
-                        @foreach($availableCustomers as $customer)
-                            <option value="{{ $customer->id }}">{{ $customer->name }} - {{ $customer->email }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <label class="form-label fw-semibold">Family Member</label>
+                <select class="form-select form-select-sm member-select" name="member_ids[]">
+                    <option value="">Select Member</option>
+                    @foreach($availableCustomers as $customer)
+                        <option value="{{ $customer->id }}">{{ $customer->name }} - {{ $customer->email }}</option>
+                    @endforeach
+                </select>
             </div>
             <div class="col-md-4">
-                <div class="form-group">
-                    <label>Relationship</label>
-                    <select class="form-control" name="relationships[]">
-                        <option value="">Select Relationship</option>
-                        <option value="spouse">Spouse</option>
-                        <option value="child">Child</option>
-                        <option value="parent">Parent</option>
-                        <option value="sibling">Sibling</option>
-                        <option value="grandparent">Grandparent</option>
-                        <option value="grandchild">Grandchild</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
+                <label class="form-label fw-semibold">Relationship</label>
+                <select class="form-select form-select-sm" name="relationships[]">
+                    <option value="">Select Relationship</option>
+                    <option value="spouse">Spouse</option>
+                    <option value="child">Child</option>
+                    <option value="parent">Parent</option>
+                    <option value="sibling">Sibling</option>
+                    <option value="grandparent">Grandparent</option>
+                    <option value="grandchild">Grandchild</option>
+                    <option value="other">Other</option>
+                </select>
             </div>
             <div class="col-md-2">
-                <div class="form-group">
-                    <label>&nbsp;</label><br>
-                    <button type="button" class="btn btn-danger btn-sm remove-member">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
+                <label class="form-label fw-semibold">&nbsp;</label>
+                <button type="button" class="btn btn-danger btn-sm remove-member d-block">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -217,7 +206,7 @@ $(document).ready(function() {
     $('.select2').select2({
         placeholder: "Select an option",
         allowClear: true,
-        minimumResultsForSearch: 0 // Always show search box
+        minimumResultsForSearch: 0
     });
 
     // Add Family Member
@@ -229,7 +218,7 @@ $(document).ready(function() {
         $('#family-members-container .member-row:last .member-select').select2({
             placeholder: "Select member",
             allowClear: true,
-            minimumResultsForSearch: 0 // Always show search box
+            minimumResultsForSearch: 0
         });
         
         // Update member restrictions

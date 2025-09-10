@@ -5,267 +5,385 @@ namespace Tests\Integration;
 use App\Models\Customer;
 use App\Models\CustomerInsurance;
 use App\Models\InsuranceCompany;
-use App\Models\PolicyType;
 use App\Models\PremiumType;
+use App\Models\PolicyType;
 use App\Models\FuelType;
+use App\Models\Branch;
 use App\Models\Broker;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
+use Carbon\Carbon;
 
 class CustomerInsuranceWorkflowTest extends TestCase
 {
-    use RefreshDatabase, WithFaker;
-
-    protected User $user;
-    protected Customer $customer;
-    protected InsuranceCompany $insuranceCompany;
-    protected PolicyType $policyType;
-    protected PremiumType $premiumType;
-    protected FuelType $fuelType;
-    protected Broker $broker;
+    use RefreshDatabase;
+    
+    private User $admin;
+    private Customer $customer;
+    private InsuranceCompany $insuranceCompany;
+    private PremiumType $premiumType;
+    private PolicyType $policyType;
+    private FuelType $fuelType;
+    private Branch $branch;
+    private Broker $broker;
 
     protected function setUp(): void
     {
         parent::setUp();
         
         // Create test user and authenticate
-        $this->user = User::factory()->create();
-        $this->actingAs($this->user);
+        $this->admin = User::factory()->create();
+        $this->actingAs($this->admin);
         
-        // Create supporting entities
-        $this->customer = Customer::factory()->create();
+        // Create required entities
+        $this->customer = Customer::factory()->create([
+            'name' => 'John Doe',
+            'email' => 'john@example.com',
+            'mobile_number' => '9876543210'
+        ]);
+        
         $this->insuranceCompany = InsuranceCompany::factory()->create();
-        $this->policyType = PolicyType::factory()->create();
         $this->premiumType = PremiumType::factory()->create();
+        $this->policyType = PolicyType::factory()->create();
         $this->fuelType = FuelType::factory()->create();
+        $this->branch = Branch::factory()->create();
         $this->broker = Broker::factory()->create();
+        
+        // Setup storage for file uploads
+        Storage::fake('public');
     }
 
     public function test_complete_customer_insurance_creation_workflow()
     {
-        // Step 1: Create a new customer insurance policy
-        $policyData = [
+        // Step 1: Access the customer insurance creation page
+        $response = $this->get(route('customer_insurances.create'));
+        $response->assertStatus(200);
+        $response->assertViewIs('customer_insurances.add');
+        
+        // Step 2: Submit customer insurance creation form
+        $policyDocument = UploadedFile::fake()->create('policy.pdf', 100, 'application/pdf');
+        
+        $insuranceData = [
             'customer_id' => $this->customer->id,
             'insurance_company_id' => $this->insuranceCompany->id,
-            'policy_type_id' => $this->policyType->id,
             'premium_type_id' => $this->premiumType->id,
+            'policy_type_id' => $this->policyType->id,
             'fuel_type_id' => $this->fuelType->id,
+            'branch_id' => $this->branch->id,
             'broker_id' => $this->broker->id,
-            'policy_no' => 'POL-' . rand(100000, 999999),
-            'sum_insured' => 500000,
-            'premium_amount' => 15000,
-            'start_date' => now()->format('Y-m-d'),
-            'expired_date' => now()->addYear()->format('Y-m-d'),
-            'status' => 1
+            'policy_no' => 'POL-2024-TEST-001',
+            'registration_no' => 'MH01AB1234',
+            'make_model' => 'Honda City',
+            'start_date' => '15/01/2024',
+            'expired_date' => '15/01/2025',
+            'premium_amount' => '25000',
+            'gst' => '4500',
+            'final_premium_with_gst' => '29500',
+            'my_commission_percentage' => '10',
+            'my_commission_amount' => '2500',
+            'status' => 1,
+            'policy_document' => $policyDocument
         ];
         
-        $response = $this->post(route('customer-insurances.store'), $policyData);
+        $response = $this->post(route('customer_insurances.store'), $insuranceData);
         
-        $response->assertRedirect(route('customer-insurances.index'));
-        $response->assertSessionHas('success');
-        
-        // Verify policy was created
-        $this->assertDatabaseHas('customer_insurances', [
-            'customer_id' => $this->customer->id,
-            'policy_no' => $policyData['policy_no'],
-            'sum_insured' => 500000
-        ]);
-        
-        $policy = CustomerInsurance::where('policy_no', $policyData['policy_no'])->first();
-        
-        // Step 2: View the policy details
-        $response = $this->get(route('customer-insurances.show', $policy));
-        $response->assertStatus(200);
-        $response->assertSee($policy->policy_no);
-        $response->assertSee($this->customer->name);
-        
-        // Step 3: Update the policy
-        $updateData = array_merge($policyData, [
-            'sum_insured' => 750000,
-            'premium_amount' => 18000
-        ]);
-        
-        $response = $this->put(route('customer-insurances.update', $policy), $updateData);
-        
-        $response->assertRedirect(route('customer-insurances.index'));
-        $response->assertSessionHas('success');
-        
-        // Verify updates
-        $this->assertDatabaseHas('customer_insurances', [
-            'id' => $policy->id,
-            'sum_insured' => 750000,
-            'premium_amount' => 18000
-        ]);
-        
-        // Step 4: Change policy status
-        $response = $this->patch(route('customer-insurances.updateStatus', [$policy, 0]));
-        
+        // Step 3: Verify successful creation
         $response->assertRedirect();
-        $response->assertSessionHas('success');
+        $response->assertSessionHas('success', 'Customer Insurance Created Successfully.');
         
+        // Step 4: Verify database record
         $this->assertDatabaseHas('customer_insurances', [
-            'id' => $policy->id,
-            'status' => 0
+            'customer_id' => $this->customer->id,
+            'policy_no' => 'POL-2024-TEST-001',
+            'registration_no' => 'MH01AB1234',
+            'premium_amount' => 25000,
+            'final_premium_with_gst' => 29500,
+            'status' => 1
         ]);
         
-        // Step 5: Export policies
-        $response = $this->get(route('customer-insurances.export'));
+        // Step 5: Verify file upload
+        $createdInsurance = CustomerInsurance::where('policy_no', 'POL-2024-TEST-001')->first();
+        $this->assertNotNull($createdInsurance->policy_document_path);
+        Storage::disk('public')->assertExists($createdInsurance->policy_document_path);
         
-        $response->assertStatus(200);
-        $response->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        // Step 6: Verify audit trail
+        $this->assertDatabaseHas('customer_insurances', [
+            'id' => $createdInsurance->id,
+            'created_by' => $this->admin->id
+        ]);
     }
 
-    public function test_customer_insurance_with_family_group_workflow()
+    public function test_customer_insurance_update_workflow()
     {
-        // Create family group
-        $familyHead = Customer::factory()->create(['is_family_head' => true]);
-        $familyMember = Customer::factory()->create([
-            'family_group_id' => $familyHead->family_group_id
+        // Step 1: Create existing insurance
+        $insurance = CustomerInsurance::factory()->create([
+            'customer_id' => $this->customer->id,
+            'policy_no' => 'OLD-POLICY-001',
+            'premium_amount' => 20000,
+            'created_by' => $this->admin->id
         ]);
         
-        // Create policy for family head
-        $policyData = [
-            'customer_id' => $familyHead->id,
+        // Step 2: Access edit page
+        $response = $this->get(route('customer_insurances.edit', $insurance));
+        $response->assertStatus(200);
+        $response->assertViewIs('customer_insurances.edit');
+        $response->assertViewHas('customer_insurance', $insurance);
+        
+        // Step 3: Submit update
+        $updateData = [
+            'customer_id' => $this->customer->id,
             'insurance_company_id' => $this->insuranceCompany->id,
-            'policy_type_id' => $this->policyType->id,
             'premium_type_id' => $this->premiumType->id,
+            'policy_type_id' => $this->policyType->id,
             'fuel_type_id' => $this->fuelType->id,
+            'branch_id' => $this->branch->id,
             'broker_id' => $this->broker->id,
-            'policy_no' => 'FAM-' . rand(100000, 999999),
-            'sum_insured' => 1000000,
-            'premium_amount' => 25000,
-            'start_date' => now()->format('Y-m-d'),
-            'expired_date' => now()->addYear()->format('Y-m-d'),
+            'policy_no' => 'UPDATED-POLICY-001',
+            'registration_no' => 'MH01CD5678',
+            'premium_amount' => '30000',
+            'final_premium_with_gst' => '35400',
             'status' => 1
         ];
         
-        $response = $this->post(route('customer-insurances.store'), $policyData);
+        $response = $this->put(route('customer_insurances.update', $insurance), $updateData);
         
-        $response->assertRedirect(route('customer-insurances.index'));
+        // Step 4: Verify successful update
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'CustomerInsurance Updated Successfully.');
         
-        // Verify family member can view family policies
-        $policy = CustomerInsurance::where('policy_no', $policyData['policy_no'])->first();
+        // Step 5: Verify database changes
+        $this->assertDatabaseHas('customer_insurances', [
+            'id' => $insurance->id,
+            'policy_no' => 'UPDATED-POLICY-001',
+            'registration_no' => 'MH01CD5678',
+            'premium_amount' => 30000,
+            'final_premium_with_gst' => 35400,
+            'updated_by' => $this->admin->id
+        ]);
         
-        $this->assertNotNull($policy);
-        $this->assertEquals($familyHead->id, $policy->customer_id);
+        // Step 6: Verify old data is gone
+        $this->assertDatabaseMissing('customer_insurances', [
+            'id' => $insurance->id,
+            'policy_no' => 'OLD-POLICY-001',
+            'premium_amount' => 20000
+        ]);
     }
 
-    public function test_policy_expiration_workflow()
+    public function test_customer_insurance_renewal_workflow()
     {
-        // Create a policy that's about to expire
-        $expiringPolicy = CustomerInsurance::factory()->create([
+        // Step 1: Create expiring insurance
+        $expiringInsurance = CustomerInsurance::factory()->create([
             'customer_id' => $this->customer->id,
-            'expired_date' => now()->addDays(15), // Expires in 15 days
+            'policy_no' => 'EXPIRING-001',
+            'start_date' => Carbon::now()->subYear()->format('Y-m-d'),
+            'expired_date' => Carbon::now()->addDays(30)->format('Y-m-d'),
+            'premium_amount' => 25000,
             'status' => 1
         ]);
         
-        // Test filtering for expiring policies
-        $response = $this->get(route('customer-insurances.index', [
-            'expiring_soon' => 'yes'
-        ]));
-        
+        // Step 2: Access renewal page
+        $response = $this->get(route('customer_insurances.renew', $expiringInsurance));
         $response->assertStatus(200);
-        $response->assertSee($expiringPolicy->policy_no);
+        $response->assertViewIs('customer_insurances.renew');
         
-        // Test renewal workflow
+        // Step 3: Submit renewal
         $renewalData = [
             'customer_id' => $this->customer->id,
-            'insurance_company_id' => $expiringPolicy->insurance_company_id,
-            'policy_type_id' => $expiringPolicy->policy_type_id,
-            'premium_type_id' => $expiringPolicy->premium_type_id,
-            'fuel_type_id' => $expiringPolicy->fuel_type_id,
-            'broker_id' => $expiringPolicy->broker_id,
-            'policy_no' => 'REN-' . $expiringPolicy->policy_no,
-            'sum_insured' => $expiringPolicy->sum_insured,
-            'premium_amount' => $expiringPolicy->premium_amount * 1.1, // 10% increase
-            'start_date' => $expiringPolicy->expired_date,
-            'expired_date' => now()->addYear()->addDays(15)->format('Y-m-d'),
+            'insurance_company_id' => $this->insuranceCompany->id,
+            'premium_type_id' => $this->premiumType->id,
+            'policy_type_id' => $this->policyType->id,
+            'fuel_type_id' => $this->fuelType->id,
+            'branch_id' => $this->branch->id,
+            'broker_id' => $this->broker->id,
+            'policy_no' => 'RENEWED-001',
+            'registration_no' => $expiringInsurance->registration_no,
+            'start_date' => Carbon::now()->format('d/m/Y'),
+            'expired_date' => Carbon::now()->addYear()->format('d/m/Y'),
+            'premium_amount' => '28000',
+            'final_premium_with_gst' => '33040',
             'status' => 1
         ];
         
-        $response = $this->post(route('customer-insurances.store'), $renewalData);
+        $response = $this->post(route('customer_insurances.store_renew', $expiringInsurance), $renewalData);
         
-        $response->assertRedirect(route('customer-insurances.index'));
-        $response->assertSessionHas('success');
+        // Step 4: Verify successful renewal
+        $response->assertRedirect(route('customer_insurances.index'));
+        $response->assertSessionHas('success', 'Customer Insurance Renewed Successfully.');
         
-        // Verify renewal policy created
+        // Step 5: Verify new policy created
         $this->assertDatabaseHas('customer_insurances', [
-            'policy_no' => $renewalData['policy_no'],
-            'customer_id' => $this->customer->id
+            'customer_id' => $this->customer->id,
+            'policy_no' => 'RENEWED-001',
+            'premium_amount' => 28000,
+            'final_premium_with_gst' => 33040,
+            'status' => 1
+        ]);
+        
+        // Step 6: Verify original policy still exists but not modified
+        $this->assertDatabaseHas('customer_insurances', [
+            'id' => $expiringInsurance->id,
+            'policy_no' => 'EXPIRING-001',
+            'premium_amount' => 25000
         ]);
     }
 
-    public function test_bulk_operations_workflow()
+    public function test_customer_insurance_status_update_workflow()
     {
-        // Create multiple policies
-        $policies = CustomerInsurance::factory()->count(5)->create([
+        // Step 1: Create active insurance
+        $insurance = CustomerInsurance::factory()->create([
+            'customer_id' => $this->customer->id,
             'status' => 1
         ]);
         
-        // Test bulk status update (this would be implemented in the controller)
-        foreach ($policies as $policy) {
-            $response = $this->patch(route('customer-insurances.updateStatus', [$policy, 0]));
-            $response->assertRedirect();
-        }
-        
-        // Verify all policies are now inactive
-        foreach ($policies as $policy) {
-            $this->assertDatabaseHas('customer_insurances', [
-                'id' => $policy->id,
-                'status' => 0
-            ]);
-        }
-        
-        // Test bulk export
-        $response = $this->get(route('customer-insurances.export'));
-        
-        $response->assertStatus(200);
-        $response->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    }
-
-    public function test_search_and_filter_workflow()
-    {
-        // Create policies with different characteristics
-        $motorPolicy = CustomerInsurance::factory()->create([
-            'policy_type_id' => PolicyType::factory()->create(['name' => 'Motor Insurance'])->id,
-            'policy_no' => 'MOTOR-123456',
-            'status' => 1
-        ]);
-        
-        $healthPolicy = CustomerInsurance::factory()->create([
-            'policy_type_id' => PolicyType::factory()->create(['name' => 'Health Insurance'])->id,
-            'policy_no' => 'HEALTH-789012',
-            'status' => 1
-        ]);
-        
-        // Test search by policy number
-        $response = $this->get(route('customer-insurances.index', [
-            'search' => 'MOTOR-123456'
-        ]));
-        
-        $response->assertStatus(200);
-        $response->assertSee('MOTOR-123456');
-        $response->assertDontSee('HEALTH-789012');
-        
-        // Test filter by policy type
-        $response = $this->get(route('customer-insurances.index', [
-            'policy_type' => $motorPolicy->policy_type_id
-        ]));
-        
-        $response->assertStatus(200);
-        $response->assertSee('MOTOR-123456');
-        $response->assertDontSee('HEALTH-789012');
-        
-        // Test filter by status
-        $inactivePolicy = CustomerInsurance::factory()->create(['status' => 0]);
-        
-        $response = $this->get(route('customer-insurances.index', [
+        // Step 2: Update status to inactive
+        $response = $this->get(route('customer_insurances.update_status', [
+            'customer_insurance_id' => $insurance->id,
             'status' => 0
         ]));
         
+        // Step 3: Verify successful status update
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'CustomerInsurance Status Updated Successfully!');
+        
+        // Step 4: Verify database update
+        $this->assertDatabaseHas('customer_insurances', [
+            'id' => $insurance->id,
+            'status' => 0,
+            'updated_by' => $this->admin->id
+        ]);
+    }
+
+    public function test_customer_insurance_deletion_workflow()
+    {
+        // Step 1: Create insurance to delete
+        $insurance = CustomerInsurance::factory()->create([
+            'customer_id' => $this->customer->id,
+            'policy_no' => 'TO-DELETE-001'
+        ]);
+        
+        // Step 2: Delete insurance
+        $response = $this->delete(route('customer_insurances.delete', $insurance));
+        
+        // Step 3: Verify successful deletion
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'CustomerInsurance Deleted Successfully!.');
+        
+        // Step 4: Verify soft deletion
+        $this->assertSoftDeleted('customer_insurances', [
+            'id' => $insurance->id,
+            'deleted_by' => $this->admin->id
+        ]);
+    }
+
+    public function test_customer_insurance_export_workflow()
+    {
+        // Step 1: Create sample data
+        CustomerInsurance::factory()->count(5)->create([
+            'customer_id' => $this->customer->id
+        ]);
+        
+        // Step 2: Request export
+        $response = $this->get(route('customer_insurances.export'));
+        
+        // Step 3: Verify export download
         $response->assertStatus(200);
-        $response->assertSee($inactivePolicy->policy_no);
+        $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $this->assertStringContainsString('attachment', $response->headers->get('Content-Disposition'));
+    }
+
+    public function test_customer_insurance_search_and_pagination_workflow()
+    {
+        // Step 1: Create test data
+        CustomerInsurance::factory()->create([
+            'customer_id' => $this->customer->id,
+            'policy_no' => 'SEARCH-POLICY-001',
+            'registration_no' => 'MH01SEARCH1'
+        ]);
+        
+        CustomerInsurance::factory()->count(15)->create([
+            'customer_id' => $this->customer->id
+        ]);
+        
+        // Step 2: Access index page
+        $response = $this->get(route('customer_insurances.index'));
+        $response->assertStatus(200);
+        $response->assertViewIs('customer_insurances.index');
+        
+        // Step 3: Test search functionality
+        $searchResponse = $this->get(route('customer_insurances.index', ['search' => 'SEARCH-POLICY']));
+        $searchResponse->assertStatus(200);
+        $searchResponse->assertSee('SEARCH-POLICY-001');
+        
+        // Step 4: Test pagination
+        $page2Response = $this->get(route('customer_insurances.index', ['page' => 2]));
+        $page2Response->assertStatus(200);
+    }
+
+    public function test_customer_insurance_validation_errors()
+    {
+        // Test missing required fields
+        $response = $this->post(route('customer_insurances.store'), []);
+        
+        $response->assertSessionHasErrors([
+            'customer_id',
+            'policy_no',
+            'start_date',
+            'expired_date'
+        ]);
+    }
+
+    public function test_customer_insurance_file_upload_validation()
+    {
+        // Test invalid file type
+        $invalidFile = UploadedFile::fake()->create('document.txt', 100, 'text/plain');
+        
+        $insuranceData = [
+            'customer_id' => $this->customer->id,
+            'insurance_company_id' => $this->insuranceCompany->id,
+            'premium_type_id' => $this->premiumType->id,
+            'policy_no' => 'TEST-POLICY-001',
+            'start_date' => '15/01/2024',
+            'expired_date' => '15/01/2025',
+            'premium_amount' => '25000',
+            'policy_document' => $invalidFile
+        ];
+        
+        $response = $this->post(route('customer_insurances.store'), $insuranceData);
+        
+        // Should have validation errors for file type
+        $response->assertSessionHasErrors('policy_document');
+    }
+
+    public function test_unauthorized_access_protection()
+    {
+        // Step 1: Logout admin
+        auth()->logout();
+        
+        // Step 2: Try to access protected routes
+        $this->get(route('customer_insurances.index'))->assertRedirect(route('login'));
+        $this->get(route('customer_insurances.create'))->assertRedirect(route('login'));
+        $this->post(route('customer_insurances.store'), [])->assertRedirect(route('login'));
+    }
+
+    public function test_whatsapp_document_sending_workflow()
+    {
+        // Create insurance with document
+        $insurance = CustomerInsurance::factory()->create([
+            'customer_id' => $this->customer->id,
+            'policy_document_path' => 'documents/test-policy.pdf'
+        ]);
+        
+        // Mock file exists
+        Storage::disk('public')->put('documents/test-policy.pdf', 'test content');
+        
+        // Send WhatsApp document
+        $response = $this->post(route('customer_insurances.send_wa_document', $insurance));
+        
+        // Should redirect back with status message
+        $response->assertRedirect();
+        // Note: Actual WhatsApp sending would be mocked in a more comprehensive test
     }
 }

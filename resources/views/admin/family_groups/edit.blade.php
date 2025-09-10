@@ -112,7 +112,7 @@
                                                 <strong>Current Family Head:</strong> {{ $familyGroup->familyHead->name }} ({{ $familyGroup->familyHead->email }})
                                                 <br>
                                                 <i class="fas fa-calendar mr-1"></i>
-                                                <strong>Last Password Change:</strong> {{ $familyGroup->familyHead->password_changed_at ? $familyGroup->familyHead->password_changed_at->format('d M Y H:i') : 'Never' }}
+                                                <strong>Last Password Change:</strong> {{ $familyGroup->familyHead->password_changed_at ? formatDateForUi($familyGroup->familyHead->password_changed_at, 'd M Y H:i') : 'Never' }}
                                                 <br>
                                                 <i class="fas fa-exclamation-triangle mr-1 text-warning"></i>
                                                 <strong>Must Change Password:</strong> {{ $familyGroup->familyHead->must_change_password ? 'Yes' : 'No' }}
@@ -295,7 +295,7 @@
                             </tr>
                             <tr>
                                 <td class="font-weight-bold">Created:</td>
-                                <td>{{ $familyGroup->created_at->format('d M Y') }}</td>
+                                <td>{{ formatDateForUi($familyGroup->created_at) }}</td>
                             </tr>
                         </table>
                     </div>

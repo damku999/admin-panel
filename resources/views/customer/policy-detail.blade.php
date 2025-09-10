@@ -23,13 +23,13 @@
         <div class="alert alert-danger">
             <i class="fas fa-exclamation-triangle mr-2"></i>
             <strong>Policy Expired:</strong> This policy expired {{ abs($daysUntilExpiry) }} days ago on
-            {{ \Carbon\Carbon::parse($policy->expired_date)->format('d M Y') }}.
+            {{ formatDateForUi($policy->expired_date) }}.
         </div>
     @elseif($isExpiringSoon)
         <div class="alert alert-warning">
             <i class="fas fa-clock mr-2"></i>
             <strong>Expiring Soon:</strong> This policy will expire in {{ $daysUntilExpiry }} days on
-            {{ \Carbon\Carbon::parse($policy->expired_date)->format('d M Y') }}.
+            {{ formatDateForUi($policy->expired_date) }}.
         </div>
     @endif
 
@@ -231,14 +231,14 @@
                     <div class="form-group">
                         <label class="small mb-1"><strong>Policy Start Date</strong></label>
                         <p class="form-control-static">
-                            {{ $policy->start_date ? \Carbon\Carbon::parse($policy->start_date)->format('d M Y') : 'N/A' }}
+                            {{ $policy->start_date ? formatDateForUi($policy->start_date) : 'N/A' }}
                         </p>
                     </div>
 
                     <div class="form-group">
                         <label class="small mb-1"><strong>Policy Expiry Date</strong></label>
                         <p class="form-control-static">
-                            {{ $policy->expired_date ? \Carbon\Carbon::parse($policy->expired_date)->format('d M Y') : 'N/A' }}
+                            {{ $policy->expired_date ? formatDateForUi($policy->expired_date) : 'N/A' }}
                         </p>
                     </div>
 
@@ -255,12 +255,12 @@
 
                     <div class="form-group">
                         <label class="small mb-1"><strong>Created Date</strong></label>
-                        <p class="form-control-static">{{ $policy->created_at->format('d M Y') }}</p>
+                        <p class="form-control-static">{{ formatDateForUi($policy->created_at) }}</p>
                     </div>
 
                     <div class="form-group">
                         <label class="small mb-1"><strong>Last Updated</strong></label>
-                        <p class="form-control-static">{{ $policy->updated_at->format('d M Y') }}</p>
+                        <p class="form-control-static">{{ formatDateForUi($policy->updated_at) }}</p>
                     </div>
                 </div>
             </div>

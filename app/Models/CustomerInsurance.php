@@ -220,4 +220,88 @@ class CustomerInsurance extends Authenticatable
     {
         return LogOptions::defaults();
     }
+
+    // =======================================================
+    // DATE FORMATTING ACCESSORS & MUTATORS
+    // =======================================================
+
+    /**
+     * Get issue date in UI format (d/m/Y)
+     */
+    public function getIssueDateFormattedAttribute()
+    {
+        return formatDateForUi($this->issue_date);
+    }
+
+    /**
+     * Set issue date from UI format (d/m/Y) to database format (Y-m-d)
+     */
+    public function setIssueDateAttribute($value)
+    {
+        $this->attributes['issue_date'] = formatDateForDatabase($value);
+    }
+
+    /**
+     * Get start date in UI format (d/m/Y)
+     */
+    public function getStartDateFormattedAttribute()
+    {
+        return formatDateForUi($this->start_date);
+    }
+
+    /**
+     * Set start date from UI format (d/m/Y) to database format (Y-m-d)
+     */
+    public function setStartDateAttribute($value)
+    {
+        $this->attributes['start_date'] = formatDateForDatabase($value);
+    }
+
+    /**
+     * Get expired date in UI format (d/m/Y)
+     */
+    public function getExpiredDateFormattedAttribute()
+    {
+        return formatDateForUi($this->expired_date);
+    }
+
+    /**
+     * Set expired date from UI format (d/m/Y) to database format (Y-m-d)
+     */
+    public function setExpiredDateAttribute($value)
+    {
+        $this->attributes['expired_date'] = formatDateForDatabase($value);
+    }
+
+    /**
+     * Get TP expiry date in UI format (d/m/Y)
+     */
+    public function getTpExpiryDateFormattedAttribute()
+    {
+        return formatDateForUi($this->tp_expiry_date);
+    }
+
+    /**
+     * Set TP expiry date from UI format (d/m/Y) to database format (Y-m-d)
+     */
+    public function setTpExpiryDateAttribute($value)
+    {
+        $this->attributes['tp_expiry_date'] = formatDateForDatabase($value);
+    }
+
+    /**
+     * Get maturity date in UI format (d/m/Y)
+     */
+    public function getMaturityDateFormattedAttribute()
+    {
+        return formatDateForUi($this->maturity_date);
+    }
+
+    /**
+     * Set maturity date from UI format (d/m/Y) to database format (Y-m-d)
+     */
+    public function setMaturityDateAttribute($value)
+    {
+        $this->attributes['maturity_date'] = formatDateForDatabase($value);
+    }
 }

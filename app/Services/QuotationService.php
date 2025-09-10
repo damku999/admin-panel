@@ -4,10 +4,13 @@ namespace App\Services;
 
 use App\Contracts\Repositories\QuotationRepositoryInterface;
 use App\Contracts\Services\QuotationServiceInterface;
+use App\Events\Quotation\QuotationRequested;
+use App\Events\Quotation\QuotationGenerated;
 use App\Models\Customer;
 use App\Models\InsuranceCompany;
 use App\Models\Quotation;
 use App\Models\QuotationCompany;
+use App\Models\PolicyType;
 use App\Services\PdfGenerationService;
 use App\Traits\WhatsAppApiTrait;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -26,20 +29,45 @@ class QuotationService implements QuotationServiceInterface
 
     public function createQuotation(array $data): Quotation
     {
-        $data['total_idv'] = $this->calculateTotalIdv($data);
+        DB::beginTransaction();
+        
+        try {
+            // Fire QuotationRequested event first
+            $customer = Customer::find($data['customer_id']);
+            $policyType = PolicyType::find($data['policy_type_id']);
+            
+            if ($customer && $policyType) {
+                QuotationRequested::dispatch(
+                    $customer,
+                    $policyType,
+                    $data,
+                    'admin'
+                );
+            }
 
-        // Extract company data before creating quotation
-        $companies = $data['companies'] ?? [];
-        unset($data['companies']);
+            $data['total_idv'] = $this->calculateTotalIdv($data);
 
-        $quotation = Quotation::create($data);
+            // Extract company data before creating quotation
+            $companies = $data['companies'] ?? [];
+            unset($data['companies']);
 
-        // Create company quotes manually
-        if (!empty($companies)) {
-            $this->createManualCompanyQuotes($quotation, $companies);
+            $quotation = Quotation::create($data);
+
+            // Create company quotes manually
+            if (!empty($companies)) {
+                $this->createManualCompanyQuotes($quotation, $companies);
+            }
+
+            DB::commit();
+
+            // Fire QuotationGenerated event after successful creation
+            QuotationGenerated::dispatch($quotation);
+
+            return $quotation;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
-
-        return $quotation;
     }
 
     public function generateCompanyQuotes(Quotation $quotation): void

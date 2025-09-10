@@ -17,6 +17,7 @@ use App\Contracts\Services\CustomerInsuranceServiceInterface;
 use App\Contracts\Services\InsuranceCompanyServiceInterface;
 use App\Contracts\Services\PolicyServiceInterface;
 use App\Contracts\Services\QuotationServiceInterface;
+use App\Contracts\Services\ReportServiceInterface;
 use App\Contracts\Services\UserServiceInterface;
 use App\Repositories\AddonCoverRepository;
 use App\Repositories\BrokerRepository;
@@ -33,6 +34,7 @@ use App\Services\CustomerInsuranceService;
 use App\Services\InsuranceCompanyService;
 use App\Services\PolicyService;
 use App\Services\QuotationService;
+use App\Services\ReportService;
 use App\Services\UserService;
 use Illuminate\Support\ServiceProvider;
 
@@ -61,6 +63,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(InsuranceCompanyServiceInterface::class, InsuranceCompanyService::class);
         $this->app->bind(QuotationServiceInterface::class, QuotationService::class);
         $this->app->bind(PolicyServiceInterface::class, PolicyService::class);
+        $this->app->bind(ReportServiceInterface::class, ReportService::class);
         $this->app->bind(UserServiceInterface::class, UserService::class);
     }
 

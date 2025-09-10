@@ -60,7 +60,7 @@
                             <div class="input-group date" id="issue_date">
                                 <input type="text"
                                     class="form-control datepicker @error('issue_date') is-invalid @enderror"
-                                    id="issue_date" name="issue_date" value="{{ old('issue_date') }}" />
+                                    id="issue_date" name="issue_date" value="{{ old('issue_date') ? formatDateForUi(old('issue_date')) : '' }}" />
                             </div>
                             @error('issue_date')
                                 <span class="text-danger">{{ $message }}</span>
@@ -187,7 +187,7 @@
                             <div class="input-group date">
                                 <input type="text"
                                     class="form-control datepicker @error('start_date') is-invalid @enderror"
-                                    id="start_date" name="start_date" value="{{ old('start_date') }}"
+                                    id="start_date" name="start_date" value="{{ old('start_date') ? formatDateForUi(old('start_date')) : '' }}"
                                     onchange="setExpiredDate()" />
                             </div>
                             @error('start_date')
@@ -201,7 +201,7 @@
                             <div class="input-group date">
                                 <input type="text"
                                     class="form-control datepicker @error('expired_date') is-invalid @enderror"
-                                    id="expired_date" name="expired_date" value="{{ old('expired_date') }}" />
+                                    id="expired_date" name="expired_date" value="{{ old('expired_date') ? formatDateForUi(old('expired_date')) : '' }}" />
                             </div>
                             @error('expired_date')
                                 <span class="text-danger">{{ $message }}</span>
@@ -269,7 +269,7 @@
                             <div class="input-group date">
                                 <input type="text"
                                     class="form-control datepicker @error('tp_expiry_date') is-invalid @enderror"
-                                    id="tp_expiry_date" name="tp_expiry_date" value="{{ old('tp_expiry_date') }}" />
+                                    id="tp_expiry_date" name="tp_expiry_date" value="{{ old('tp_expiry_date') ? formatDateForUi(old('tp_expiry_date')) : '' }}" />
                             </div>
                             @error('tp_expiry_date')
                                 <span class="text-danger">{{ $message }}</span>
@@ -417,7 +417,7 @@
                             <div class="input-group date" id="maturity_date">
                                 <input type="text"
                                     class="form-control datepicker @error('maturity_date') is-invalid @enderror"
-                                    id="maturity_date" name="maturity_date" value="{{ old('maturity_date') }}" />
+                                    id="maturity_date" name="maturity_date" value="{{ old('maturity_date') ? formatDateForUi(old('maturity_date')) : '' }}" />
                             </div>
                             @error('maturity_date')
                                 <span class="text-danger">{{ $message }}</span>

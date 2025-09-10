@@ -1,0 +1,262 @@
+/**
+ * Admin Portal Styles
+ * Bootstrap 5 + SB Admin 2 compatibility layer
+ */
+
+// Use Bootstrap 5 with @use syntax
+@use '~bootstrap/scss/bootstrap';
+
+// Use FontAwesome with @use syntax
+@use '~@fortawesome/fontawesome-free/scss/fontawesome';
+@use '~@fortawesome/fontawesome-free/scss/solid';
+@use '~@fortawesome/fontawesome-free/scss/brands';
+
+// SB Admin 2 Variables and Overrides
+$primary: #4e73df;
+$secondary: #858796;
+$success: #1cc88a;
+$info: #36b9cc;
+$warning: #f6c23e;
+$danger: #e74a3b;
+$light: #f8f9fc;
+$dark: #5a5c69;
+
+// Custom variables for admin interface
+$sidebar-width: 224px;
+$sidebar-collapsed-width: 6.5rem;
+$topbar-height: 4.375rem;
+
+// Admin specific styles
+.sidebar {
+  width: $sidebar-width;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #4e73df 10%, #224abe 100%);
+  
+  &.toggled {
+    width: $sidebar-collapsed-width;
+    
+    .nav-item .nav-link {
+      text-align: center;
+      padding: 0.75rem 1rem;
+      width: $sidebar-collapsed-width;
+      
+      span {
+        font-size: 0.65rem;
+        display: block;
+      }
+    }
+  }
+  
+  .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    
+    &:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    &.active {
+      color: white;
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+  
+  .sidebar-brand {
+    height: $topbar-height;
+    padding: 0 1rem;
+    color: white;
+    font-weight: 700;
+    
+    .sidebar-brand-icon {
+      font-size: 2rem;
+    }
+  }
+}
+
+// Main content area
+#wrapper {
+  display: flex;
+  
+  #content-wrapper {
+    background-color: #f8f9fc;
+    width: 100%;
+    overflow-x: hidden;
+  }
+  
+  #content {
+    padding: 1.5rem;
+  }
+}
+
+// Topbar styling
+.topbar {
+  height: $topbar-height;
+  background: white;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  
+  .navbar-nav {
+    .nav-item {
+      .nav-link {
+        color: #5a5c69;
+        
+        &:hover {
+          color: #3a3b45;
+        }
+      }
+      
+      &.dropdown {
+        .dropdown-menu {
+          border: none;
+          box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+        }
+      }
+    }
+  }
+  
+  .topbar-divider {
+    width: 0;
+    border-right: 1px solid #e3e6f0;
+    height: calc(4.375rem - 2rem);
+    margin: auto 1rem;
+  }
+}
+
+// Cards styling
+.card {
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  border: none;
+  
+  .card-header {
+    background: white;
+    border-bottom: 1px solid #e3e6f0;
+    
+    h6 {
+      color: $primary;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+  }
+}
+
+// Table styling
+.table {
+  .thead-light th {
+    background: #f8f9fc;
+    border-color: #e3e6f0;
+    color: #5a5c69;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+  }
+}
+
+// Button styling
+.btn {
+  border-width: 2px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  border-radius: 0.35rem;
+  
+  &.btn-circle {
+    border-radius: 100%;
+    height: 2.5rem;
+    width: 2.5rem;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+// Form styling
+.form-control {
+  border-color: #e3e6f0;
+  font-size: 0.9rem;
+  
+  &:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+  }
+}
+
+// Utility classes
+.text-xs {
+  font-size: 0.7rem;
+}
+
+.text-lg {
+  font-size: 1.2rem;
+}
+
+.rotate-15 {
+  transform: rotate(15deg);
+}
+
+.rotate-n-15 {
+  transform: rotate(-15deg);
+}
+
+// Animation classes
+.animated {
+  animation-duration: 1s;
+  animation-fill-mode: both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fadeIn {
+  animation-name: fadeIn;
+}
+
+// Loading spinner
+.spinner-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  #wrapper {
+    #content-wrapper {
+      #content {
+        padding: 1rem;
+      }
+    }
+  }
+  
+  .sidebar {
+    &.toggled {
+      width: 0;
+    }
+  }
+  
+  body.sidebar-toggled {
+    .sidebar {
+      width: $sidebar-width;
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .sidebar,
+  .topbar,
+  .btn,
+  .no-print {
+    display: none !important;
+  }
+  
+  #wrapper #content-wrapper #content {
+    padding: 0;
+    margin: 0;
+  }
+}

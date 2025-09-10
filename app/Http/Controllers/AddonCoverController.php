@@ -2,22 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Services\AddonCoverServiceInterface;
 use App\Models\AddonCover;
 use Illuminate\Http\Request;
-use App\Exports\AddonCoversExport;
-use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 
 class AddonCoverController extends Controller
 {
     /**
      * Create a new controller instance.
-     *
-     * @return void
      */
-    public function __construct()
-    {
+    public function __construct(
+        private AddonCoverServiceInterface $addonCoverService
+    ) {
         $this->middleware('auth');
         $this->middleware('permission:addon-cover-list|addon-cover-create|addon-cover-edit|addon-cover-delete', ['only' => ['index']]);
         $this->middleware('permission:addon-cover-create', ['only' => ['create', 'store', 'updateStatus']]);
@@ -33,16 +30,7 @@ class AddonCoverController extends Controller
      */
     public function index(Request $request)
     {
-        $addon_cover_obj = AddonCover::select('*');
-        if (!empty($request->search)) {
-            $addon_cover_obj->where('name', 'LIKE', '%' . trim($request->search) . '%')
-                           ->orWhere('description', 'LIKE', '%' . trim($request->search) . '%');
-        }
-
-        // Order by order_no first, then by name
-        $addon_covers = $addon_cover_obj->orderBy('order_no', 'asc')
-                                      ->orderBy('name', 'asc')
-                                      ->paginate(10);
+        $addon_covers = $this->addonCoverService->getAddonCovers($request);
         return view('addon_covers.index', ['addon_covers' => $addon_covers]);
     }
 
@@ -65,32 +53,20 @@ class AddonCoverController extends Controller
      */
     public function store(Request $request)
     {
-        // Validations
-        $validation_array = [
-            'name' => 'required|string|max:255|unique:addon_covers,name',
-            'description' => 'nullable|string',
-            'order_no' => 'required|integer|min:0', // 0 = auto-assign next available
-            'status' => 'boolean',
-        ];
-
-        $request->validate($validation_array);
-        DB::beginTransaction();
+        $validationRules = $this->addonCoverService->getStoreValidationRules();
+        $request->validate($validationRules);
 
         try {
-            // Store Data
-            AddonCover::create([
+            $data = [
                 'name' => $request->name,
                 'description' => $request->description,
                 'order_no' => $request->order_no,
                 'status' => $request->has('status') ? 1 : 0,
-            ]);
-
-            // Commit And Redirected To Listing
-            DB::commit();
+            ];
+            
+            $this->addonCoverService->createAddonCover($data);
             return redirect()->route('addon-covers.index')->with('success', 'Add-on Cover Created Successfully.');
         } catch (\Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
             return redirect()->back()->withInput()->with('error', $th->getMessage());
         }
     }
@@ -103,7 +79,6 @@ class AddonCoverController extends Controller
      */
     public function updateStatus($addon_cover_id, $status)
     {
-        // Validation
         $validate = Validator::make([
             'addon_cover_id' => $addon_cover_id,
             'status' => $status
@@ -112,23 +87,14 @@ class AddonCoverController extends Controller
             'status' => 'required|in:0,1',
         ]);
 
-        // If Validations Fails
         if ($validate->fails()) {
             return redirect()->back()->with('error', $validate->errors()->first());
         }
 
         try {
-            DB::beginTransaction();
-
-            // Update Status
-            AddonCover::whereId($addon_cover_id)->update(['status' => $status]);
-
-            // Commit And Redirect on index with Success Message
-            DB::commit();
+            $this->addonCoverService->updateStatus($addon_cover_id, $status);
             return redirect()->back()->with('success', 'Add-on Cover Status Updated Successfully!');
         } catch (\Throwable $th) {
-            // Rollback & Return Error Message
-            DB::rollBack();
             return redirect()->back()->with('error', $th->getMessage());
         }
     }
@@ -154,31 +120,20 @@ class AddonCoverController extends Controller
      */
     public function update(Request $request, AddonCover $addon_cover)
     {
-        // Validations
-        $validation_array = [
-            'name' => 'required|string|max:255|unique:addon_covers,name,' . $addon_cover->id,
-            'description' => 'nullable|string',
-            'order_no' => 'required|integer|min:0', // 0 = auto-assign next available
-            'status' => 'boolean',
-        ];
+        $validationRules = $this->addonCoverService->getUpdateValidationRules($addon_cover);
+        $request->validate($validationRules);
 
-        $request->validate($validation_array);
-
-        DB::beginTransaction();
         try {
-            // Store Data
-            AddonCover::whereId($addon_cover->id)->update([
+            $data = [
                 'name' => $request->name,
                 'description' => $request->description,
                 'order_no' => $request->order_no,
                 'status' => $request->has('status') ? 1 : 0,
-            ]);
-            // Commit And Redirected To Listing
-            DB::commit();
+            ];
+            
+            $this->addonCoverService->updateAddonCover($addon_cover, $data);
             return redirect()->route('addon-covers.index')->with('success', 'Add-on Cover Updated Successfully.');
         } catch (\Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
             return redirect()->back()->withInput()->with('error', $th->getMessage());
         }
     }
@@ -191,15 +146,10 @@ class AddonCoverController extends Controller
      */
     public function delete(AddonCover $addon_cover)
     {
-        DB::beginTransaction();
         try {
-            // Delete AddonCover
-            AddonCover::whereId($addon_cover->id)->delete();
-
-            DB::commit();
+            $this->addonCoverService->deleteAddonCover($addon_cover);
             return redirect()->back()->with('success', 'Add-on Cover Deleted Successfully!.');
         } catch (\Throwable $th) {
-            DB::rollBack();
             return redirect()->back()->with('error', $th->getMessage());
         }
     }
@@ -216,7 +166,7 @@ class AddonCoverController extends Controller
 
     public function export()
     {
-        return Excel::download(new AddonCoversExport, 'addon_covers.xlsx');
+        return $this->addonCoverService->exportAddonCovers();
     }
 
 }

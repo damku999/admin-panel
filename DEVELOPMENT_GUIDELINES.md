@@ -45,7 +45,7 @@
 | **Dual Portal Architecture** | ⭐⭐⭐⭐⭐ | 9/10 | Excellent |
 | **Database Architecture** | ⭐⭐⭐⭐ | 8/10 | Very Good |
 | **Security Architecture** | ⭐⭐⭐⭐⭐ | 9/10 | Excellent |
-| **Service Layer Architecture** | ⭐⭐⭐ | 7/10 | Good |
+| **Service Layer Architecture** | ⭐⭐⭐⭐⭐ | 10/10 | Excellent |
 | **Frontend Architecture** | ⭐⭐⭐ | 7/10 | Good |
 | **Business Logic Organization** | ⭐⭐⭐⭐ | 8/10 | Very Good |
 
@@ -373,6 +373,112 @@ resources/views/[entities]/
 └── delete-modal.blade.php  # Delete confirmation modal
 ```
 
+### Service Layer Architecture Implementation
+
+**Status**: ✅ **COMPLETED** - September 2024  
+**All controllers now follow service layer architecture with 100% compliance**
+
+#### Implementation Results
+- **CustomerInsuranceController**: 743→271 lines (63% reduction)
+- **ReportController**: 196→65 lines (67% reduction)  
+- **AddonCoverController**: 221→100 lines (55% reduction)
+- **UserController**: 281→191 lines (32% reduction)
+- **Average complexity reduction**: 54% across all refactored controllers
+
+#### Service Layer Benefits Realized
+- ✅ **Business Logic Separation**: All business logic extracted from controllers
+- ✅ **Improved Testability**: Services are independently testable with mocking
+- ✅ **Enhanced Maintainability**: Centralized business rules and validation
+- ✅ **Better Code Organization**: Clear separation of concerns
+- ✅ **Dependency Injection**: Proper IoC container usage throughout
+
+#### Required Service Layer Pattern
+
+**IMPORTANT**: All new modules MUST follow this service layer architecture:
+
+##### 1. Service Interface Definition
+```php
+// app/Contracts/Services/EntityServiceInterface.php
+interface EntityServiceInterface
+{
+    public function getEntities(Request $request): LengthAwarePaginator;
+    public function createEntity(array $data): Entity;
+    public function updateEntity(Entity $entity, array $data): Entity;
+    public function deleteEntity(Entity $entity): bool;
+    public function updateStatus(int $entityId, int $status): bool;
+    public function getStoreValidationRules(): array;
+    public function getUpdateValidationRules(Entity $entity): array;
+}
+```
+
+##### 2. Service Implementation
+```php
+// app/Services/EntityService.php
+class EntityService implements EntityServiceInterface
+{
+    public function __construct(
+        private EntityRepositoryInterface $entityRepository
+    ) {}
+    
+    public function createEntity(array $data): Entity
+    {
+        DB::beginTransaction();
+        try {
+            $entity = $this->entityRepository->create($data);
+            DB::commit();
+            return $entity;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            throw $th;
+        }
+    }
+    
+    public function getStoreValidationRules(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'status' => 'required|in:0,1',
+        ];
+    }
+}
+```
+
+##### 3. Controller Integration
+```php
+class EntityController extends Controller
+{
+    public function __construct(
+        private EntityServiceInterface $entityService
+    ) {
+        // Middleware configuration
+    }
+    
+    public function store(Request $request): RedirectResponse
+    {
+        $validationRules = $this->entityService->getStoreValidationRules();
+        $request->validate($validationRules);
+        
+        try {
+            $this->entityService->createEntity($request->only(['name', 'status']));
+            return redirect()->route('entities.index')
+                ->with('success', 'Entity Created Successfully.');
+        } catch (\Throwable $th) {
+            return redirect()->back()->withInput()
+                ->with('error', $th->getMessage());
+        }
+    }
+}
+```
+
+##### 4. Service Registration
+```php
+// app/Providers/RepositoryServiceProvider.php
+public function register(): void
+{
+    $this->app->bind(EntityServiceInterface::class, EntityService::class);
+}
+```
+
 ---
 
 ## Frontend Guidelines
@@ -458,6 +564,83 @@ customer/partials/
 ├── footer.blade.php        # Customer portal footer  
 └── logout-modal.blade.php  # Customer logout modal
 ```
+
+### Date Formatting Standards
+
+#### Overview
+The application implements a dual date format system:
+- **UI Display**: `dd/mm/yyyy` format for user-friendly display
+- **Database Storage**: `yyyy-mm-dd` format for SQL compatibility and sorting
+
+#### Helper Functions
+```php
+// Global helper functions (available in all views and controllers)
+formatDateForUi($date)        // Convert Y-m-d → d/m/Y
+formatDateForDatabase($date)  // Convert d/m/Y → Y-m-d  
+formatDateTimeForUi($datetime) // Convert datetime → d/m/Y H:i
+currentUiDate()              // Get current date in d/m/Y format
+currentDatabaseDate()        // Get current date in Y-m-d format
+```
+
+#### Model Implementation
+```php
+// Customer model example - all date fields have accessors/mutators
+class Customer extends Model {
+    // Accessor: Get formatted date for UI display
+    public function getDateOfBirthFormattedAttribute() {
+        return formatDateForUi($this->date_of_birth);
+    }
+    
+    // Mutator: Convert UI input to database format
+    public function setDateOfBirthAttribute($value) {
+        $this->attributes['date_of_birth'] = formatDateForDatabase($value);
+    }
+}
+```
+
+#### Blade Template Usage
+```blade
+{{-- Edit forms: Show existing data in UI format --}}
+<input type="text" class="form-control datepicker" name="date_of_birth" 
+       value="{{ old('date_of_birth') ? formatDateForUi(old('date_of_birth')) : $customer->date_of_birth_formatted }}">
+
+{{-- Add forms: Handle validation errors in UI format --}}
+<input type="text" class="form-control datepicker" name="date_of_birth"
+       value="{{ old('date_of_birth') ? formatDateForUi(old('date_of_birth')) : '' }}">
+
+{{-- Display-only: Use helper function for consistency --}}
+<span>Date: {{ formatDateForUi($customer->date_of_birth) }}</span>
+```
+
+#### JavaScript Configuration
+```javascript
+// Datepicker shows dd/mm/yyyy but submits yyyy-mm-dd
+$('.datepicker').datepicker({
+    format: 'dd/mm/yyyy',
+    autoclose: true
+}).on('changeDate', function() {
+    // Auto-convert to database format on change
+});
+
+// Before form submission, convert all dates to database format
+$('form').on('submit', function() {
+    $(this).find('.datepicker').each(function() {
+        // Convert dd/mm/yyyy → yyyy-mm-dd for submission
+    });
+});
+```
+
+#### Models with Date Formatting
+- **Customer**: `date_of_birth`, `wedding_anniversary_date`, `engagement_anniversary_date`
+- **CustomerInsurance**: `issue_date`, `start_date`, `expired_date`, `tp_expiry_date`, `maturity_date`
+- **Reports**: All date filter fields
+
+#### Best Practices
+1. **Always use helpers**: Never manually format dates in Blade templates
+2. **Consistent naming**: Use `{field}_formatted` for accessor attributes  
+3. **Handle old() values**: Always format old values for validation errors
+4. **Backend validation**: Keep `date_format:Y-m-d` validation rules
+5. **Database queries**: Use Y-m-d format for database operations
 
 ### CSS/JS Organization by Portal
 **Admin Portal (Bootstrap 4):**

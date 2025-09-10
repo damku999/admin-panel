@@ -220,7 +220,7 @@
                                 <input type="text"
                                     class="form-control datepicker @error('date_of_birth') is-invalid @enderror"
                                     id="date_of_birth" name="date_of_birth"
-                                    value="{{ old('date_of_birth') ? old('date_of_birth') : $customer->date_of_birth }}" />
+                                    value="{{ old('date_of_birth') ? formatDateForUi(old('date_of_birth')) : $customer->date_of_birth_formatted }}" />
                             </div>
                             @error('date_of_birth')
                                 <span class="text-danger">{{ $message }}</span>
@@ -234,7 +234,7 @@
                                 <input type="text"
                                     class="form-control datepicker @error('engagement_anniversary_date') is-invalid @enderror"
                                     id="engagement_anniversary_date" name="engagement_anniversary_date"
-                                    value="{{ old('engagement_anniversary_date') ? old('engagement_anniversary_date') : $customer->engagement_anniversary_date }}" />
+                                    value="{{ old('engagement_anniversary_date') ? formatDateForUi(old('engagement_anniversary_date')) : $customer->engagement_anniversary_date_formatted }}" />
                             </div>
                             @error('engagement_anniversary_date')
                                 <span class="text-danger">{{ $message }}</span>
@@ -248,7 +248,7 @@
                                 <input type="text"
                                     class="form-control datepicker @error('wedding_anniversary_date') is-invalid @enderror"
                                     id="wedding_anniversary_date" name="wedding_anniversary_date"
-                                    value="{{ old('wedding_anniversary_date') ? old('wedding_anniversary_date') : $customer->wedding_anniversary_date }}" />
+                                    value="{{ old('wedding_anniversary_date') ? formatDateForUi(old('wedding_anniversary_date')) : $customer->wedding_anniversary_date_formatted }}" />
                             </div>
                             @error('wedding_anniversary_date')
                                 <span class="text-danger">{{ $message }}</span>
@@ -282,9 +282,9 @@
                         @if (!empty($customer_insurances))
                             @foreach ($customer_insurances as $customer_insurance)
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::parse($customer_insurance->created_at)->format('d/m/Y') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($customer_insurance->issue_date)->format('d/m/Y') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($customer_insurance->expired_date)->format('d/m/Y') }}
+                                    <td>{{ formatDateForUi($customer_insurance->created_at) }}</td>
+                                    <td>{{ formatDateForUi($customer_insurance->issue_date) }}</td>
+                                    <td>{{ formatDateForUi($customer_insurance->expired_date) }}
                                     </td>
                                     <td>{{ $customer_insurance->policy_no }}</td>
                                     <td>{{ $customer_insurance->registration_no }}</td>

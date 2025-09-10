@@ -21,4 +21,8 @@ interface AddonCoverServiceInterface
     public function exportAddonCovers(): \Symfony\Component\HttpFoundation\BinaryFileResponse;
     
     public function getActiveAddonCovers(): \Illuminate\Database\Eloquent\Collection;
+    
+    public function getStoreValidationRules(): array;
+    
+    public function getUpdateValidationRules(AddonCover $addonCover): array;
 }

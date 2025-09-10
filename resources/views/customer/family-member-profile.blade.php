@@ -96,7 +96,7 @@
                                         <i class="fas fa-birthday-cake me-2"></i>Date of Birth
                                     </label>
                                     <div class="info-value">
-                                        {{ $member->date_of_birth ? $member->date_of_birth->format('d M Y') : 'Not provided' }}
+                                        {{ $member->date_of_birth ? formatDateForUi($member->date_of_birth) : 'Not provided' }}
                                     </div>
                                 </div>
                             </div>
@@ -126,7 +126,7 @@
                                     <label class="form-label text-brand fw-bold">
                                         <i class="fas fa-calendar-plus me-2"></i>Member Since
                                     </label>
-                                    <div class="info-value">{{ $member->created_at->format('d M Y') }}</div>
+                                    <div class="info-value">{{ formatDateForUi($member->created_at) }}</div>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -134,7 +134,7 @@
                                     <label class="form-label text-brand fw-bold">
                                         <i class="fas fa-edit me-2"></i>Last Updated
                                     </label>
-                                    <div class="info-value">{{ $member->updated_at->format('d M Y') }}</div>
+                                    <div class="info-value">{{ formatDateForUi($member->updated_at) }}</div>
                                 </div>
                             </div>
                         </div>

@@ -173,7 +173,7 @@
                             <div class="input-group date" id="datepicker">
                                 <input type="text"
                                     class="form-control datepicker @error('date_of_birth') is-invalid @enderror"
-                                    id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth') }}" />
+                                    id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth') ? formatDateForUi(old('date_of_birth')) : '' }}" />
                                 </span>
                             </div>
                             @error('date_of_birth')
@@ -188,7 +188,7 @@
                                 <input type="text"
                                     class="form-control datepicker  @error('engagement_anniversary_date') is-invalid @enderror"
                                     id="engagement_anniversary_date" name="engagement_anniversary_date"
-                                    value="{{ old('engagement_anniversary_date') }}" />
+                                    value="{{ old('engagement_anniversary_date') ? formatDateForUi(old('engagement_anniversary_date')) : '' }}" />
                             </div>
                             @error('engagement_anniversary_date')
                                 <span class="text-danger">{{ $message }}</span>
@@ -202,7 +202,7 @@
                                 <input type="text"
                                     class="form-control datepicker @error('wedding_anniversary_date') is-invalid @enderror"
                                     id="wedding_anniversary_date" name="wedding_anniversary_date"
-                                    value="{{ old('wedding_anniversary_date') }}" />
+                                    value="{{ old('wedding_anniversary_date') ? formatDateForUi(old('wedding_anniversary_date')) : '' }}" />
                             </div>
                             @error('wedding_anniversary_date')
                                 <span class="text-danger">{{ $message }}</span>

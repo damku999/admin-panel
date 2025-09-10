@@ -9,6 +9,9 @@
 
     <!-- Page Wrapper -->
     <div id="wrapper">
+        
+        <!-- Mobile Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
         <!-- Sidebar -->
         @include('common.sidebar')
@@ -49,11 +52,10 @@
     <!-- Logout Modal-->
     @include('common.logout-modal')
 
-    <!-- Bootstrap core JavaScript-->
-    <script src="{{ asset('js/app.js') }}"></script>
+    <!-- Modern Admin Portal JavaScript Bundle -->
+    <script src="{{ url('js/admin.js') }}"></script>
 
-    <!-- Custom scripts for all pages-->
-    <script src="{{ asset('admin/js/sb-admin-2.min.js') }}"></script>
+    <!-- Bootstrap 5 JS (included in admin.js bundle) -->
     <script src="{{ asset('admin/toastr/toastr.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ asset('datepicker/js/bootstrap-datepicker.min.js') }}"></script>
@@ -148,8 +150,35 @@
         }
         $(document).ready(function() {
             $('.datepicker').datepicker({
-                format: 'dd-mm-yyyy', // Adjust the format as per your requirement
+                format: 'dd/mm/yyyy',
                 autoclose: true
+            }).on('changeDate', function() {
+                // Convert dd/mm/yyyy to yyyy-mm-dd for form submission
+                var $input = $(this);
+                var displayDate = $input.val();
+                if (displayDate) {
+                    var dateParts = displayDate.split('/');
+                    if (dateParts.length === 3) {
+                        var dbFormat = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0];
+                        // Store the database format in a hidden field or data attribute
+                        $input.attr('data-db-date', dbFormat);
+                    }
+                }
+            });
+
+            // Before form submission, convert all datepicker values to database format
+            $('form').on('submit', function() {
+                $(this).find('.datepicker').each(function() {
+                    var $input = $(this);
+                    var displayDate = $input.val();
+                    if (displayDate && displayDate.includes('/')) {
+                        var dateParts = displayDate.split('/');
+                        if (dateParts.length === 3) {
+                            var dbFormat = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0];
+                            $input.val(dbFormat);
+                        }
+                    }
+                });
             });
 
             // Fix menu collapse functionality (jQuery-only implementation)
@@ -385,6 +414,67 @@
                 
                 toastr[type](message);
             };
+
+            // =======================================================
+            // MOBILE SIDEBAR TOGGLE FUNCTIONALITY
+            // =======================================================
+            
+            // Mobile Sidebar Toggle Functions
+            window.toggleMobileSidebar = function() {
+                const sidebar = $('.sidebar');
+                const overlay = $('#sidebarOverlay');
+                
+                if (sidebar.hasClass('show')) {
+                    // Hide sidebar
+                    sidebar.removeClass('show');
+                    overlay.removeClass('show');
+                    $('body').removeClass('sidebar-open');
+                } else {
+                    // Show sidebar
+                    sidebar.addClass('show');
+                    overlay.addClass('show');
+                    $('body').addClass('sidebar-open');
+                }
+            };
+            
+            window.hideMobileSidebar = function() {
+                $('.sidebar').removeClass('show');
+                $('#sidebarOverlay').removeClass('show');
+                $('body').removeClass('sidebar-open');
+            };
+            
+            // Mobile Sidebar Event Handlers (Bootstrap-compatible)
+            $('#sidebarToggleTop').on('click', function(e) {
+                e.preventDefault();
+                toggleMobileSidebar();
+            });
+            
+            // Close sidebar when clicking overlay
+            $('#sidebarOverlay').on('click', function() {
+                hideMobileSidebar();
+            });
+            
+            // Close sidebar on window resize if screen becomes desktop size
+            $(window).on('resize', function() {
+                if ($(window).width() > 768) {
+                    hideMobileSidebar();
+                }
+            });
+            
+            // Close sidebar when clicking outside on mobile
+            $(document).on('click', function(e) {
+                if ($(window).width() <= 768) {
+                    const sidebar = $('.sidebar');
+                    const toggle = $('#sidebarToggleTop');
+                    
+                    // Check if click is outside sidebar and toggle button
+                    if (!sidebar.is(e.target) && sidebar.has(e.target).length === 0 && 
+                        !toggle.is(e.target) && toggle.has(e.target).length === 0 && 
+                        sidebar.hasClass('show')) {
+                        hideMobileSidebar();
+                    }
+                }
+            });
         });
     </script>
 </body>

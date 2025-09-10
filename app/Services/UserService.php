@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
+use Spatie\Permission\Models\Role;
 
 class UserService implements UserServiceInterface
 {
@@ -135,5 +136,44 @@ class UserService implements UserServiceInterface
     public function getUserWithRoles(int $userId): ?User
     {
         return $this->userRepository->findWithRoles($userId);
+    }
+    
+    public function getStoreValidationRules(): array
+    {
+        return [
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'mobile_number' => 'required|numeric|digits:10',
+            'role_id' => 'required|exists:roles,id',
+            'status' => 'required|numeric|in:0,1',
+            'new_password' => 'required|min:8|max:16|regex:/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){8,16}$/',
+            'new_confirm_password' => 'required|same:new_password',
+        ];
+    }
+    
+    public function getUpdateValidationRules(User $user): array
+    {
+        return [
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'mobile_number' => 'required|numeric|digits:10',
+            'role_id' => 'required|exists:roles,id',
+            'status' => 'required|numeric|in:0,1',
+        ];
+    }
+    
+    public function getPasswordValidationRules(): array
+    {
+        return [
+            'new_password' => 'required|min:8|max:16|regex:/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){8,16}$/',
+            'new_confirm_password' => 'required|same:new_password',
+        ];
+    }
+    
+    public function getRoles(): Collection
+    {
+        return Role::all();
     }
 }

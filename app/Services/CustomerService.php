@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Contracts\Repositories\CustomerRepositoryInterface;
 use App\Contracts\Services\CustomerServiceInterface;
+use App\Events\Customer\CustomerRegistered;
+use App\Events\Customer\CustomerProfileUpdated;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
@@ -65,8 +67,15 @@ class CustomerService implements CustomerServiceInterface
 
             DB::commit();
 
-            // Send welcome WhatsApp message
-            $this->sendOnboardingMessage($customer);
+            // Fire CustomerRegistered event for async processing
+            CustomerRegistered::dispatch(
+                $customer,
+                [
+                    'request_data' => $request->only(['type', 'status']),
+                    'has_documents' => $request->hasFile('documents'),
+                ],
+                'admin'
+            );
 
             return $customer;
         } catch (\Throwable $th) {
@@ -80,8 +89,13 @@ class CustomerService implements CustomerServiceInterface
         DB::beginTransaction();
 
         try {
-            // Update customer data
-            $updated = $this->customerRepository->update($customer->id, [
+            // Capture original values for change tracking
+            $originalValues = $customer->only([
+                'name', 'email', 'mobile_number', 'status', 'type',
+                'pan_card_number', 'aadhar_card_number', 'gst_number'
+            ]);
+
+            $newValues = [
                 'name' => $request->name,
                 'email' => $request->email,
                 'mobile_number' => $request->mobile_number,
@@ -93,12 +107,33 @@ class CustomerService implements CustomerServiceInterface
                 'pan_card_number' => $request->pan_card_number,
                 'aadhar_card_number' => $request->aadhar_card_number,
                 'gst_number' => $request->gst_number,
-            ]);
+            ];
+
+            // Update customer data
+            $updated = $this->customerRepository->update($customer->id, $newValues);
 
             if ($updated) {
                 // Handle document uploads
                 $this->handleCustomerDocuments($request, $customer);
                 DB::commit();
+
+                // Identify changed fields
+                $changedFields = [];
+                foreach ($newValues as $field => $newValue) {
+                    if (isset($originalValues[$field]) && $originalValues[$field] !== $newValue) {
+                        $changedFields[] = $field;
+                    }
+                }
+
+                // Fire CustomerProfileUpdated event if there are changes
+                if (!empty($changedFields)) {
+                    CustomerProfileUpdated::dispatch(
+                        $customer->fresh(),
+                        $changedFields,
+                        $originalValues
+                    );
+                }
+
                 return true;
             }
 

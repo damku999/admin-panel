@@ -1,0 +1,68 @@
+/**
+ * Clean Admin Portal Styles
+ * Pure Bootstrap 5 with minimal custom styling
+ */
+
+// Use Bootstrap 5 with @use syntax
+@use '~bootstrap/scss/bootstrap';
+
+// Use FontAwesome with @use syntax
+@use '~@fortawesome/fontawesome-free/scss/fontawesome';
+@use '~@fortawesome/fontawesome-free/scss/solid';
+@use '~@fortawesome/fontawesome-free/scss/brands';
+
+// Custom Bootstrap variable overrides (before bootstrap import)
+$primary: #4f46e5;
+$secondary: #6b7280;
+$success: #059669;
+$warning: #d97706;
+$danger: #dc2626;
+$info: #0891b2;
+
+// Admin layout variables
+$sidebar-width: 280px;
+
+// Minimal custom styles - only what Bootstrap can't do
+.sidebar {
+  width: $sidebar-width;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  
+  .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    transition: all 0.2s ease;
+    
+    &:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    &.active {
+      color: white;
+      background: rgba(255, 255, 255, 0.2);
+    }
+  }
+  
+  .sidebar-brand {
+    color: white;
+    font-weight: 700;
+  }
+}
+
+// Main layout
+#wrapper {
+  display: flex;
+}
+
+#content-wrapper {
+  background-color: #f8fafc;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+// Responsive layout
+@media (min-width: 769px) {
+  #content-wrapper {
+    margin-left: $sidebar-width;
+  }
+}

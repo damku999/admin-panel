@@ -33,77 +33,25 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Customer Authentication Routes (defined before Auth::routes to ensure priority)
-Route::prefix('customer')->name('customer.')->group(function () {
-    // Public routes with rate limiting for security
-    Route::middleware(['throttle:10,1'])->group(function () {
-        Route::get('/login', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showLoginForm'])->name('login');
-        Route::post('/login', [App\Http\Controllers\Auth\CustomerAuthController::class, 'login']);
-    });
-
-    // Password Reset Routes (rate limited)
-    Route::middleware(['throttle:5,1'])->group(function () {
-        Route::get('/password/reset', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showPasswordResetForm'])->name('password.request');
-        Route::post('/password/email', [App\Http\Controllers\Auth\CustomerAuthController::class, 'sendPasswordResetLink'])->name('password.email');
-        Route::get('/password/reset/{token}', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showPasswordResetFormWithToken'])->name('password.reset');
-        Route::post('/password/reset', [App\Http\Controllers\Auth\CustomerAuthController::class, 'resetPassword'])->name('password.update');
-    });
-
-    // Email Verification Routes (rate limited)
-    Route::middleware(['throttle:3,1'])->group(function () {
-        Route::get('/email/verify/{token}', [App\Http\Controllers\Auth\CustomerAuthController::class, 'verifyEmail'])->name('verify-email');
-    });
-
-    // Logout route (authenticated only)
-    Route::post('/logout', [App\Http\Controllers\Auth\CustomerAuthController::class, 'logout'])
-        ->middleware(['customer.auth'])
-        ->name('logout');
-
-    // Customer Dashboard (Protected Routes with timeout enforcement)
-    Route::middleware(['customer.auth', 'customer.timeout', 'throttle:60,1'])->group(function () {
-        Route::get('/dashboard', [App\Http\Controllers\Auth\CustomerAuthController::class, 'dashboard'])->name('dashboard');
-
-        // Password Change Routes (for authenticated customers)
-        Route::get('/change-password', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showChangePasswordForm'])->name('change-password');
-        Route::post('/change-password', [App\Http\Controllers\Auth\CustomerAuthController::class, 'changePassword'])
-            ->middleware(['throttle:10,1'])
-            ->name('change-password.update');
-
-        // Email Verification Notice (for authenticated customers who need verification)
-        Route::get('/email/verify-notice', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showEmailVerificationNotice'])->name('verify-email-notice');
-        Route::post('/email/resend', [App\Http\Controllers\Auth\CustomerAuthController::class, 'resendVerification'])
-            ->name('verification.send');
-
-        // Profile route - show customer profile information
-        Route::get('/profile', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showProfile'])->name('profile');
-        
-        // Family member management routes (only for family heads)
-        Route::get('/family-member/{member}/profile', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showFamilyMemberProfile'])->name('family-member.profile');
-        Route::get('/family-member/{member}/change-password', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showFamilyMemberPasswordForm'])->name('family-member.change-password');
-        Route::post('/family-member/{member}/change-password', [App\Http\Controllers\Auth\CustomerAuthController::class, 'updateFamilyMemberPassword'])->name('family-member.update-password');
-    });
-
-    // Family-specific routes (require family group membership)
-    Route::middleware(['customer.auth', 'customer.timeout', 'customer.family', 'throttle:60,1'])->group(function () {
-        // Policies routes (family access required)
-        Route::get('/policies', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showPolicies'])->name('policies');
-        Route::get('/policies/{policy}', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showPolicyDetail'])->name('policies.detail');
-        Route::get('/policies/{policy}/download', [App\Http\Controllers\Auth\CustomerAuthController::class, 'downloadPolicy'])
-            ->middleware(['throttle:10,1'])
-            ->name('policies.download');
-        
-        // Quotations routes (family access required)
-        Route::get('/quotations', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showQuotations'])->name('quotations');
-        Route::get('/quotations/{quotation}', [App\Http\Controllers\Auth\CustomerAuthController::class, 'showQuotationDetail'])->name('quotations.detail');
-        Route::get('/quotations/{quotation}/download', [App\Http\Controllers\Auth\CustomerAuthController::class, 'downloadQuotation'])
-            ->middleware(['throttle:10,1'])
-            ->name('quotations.download');
-    });
-});
+// Customer Portal Routes are now defined in routes/customer.php
 
 Auth::routes(['register' => false]);
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+// Health check and monitoring routes
+Route::get('/health', [App\Http\Controllers\HealthController::class, 'health'])->name('health.basic');
+Route::get('/health/detailed', [App\Http\Controllers\HealthController::class, 'detailed'])->name('health.detailed');
+Route::get('/health/liveness', [App\Http\Controllers\HealthController::class, 'liveness'])->name('health.liveness');
+Route::get('/health/readiness', [App\Http\Controllers\HealthController::class, 'readiness'])->name('health.readiness');
+
+// Admin-only monitoring routes
+Route::middleware(['auth', 'role:Super Admin'])->group(function () {
+    Route::get('/monitoring/metrics', [App\Http\Controllers\HealthController::class, 'metrics'])->name('monitoring.metrics');
+    Route::get('/monitoring/performance', [App\Http\Controllers\HealthController::class, 'performance'])->name('monitoring.performance');
+    Route::get('/monitoring/resources', [App\Http\Controllers\HealthController::class, 'resources'])->name('monitoring.resources');
+    Route::get('/monitoring/logs', [App\Http\Controllers\HealthController::class, 'logs'])->name('monitoring.logs');
+});
 
 // Profile Routes
 Route::prefix('profile')->name('profile.')->middleware('auth')->group(function () {
@@ -307,3 +255,7 @@ Route::middleware('auth')->prefix('marketing/whatsapp')->name('marketing.whatsap
     Route::post('/send', [App\Http\Controllers\MarketingWhatsAppController::class, 'send'])->name('send');
     Route::post('/preview', [App\Http\Controllers\MarketingWhatsAppController::class, 'preview'])->name('preview');
 });
+
+// CSP violation reporting (no middleware, public endpoint)
+Route::post('/security/csp-report', [\App\Http\Controllers\Security\CspViolationController::class, 'report'])
+    ->name('security.csp.report');

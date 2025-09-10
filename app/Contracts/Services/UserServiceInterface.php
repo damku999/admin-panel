@@ -27,4 +27,12 @@ interface UserServiceInterface
     public function changePassword(User $user, string $newPassword): bool;
     
     public function getUserWithRoles(int $userId): ?User;
+    
+    public function getStoreValidationRules(): array;
+    
+    public function getUpdateValidationRules(User $user): array;
+    
+    public function getPasswordValidationRules(): array;
+    
+    public function getRoles(): \Illuminate\Database\Eloquent\Collection;
 }

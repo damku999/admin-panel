@@ -84,4 +84,24 @@ class AddonCoverService implements AddonCoverServiceInterface
     {
         return $this->addonCoverRepository->getActive();
     }
+    
+    public function getStoreValidationRules(): array
+    {
+        return [
+            'name' => 'required|string|max:255|unique:addon_covers,name',
+            'description' => 'nullable|string',
+            'order_no' => 'required|integer|min:0',
+            'status' => 'boolean',
+        ];
+    }
+    
+    public function getUpdateValidationRules(AddonCover $addonCover): array
+    {
+        return [
+            'name' => 'required|string|max:255|unique:addon_covers,name,' . $addonCover->id,
+            'description' => 'nullable|string',
+            'order_no' => 'required|integer|min:0',
+            'status' => 'boolean',
+        ];
+    }
 }

@@ -50,7 +50,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single'],
+            'channels' => ['daily', 'structured'],
             'ignore_exceptions' => false,
         ],
 
@@ -64,7 +64,52 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30,
+        ],
+        
+        // Structured logging for monitoring and analytics
+        'structured' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/structured.log'),
+            'level' => 'info',
+            'days' => 30,
+            'tap' => [\App\Logging\StructuredLogFormatter::class],
+        ],
+        
+        // Performance monitoring logs
+        'performance' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/performance.log'),
+            'level' => 'info',
             'days' => 14,
+            'tap' => [\App\Logging\PerformanceLogFormatter::class],
+        ],
+        
+        // Error tracking logs
+        'errors' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/errors.log'),
+            'level' => 'warning',
+            'days' => 60,
+            'tap' => [\App\Logging\ErrorLogFormatter::class],
+        ],
+        
+        // Security events logs
+        'security' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/security.log'),
+            'level' => 'info',
+            'days' => 90,
+            'tap' => [\App\Logging\SecurityLogFormatter::class],
+        ],
+        
+        // Business events logs
+        'business' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/business.log'),
+            'level' => 'info',
+            'days' => 90,
+            'tap' => [\App\Logging\BusinessLogFormatter::class],
         ],
 
         'slack' => [

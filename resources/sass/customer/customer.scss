@@ -1,0 +1,392 @@
+/**
+ * Customer Portal Styles
+ * Modern Bootstrap 5 design for customer interface
+ */
+
+// Import Bootstrap 5 with custom variables
+$primary: #2563eb;
+$secondary: #64748b;
+$success: #10b981;
+$info: #06b6d4;
+$warning: #f59e0b;
+$danger: #ef4444;
+$light: #f8fafc;
+$dark: #1e293b;
+
+// Custom variables for customer portal - Modern Design System
+$navbar-brand-font-size: 1.5rem;
+$card-border-radius: 0.75rem;
+$btn-border-radius: 0.5rem;
+
+// Modern Color Palette
+$webmonks-primary: #2563eb;
+$webmonks-secondary: #64748b;
+$webmonks-success: #10b981;
+$webmonks-info: #06b6d4;
+$webmonks-warning: #f59e0b;
+$webmonks-danger: #ef4444;
+$webmonks-light: #f8fafc;
+$webmonks-dark: #1e293b;
+
+// Dashboard specific colors
+$card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$border-color: #e2e8f0;
+$text-muted: #64748b;
+$table-hover: #f8fafc;
+
+@use '~bootstrap/scss/bootstrap';
+
+// Use FontAwesome with @use syntax
+@use '~@fortawesome/fontawesome-free/scss/fontawesome';
+@use '~@fortawesome/fontawesome-free/scss/solid';
+@use '~@fortawesome/fontawesome-free/scss/brands';
+
+// Customer portal specific styles (modern design system applied below)
+
+/* Override any bad gradients */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #20b2aa, #1a9695) !important;
+    background-image: linear-gradient(135deg, #20b2aa, #1a9695) !important;
+}
+
+// Fixed navbar styling for sticky header
+.navbar {
+  background-color: white !important;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  
+  &.sticky-top {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+// Use Bootstrap hero classes
+.hero-section {
+  background: linear-gradient(135deg, $primary 0%, lighten($primary, 10%) 100%);
+  color: white;
+}
+
+// Use Bootstrap cards with minimal overrides
+.card {
+  border: none;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+  }
+}
+
+// Simplified feature cards
+.feature-card .feature-icon {
+  width: 4rem;
+  height: 4rem;
+  background: $primary;
+  color: white;
+}
+
+// Use Bootstrap button classes
+
+// Use Bootstrap form classes
+
+// Use Bootstrap table classes
+
+// Use Bootstrap status badges
+.badge {
+  &.status-active { background: $success; }
+  &.status-inactive { background: $secondary; }
+  &.status-pending { background: $warning; }
+  &.status-expired { background: $danger; }
+}
+
+// Simplified stat cards
+.stat-card {
+  border-left: 4px solid $primary;
+  
+  .stat-icon { color: $primary; }
+  .stat-number { color: $dark; }
+  .stat-label { color: $secondary; }
+}
+
+// Use Bootstrap loading
+.page-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 9999;
+}
+
+// Animations
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in-up {
+  animation: slideInUp 0.6s ease-out;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fade-in-scale {
+  animation: fadeInScale 0.4s ease-out;
+}
+
+// Use Bootstrap footer classes
+.footer {
+  background: $dark;
+  color: white;
+}
+
+// Use Bootstrap responsive classes
+
+// Minimal dashboard styling using Bootstrap classes
+.dashboard-container {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  min-height: 100vh;
+}
+
+.compact-welcome-card {
+  background: linear-gradient(135deg, $webmonks-primary 0%, lighten($webmonks-primary, 10%) 100%);
+  color: white;
+  
+  h4, h5 {
+    color: white !important;
+  }
+  
+  .text-muted {
+    color: rgba(255, 255, 255, 0.8) !important;
+  }
+}
+
+// Minimal table styling - use Bootstrap classes where possible
+.table {
+  thead th {
+    background: $webmonks-light;
+    color: $webmonks-dark;
+    font-weight: 600;
+    border: none;
+  }
+  
+  tbody tr:hover {
+    background-color: $table-hover;
+  }
+}
+
+// Use Bootstrap badge classes with minimal overrides
+.badge {
+  &.bg-success { background: $webmonks-success !important; }
+  &.bg-warning { background: $webmonks-warning !important; color: $webmonks-dark; }
+  &.bg-danger { background: $webmonks-danger !important; }
+  &.bg-info { background: $webmonks-info !important; }
+  &.bg-primary { background: $webmonks-primary !important; }
+  &.bg-secondary { background: $webmonks-secondary !important; }
+}
+
+// Use Bootstrap button classes with minimal color overrides
+.btn {
+  &.btn-info { background: $webmonks-info; border-color: $webmonks-info; }
+  &.btn-success { background: $webmonks-success; border-color: $webmonks-success; }
+  &.btn-warning { background: $webmonks-warning; border-color: $webmonks-warning; color: $webmonks-dark; }
+  &.btn-primary { background: $webmonks-primary; border-color: $webmonks-primary; }
+}
+
+// Simplified quick actions using Bootstrap utility classes
+.quick-actions .card {
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: $webmonks-primary;
+    transform: translateY(-3px);
+  }
+  
+  .icon {
+    width: 3rem;
+    height: 3rem;
+    background: $webmonks-primary;
+    color: white;
+  }
+}
+
+// Use Bootstrap responsive utilities
+
+// Use Bootstrap responsive utilities and components
+
+// Simplified auth styling
+.auth-container {
+  background: linear-gradient(135deg, $webmonks-light 0%, #e2e8f0 100%);
+  min-height: 100vh;
+}
+
+.auth-card {
+  background: white;
+  box-shadow: $card-shadow;
+  max-width: 400px;
+  border-top: 4px solid $webmonks-primary;
+}
+
+.btn-webmonks {
+  background: $webmonks-primary;
+  border: none;
+  color: white;
+  
+  &:hover {
+    background: darken($webmonks-primary, 10%);
+    color: white;
+  }
+}
+
+// Page Headers
+.page-header {
+  background: linear-gradient(135deg, $webmonks-primary 0%, lighten($webmonks-primary, 10%) 100%);
+  color: white;
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+  border-radius: 0 0 $card-border-radius $card-border-radius;
+  
+  h1, h2, h3 {
+    color: white;
+    margin: 0;
+    font-weight: 600;
+  }
+  
+  .breadcrumb {
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    
+    .breadcrumb-item {
+      color: rgba(255, 255, 255, 0.8);
+      
+      &.active {
+        color: white;
+      }
+      
+      a {
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        
+        &:hover {
+          color: white;
+        }
+      }
+    }
+  }
+}
+
+// Simplified content sections
+.content-section {
+  background: white;
+  box-shadow: $card-shadow;
+  margin-bottom: 1.5rem;
+  border-radius: $card-border-radius;
+  overflow: hidden;
+  
+  .section-header {
+    background: $webmonks-light;
+    border-bottom: 1px solid $border-color;
+    padding: 1rem 1.5rem;
+  }
+  
+  .section-body {
+    padding: 1.5rem;
+  }
+  
+  // Proper spacing between sections
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// Simplified profile container
+.profile-container {
+  .profile-header {
+    background: $webmonks-primary;
+    color: white;
+    
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+  }
+}
+
+// Use Bootstrap form classes
+.form-group label {
+  color: $webmonks-dark;
+  font-weight: 600;
+}
+
+.form-control:focus {
+  border-color: $webmonks-primary;
+  box-shadow: 0 0 0 0.2rem rgba($webmonks-primary, 0.15);
+}
+
+// Use Bootstrap alerts with minimal styling
+.alert {
+  border: none;
+  border-left: 4px solid;
+  
+  &.alert-success { border-left-color: $webmonks-success; }
+  &.alert-danger { border-left-color: $webmonks-danger; }
+  &.alert-warning { border-left-color: $webmonks-warning; }
+  &.alert-info { border-left-color: $webmonks-info; }
+}
+
+// Use Bootstrap spinner
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 9999;
+}
+
+// Fade In Animation
+.fade-in-scale {
+  animation: fadeInScale 0.6s ease-out forwards;
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// Use Bootstrap text utilities
+.empty-state .empty-icon {
+  font-size: 4rem;
+  color: rgba($text-muted, 0.5);
+}

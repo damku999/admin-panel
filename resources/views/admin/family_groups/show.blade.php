@@ -57,11 +57,11 @@
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">Created Date:</td>
-                                    <td>{{ $familyGroup->created_at->format('d M Y, h:i A') }}</td>
+                                    <td>{{ formatDateForUi($familyGroup->created_at, 'd M Y, h:i A') }}</td>
                                 </tr>
                                 <tr>
                                     <td class="font-weight-bold">Last Updated:</td>
-                                    <td>{{ $familyGroup->updated_at->format('d M Y, h:i A') }}</td>
+                                    <td>{{ formatDateForUi($familyGroup->updated_at, 'd M Y, h:i A') }}</td>
                                 </tr>
                             </table>
                         </div>
@@ -103,7 +103,7 @@
                                     </tr>
                                     <tr>
                                         <td class="font-weight-bold">Date of Birth:</td>
-                                        <td>{{ $familyGroup->familyHead->date_of_birth ? $familyGroup->familyHead->date_of_birth->format('d M Y') : 'N/A' }}</td>
+                                        <td>{{ $familyGroup->familyHead->date_of_birth ? formatDateForUi($familyGroup->familyHead->date_of_birth) : 'N/A' }}</td>
                                     </tr>
                                     <tr>
                                         <td class="font-weight-bold">Status:</td>

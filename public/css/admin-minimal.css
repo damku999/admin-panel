@@ -1,0 +1,72 @@
+/* =======================================================
+   MINIMAL ADMIN UI - Bootstrap-First Approach
+   Only essential styles that can't be done with Bootstrap classes
+   ======================================================= */
+
+/* =======================================================
+   MOBILE SIDEBAR FUNCTIONALITY (Essential)
+   ======================================================= */
+
+/* Mobile Sidebar - Hide by default */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -280px;
+        width: 280px;
+        height: 100vh;
+        z-index: 1000;
+        transition: left 0.3s ease-in-out;
+    }
+    
+    .sidebar.show {
+        left: 0;
+    }
+    
+    #content-wrapper {
+        margin-left: 0 !important;
+    }
+    
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+    
+    .sidebar-overlay.show {
+        display: block;
+    }
+}
+
+/* Desktop - Normal sidebar */
+@media (min-width: 769px) {
+    .sidebar {
+        position: fixed;
+        left: 0;
+        width: 280px;
+    }
+    
+    #content-wrapper {
+        margin-left: 280px;
+    }
+    
+    .sidebar-overlay {
+        display: none !important;
+    }
+}
+
+/* Prevent body scroll when mobile sidebar is open */
+body.sidebar-open {
+    overflow: hidden;
+}
+
+@media (min-width: 769px) {
+    body.sidebar-open {
+        overflow: auto;
+    }
+}

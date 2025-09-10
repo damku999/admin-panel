@@ -123,7 +123,7 @@
                         <div class="mb-3">
                             <strong>Created:</strong><br>
                             <small class="text-muted">
-                                {{ $quotation->created_at->format('d M Y, H:i') }}
+                                {{ formatDateForUi($quotation->created_at, 'd M Y, H:i') }}
                             </small>
                         </div>
 
@@ -131,7 +131,7 @@
                             <div class="mb-3">
                                 <strong>Sent:</strong><br>
                                 <small class="text-muted">
-                                    {{ $quotation->sent_at->format('d M Y, H:i') }}
+                                    {{ formatDateForUi($quotation->sent_at, 'd M Y, H:i') }}
                                 </small>
                             </div>
                         @endif
@@ -453,7 +453,7 @@
                         <strong>WhatsApp Number:</strong>
                         {{ $quotation->whatsapp_number ?? $quotation->customer->mobile_number }}<br>
                         <strong>Last Sent:</strong>
-                        {{ $quotation->sent_at ? $quotation->sent_at->format('d M Y, H:i') : 'Not available' }}
+                        {{ $quotation->sent_at ? formatDateForUi($quotation->sent_at, 'd M Y, H:i') : 'Not available' }}
                     </div>
                     <p class="text-muted small">This will generate a fresh PDF with current quotes and send it again.</p>
                 </div>

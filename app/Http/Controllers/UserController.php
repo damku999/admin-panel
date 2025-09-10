@@ -3,25 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Exports\UsersExport;
 use App\Imports\UsersImport;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Hash;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rules\Password;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Contracts\Services\UserServiceInterface;
 
 class UserController extends Controller
 {
     /**
      * Create a new controller instance.
-     *
-     * @return void
      */
-    public function __construct()
-    {
+    public function __construct(
+        private UserServiceInterface $userService
+    ) {
         $this->middleware('auth');
         $this->middleware('permission:user-list|user-create|user-edit|user-delete', ['only' => ['index']]);
         $this->middleware('permission:user-create', ['only' => ['create', 'store', 'updateStatus']]);
@@ -32,26 +27,24 @@ class UserController extends Controller
 
     /**
      * List User
-     * @param Nill
-     * @return Array $user
+     * @param Request $request
+     * @return View
      * @author Darshan Baraiya
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('roles')->paginate(10);
+        $users = $this->userService->getUsers($request);
         return view('users.index', ['users' => $users]);
     }
 
     /**
      * Create User
-     * @param Nill
-     * @return Array $user
+     * @return View
      * @author Darshan Baraiya
      */
     public function create()
     {
-        $roles = Role::all();
-
+        $roles = $this->userService->getRoles();
         return view('users.add', ['roles' => $roles]);
     }
 
@@ -63,52 +56,28 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        // Validations
-        $request->validate([
-            'first_name'    => 'required',
-            'last_name'     => 'required',
-            'email'         => 'required|unique:users,email',
-            'mobile_number' => 'required|numeric|digits:10',
-            'role_id'       =>  'required|exists:roles,id',
-            'status'       =>  'required|numeric|in:0,1',
-            'new_password' => 'required|min:8|max:16|regex:/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){8,16}$/',
-            'new_confirm_password' => ['required', 'same:new_password'],
-        ], [
+        // Validations using service
+        $validationRules = $this->userService->getStoreValidationRules();
+        $request->validate($validationRules, [
             'new_password.regex' => 'The new password format is invalid. It must contain at least one number, one special character, one uppercase letter, one lowercase letter, and be between 8 and 16 characters long.',
         ]);
 
-        DB::beginTransaction();
         try {
+            // Create user through service
+            $user = $this->userService->createUser($request->all());
 
-            // Store Data
-            $user = User::create([
-                'first_name'    => $request->first_name,
-                'last_name'     => $request->last_name,
-                'email'         => $request->email,
-                'mobile_number' => $request->mobile_number,
-                'role_id'       => $request->role_id,
-                'status'        => $request->status,
-                'password'      => Hash::make($request->new_password)
-            ]);
+            // Assign roles through service
+            $this->userService->assignRoles($user, [$request->role_id]);
 
-            // Delete Any Existing Role
-            DB::table('model_has_roles')->where('model_id', $user->id)->delete();
-
-            // Assign Role To User
-            $user->assignRole($user->role_id);
-
-            // Commit And Redirected To Listing
-            DB::commit();
             return redirect()->back()->with('success', 'User Created Successfully.');
         } catch (\Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
             return redirect()->back()->withInput()->with('error', $th->getMessage());
         }
     }
 
     /**
      * Update Status Of User
+     * @param Integer $user_id
      * @param Integer $status
      * @return List Page With Success
      * @author Darshan Baraiya
@@ -130,31 +99,24 @@ class UserController extends Controller
         }
 
         try {
-            DB::beginTransaction();
+            // Update status through service
+            $this->userService->updateStatus($user_id, $status);
 
-            // Update Status
-            User::whereId($user_id)->update(['status' => $status]);
-
-            // Commit And Redirect on index with Success Message
-            DB::commit();
             return redirect()->back()->with('success', 'User Status Updated Successfully!');
         } catch (\Throwable $th) {
-
-            // Rollback & Return Error Message
-            DB::rollBack();
             return redirect()->back()->with('error', $th->getMessage());
         }
     }
 
     /**
      * Edit User
-     * @param Integer $user
-     * @return Collection $user
+     * @param User $user
+     * @return View
      * @author Darshan Baraiya
      */
     public function edit(User $user)
     {
-        $roles = Role::all();
+        $roles = $this->userService->getRoles();
         return view('users.edit')->with([
             'roles' => $roles,
             'user'  => $user
@@ -163,75 +125,47 @@ class UserController extends Controller
 
     /**
      * Update User
-     * @param Request $request, User $user
+     * @param Request $request
+     * @param User $user
      * @return View Users
      * @author Darshan Baraiya
      */
     public function update(Request $request, User $user)
     {
-        // Validations
-        $request->validate([
-            'first_name'    => 'required',
-            'last_name'     => 'required',
-            'email'         => 'required|unique:users,email,' . $user->id . ',id',
-            'mobile_number' => 'required|numeric|digits:10',
-            'role_id'       =>  'required|exists:roles,id',
-            'status'       =>  'required|numeric|in:0,1',
-            'new_password' => 'nullable',
-            'new_confirm_password' => 'nullable',
-
-        ]);
+        // Validations using service
+        $validationRules = $this->userService->getUpdateValidationRules($user);
+        $request->validate($validationRules);
 
         // Check if new password is not empty in the request
-
         if (!empty($request->input('new_password'))) {
-            $rules = [
-                'new_password' => 'required|min:8|max:16|regex:/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){8,16}$/',
-                'new_confirm_password' => ['required', 'same:new_password'],
-            ];
+            $passwordRules = $this->userService->getPasswordValidationRules();
             $customMessages = [
                 'new_password.regex' => 'The new password format is invalid. It must contain at least one number, one special character, one uppercase letter, one lowercase letter, and be between 8 and 16 characters long.',
             ];
 
             // Perform the validation
-            $validator = Validator::make($request->all(), $rules, $customMessages);
+            $validator = Validator::make($request->all(), $passwordRules, $customMessages);
 
             // Check if validation fails
             if ($validator->fails()) {
-                // Handle the validation failure, for example, return back with errors
                 return redirect()->back()->withErrors($validator)->withInput();
             }
         }
 
-        DB::beginTransaction();
         try {
+            // Update user through service
+            $this->userService->updateUser($user, $request->all());
 
-            // Store Data
-            $user_updated = User::whereId($user->id)->update([
-                'first_name'    => $request->first_name,
-                'last_name'     => $request->last_name,
-                'email'         => $request->email,
-                'mobile_number' => $request->mobile_number,
-                'role_id'       => $request->role_id,
-                'status'        => $request->status,
-            ]);
-            $user->role_id = $request->role_id;
+            // Assign roles through service
+            $this->userService->assignRoles($user, [$request->role_id]);
 
-            // Delete Any Existing Role
-            DB::table('model_has_roles')->where('model_id', $user->id)->delete();
-
-            // Assign Role To User
-            $user->assignRole($user->role_id);
+            // Handle password change if provided
             if (!empty($request->input('new_password'))) {
-                $user->password = Hash::make($request->new_password);
-                $user->save();
+                $this->userService->changePassword($user, $request->new_password);
             }
-            // Commit And Redirected To Listing
-            DB::commit();
+
             return redirect()->back()->with('success', 'User Updated Successfully.');
         } catch (\Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
             return redirect()->back()->withInput()->with('error', $th->getMessage());
         }
     }
@@ -244,29 +178,30 @@ class UserController extends Controller
      */
     public function delete(User $user)
     {
-        DB::beginTransaction();
         try {
-            // Delete User
-            User::whereId($user->id)->delete();
+            // Delete user through service
+            $this->userService->deleteUser($user);
 
-            DB::commit();
             return redirect()->back()->with('success', 'User Deleted Successfully!.');
         } catch (\Throwable $th) {
-            DB::rollBack();
             return redirect()->back()->with('error', $th->getMessage());
         }
     }
 
     /**
      * Import Users
-     * @param Null
-     * @return View File
+     * @return View
      */
     public function importUsers()
     {
         return view('users.import');
     }
 
+    /**
+     * Upload Users
+     * @param Request $request
+     * @return Redirect
+     */
     public function uploadUsers(Request $request)
     {
         Excel::import(new UsersImport, $request->file);
@@ -274,8 +209,12 @@ class UserController extends Controller
         return redirect()->back()->with('success', 'User Imported Successfully');
     }
 
+    /**
+     * Export Users
+     * @return BinaryFileResponse
+     */
     public function export()
     {
-        return Excel::download(new UsersExport, 'users.xlsx');
+        return $this->userService->exportUsers();
     }
 }

@@ -613,4 +613,56 @@ class Customer extends Authenticatable
 
         return $familyGroupId;
     }
+
+    // =======================================================
+    // DATE FORMATTING ACCESSORS & MUTATORS
+    // =======================================================
+
+    /**
+     * Get date of birth in UI format (d/m/Y)
+     */
+    public function getDateOfBirthFormattedAttribute()
+    {
+        return formatDateForUi($this->date_of_birth);
+    }
+
+    /**
+     * Set date of birth from UI format (d/m/Y) to database format (Y-m-d)
+     */
+    public function setDateOfBirthAttribute($value)
+    {
+        $this->attributes['date_of_birth'] = formatDateForDatabase($value);
+    }
+
+    /**
+     * Get wedding anniversary date in UI format (d/m/Y)
+     */
+    public function getWeddingAnniversaryDateFormattedAttribute()
+    {
+        return formatDateForUi($this->wedding_anniversary_date);
+    }
+
+    /**
+     * Set wedding anniversary date from UI format (d/m/Y) to database format (Y-m-d)
+     */
+    public function setWeddingAnniversaryDateAttribute($value)
+    {
+        $this->attributes['wedding_anniversary_date'] = formatDateForDatabase($value);
+    }
+
+    /**
+     * Get engagement anniversary date in UI format (d/m/Y)
+     */
+    public function getEngagementAnniversaryDateFormattedAttribute()
+    {
+        return formatDateForUi($this->engagement_anniversary_date);
+    }
+
+    /**
+     * Set engagement anniversary date from UI format (d/m/Y) to database format (Y-m-d)
+     */
+    public function setEngagementAnniversaryDateAttribute($value)
+    {
+        $this->attributes['engagement_anniversary_date'] = formatDateForDatabase($value);
+    }
 }

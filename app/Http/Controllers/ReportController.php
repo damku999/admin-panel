@@ -2,31 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\CrossSellingExport;
-use App\Exports\CustomerInsurancesExport1;
-use App\Models\Branch;
-use App\Models\Broker;
-use App\Models\Customer;
-use App\Models\FuelType;
-use App\Models\InsuranceCompany;
-use App\Models\PolicyType;
-use App\Models\PremiumType;
-use App\Models\ReferenceUser;
-use App\Models\RelationshipManager;
+use App\Contracts\Services\ReportServiceInterface;
 use App\Models\Report;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
     /**
      * Create a new controller instance.
-     *
-     * @return void
      */
-    public function __construct()
-    {
+    public function __construct(
+        private ReportServiceInterface $reportService
+    ) {
         $this->middleware('auth');
         $this->middleware('permission:report-list', ['only' => ['index']]);
     }
@@ -34,118 +21,26 @@ class ReportController extends Controller
 
     public function index(Request $request)
     {
-        $premiumTypes = PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies')->get();
-        $response = [
-            'customers' => Customer::select('id', 'name')->get(),
-            'brokers' => Broker::select('id', 'name')->get(),
-            'relationship_managers' => RelationshipManager::select('id', 'name')->get(),
-            'branches' => Branch::select('id', 'name')->get(),
-            'insurance_companies' => InsuranceCompany::select('id', 'name')->get(),
-            'policy_type' => PolicyType::select('id', 'name')->get(),
-            'fuel_type' => FuelType::select('id', 'name')->get(),
-            'premium_types' => $premiumTypes,
-            'reference_by_user' => ReferenceUser::select('id', 'name')->get(),
-            'customerInsurances' => [],
-            'crossSelling' => [],
-        ];
+        $response = $this->reportService->getInitialData();
 
         if ($request['report_name'] == 'cross_selling') {
             if ($request->has('view')) {
-                $premiumTypes = PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies');
-                if ($request['premium_type_id']) {
-                    $premiumTypes = $premiumTypes->whereIn('id', $request['premium_type_id']);
-                }
-                $response['premiumTypes'] = $premiumTypes = $premiumTypes->get();
-
-                $customer_obj = Customer::with(['insurance.premiumType'])
-                    ->orderBy('name');
-
-                // Filtering based on the provided start and end dates
-                $hasDateFilter = false; // Flag to check if date filters are applied
-
-                if (!empty($request['issue_start_date']) || !empty($request['issue_end_date'])) {
-                    $customer_obj = $customer_obj->whereHas('insurance', function ($query) use ($request) {
-                        if (!empty($request['issue_start_date'])) {
-                            $query->where('start_date', '>=', Carbon::parse($request['issue_start_date'])->format('Y-m-d'));
-                        }
-                        if (!empty($request['issue_end_date'])) {
-                            $query->where('start_date', '<=', Carbon::parse($request['issue_end_date'])->format('Y-m-d'));
-                        }
-                    });
-                    $hasDateFilter = true; // Set the flag to true if filters are applied
-                }
-
-                // Execute the query
-                $customers = $customer_obj->get();
-
-                $oneYearAgo = Carbon::now()->subYear(); // Calculate one year ago from today
-
-                $results = $customers->map(function ($customer) use ($premiumTypes, $oneYearAgo, $hasDateFilter) {
-                    // Initialize customer data
-                    $customerData = [
-                        'customer_name' => $customer->name,
-                        'id' => $customer->id,
-                        'total_premium_last_year' => 0,
-                        'actual_earnings_last_year' => 0,
-                        'premium_totals' => [],
-                    ];
-
-                    // Loop through each premium type dynamically
-                    foreach ($premiumTypes as $premiumType) {
-                        // Check if the customer has this premium type in their insurances
-                        $hasPremiumType = $customer->insurance->contains(function ($insurance) use ($premiumType) {
-                            return $insurance->premiumType->id === $premiumType->id;
-                        });
-
-                        // Calculate total premium collected for the specific premium type in the last year
-                        $premiumTotal = $customer->insurance
-                            ->where('premium_type_id', $premiumType->id) // Filter insurances by premium type
-                            ->when(!$hasDateFilter, function ($query) use ($oneYearAgo) {
-                                return $query->where('start_date', '>=', $oneYearAgo);
-                            })
-                            ->sum('final_premium_with_gst');
-
-                        // Update total premium last year and actual earnings
-                        $customerData['total_premium_last_year'] += $premiumTotal;
-
-                        // Only calculate actual earnings if date filters are not applied
-                        $customerData['actual_earnings_last_year'] = $customerData['actual_earnings_last_year'] + $customer->insurance
-                            ->where('premium_type_id', $premiumType->id)
-                            ->when(!$hasDateFilter, function ($query) use ($oneYearAgo) {
-                                return $query->where('actual_earnings', '>=', $oneYearAgo);
-                            })
-                            ->sum('actual_earnings');
-
-                        // Add the premium type status and total dynamically to the customer data
-                        $customerData['premium_totals'][$premiumType->name] = [
-                            'has_premium' => $hasPremiumType ? 'Yes' : 'No',
-                            'amount' => $premiumTotal > 0 ? $premiumTotal : 0,
-                        ];
-                    }
-
-                    return $customerData;
-                });
-
-                $response['crossSelling'] = $results;
+                $crossSellingData = $this->reportService->generateCrossSellingReport($request->all());
+                $response = array_merge($response, $crossSellingData);
             } else {
-                return Excel::download(new CrossSellingExport($request->all()), 'cross_selling.xlsx');
+                return $this->reportService->exportCrossSellingReport($request->all());
             }
         } else {
             if ($request->has('download')) {
-                $validation_array = [
-                    'report_name' => 'required',
-                ];
-                $request->validate($validation_array);
-                return Excel::download(new CustomerInsurancesExport1($request->all()), 'customer_insurances.xlsx');
+                $request->validate(['report_name' => 'required']);
+                return $this->reportService->exportCustomerInsuranceReport($request->all());
             }
             if ($request->has('view')) {
-                $validation_array = [
-                    'report_name' => 'required',
-                ];
-                $request->validate($validation_array);
-                $response['customerInsurances'] = Report::getInsuranceReport($request->all());
+                $request->validate(['report_name' => 'required']);
+                $response['customerInsurances'] = $this->reportService->generateCustomerInsuranceReport($request->all());
             }
         }
+        
         return view('reports.index', $response);
     }
 
@@ -156,33 +51,17 @@ class ReportController extends Controller
 
     public function saveColumns(Request $request)
     {
-        $updatedColumns = [];
-        foreach (config('constants.INSURANCE_DETAIL') as $column) {
-            $selected = 'No';
-            if (in_array($column['table_column_name'], $request->selected_columns)) {
-                $selected = 'Yes';
-            }
-
-            $column['selected_column'] = $selected;
-            $updatedColumns[] = $column;
-        }
-
-        Report::updateOrCreate([
-            'name' => $request->input('report_name'),
-            'user_id' => auth()->user()->id,
-        ], [
-            'name' => $request->input('report_name'),
-            'user_id' => auth()->user()->id,
-            'selected_columns' => $updatedColumns,
-        ]);
+        $this->reportService->saveUserReportColumns(
+            $request->input('report_name'),
+            $request->selected_columns,
+            auth()->user()->id
+        );
     }
 
     public function loadColumns(Request $request, $report_name)
     {
-        $report = Report::where([
-            'name' => $report_name,
-            'user_id' => auth()->user()->id,
-        ])->first();
+        $columns = $this->reportService->loadUserReportColumns($report_name, auth()->user()->id);
+        $report = (object) ['selected_columns' => $columns];
         return view('reports.table_columns', ['reports' => $report]);
     }
 }

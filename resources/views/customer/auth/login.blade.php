@@ -3,126 +3,117 @@
 @section('title', 'Customer Login')
 
 @section('content')
+<div class="auth-container d-flex align-items-center justify-content-center min-vh-100">
     <div class="container">
-        <div class="row justify-content-center min-vh-100 align-items-center">
-            <div class="col-md-5 col-lg-4">
-                <div class="login-card">
-                    <!-- Logo Section -->
-                    <div class="text-center mb-4">
-                        <img src="{{ asset('images/parth_logo.png') }}" alt="WebMonks" class="img-fluid mb-3"
-                            style="max-height: 50px;">
-                        <h4 class="fw-bold text-dark mb-1">Customer Portal</h4>
-                        <p class="text-muted small mb-0">Sign in to your account</p>
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="auth-card card shadow-lg fade-in-scale">
+                    <!-- Auth Header -->
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <img src="{{ asset('images/parth_logo.png') }}" alt="WebMonks" class="img-fluid mb-3" style="max-width: 120px;">
+                            <h4 class="text-dark fw-bold">Customer Portal</h4>
+                            <p class="text-muted">Sign in to access your insurance dashboard</p>
+                        </div>
+
+        <!-- Alerts -->
+        @if (session('error'))
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
+            </div>
+        @endif
+
+        @if (session('message'))
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>{{ session('message') }}
+            </div>
+        @endif
+
+        <!-- Login Form -->
+        <form method="POST" action="{{ route('customer.login') }}">
+            @csrf
+
+            <div class="form-group">
+                <label for="email">
+                    <i class="fas fa-envelope me-1"></i>Email Address
+                </label>
+                <input type="email" 
+                       class="form-control @error('email') is-invalid @enderror" 
+                       id="email"
+                       name="email" 
+                       value="{{ old('email') }}" 
+                       placeholder="Enter your email address" 
+                       required 
+                       autofocus>
+                @error('email')
+                    <div class="invalid-feedback">
+                        <i class="fas fa-exclamation-triangle me-1"></i>{{ $message }}
                     </div>
+                @enderror
+            </div>
 
-                    <!-- Alerts -->
-                    @if (session('error'))
-                        <div class="alert alert-danger py-2">
-                            {{ session('error') }}
-                        </div>
-                    @endif
+            <div class="form-group">
+                <label for="password">
+                    <i class="fas fa-lock me-1"></i>Password
+                </label>
+                <input type="password" 
+                       class="form-control @error('password') is-invalid @enderror"
+                       id="password" 
+                       name="password" 
+                       placeholder="Enter your password" 
+                       required>
+                @error('password')
+                    <div class="invalid-feedback">
+                        <i class="fas fa-exclamation-triangle me-1"></i>{{ $message }}
+                    </div>
+                @enderror
+            </div>
 
-                    @if (session('message'))
-                        <div class="alert alert-success py-2">
-                            {{ session('message') }}
-                        </div>
-                    @endif
+            <div class="form-group">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                        <label class="form-check-label" for="remember">
+                            Remember me
+                        </label>
+                    </div>
+                    <a href="{{ route('customer.password.request') }}" class="text-decoration-none">
+                        <i class="fas fa-key me-1"></i>Forgot Password?
+                    </a>
+                </div>
+            </div>
 
-                    <!-- Login Form -->
-                    <form method="POST" action="{{ route('customer.login') }}">
-                        @csrf
-
-                        <div class="mb-3">
-                            <input type="email" class="form-control @error('email') is-invalid @enderror" id="email"
-                                name="email" value="{{ old('email') }}" placeholder="Email address" required>
-                            @error('email')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <input type="password" class="form-control @error('password') is-invalid @enderror"
-                                id="password" name="password" placeholder="Password" required>
-                            @error('password')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3 d-flex justify-content-between align-items-center">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="remember" name="remember">
-                                <label class="form-check-label small" for="remember">Remember me</label>
-                            </div>
-                            <a href="{{ route('customer.password.request') }}" class="small text-decoration-none">Forgot
-                                password?</a>
-                        </div>
-
-                        <button type="submit" class="btn btn-webmonks w-100 mb-3">
-                            Sign In
+                        <button type="submit" class="btn btn-primary w-100 mb-4">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
                         </button>
                     </form>
 
                     <!-- Admin Link -->
                     <div class="text-center">
-                        <a href="{{ route('login') }}" class="small text-muted text-decoration-none">Admin Login</a>
+                        <p class="text-muted mb-0">
+                            <small>Need admin access? 
+                                <a href="{{ route('login') }}" class="text-decoration-none">
+                                    <i class="fas fa-user-shield me-1"></i>Admin Login
+                                </a>
+                            </small>
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <style>
-        .login-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(32, 178, 170, 0.15);
-            border-top: 4px solid #20b2aa;
-        }
-
-        .btn-webmonks {
-            background: linear-gradient(135deg, #20b2aa, #1a9695);
-            border: none;
-            color: white;
-            padding: 0.75rem;
-            font-weight: 500;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-webmonks:hover {
-            background: linear-gradient(135deg, #1a9695, #178b8a);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(32, 178, 170, 0.3);
-            color: white;
-        }
-
-        .form-control {
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
-            border-color: #20b2aa;
-            box-shadow: 0 0 0 0.2rem rgba(32, 178, 170, 0.25);
-        }
-
-        .alert {
-            border: none;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-
-        body {
-            background: linear-gradient(135deg, #f0fdfc, #e6fffa) !important;
-        }
-
-        /* Override any bad gradients */
-        .bg-gradient-primary {
-            background: linear-gradient(135deg, #20b2aa, #1a9695) !important;
-            background-image: linear-gradient(135deg, #20b2aa, #1a9695) !important;
-        }
-    </style>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+    // Add focus state enhancement
+    $(document).ready(function() {
+        $('.form-control').on('focus', function() {
+            $(this).parent().addClass('focused');
+        }).on('blur', function() {
+            $(this).parent().removeClass('focused');
+        });
+    });
+</script>
+@endpush

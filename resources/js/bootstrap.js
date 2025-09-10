@@ -1,18 +1,22 @@
+// Load essential libraries
 window._ = require('lodash');
 
 try {
-    window.Popper = require('popper.js').default;
+    // Use modern Popper.js for Bootstrap 5 compatibility
+    const { createPopper } = require('@popperjs/core');
+    window.Popper = createPopper;
     window.$ = window.jQuery = require('jquery');
 
+    // Load Bootstrap 5 JavaScript
     require('bootstrap');
-} catch (e) {}
+} catch (e) {
+    console.warn('Bootstrap initialization failed:', e);
+}
 
 /**
- * We'll load the axios HTTP library which allows us to easily issue requests
- * to our Laravel back-end. This library automatically handles sending the
- * CSRF token as a header based on the value of the "XSRF" token cookie.
+ * Configure Axios HTTP library for CSRF protection
+ * Updated to latest version with improved security
  */
-
 window.axios = require('axios');
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';

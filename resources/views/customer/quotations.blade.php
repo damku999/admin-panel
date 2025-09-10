@@ -3,105 +3,109 @@
 @section('title', 'Customer Quotations')
 
 @section('content')
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">
-            @if ($isHead)
-                Family Quotations
-            @else
-                Your Quotations
-            @endif
-        </h1>
-        <a href="{{ route('customer.dashboard') }}" class="btn btn-primary btn-sm">
-            <i class="fas fa-arrow-left"></i> Back to Dashboard
-        </a>
-    </div>
-
-    @if ($quotations->count() > 0)
-        <!-- Quotations List -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold ">
-                    <i class="fas fa-calculator mr-2"></i>
+<div class="dashboard-container">
+    <div class="container-fluid">
+        @if ($quotations->count() > 0)
+        <!-- Quotations Header -->
+        <div class="card mb-4 fade-in-scale" style="animation-delay: 0ms">
+            <div class="card-header bg-success">
+                <h5 class="mb-0 text-white fw-bold">
+                    <i class="fas fa-calculator me-2"></i>
                     @if ($isHead)
-                        All Family Quotations ({{ $quotations->count() }} Total)
+                        Family Insurance Quotations
                     @else
-                        Your Quotations ({{ $quotations->count() }} Total)
+                        Your Insurance Quotations
                     @endif
-                </h6>
+                    <span class="badge bg-light text-success ms-2">{{ $quotations->count() }} Total</span>
+                </h5>
             </div>
+        </div>
+
+        <!-- Quotations Table -->
+        <div class="card fade-in-scale" style="animation-delay: 100ms">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-bordered" width="100%" cellspacing="0">
-                        <thead>
+                    <table class="table table-hover">
+                        <thead class="bg-light">
                             <tr>
-                                <th>Quote Reference</th>
-                                <th>Policy Holder</th>
-                                <th>Vehicle Details</th>
-                                <th>Total IDV</th>
-                                <th>Best Quote</th>
-                                <th>Status</th>
-                                <th>Created Date</th>
-                                <th>Actions</th>
+                                <th><i class="fas fa-hashtag me-1"></i>Quote Reference</th>
+                                <th><i class="fas fa-user me-1"></i>Policy Holder</th>
+                                <th><i class="fas fa-car me-1"></i>Vehicle Details</th>
+                                <th><i class="fas fa-shield-alt me-1"></i>Total IDV</th>
+                                <th><i class="fas fa-rupee-sign me-1"></i>Best Quote</th>
+                                <th><i class="fas fa-info-circle me-1"></i>Status</th>
+                                <th><i class="fas fa-calendar me-1"></i>Created</th>
+                                <th><i class="fas fa-cog me-1"></i>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($quotations as $quotation)
                                 <tr class="{{ $quotation->customer_id === $customer->id ? 'table-light' : '' }}">
                                     <td>
-                                        <strong>{{ $quotation->getQuoteReference() }}</strong>
+                                        <strong class="text-success">{{ $quotation->getQuoteReference() }}</strong>
                                     </td>
                                     <td>
-                                        {{ $quotation->customer->name }}
-                                        @if ($quotation->customer_id === $customer->id)
-                                            <span class="badge badge-info ml-1">You</span>
-                                        @endif
+                                        <div>
+                                            <strong>{{ $quotation->customer->name }}</strong>
+                                            @if ($quotation->customer_id === $customer->id)
+                                                <br><span class="badge bg-success">You</span>
+                                            @endif
+                                        </div>
                                     </td>
                                     <td>
                                         @if ($quotation->vehicle_number)
-                                            <strong>{{ $quotation->vehicle_number }}</strong><br>
-                                            <small class="text-muted">{{ $quotation->make_model_variant }}</small>
+                                            <div>
+                                                <strong class="text-dark">{{ $quotation->vehicle_number }}</strong>
+                                                <br><small class="text-muted">{{ $quotation->make_model_variant }}</small>
+                                            </div>
                                         @else
-                                            <small class="text-muted">General Insurance</small>
+                                            <span class="text-muted">General Insurance</span>
                                         @endif
                                     </td>
                                     <td>
                                         @if ($quotation->total_idv)
-                                            ₹{{ number_format($quotation->total_idv, 2) }}
+                                            <strong class="text-success">₹{{ number_format($quotation->total_idv, 0) }}</strong>
                                         @else
-                                            N/A
+                                            <span class="text-muted">N/A</span>
                                         @endif
                                     </td>
                                     <td>
                                         @if ($quotation->bestQuote())
-                                            <strong>₹{{ number_format($quotation->bestQuote()->final_premium, 2) }}</strong><br>
-                                            <small
-                                                class="text-muted">{{ $quotation->bestQuote()->insuranceCompany->name ?? 'N/A' }}</small>
+                                            <div>
+                                                <strong class="text-success">₹{{ number_format($quotation->bestQuote()->final_premium, 0) }}</strong>
+                                                <br><small class="text-muted">{{ $quotation->bestQuote()->insuranceCompany->name ?? 'N/A' }}</small>
+                                            </div>
                                         @else
-                                            <span class="text-muted">No quotes available</span>
+                                            <span class="text-muted">No quotes</span>
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($quotation->status == 'sent')
-                                            <span class="badge badge-success">Sent</span>
-                                        @elseif($quotation->status == 'pending')
-                                            <span class="badge badge-warning">Pending</span>
-                                        @else
-                                            <span
-                                                class="badge badge-secondary">{{ ucfirst($quotation->status ?? 'Draft') }}</span>
-                                        @endif
+                                        @php
+                                            $statusColors = [
+                                                'Draft' => 'secondary',
+                                                'Generated' => 'info',
+                                                'Sent' => 'warning',
+                                                'Accepted' => 'primary',
+                                                'Rejected' => 'danger',
+                                            ];
+                                        @endphp
+                                        <span class="badge bg-{{ $statusColors[$quotation->status] ?? 'secondary' }}">
+                                            {{ ucfirst($quotation->status ?? 'Draft') }}
+                                        </span>
                                     </td>
-                                    <td>{{ $quotation->created_at->format('d M Y') }}</td>
                                     <td>
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ route('customer.quotations.detail', $quotation->id) }}"
-                                                class="btn btn-success btn-sm">
-                                                <i class="fas fa-eye"></i> View
+                                        <small class="text-muted">{{ formatDateForUi($quotation->created_at) }}</small>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-1">
+                                            <a href="{{ route('customer.quotations.detail', $quotation->id) }}" 
+                                               class="btn btn-success btn-sm" title="View Details">
+                                                <i class="fas fa-eye"></i>
                                             </a>
                                             @if ($quotation->quotationCompanies->count() > 0)
-                                                <a href="{{ route('customer.quotations.download', $quotation->id) }}"
-                                                    class="btn btn-primary btn-sm">
-                                                    <i class="fas fa-download"></i> PDF
+                                                <a href="{{ route('customer.quotations.download', $quotation->id) }}" 
+                                                   class="btn btn-outline-success btn-sm" title="Download PDF">
+                                                    <i class="fas fa-download"></i>
                                                 </a>
                                             @endif
                                         </div>
@@ -113,46 +117,56 @@
                 </div>
             </div>
         </div>
-    @else
-        <!-- No Quotations -->
-        <div class="card border-left-warning shadow mb-4">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">No Quotations Found</div>
-                        <div class="text-gray-800">
-                            @if ($customer->hasFamily())
+        @else
+            <div class="card">
+                <div class="card-body">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <h4>No Quotations Found</h4>
+                        <p class="text-muted">
+                            @if ($isHead)
                                 No insurance quotations found for your family.
                             @else
-                                You don't have any insurance quotations or are not part of a family group.
+                                You don't have any insurance quotations yet.
                             @endif
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-calculator fa-2x text-gray-300"></i>
+                        </p>
+                        <a href="{{ route('customer.dashboard') }}" class="btn btn-success">
+                            <i class="fas fa-home me-2"></i>Back to Dashboard
+                        </a>
                     </div>
                 </div>
             </div>
-        </div>
-    @endif
+        @endif
 
-    <!-- Information Card -->
-    <div class="card border-left-info shadow">
-        <div class="card-body">
-            <div class="row no-gutters align-items-center">
-                <div class="col mr-2">
-                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">About Quotations</div>
-                    <div class="text-gray-800">
-                        <small>
-                            <strong>Read-Only Access:</strong> You can view quotation details but cannot make changes.
-                            Contact your insurance agent or admin for quotation modifications or to generate new quotes.
-                        </small>
-                    </div>
-                </div>
-                <div class="col-auto">
-                    <i class="fas fa-info-circle fa-2x text-gray-300"></i>
-                </div>
+        <!-- Information Card -->
+        <div class="card mt-4">
+            <div class="card-header bg-info">
+                <h6 class="mb-0 text-white fw-bold">
+                    <i class="fas fa-info-circle me-2"></i>About Quotations
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">
+                    <strong>Read-Only Access:</strong> You can view quotation details but cannot make changes.
+                    Contact your insurance agent or admin for quotation modifications or to generate new quotes.
+                </p>
             </div>
         </div>
     </div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+    // Initialize animations
+    $(document).ready(function() {
+        $('.card').each(function(index) {
+            if (!$(this).hasClass('fade-in-scale')) {
+                $(this).css('animation-delay', (index * 150) + 'ms').addClass('fade-in-scale');
+            }
+        });
+    });
+</script>
+@endpush

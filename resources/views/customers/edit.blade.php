@@ -6,261 +6,222 @@
 
     <div class="container-fluid">
 
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Edit Customers</h1>
-            <a href="{{ route('customers.index') }}" onclick="window.history.go(-1); return false;"
-                class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-                    class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
-        </div>
-
         {{-- Alert Messages --}}
         @include('common.alert')
 
-        <!-- DataTales Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Edit Customer</h6>
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+        <!-- Customer Edit Form -->
+        <div class="card shadow mb-3 mt-2">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold text-primary">Edit Customer</h6>
+                <a href="{{ route('customers.index') }}" onclick="window.history.go(-1); return false;"
+                    class="btn btn-outline-secondary btn-sm d-flex align-items-center">
+                    <i class="fas fa-chevron-left me-2"></i>
+                    <span>Back</span>
+                </a>
             </div>
+            @if ($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3 mb-0" role="alert">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
             <form method="POST" action="{{ route('customers.update', ['customer' => $customer->id]) }}"
                 enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
-                <div class="card-body">
-                    <div class="form-group row">
-
-                        {{-- First Name --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;">*</span>First Name</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('name') is-invalid @enderror"
-                                id="exampleFirstName" placeholder="First Name" name="name"
-                                value="{{ old('name') ? old('name') : $customer->name }}">
-
-                            @error('name')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
+                <div class="card-body py-3">
+                    <!-- Section 1: Basic Information -->
+                    <div class="mb-4">
+                        <h6 class="text-muted fw-bold mb-3"><i class="fas fa-user me-2"></i>Basic Information</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Name</label>
+                                <input type="text" class="form-control form-control-sm @error('name') is-invalid @enderror"
+                                    name="name" placeholder="Enter full name" value="{{ old('name', $customer->name) }}">
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Email</label>
+                                <input type="email" class="form-control form-control-sm @error('email') is-invalid @enderror"
+                                    name="email" placeholder="Enter email address" value="{{ old('email', $customer->email) }}">
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Mobile Number</label>
+                                <input type="text" class="form-control form-control-sm @error('mobile_number') is-invalid @enderror"
+                                    name="mobile_number" placeholder="Enter mobile number" value="{{ old('mobile_number', $customer->mobile_number) }}">
+                                @error('mobile_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
+                    </div>
 
-
-                        {{-- Email --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;">*</span>Email</label>
-                            <input type="email"
-                                class="form-control form-control-customer @error('email') is-invalid @enderror"
-                                id="exampleEmail" placeholder="Email" name="email"
-                                value="{{ old('email') ? old('email') : $customer->email }}">
-
-                            @error('email')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
+                    <!-- Section 2: Customer Configuration -->
+                    <div class="mb-4">
+                        <h6 class="text-muted fw-bold mb-3"><i class="fas fa-cogs me-2"></i>Customer Configuration</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Customer Type</label>
+                                <select class="form-select form-select-sm @error('type') is-invalid @enderror" name="type" id="customerType">
+                                    <option value="Retail" @if (old('type', $customer->type) == 'Retail') selected @endif>Retail</option>
+                                    <option value="Corporate" @if (old('type', $customer->type) == 'Corporate') selected @endif>Corporate</option>
+                                </select>
+                                @error('type')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Status</label>
+                                <select class="form-select form-select-sm @error('status') is-invalid @enderror" name="status">
+                                    <option value="1" @if (old('status', $customer->status) == 1) selected @endif>Active</option>
+                                    <option value="0" @if (old('status', $customer->status) == 0) selected @endif>Inactive</option>
+                                </select>
+                                @error('status')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Date Of Birth</label>
+                                <input type="text" class="form-control form-control-sm datepicker @error('date_of_birth') is-invalid @enderror"
+                                    name="date_of_birth" placeholder="DD/MM/YYYY" 
+                                    value="{{ old('date_of_birth') ? formatDateForUi(old('date_of_birth')) : $customer->date_of_birth_formatted }}">
+                                @error('date_of_birth')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
+                    </div>
 
-                        {{-- Mobile Number --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;">*</span>Mobile Number</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('mobile_number') is-invalid @enderror"
-                                id="exampleMobile" placeholder="Mobile Number" name="mobile_number"
-                                value="{{ old('mobile_number') ? old('mobile_number') : $customer->mobile_number }}">
-
-                            @error('mobile_number')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;">*</span>Customer Type</label>
-                            <select class="form-control form-control-customer @error('type') is-invalid @enderror"
-                                name="type" id="customerType">
-                                <option selected disabled>Select Customer Type</option>
-                                <option value="Retail" @if (old('type', $customer->type) == 'Retail') selected @endif>Retail</option>
-                                <option value="Corporate" @if (old('type', $customer->type) == 'Corporate') selected @endif>Corporate
-                                </option>
-                            </select>
-                            @error('type')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Pan Card Number --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label for="pan_card_number">Pan Card Number</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('pan_card_number') is-invalid @enderror"
-                                id="pan_card_number" placeholder="Pan Card Number" name="pan_card_number"
-                                value="{{ old('pan_card_number', $customer->pan_card_number) }}">
-                            @error('pan_card_number')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        {{-- Pan Card Document --}}
-
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label for="gst_path">Pan Card Document</label>
-                            <div class="input-group">
-                                <div class="custom-file">
-                                    <input type="file"
-                                        class="custom-file-input @error('pan_card_path') is-invalid @enderror"
-                                        id="pan_card_path" placeholder="GST Document" name="pan_card_path"
-                                        value="{{ old('pan_card_path') }}">
-                                    <label class="custom-file-label" for="pan_card_path">Choose file</label>
-                                </div>
-                                <div class="input-group-append">
+                    <!-- Section 3: Document Information -->
+                    <div class="mb-4">
+                        <h6 class="text-muted fw-bold mb-3"><i class="fas fa-id-card me-2"></i>Document Information</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">PAN Card Number</label>
+                                <input type="text" class="form-control form-control-sm @error('pan_card_number') is-invalid @enderror"
+                                    name="pan_card_number" placeholder="Enter PAN number" value="{{ old('pan_card_number', $customer->pan_card_number) }}">
+                                @error('pan_card_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">PAN Card Document</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="file" class="form-control form-control-sm @error('pan_card_path') is-invalid @enderror"
+                                        name="pan_card_path" accept=".pdf,.jpg,.jpeg,.png">
                                     @if ($customer->pan_card_path)
-                                        <a href="{{ asset('storage/' . $customer->pan_card_path) }}"
-                                            class="btn btn-primary" target="__blank">Download</a>
+                                        <a href="{{ asset('storage/' . $customer->pan_card_path) }}" 
+                                           class="btn btn-outline-primary btn-sm" target="_blank" title="Download current document">
+                                            <i class="fas fa-download"></i>
+                                        </a>
                                     @endif
                                 </div>
+                                @error('pan_card_path')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
-                            @error('pan_card_path')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Aadhar Card Number</label>
+                                <input type="text" class="form-control form-control-sm @error('aadhar_card_number') is-invalid @enderror"
+                                    name="aadhar_card_number" placeholder="Enter Aadhar number" value="{{ old('aadhar_card_number', $customer->aadhar_card_number) }}">
+                                @error('aadhar_card_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
-
-                        {{-- Aadhar Card Number --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label for="aadhar_card_number">Aadhar Card Number</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('aadhar_card_number') is-invalid @enderror"
-                                id="aadhar_card_number" placeholder="Aadhar Card Number" name="aadhar_card_number"
-                                value="{{ old('aadhar_card_number', $customer->aadhar_card_number) }}">
-                            @error('aadhar_card_number')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Aadhar Card Document --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label for="aadhar_card_path">Aadhar Card Document</label>
-                            <div class="input-group">
-                                <div class="custom-file">
-                                    <input type="file"
-                                        class="custom-file-input @error('aadhar_card_path') is-invalid @enderror"
-                                        id="aadhar_card_path" placeholder="Aadhar Card Document" name="aadhar_card_path"
-                                        value="{{ old('aadhar_card_path') }}">
-                                    <label class="custom-file-label" for="aadhar_card_path">Choose file</label>
-                                </div>
-                                <div class="input-group-append">
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Aadhar Card Document</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="file" class="form-control form-control-sm @error('aadhar_card_path') is-invalid @enderror"
+                                        name="aadhar_card_path" accept=".pdf,.jpg,.jpeg,.png">
                                     @if ($customer->aadhar_card_path)
-                                        <a href="{{ asset('storage/' . $customer->aadhar_card_path) }}"
-                                            class="btn btn-primary" target="__blank">Download</a>
+                                        <a href="{{ asset('storage/' . $customer->aadhar_card_path) }}" 
+                                           class="btn btn-outline-primary btn-sm" target="_blank" title="Download current document">
+                                            <i class="fas fa-download"></i>
+                                        </a>
                                     @endif
                                 </div>
+                                @error('aadhar_card_path')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
-                            @error('aadhar_card_path')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- GST Number --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label for="gst_number">GST Number</label>
-                            <input type="text"
-                                class="form-control form-control-customer @error('gst_number') is-invalid @enderror"
-                                id="gst_number" placeholder="GST Number" name="gst_number"
-                                value="{{ old('gst_number', $customer->gst_number) }}">
-                            @error('gst_number')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- GST Document --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label for="gst_path">GST Document</label>
-                            <div class="input-group">
-                                <div class="custom-file">
-                                    <input type="file"
-                                        class="custom-file-input @error('gst_path') is-invalid @enderror" id="gst_path"
-                                        placeholder="GST Document" name="gst_path" value="{{ old('gst_path') }}">
-                                    <label class="custom-file-label" for="gst_path">Choose file</label>
-                                </div>
-                                <div class="input-group-append">
+                            <!-- GST Information (Corporate Only) -->
+                            <div class="col-md-4" id="gstNumberSection" style="display: none;">
+                                <label class="form-label fw-semibold">GST Number</label>
+                                <input type="text" class="form-control form-control-sm @error('gst_number') is-invalid @enderror"
+                                    name="gst_number" placeholder="Enter GST number" value="{{ old('gst_number', $customer->gst_number) }}">
+                                @error('gst_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-4" id="gstDocumentSection" style="display: none;">
+                                <label class="form-label fw-semibold">GST Document</label>
+                                <div class="input-group input-group-sm">
+                                    <input type="file" class="form-control form-control-sm @error('gst_path') is-invalid @enderror"
+                                        name="gst_path" accept=".pdf,.jpg,.jpeg,.png">
                                     @if ($customer->gst_path)
-                                        <a href="{{ asset('storage/' . $customer->gst_path) }}" class="btn btn-primary"
-                                            target="__blank">Download</a>
+                                        <a href="{{ asset('storage/' . $customer->gst_path) }}" 
+                                           class="btn btn-outline-primary btn-sm" target="_blank" title="Download current document">
+                                            <i class="fas fa-download"></i>
+                                        </a>
                                     @endif
                                 </div>
+                                @error('gst_path')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
-                            @error('gst_path')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
                         </div>
+                    </div>
 
-                        {{-- Status --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;">*</span>Status</label>
-                            <select class="form-control form-control-customer @error('status') is-invalid @enderror"
-                                name="status">
-                                <option value="1"
-                                    {{ old('role_id') ? (old('role_id') == 1 ? 'selected' : '') : ($customer->status == 1 ? 'selected' : '') }}>
-                                    Active</option>
-                                <option value="0"
-                                    {{ old('role_id') ? (old('role_id') == 0 ? 'selected' : '') : ($customer->status == 0 ? 'selected' : '') }}>
-                                    Inactive</option>
-                            </select>
-                            @error('status')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Date Of Birth --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;"></span>Date Of Birth</label>
-                            <div class="input-group date" id="datepicker">
-                                <input type="text"
-                                    class="form-control datepicker @error('date_of_birth') is-invalid @enderror"
-                                    id="date_of_birth" name="date_of_birth"
-                                    value="{{ old('date_of_birth') ? formatDateForUi(old('date_of_birth')) : $customer->date_of_birth_formatted }}" />
+                    <!-- Section 4: Important Dates -->
+                    <div class="mb-3">
+                        <h6 class="text-muted fw-bold mb-3"><i class="fas fa-calendar-alt me-2"></i>Important Dates</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Engagement Anniversary</label>
+                                <input type="text" class="form-control form-control-sm datepicker @error('engagement_anniversary_date') is-invalid @enderror"
+                                    name="engagement_anniversary_date" placeholder="DD/MM/YYYY"
+                                    value="{{ old('engagement_anniversary_date') ? formatDateForUi(old('engagement_anniversary_date')) : $customer->engagement_anniversary_date_formatted }}">
+                                @error('engagement_anniversary_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
-                            @error('date_of_birth')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Date Of Engagement Anniversary --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;"></span>Date Of Engagement Anniversary</label>
-                            <div class="input-group date" id="datepicker">
-                                <input type="text"
-                                    class="form-control datepicker @error('engagement_anniversary_date') is-invalid @enderror"
-                                    id="engagement_anniversary_date" name="engagement_anniversary_date"
-                                    value="{{ old('engagement_anniversary_date') ? formatDateForUi(old('engagement_anniversary_date')) : $customer->engagement_anniversary_date_formatted }}" />
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Wedding Anniversary</label>
+                                <input type="text" class="form-control form-control-sm datepicker @error('wedding_anniversary_date') is-invalid @enderror"
+                                    name="wedding_anniversary_date" placeholder="DD/MM/YYYY"
+                                    value="{{ old('wedding_anniversary_date') ? formatDateForUi(old('wedding_anniversary_date')) : $customer->wedding_anniversary_date_formatted }}">
+                                @error('wedding_anniversary_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
-                            @error('engagement_anniversary_date')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
-                        </div>
-
-                        {{-- Date Of Wedding Anniversary --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <span style="color:red;"></span>Date Of Wedding Anniversary</label>
-                            <div class="input-group date" id="datepicker">
-                                <input type="text"
-                                    class="form-control datepicker @error('wedding_anniversary_date') is-invalid @enderror"
-                                    id="wedding_anniversary_date" name="wedding_anniversary_date"
-                                    value="{{ old('wedding_anniversary_date') ? formatDateForUi(old('wedding_anniversary_date')) : $customer->wedding_anniversary_date_formatted }}" />
+                            <div class="col-md-4">
+                                <!-- Empty column for consistent 3-column layout -->
                             </div>
-                            @error('wedding_anniversary_date')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
                         </div>
-
                     </div>
                 </div>
 
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-success btn-customer float-right mb-3">Update</button>
-                    <a class="btn btn-primary float-right mr-3 mb-3" href="{{ route('customers.index') }}">Cancel</a>
+                <div class="card-footer py-2 bg-light">
+                    <div class="d-flex justify-content-end gap-2">
+                        <a class="btn btn-secondary btn-sm px-4" href="{{ route('customers.index') }}">
+                            <i class="fas fa-times me-1"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success btn-sm px-4">
+                            <i class="fas fa-save me-1"></i>Update Customer
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -334,37 +295,28 @@
         // Get the customer type select element
         const customerTypeSelect = document.getElementById('customerType');
 
-        // Get the sections related to GST
+        // Get the GST sections
         const gstNumberSection = document.getElementById('gstNumberSection');
         const gstDocumentSection = document.getElementById('gstDocumentSection');
 
-        // Function to hide the sections
-        const hideSections = () => {
-            gstNumberSection.style.display = 'none';
-            gstDocumentSection.style.display = 'none';
-        };
-
-        // Function to show the sections
-        const showSections = () => {
+        // Function to toggle GST section visibility
+        const toggleGSTSection = () => {
             const customerType = customerTypeSelect.value;
-
             if (customerType === 'Corporate') {
                 gstNumberSection.style.display = 'block';
                 gstDocumentSection.style.display = 'block';
+            } else {
+                gstNumberSection.style.display = 'none';
+                gstDocumentSection.style.display = 'none';
             }
         };
 
-        // Hide all sections initially
-        hideSections();
-
-        // Show sections based on the selected customer type
-        showSections();
+        // Initialize GST section visibility
+        toggleGSTSection();
 
         // Event listener for customer type change
-        customerTypeSelect.addEventListener('change', () => {
-            hideSections();
-            showSections();
-        });
+        customerTypeSelect.addEventListener('change', toggleGSTSection);
+        
         const inputElements = document.querySelectorAll('input[type="text"]');
 
         function convertToUppercase(event) {

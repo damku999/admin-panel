@@ -33,12 +33,20 @@ class ReportService implements ReportServiceInterface
         return $this->cacheService->cacheQuery('report_initial_data', [], function () {
             return [
                 'customers' => Customer::select('id', 'name')->get(),
-                'brokers' => $this->cacheService->getBrokers()->map->only(['id', 'name']),
+                'brokers' => $this->cacheService->getBrokers()->map(function($item) { 
+                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']]; 
+                }),
                 'relationship_managers' => RelationshipManager::select('id', 'name')->get(),
                 'branches' => Branch::select('id', 'name')->get(),
-                'insurance_companies' => $this->cacheService->getInsuranceCompanies()->map->only(['id', 'name']),
-                'policy_type' => $this->cacheService->getPolicyTypes()->map->only(['id', 'name']),
-                'fuel_type' => $this->cacheService->getFuelTypes()->map->only(['id', 'name']),
+                'insurance_companies' => $this->cacheService->getInsuranceCompanies()->map(function($item) { 
+                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']]; 
+                }),
+                'policy_type' => $this->cacheService->getPolicyTypes()->map(function($item) { 
+                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']]; 
+                }),
+                'fuel_type' => $this->cacheService->getFuelTypes()->map(function($item) { 
+                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']]; 
+                }),
                 'premium_types' => $this->cacheService->getPremiumTypes(),
                 'reference_by_user' => ReferenceUser::select('id', 'name')->get(),
                 'customerInsurances' => [],

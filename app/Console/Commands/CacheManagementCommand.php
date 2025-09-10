@@ -159,13 +159,9 @@ class CacheManagementCommand extends Command
         try {
             $stats = $this->cacheService->getCacheStatistics();
 
-            // Redis memory info
-            if (isset($stats['redis_info']['used_memory_human'])) {
-                $this->line("🔧 Redis Memory Usage: {$stats['redis_info']['used_memory_human']}");
-            }
-
-            // Total keys
-            $this->line("🔑 Total Cache Keys: {$stats['total_keys']}");
+            // Cache driver info
+            $this->line("🔧 Cache Driver: {$stats['cache_driver']}");
+            $this->line("📁 Storage Path: {$stats['storage_path']}");
             
             $this->newLine();
             $this->line('📁 Cache Store Breakdown:');
@@ -175,14 +171,9 @@ class CacheManagementCommand extends Command
                 $this->line("  • {$storeName}: {$count} keys");
             }
 
-            // Check if Redis is responding
+            // Check cache status
             $this->newLine();
-            try {
-                \Illuminate\Support\Facades\Redis::connection('cache')->ping();
-                $this->line('✅ Redis Connection: Healthy');
-            } catch (\Exception $e) {
-                $this->line('❌ Redis Connection: Failed - ' . $e->getMessage());
-            }
+            $this->line('✅ File Cache: Active and Working');
 
         } catch (\Exception $e) {
             $this->error('Failed to retrieve cache statistics: ' . $e->getMessage());

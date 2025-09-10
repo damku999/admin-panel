@@ -2,8 +2,8 @@
     <div class="container-fluid px-3">
         <!-- Left side - Sidebar Toggle -->
         <div class="d-flex align-items-center">
-            <!-- Sidebar Toggle (Mobile) -->
-            <button id="sidebarToggleTop" class="btn btn-outline-secondary btn-sm d-md-none me-2" style="border: none;">
+            <!-- Sidebar Toggle (All Devices) -->
+            <button id="sidebarToggleTop" class="btn btn-outline-secondary btn-sm me-2" style="border: none;" onclick="toggleSidebar(); console.log('Inline click handler called');">
                 <i class="fas fa-bars"></i>
             </button>
         </div>

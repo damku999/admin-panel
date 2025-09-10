@@ -256,6 +256,17 @@ Route::middleware('auth')->prefix('marketing/whatsapp')->name('marketing.whatsap
     Route::post('/preview', [App\Http\Controllers\MarketingWhatsAppController::class, 'preview'])->name('preview');
 });
 
+// Branches
+Route::middleware('auth')->prefix('branches')->name('branches.')->group(function () {
+    Route::get('/', [App\Http\Controllers\BranchController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\BranchController::class, 'create'])->name('create');
+    Route::post('/store', [App\Http\Controllers\BranchController::class, 'store'])->name('store');
+    Route::get('/edit/{branch}', [App\Http\Controllers\BranchController::class, 'edit'])->name('edit');
+    Route::put('/update/{branch}', [App\Http\Controllers\BranchController::class, 'update'])->name('update');
+    Route::get('/update/status/{branch_id}/{status}', [App\Http\Controllers\BranchController::class, 'updateStatus'])->name('status');
+    Route::get('export/', [App\Http\Controllers\BranchController::class, 'export'])->name('export');
+});
+
 // CSP violation reporting (no middleware, public endpoint)
 Route::post('/security/csp-report', [\App\Http\Controllers\Security\CspViolationController::class, 'report'])
     ->name('security.csp.report');

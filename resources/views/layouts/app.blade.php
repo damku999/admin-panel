@@ -149,6 +149,10 @@
             }
         }
         $(document).ready(function() {
+            console.log('Document ready, jQuery version:', $().jquery);
+            console.log('Toggle button exists:', $('#sidebarToggleTop').length);
+            console.log('Sidebar exists:', $('#accordionSidebar').length);
+            
             $('.datepicker').datepicker({
                 format: 'dd/mm/yyyy',
                 autoclose: true
@@ -416,62 +420,98 @@
             };
 
             // =======================================================
-            // MOBILE SIDEBAR TOGGLE FUNCTIONALITY
+            // SIDEBAR TOGGLE FUNCTIONALITY (Mobile + Desktop)
             // =======================================================
             
-            // Mobile Sidebar Toggle Functions
-            window.toggleMobileSidebar = function() {
-                const sidebar = $('.sidebar');
+            // Unified Sidebar Toggle Functions
+            window.toggleSidebar = function() {
+                console.log('toggleSidebar function called');
+                const sidebar = $('#accordionSidebar');
                 const overlay = $('#sidebarOverlay');
+                const wrapper = $('#wrapper');
+                const contentWrapper = $('#content-wrapper');
                 
-                if (sidebar.hasClass('show')) {
-                    // Hide sidebar
-                    sidebar.removeClass('show');
-                    overlay.removeClass('show');
-                    $('body').removeClass('sidebar-open');
+                console.log('Sidebar element found:', sidebar.length);
+                console.log('Screen width:', $(window).width());
+                
+                if ($(window).width() <= 768) {
+                    // Mobile behavior - show/hide sidebar with overlay
+                    if (sidebar.hasClass('show')) {
+                        sidebar.removeClass('show');
+                        overlay.removeClass('show');
+                        $('body').removeClass('sidebar-open');
+                    } else {
+                        sidebar.addClass('show');
+                        overlay.addClass('show');
+                        $('body').addClass('sidebar-open');
+                    }
                 } else {
-                    // Show sidebar
-                    sidebar.addClass('show');
-                    overlay.addClass('show');
-                    $('body').addClass('sidebar-open');
+                    // Desktop behavior - collapse/expand sidebar
+                    console.log('Desktop mode - current toggled state:', sidebar.hasClass('toggled'));
+                    if (sidebar.hasClass('toggled')) {
+                        sidebar.removeClass('toggled');
+                        wrapper.removeClass('sidebar-toggled');
+                        contentWrapper.removeClass('sidebar-toggled');
+                        console.log('Sidebar expanded');
+                    } else {
+                        sidebar.addClass('toggled');
+                        wrapper.addClass('sidebar-toggled');
+                        contentWrapper.addClass('sidebar-toggled');
+                        console.log('Sidebar collapsed');
+                    }
+                    console.log('After toggle - sidebar classes:', sidebar.attr('class'));
                 }
             };
             
-            window.hideMobileSidebar = function() {
-                $('.sidebar').removeClass('show');
-                $('#sidebarOverlay').removeClass('show');
+            window.hideSidebar = function() {
+                const sidebar = $('#accordionSidebar');
+                const overlay = $('#sidebarOverlay');
+                const wrapper = $('#wrapper');
+                const contentWrapper = $('#content-wrapper');
+                
+                // Mobile: hide sidebar
+                sidebar.removeClass('show');
+                overlay.removeClass('show');
                 $('body').removeClass('sidebar-open');
+                
+                // Desktop: keep current state (don't auto-collapse)
             };
             
-            // Mobile Sidebar Event Handlers (Bootstrap-compatible)
+            // Sidebar Event Handlers (Bootstrap-compatible)
             $('#sidebarToggleTop').on('click', function(e) {
                 e.preventDefault();
-                toggleMobileSidebar();
+                console.log('Toggle button clicked!');
+                toggleSidebar();
             });
             
-            // Close sidebar when clicking overlay
+            // Close sidebar when clicking overlay (mobile only)
             $('#sidebarOverlay').on('click', function() {
-                hideMobileSidebar();
-            });
-            
-            // Close sidebar on window resize if screen becomes desktop size
-            $(window).on('resize', function() {
-                if ($(window).width() > 768) {
-                    hideMobileSidebar();
+                if ($(window).width() <= 768) {
+                    hideSidebar();
                 }
             });
             
-            // Close sidebar when clicking outside on mobile
+            // Handle window resize - clean up mobile states on desktop
+            $(window).on('resize', function() {
+                if ($(window).width() > 768) {
+                    // Clean up mobile states when switching to desktop
+                    $('#accordionSidebar').removeClass('show');
+                    $('#sidebarOverlay').removeClass('show');
+                    $('body').removeClass('sidebar-open');
+                }
+            });
+            
+            // Close sidebar when clicking outside on mobile only
             $(document).on('click', function(e) {
                 if ($(window).width() <= 768) {
-                    const sidebar = $('.sidebar');
+                    const sidebar = $('#accordionSidebar');
                     const toggle = $('#sidebarToggleTop');
                     
                     // Check if click is outside sidebar and toggle button
                     if (!sidebar.is(e.target) && sidebar.has(e.target).length === 0 && 
                         !toggle.is(e.target) && toggle.has(e.target).length === 0 && 
                         sidebar.hasClass('show')) {
-                        hideMobileSidebar();
+                        hideSidebar();
                     }
                 }
             });

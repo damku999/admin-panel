@@ -4,7 +4,6 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 
@@ -32,7 +31,6 @@ class HealthCheckService
                 'database' => $this->checkDatabase(),
                 'cache' => $this->checkCache(),
                 'storage' => $this->checkStorage(),
-                'redis' => $this->checkRedis(),
                 'queue' => $this->checkQueue(),
                 'memory' => $this->checkMemory(),
                 'disk' => $this->checkDisk(),
@@ -128,44 +126,6 @@ class HealthCheckService
         }
     }
     
-    /**
-     * Check Redis connectivity and performance
-     */
-    private function checkRedis(): array
-    {
-        try {
-            $startTime = microtime(true);
-            
-            // Test Redis connection
-            $redis = Redis::connection();
-            $redis->ping();
-            
-            // Test basic operations
-            $testKey = 'health_check_redis_' . time();
-            $redis->set($testKey, 'test');
-            $value = $redis->get($testKey);
-            $redis->del($testKey);
-            
-            $responseTime = round((microtime(true) - $startTime) * 1000, 2);
-            
-            // Get Redis info
-            $info = $redis->info('memory');
-            $memoryUsed = isset($info['used_memory']) ? round($info['used_memory'] / 1024 / 1024, 2) : null;
-            
-            return [
-                'status' => 'healthy',
-                'response_time_ms' => $responseTime,
-                'memory_used_mb' => $memoryUsed,
-                'message' => 'Redis connection successful',
-            ];
-        } catch (Throwable $e) {
-            return [
-                'status' => 'unhealthy',
-                'error' => $e->getMessage(),
-                'message' => 'Redis connection failed',
-            ];
-        }
-    }
     
     /**
      * Check file storage system

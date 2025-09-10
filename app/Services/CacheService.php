@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Redis;
 
 class CacheService
 {
@@ -22,37 +21,82 @@ class CacheService
     
     public function getInsuranceCompanies(): \Illuminate\Database\Eloquent\Collection
     {
-        return Cache::store('lookups')->remember(self::INSURANCE_COMPANIES_KEY, self::LONG_TTL, function () {
+        $data = Cache::store('lookups')->remember(self::INSURANCE_COMPANIES_KEY, self::LONG_TTL, function () {
             return \App\Models\InsuranceCompany::where('status', 1)->get();
         });
+        
+        // Ensure we always return a Collection (file cache might return array)
+        if (is_array($data)) {
+            return collect($data)->map(function ($item) {
+                return is_array($item) ? (object) $item : $item;
+            });
+        }
+        
+        return $data;
     }
     
     public function getBrokers(): \Illuminate\Database\Eloquent\Collection
     {
-        return Cache::store('lookups')->remember(self::BROKERS_KEY, self::LONG_TTL, function () {
+        $data = Cache::store('lookups')->remember(self::BROKERS_KEY, self::LONG_TTL, function () {
             return \App\Models\Broker::where('status', 1)->get();
         });
+        
+        // Ensure we always return a Collection (file cache might return array)
+        if (is_array($data)) {
+            return collect($data)->map(function ($item) {
+                return is_array($item) ? (object) $item : $item;
+            });
+        }
+        
+        return $data;
     }
     
     public function getPolicyTypes(): \Illuminate\Database\Eloquent\Collection
     {
-        return Cache::store('lookups')->remember(self::POLICY_TYPES_KEY, self::LONG_TTL, function () {
+        $data = Cache::store('lookups')->remember(self::POLICY_TYPES_KEY, self::LONG_TTL, function () {
             return \App\Models\PolicyType::where('status', 1)->get();
         });
+        
+        // Ensure we always return a Collection (file cache might return array)
+        if (is_array($data)) {
+            return collect($data)->map(function ($item) {
+                return is_array($item) ? (object) $item : $item;
+            });
+        }
+        
+        return $data;
     }
     
     public function getPremiumTypes(): \Illuminate\Database\Eloquent\Collection
     {
-        return Cache::store('lookups')->remember(self::PREMIUM_TYPES_KEY, self::LONG_TTL, function () {
+        $data = Cache::store('lookups')->remember(self::PREMIUM_TYPES_KEY, self::LONG_TTL, function () {
             return \App\Models\PremiumType::where('status', 1)->get();
         });
+        
+        // Ensure we always return a Collection (file cache might return array)
+        if (is_array($data)) {
+            return collect($data)->map(function ($item) {
+                return is_array($item) ? (object) $item : $item;
+            });
+        }
+        
+        return $data;
     }
     
     public function getFuelTypes(): \Illuminate\Database\Eloquent\Collection
     {
-        return Cache::store('lookups')->remember(self::FUEL_TYPES_KEY, self::LONG_TTL, function () {
+        $data = Cache::store('lookups')->remember(self::FUEL_TYPES_KEY, self::LONG_TTL, function () {
             return \App\Models\FuelType::where('status', 1)->get();
         });
+        
+        // Ensure we always return a Collection (file cache might return array)
+        if (is_array($data)) {
+            return collect($data)->map(function ($item) {
+                return is_array($item) ? (object) $item : $item;
+            });
+        }
+        
+        return $data;
     }
     
     public function getActiveUsers(): \Illuminate\Database\Eloquent\Collection
@@ -190,15 +234,15 @@ class CacheService
      */
     public function getCacheStatistics(): array
     {
-        $redis = Redis::connection('cache');
-        
+        // File cache statistics (simplified for non-Redis environment)
         return [
-            'redis_info' => $redis->info('memory'),
-            'total_keys' => $redis->dbsize(),
+            'cache_driver' => config('cache.default'),
+            'storage_path' => storage_path('framework/cache'),
             'stores' => [
-                'lookups_keys' => count($this->getKeysByPattern('lookups_*')),
-                'queries_keys' => count($this->getKeysByPattern('queries_*')),
-                'reports_keys' => count($this->getKeysByPattern('reports_*')),
+                'lookups_store' => 'file-based',
+                'queries_store' => 'file-based',
+                'reports_store' => 'file-based',
+                'cache_info' => 'File-based caching active'
             ]
         ];
     }
@@ -260,15 +304,13 @@ class CacheService
     }
     
     /**
-     * Get Redis keys by pattern
+     * Get cache keys by pattern (file cache compatible)
      */
     private function getKeysByPattern(string $pattern): array
     {
-        try {
-            return Redis::connection('cache')->keys($pattern) ?? [];
-        } catch (\Exception $e) {
-            return [];
-        }
+        // File cache doesn't support pattern matching
+        // Return empty array for compatibility
+        return [];
     }
     
     /**

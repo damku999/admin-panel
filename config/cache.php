@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('CACHE_DRIVER', 'redis'),
+    'default' => env('CACHE_DRIVER', 'file'),
 
     /*
     |--------------------------------------------------------------------------
@@ -54,26 +54,20 @@ return [
             'path' => storage_path('framework/cache/data'),
         ],
 
-        // Performance-optimized cache stores
+        // Performance-optimized cache stores (file-based for compatibility)
         'queries' => [
-            'driver' => 'redis',
-            'connection' => 'cache',
-            'lock_connection' => 'default',
-            'prefix' => 'queries_',
+            'driver' => 'file',
+            'path' => storage_path('framework/cache/queries'),
         ],
 
         'reports' => [
-            'driver' => 'redis',
-            'connection' => 'cache',
-            'lock_connection' => 'default',
-            'prefix' => 'reports_',
+            'driver' => 'file',
+            'path' => storage_path('framework/cache/reports'),
         ],
 
         'lookups' => [
-            'driver' => 'redis',
-            'connection' => 'cache',
-            'lock_connection' => 'default',
-            'prefix' => 'lookups_',
+            'driver' => 'file',
+            'path' => storage_path('framework/cache/lookups'),
         ],
 
         'memcached' => [

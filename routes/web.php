@@ -72,6 +72,7 @@ Route::middleware('auth')->prefix('customers')->name('customers.')->group(functi
     Route::get('/', [CustomerController::class, 'index'])->name('index');
     Route::get('/create', [CustomerController::class, 'create'])->name('create');
     Route::post('/store', [CustomerController::class, 'store'])->name('store');
+    Route::get('/show/{customer}', [CustomerController::class, 'show'])->name('show');
     Route::get('/edit/{customer}', [CustomerController::class, 'edit'])->name('edit');
     Route::put('/update/{customer}', [CustomerController::class, 'update'])->name('update');
     Route::get('/resendOnBoardingWA/{customer}', [CustomerController::class, 'resendOnBoardingWA'])->name('resendOnBoardingWA');

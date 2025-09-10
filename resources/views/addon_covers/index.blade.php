@@ -30,7 +30,7 @@
                 <form action="{{ route('addon-covers.index') }}" method="GET" role="search">
                     <div class="input-group-append">
                         <input type="text" placeholder="Search" name="search"
-                            class="form-control float-right filter_by_key" value="{{ request('search') }}">
+                            class="form-control float-end filter_by_key" value="{{ request('search') }}">
                         <button type="submit" class="btn btn-default filter_by_click">
                             <i class="fas fa-search"></i>
                         </button>
@@ -58,13 +58,13 @@
                                     <td>{{ $addon_cover->name }}</td>
                                     <td>{{ Str::limit($addon_cover->description, 50) }}</td>
                                     <td class="text-center">
-                                        <span class="badge badge-primary">{{ $addon_cover->order_no }}</span>
+                                        <span class="badge bg-primary text-white">{{ $addon_cover->order_no }}</span>
                                     </td>
                                     <td>
                                         @if ($addon_cover->status == 0)
-                                            <span class="badge badge-danger">Inactive</span>
+                                            <span class="badge bg-danger text-white">Inactive</span>
                                         @elseif ($addon_cover->status == 1)
-                                            <span class="badge badge-success">Active</span>
+                                            <span class="badge bg-success text-white">Active</span>
                                         @endif
                                     </td>
                                     <td>

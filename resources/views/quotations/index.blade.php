@@ -88,7 +88,7 @@
                                             </small>
                                         </td>
                                         <td>
-                                            <span class="badge badge-info">{{ $quotation->policy_type }}</span><br>
+                                            <span class="badge bg-info text-white">{{ $quotation->policy_type }}</span><br>
                                             <small>{{ $quotation->policy_tenure_years }} Year(s)</small>
                                         </td>
                                         <td>
@@ -109,7 +109,7 @@
                                                     'Rejected' => 'danger'
                                                 ];
                                             @endphp
-                                            <span class="badge badge-{{ $statusColors[$quotation->status] ?? 'secondary' }}">
+                                            <span class="badge bg-{{ $statusColors[$quotation->status] ?? 'secondary' }} text-white">
                                                 {{ $quotation->status }}
                                             </span>
                                             @if($quotation->sent_at)

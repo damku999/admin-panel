@@ -99,14 +99,14 @@
                                 @endif
                             </td>
                             <td>
-                                <span class="badge badge-info">{{ $familyGroup->familyMembers->count() }} Members</span>
+                                <span class="badge bg-info text-white">{{ $familyGroup->familyMembers->count() }} Members</span>
                                 @if($familyGroup->familyMembers->count() > 0)
                                     <div class="mt-1">
                                         @foreach($familyGroup->familyMembers->take(3) as $member)
                                             <small class="text-muted d-block">
                                                 {{ $member->customer->name }}
                                                 @if($member->is_head)
-                                                    <span class="badge badge-success badge-sm">Head</span>
+                                                    <span class="badge bg-success text-white">Head</span>
                                                 @endif
                                             </small>
                                         @endforeach
@@ -119,10 +119,10 @@
                             <td>
                                 @if($familyGroup->status)
                                     <a href="{{ route('family_groups.status', [$familyGroup->id, 0]) }}" 
-                                       class="badge badge-success">Active</a>
+                                       class="badge bg-success text-white text-decoration-none">Active</a>
                                 @else
                                     <a href="{{ route('family_groups.status', [$familyGroup->id, 1]) }}" 
-                                       class="badge badge-danger">Inactive</a>
+                                       class="badge bg-danger text-white text-decoration-none">Inactive</a>
                                 @endif
                             </td>
                             <td>

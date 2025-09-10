@@ -17,11 +17,11 @@ class SendWelcomeEmail implements ShouldQueue
         
         // Queue welcome email
         EmailQueued::dispatch(
-            recipientEmail: $customer->email,
-            recipientName: $customer->name,
-            subject: 'Welcome to Our Insurance Platform',
-            emailType: 'welcome',
-            emailData: [
+            $customer->email,
+            $customer->name,
+            'Welcome to Our Insurance Platform',
+            'welcome',
+            [
                 'customer_name' => $customer->name,
                 'registration_date' => $event->customer->created_at->format('d/m/Y'),
                 'next_steps' => [
@@ -31,9 +31,10 @@ class SendWelcomeEmail implements ShouldQueue
                 ],
                 'support_contact' => config('mail.support_email', 'support@example.com'),
             ],
-            priority: 3, // High priority for welcome emails
-            referenceId: "customer_registration_{$customer->id}",
-            customerId: $customer->id
+            [], // attachments
+            3, // High priority for welcome emails
+            "customer_registration_{$customer->id}",
+            $customer->id
         );
     }
 

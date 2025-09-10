@@ -18,7 +18,7 @@ class CreateCustomerAuditLog implements ShouldQueue
         
         CustomerAuditLog::create([
             'customer_id' => $customer->id,
-            'activity' => 'customer_registered',
+            'action' => 'customer_registered',
             'description' => "Customer registered via {$event->registrationChannel}",
             'metadata' => [
                 'registration_channel' => $event->registrationChannel,

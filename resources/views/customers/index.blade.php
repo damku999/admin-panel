@@ -136,9 +136,9 @@
                                     <td>{{ $customer->type }}</td>
                                     <td>
                                         @if ($customer->status == 0)
-                                            <span class="badge badge-danger">Inactive</span>
+                                            <span class="badge bg-danger text-white">Inactive</span>
                                         @elseif ($customer->status == 1)
-                                            <span class="badge badge-success">Active</span>
+                                            <span class="badge bg-success text-white">Active</span>
                                         @endif
                                     </td>
                                     <td>

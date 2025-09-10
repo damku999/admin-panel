@@ -36,13 +36,13 @@
                 <form action="{{ route('customer_insurances.index') }}" method="GET" role="search">
                     <div class="input-group">
                         <input type="text" placeholder="Search" name="search"
-                            class="form-control float-right filter_by_key mr-2" value="{{ request('search') }}">
+                            class="form-control float-end filter_by_key me-2" value="{{ request('search') }}">
 
                         <input type="text" placeholder="Exp Start Date" name="start_date"
-                            class="form-control datepicker mr-2" value="{{ request('start_date') ?: request('renewal_due_start') }}">
+                            class="form-control datepicker me-2" value="{{ request('start_date') ?: request('renewal_due_start') }}">
 
                         <input type="text" placeholder="Exp End Date" name="end_date"
-                            class="form-control datepicker mr-2" value="{{ request('end_date') ?: request('renewal_due_end') }}">
+                            class="form-control datepicker me-2" value="{{ request('end_date') ?: request('renewal_due_end') }}">
                         
                         <!-- Hidden fields to preserve renewal filter parameters -->
                         @if(request('renewal_due_start'))
@@ -195,9 +195,9 @@
                                     <td>{{ $customer_insurance->policy_type_name }}</td>
                                     <td>
                                         @if ($customer_insurance->status == 0)
-                                            <span class="badge badge-danger">Inactive</span>
+                                            <span class="badge bg-danger text-white">Inactive</span>
                                         @elseif ($customer_insurance->status == 1)
-                                            <span class="badge badge-success">Active</span>
+                                            <span class="badge bg-success text-white">Active</span>
                                         @endif
                                     </td>
                                     <td>

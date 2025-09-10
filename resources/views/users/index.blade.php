@@ -50,9 +50,9 @@
                                     <td>{{ $user->roles ? $user->roles->pluck('name')->first() : 'N/A' }}</td>
                                     <td>
                                         @if ($user->status == 0)
-                                            <span class="badge badge-danger">Inactive</span>
+                                            <span class="badge bg-danger text-white">Inactive</span>
                                         @elseif ($user->status == 1)
-                                            <span class="badge badge-success">Active</span>
+                                            <span class="badge bg-success text-white">Active</span>
                                         @endif
                                     </td>
                                     <td>

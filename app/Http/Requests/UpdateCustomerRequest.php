@@ -15,6 +15,29 @@ class UpdateCustomerRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation()
+    {
+        $data = [];
+        
+        // Convert date formats from DD/MM/YYYY to YYYY-MM-DD
+        foreach (['date_of_birth', 'wedding_anniversary_date', 'engagement_anniversary_date'] as $dateField) {
+            if ($this->has($dateField) && $this->$dateField) {
+                $dateValue = $this->$dateField;
+                if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $dateValue)) {
+                    $dateParts = explode('/', $dateValue);
+                    $data[$dateField] = $dateParts[2] . '-' . $dateParts[1] . '-' . $dateParts[0];
+                }
+            }
+        }
+        
+        if (!empty($data)) {
+            $this->merge($data);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -38,15 +61,15 @@ class UpdateCustomerRequest extends FormRequest
         ];
 
         if (!empty($this->date_of_birth)) {
-            $rules['date_of_birth'] = 'date_format:Y-m-d';
+            $rules['date_of_birth'] = 'date';
         }
 
         if (!empty($this->wedding_anniversary_date)) {
-            $rules['wedding_anniversary_date'] = 'date_format:Y-m-d';
+            $rules['wedding_anniversary_date'] = 'date';
         }
 
         if (!empty($this->engagement_anniversary_date)) {
-            $rules['engagement_anniversary_date'] = 'date_format:Y-m-d';
+            $rules['engagement_anniversary_date'] = 'date';
         }
 
         return $rules;
@@ -66,9 +89,9 @@ class UpdateCustomerRequest extends FormRequest
             'pan_card_number.required_if' => 'PAN card number is required for Retail customers.',
             'aadhar_card_number.required_if' => 'Aadhar card number is required for Retail customers.',
             'gst_number.required_if' => 'GST number is required for Corporate customers.',
-            'date_of_birth.date_format' => 'Date of birth must be in Y-m-d format.',
-            'wedding_anniversary_date.date_format' => 'Wedding anniversary date must be in Y-m-d format.',
-            'engagement_anniversary_date.date_format' => 'Engagement anniversary date must be in Y-m-d format.',
+            'date_of_birth.date' => 'Date of birth must be a valid date.',
+            'wedding_anniversary_date.date' => 'Wedding anniversary date must be a valid date.',
+            'engagement_anniversary_date.date' => 'Engagement anniversary date must be a valid date.',
         ];
     }
 }

@@ -29,7 +29,7 @@
                 <form action="{{ route('fuel_type.index') }}" method="GET" role="search">
                     <div class="input-group-append">
                         <input type="text" placeholder="Search" name="search"
-                            class="form-control float-right filter_by_key" value="{{ request('search') }}">
+                            class="form-control float-end filter_by_key" value="{{ request('search') }}">
                         <button type="submit" class="btn btn-default filter_by_click">
                             <i class="fas fa-search"></i>
                         </button>
@@ -55,9 +55,9 @@
                                     <td>{{ $fuel_type_detail->name }}</td>
                                     <td>
                                         @if ($fuel_type_detail->status == 0)
-                                            <span class="badge badge-danger">Inactive</span>
+                                            <span class="badge bg-danger text-white">Inactive</span>
                                         @elseif ($fuel_type_detail->status == 1)
-                                            <span class="badge badge-success">Active</span>
+                                            <span class="badge bg-success text-white">Active</span>
                                         @endif
                                     </td>
                                     <td>

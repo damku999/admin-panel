@@ -3,7 +3,7 @@
         <!-- Left side - Sidebar Toggle -->
         <div class="d-flex align-items-center">
             <!-- Sidebar Toggle (All Devices) -->
-            <button id="sidebarToggleTop" class="btn btn-outline-secondary btn-sm me-2" style="border: none;" onclick="toggleSidebar(); console.log('Inline click handler called');">
+            <button id="sidebarToggleTop" class="btn btn-outline-secondary btn-sm me-2" style="border: none;">
                 <i class="fas fa-bars"></i>
             </button>
         </div>

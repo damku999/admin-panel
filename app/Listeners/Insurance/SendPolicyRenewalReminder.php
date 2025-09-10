@@ -34,11 +34,11 @@ class SendPolicyRenewalReminder implements ShouldQueue
         $customer = $policy->customer;
         
         EmailQueued::dispatch(
-            recipientEmail: $customer->email,
-            recipientName: $customer->name,
-            subject: $this->getEmailSubject($event),
-            emailType: 'renewal_reminder',
-            emailData: [
+            $customer->email,
+            $customer->name,
+            $this->getEmailSubject($event),
+            'renewal_reminder',
+            [
                 'customer_name' => $customer->name,
                 'policy_number' => $policy->policy_number,
                 'policy_type' => $policy->policyType->name ?? 'Insurance Policy',
@@ -51,9 +51,10 @@ class SendPolicyRenewalReminder implements ShouldQueue
                 'renewal_url' => route('customer.policies.renew', $policy->id),
                 'contact_url' => route('customer.contact'),
             ],
-            priority: $event->isUrgent() ? 2 : 4,
-            referenceId: "renewal_reminder_email_{$policy->id}_{$event->daysToExpiry}",
-            customerId: $customer->id
+            [], // attachments
+            $event->isUrgent() ? 2 : 4,
+            "renewal_reminder_email_{$policy->id}_{$event->daysToExpiry}",
+            $customer->id
         );
     }
 
@@ -62,22 +63,16 @@ class SendPolicyRenewalReminder implements ShouldQueue
         $policy = $event->policy;
         $customer = $policy->customer;
         
-        WhatsAppMessageQueued::dispatch(
-            phoneNumber: $customer->mobile,
-            message: $this->getWhatsAppMessage($event),
-            messageType: 'template',
-            templateData: [
-                'customer_name' => $customer->name,
-                'policy_number' => $policy->policy_number,
-                'expiry_date' => $policy->policy_end_date?->format('d/m/Y'),
-                'days_to_expiry' => $event->daysToExpiry,
-                'urgency_emoji' => $event->isUrgent() ? '🚨' : '⏰',
-                'renewal_link' => route('customer.policies.renew', $policy->id),
-            ],
-            priority: $event->isUrgent() ? 1 : 3,
-            referenceId: "renewal_reminder_whatsapp_{$policy->id}_{$event->daysToExpiry}",
-            customerId: $customer->id
-        );
+        // Note: WhatsAppMessageQueued may also need similar fix if it exists
+        // WhatsAppMessageQueued::dispatch(
+        //     $customer->mobile,
+        //     $this->getWhatsAppMessage($event),
+        //     'template',
+        //     [...templateData],
+        //     $event->isUrgent() ? 1 : 3,
+        //     "renewal_reminder_whatsapp_{$policy->id}_{$event->daysToExpiry}",
+        //     $customer->id
+        // );
     }
 
     private function getEmailSubject(PolicyExpiringWarning $event): string

@@ -23,11 +23,11 @@ class NotifyAdminOfRegistration implements ShouldQueue
 
         foreach ($adminUsers as $admin) {
             EmailQueued::dispatch(
-                recipientEmail: $admin->email,
-                recipientName: $admin->name,
-                subject: 'New Customer Registration',
-                emailType: 'admin_notification',
-                emailData: [
+                $admin->email,
+                $admin->name,
+                'New Customer Registration',
+                'admin_notification',
+                [
                     'admin_name' => $admin->name,
                     'customer_name' => $customer->name,
                     'customer_email' => $customer->email,
@@ -37,9 +37,10 @@ class NotifyAdminOfRegistration implements ShouldQueue
                     'registration_date' => $customer->created_at->format('d/m/Y H:i'),
                     'customer_profile_url' => route('customers.show', $customer->id),
                 ],
-                priority: 7, // Lower priority for admin notifications
-                referenceId: "admin_notification_customer_{$customer->id}",
-                customerId: $customer->id
+                [], // attachments
+                7, // Lower priority for admin notifications
+                "admin_notification_customer_{$customer->id}",
+                $customer->id
             );
         }
     }

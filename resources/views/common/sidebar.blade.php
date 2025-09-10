@@ -11,7 +11,7 @@
 
     <!-- Dashboard -->
     <div class="nav-item">
-        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('home') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('home') }}">
+        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('home') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('home') }}" data-tooltip="Dashboard">
             <i class="fas fa-tachometer-alt me-3"></i>
             <span>Dashboard</span>
         </a>
@@ -19,7 +19,7 @@
 
     <!-- Customers -->
     <div class="nav-item">
-        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('customers.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('customers.index') }}">
+        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('customers.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('customers.index') }}" data-tooltip="Customers">
             <i class="fas fa-users me-3"></i>
             <span>Customers</span>
         </a>
@@ -27,7 +27,7 @@
 
     <!-- Customer Insurances -->
     <div class="nav-item">
-        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('customer_insurances.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('customer_insurances.index') }}">
+        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('customer_insurances.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('customer_insurances.index') }}" data-tooltip="Customer Insurances">
             <i class="fas fa-shield-alt me-3"></i>
             <span>Customer Insurances</span>
         </a>
@@ -35,7 +35,7 @@
 
     <!-- Quotations -->
     <div class="nav-item">
-        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('quotations.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('quotations.index') }}">
+        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('quotations.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('quotations.index') }}" data-tooltip="Quotations">
             <i class="fas fa-file-invoice me-3"></i>
             <span>Quotations</span>
         </a>
@@ -43,7 +43,7 @@
 
     <!-- WhatsApp Marketing -->
     <div class="nav-item">
-        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('marketing.whatsapp.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('marketing.whatsapp.index') }}">
+        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('marketing.whatsapp.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('marketing.whatsapp.index') }}" data-tooltip="WhatsApp Marketing">
             <i class="fab fa-whatsapp me-3"></i>
             <span>WhatsApp Marketing</span>
         </a>
@@ -51,7 +51,7 @@
 
     <!-- Family Groups -->
     <div class="nav-item">
-        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('family_groups.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('family_groups.index') }}">
+        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('family_groups.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('family_groups.index') }}" data-tooltip="Family Groups">
             <i class="fas fa-users-cog me-3"></i>
             <span>Family Groups</span>
         </a>
@@ -59,7 +59,7 @@
 
     <!-- Business Reports -->
     <div class="nav-item">
-        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('reports.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('reports.index') }}">
+        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('reports.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('reports.index') }}" data-tooltip="Reports">
             <i class="fas fa-chart-bar me-3"></i>
             <span>Reports</span>
         </a>
@@ -78,6 +78,7 @@
            href="#"
            data-bs-toggle="collapse"
            data-bs-target="#masterSubmenu"
+           data-tooltip="Master Data"
            aria-expanded="{{ $isMasterActive ? 'true' : 'false' }}">
             <div class="d-flex align-items-center">
                 <i class="fas fa-database me-3"></i>
@@ -140,6 +141,7 @@
            href="#"
            data-bs-toggle="collapse"
            data-bs-target="#adminSubmenu"
+           data-tooltip="Users & Administration"
            aria-expanded="{{ $isAdminActive ? 'true' : 'false' }}">
             <div class="d-flex align-items-center">
                 <i class="fas fa-users-cog me-3"></i>
@@ -172,7 +174,7 @@
     @endphp
     @if($showSystemLogs)
     <div class="nav-item">
-        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('log-viewer.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('log-viewer.index') }}">
+        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('log-viewer.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('log-viewer.index') }}" data-tooltip="System Logs">
             <i class="fas fa-bug me-3"></i>
             <span>System Logs</span>
         </a>

@@ -13,3 +13,10 @@ yarn-error.log
 /.idea
 /.vscode
 composer.lock
+test-crud.js
+test-results/.last-run.json
+tests/admin-login-test.spec.js
+tests/crud-testing.spec.js
+tests/manual-login-test.spec.js
+tests/robust-login-test.spec.js
+tests/simple-navigation-test.spec.js

@@ -67,7 +67,7 @@ class PermissionsController extends Controller
             return redirect()->back()->with('success', 'Permissions created successfully.');
         } catch (\Throwable $th) {
             DB::rollback();
-            return redirect()->route('permissions.add')->with('error', $th->getMessage());
+            return redirect()->route('permissions.index')->with('error', $th->getMessage());
         }
     }
 

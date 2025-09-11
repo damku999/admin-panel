@@ -3,6 +3,7 @@
 namespace App\Modules;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Route;
 use App\Modules\Customer\Contracts\CustomerServiceInterface;
 use App\Modules\Customer\Services\CustomerService;
 use App\Modules\Quotation\Contracts\QuotationServiceInterface;
@@ -100,25 +101,26 @@ class ModuleServiceProvider extends ServiceProvider
      */
     private function loadModuleRoutes(): void
     {
-        // Module API routes should be properly prefixed with /api
-        // For now, disable module route loading to prevent conflicts
-        // TODO: Implement proper API route loading with middleware and prefixes
-        
-        /*
-        Route::prefix('api')->middleware('api')->group(function () {
-            if (file_exists($customerApiRoutes = base_path('routes/api/customer.php'))) {
-                $this->loadRoutesFrom($customerApiRoutes);
-            }
+        // Load module API routes with proper middleware and prefixes
+        // These routes are loaded under /api/v2 to avoid conflicts with existing /api/v1 routes
+        Route::prefix('api/v2')
+            ->middleware(['api', 'throttle:api'])
+            ->group(function () {
+                // Load Customer Module API routes
+                if (file_exists($customerApiRoutes = base_path('routes/api/customer.php'))) {
+                    $this->loadRoutesFrom($customerApiRoutes);
+                }
 
-            if (file_exists($quotationApiRoutes = base_path('routes/api/quotation.php'))) {
-                $this->loadRoutesFrom($quotationApiRoutes);
-            }
+                // Load Quotation Module API routes
+                if (file_exists($quotationApiRoutes = base_path('routes/api/quotation.php'))) {
+                    $this->loadRoutesFrom($quotationApiRoutes);
+                }
 
-            if (file_exists($notificationApiRoutes = base_path('routes/api/notification.php'))) {
-                $this->loadRoutesFrom($notificationApiRoutes);
-            }
-        });
-        */
+                // Load Notification Module API routes
+                if (file_exists($notificationApiRoutes = base_path('routes/api/notification.php'))) {
+                    $this->loadRoutesFrom($notificationApiRoutes);
+                }
+            });
     }
 
     /**

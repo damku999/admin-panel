@@ -9,49 +9,55 @@
         @include('common.alert')
 
         <!-- DataTales Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-3">
-                    <div class="mb-2 mb-md-0">
-                        <h1 class="h4 mb-0 text-primary font-weight-bold">Customers Management</h1>
-                        <small class="text-muted">Manage all customer records</small>
-                    </div>
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                        @if (auth()->user()->hasPermissionTo('customer-create'))
-                            <a href="{{ route('customers.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add New</span>
-                            </a>
-                        @endif
-                        <a href="{{ route('customers.export') }}" class="btn btn-success">
-                            <i class="fas fa-file-excel"></i> <span class="d-none d-sm-inline">Export</span>
-                        </a>
-                    </div>
-                </div>
-                <form action="{{ route('customers.index') }}" method="GET" role="search">
-                    <div class="input-group">
-                        <input type="text" placeholder="Search" name="search"
-                            class="form-control float-right filter_by_key" value="{{ request('search') }}"
-                            style="margin-right: 10px;">
-                        <select name="type" class="form-control" onchange="this.form.submit()"
-                            style="margin-right: 10px;">
-                            <option value="">All Types</option>
-                            <option value="Retail" {{ request('type') == 'Retail' ? 'selected' : '' }}>Retail</option>
-                            <option value="Corporate" {{ request('type') == 'Corporate' ? 'selected' : '' }}>Corporate
-                            </option>
-                        </select>
-
-                        {{--  <input type="text" placeholder="From Date" name="from_date" id="from_date"
-                            class="form-control datepicker" value="{{ request('from_date') }}" style="margin-right: 10px;">
-                        <input type="text" placeholder="To Date" name="to_date" id="to_date"
-                            class="form-control datepicker" value="{{ request('to_date') }}" style="margin-right: 10px;"> --}}
-
-                        <div class="input-group-append">
-                            <button type="submit" class="btn btn-default filter_by_click">
-                                <i class="fas fa-search"></i>
-                            </button>
-                            <a href="{{ route('customers.index') }}" class="btn btn-default filter_by_click">
-                                <i class="fas fa-redo"></i>
-                            </a>
+        <div class="card shadow mt-3 mb-4">
+            <x-list-header 
+                    title="Customers Management"
+                    subtitle="Manage all customer records"
+                    addRoute="customers.create"
+                    addPermission="customer-create"
+                    exportRoute="customers.export"
+            />
+            <div class="card-body">
+                <form method="GET" action="{{ route('customers.index') }}" id="search_form">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="search">Search Customers</label>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       placeholder="Name, email, mobile number..." 
+                                       value="{{ request('search') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="type">Customer Type</label>
+                                <select class="form-control" id="type" name="type">
+                                    <option value="">All Types</option>
+                                    <option value="Retail" {{ request('type') == 'Retail' ? 'selected' : '' }}>Retail</option>
+                                    <option value="Corporate" {{ request('type') == 'Corporate' ? 'selected' : '' }}>Corporate</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="status">Status</label>
+                                <select class="form-control" id="status" name="status">
+                                    <option value="">All Status</option>
+                                    <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Active</option>
+                                    <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>&nbsp;</label><br>
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                                <a href="{{ route('customers.index') }}" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-times"></i> Clear
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </form>

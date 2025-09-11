@@ -19,16 +19,6 @@
                     <span>Back</span>
                 </a>
             </div>
-            @if ($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3 mb-0" role="alert">
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
             <form method="POST" action="{{ route('relationship_managers.store') }}">
                 @csrf
                 <div class="card-body py-3">

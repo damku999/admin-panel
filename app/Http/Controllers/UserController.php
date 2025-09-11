@@ -69,7 +69,7 @@ class UserController extends Controller
             // Assign roles through service
             $this->userService->assignRoles($user, [$request->role_id]);
 
-            return redirect()->back()->with('success', 'User Created Successfully.');
+            return redirect()->route('users.index')->with('success', 'User Created Successfully.');
         } catch (\Throwable $th) {
             return redirect()->back()->withInput()->with('error', $th->getMessage());
         }

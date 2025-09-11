@@ -5,26 +5,67 @@
 @section('content')
     <div class="container-fluid">
         <!-- Main Header Card -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
-                    <div class="mb-2 mb-md-0">
-                        <h1 class="h4 mb-0 text-primary font-weight-bold">
-                            <i class="fab fa-whatsapp text-success mr-2"></i>WhatsApp Marketing Management
-                        </h1>
-                        <small class="text-muted">Send marketing messages to customers</small>
-                    </div>
-                </div>
-            </div>
+        <div class="card shadow mt-3 mb-4">
+            <x-list-header 
+                    title="WhatsApp Marketing Management"
+                    subtitle="Send marketing messages to customers"
+            />
         </div>
 
         <!-- Flash Messages -->
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle mr-2"></i>
-                {!! nl2br(e(session('success'))) !!}
-                <button type="button" class="close" onclick="$(this).parent().fadeOut()" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle mr-3 text-success" style="font-size: 1.2rem;"></i>
+                    <div class="flex-grow-1">
+                        <strong>{{ session('success') }}</strong>
+                        
+                        @if (session('marketing_result'))
+                            @php $result = session('marketing_result'); @endphp
+                            <div class="mt-3">
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <div class="border-right">
+                                            <h5 class="mb-1 text-primary">{{ $result['total_customers'] }}</h5>
+                                            <small class="text-muted">Total Recipients</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="border-right">
+                                            <h5 class="mb-1 text-success">{{ $result['success_count'] }}</h5>
+                                            <small class="text-muted">Sent Successfully</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <h5 class="mb-1 text-danger">{{ $result['failed_count'] }}</h5>
+                                        <small class="text-muted">Failed</small>
+                                    </div>
+                                </div>
+                                
+                                @if ($result['failed_count'] > 0 && count($result['failed_customers']) > 0)
+                                    <div class="mt-3 pt-3 border-top">
+                                        <h6 class="text-danger mb-2">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                            Failed Recipients:
+                                        </h6>
+                                        <div class="small">
+                                            @foreach (array_slice($result['failed_customers'], 0, 5) as $customer)
+                                                <span class="badge badge-light mr-1 mb-1">{{ $customer }}</span>
+                                            @endforeach
+                                            @if (count($result['failed_customers']) > 5)
+                                                <span class="text-muted">... and {{ count($result['failed_customers']) - 5 }} more</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-link text-success p-1" 
+                        onclick="$(this).closest('.alert').fadeOut()" aria-label="Close" 
+                        style="position: absolute; top: 8px; right: 8px;">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
         @endif
@@ -33,8 +74,10 @@
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-triangle mr-2"></i>
                 {{ session('error') }}
-                <button type="button" class="close" onclick="$(this).parent().fadeOut()" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button" class="btn btn-sm btn-link text-danger p-1" 
+                        onclick="$(this).closest('.alert').fadeOut()" aria-label="Close" 
+                        style="position: absolute; top: 8px; right: 8px;">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
         @endif
@@ -43,8 +86,10 @@
             <div class="alert alert-info alert-dismissible fade show" role="alert">
                 <i class="fas fa-info-circle mr-2"></i>
                 {{ session('info') }}
-                <button type="button" class="close" onclick="$(this).parent().fadeOut()" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button" class="btn btn-sm btn-link text-info p-1" 
+                        onclick="$(this).closest('.alert').fadeOut()" aria-label="Close" 
+                        style="position: absolute; top: 8px; right: 8px;">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
         @endif
@@ -78,7 +123,7 @@
                                     <input type="radio" id="message_type_image" name="message_type" value="image" 
                                            class="custom-control-input" {{ old('message_type') === 'image' ? 'checked' : '' }}>
                                     <label class="custom-control-label" for="message_type_image">
-                                        <i class="fas fa-image mr-1"></i>Text with Image
+                                        <i class="fas fa-paperclip mr-1"></i>Text with Attachment
                                     </label>
                                 </div>
                                 @error('message_type')
@@ -106,13 +151,13 @@
                             <!-- Image Upload (hidden by default) -->
                             <div class="form-group" id="image_upload_section" style="display: none;">
                                 <label for="image" class="font-weight-bold">
-                                    <i class="fas fa-upload mr-1"></i>Upload Image <span class="text-danger">*</span>
+                                    <i class="fas fa-upload mr-1"></i>Upload File <span class="text-danger">*</span>
                                 </label>
                                 <input type="file" name="image" id="image" 
                                        class="form-control-file @error('image') is-invalid @enderror" 
-                                       accept="image/*">
+                                       accept="image/*,.pdf">
                                 <small class="text-muted">
-                                    Supported formats: JPEG, PNG, JPG, GIF. Max size: 5MB
+                                    Supported formats: JPEG, PNG, JPG, GIF, PDF. Max size: 5MB
                                 </small>
                                 @error('image')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>

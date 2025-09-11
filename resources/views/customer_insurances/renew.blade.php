@@ -5,30 +5,18 @@
 @section('content')
 
     <div class="container-fluid">
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Renew Customer Insurance</h1>
-            <a href="{{ route('customer_insurances.index') }}" onclick="window.history.go(-1); return false;"
-                class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm"><i
-                    class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
-        </div>
 
         {{-- Alert Messages --}}
         @include('common.alert')
 
         <!-- DataTales Example -->
         <div class="card shadow mb-4">
-            <div class="card-header py-3">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                 <h6 class="m-0 font-weight-bold text-primary">Renew Customer Insurance</h6>
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+                <a href="{{ route('customer_insurances.index') }}" onclick="window.history.go(-1); return false;"
+                   class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Back
+                </a>
             </div>
             <form method="POST"
                 action="{{ route('customer_insurances.storeRenew', ['customer_insurance' => $customer_insurance->id]) }}"
@@ -959,27 +947,24 @@
         premiumTypeChanged();
 
         function setExpiredDate() {
-            var startDateStr = document.getElementById("start_date").value;
-            var startDateComponents = startDateStr.split("-"); // Split the date string by '-'
-
-            // Create a new Date object using the parsed components
-            var startDate = new Date(startDateComponents[2], startDateComponents[1] - 1, startDateComponents[0]);
-
-            // Ensure startDate is set to the correct time (typically midnight)
-            startDate.setHours(0, 0, 0, 0);
-            console.log(startDate);
+            var startDateInput = document.getElementById("start_date");
+            var expiredDateInput = document.getElementById("expired_date");
+            
+            if (!startDateInput.value) return;
+            
+            // Get the date from Flatpickr instance
+            var startDate = startDateInput._flatpickr.selectedDates[0];
+            if (!startDate) return;
+            
             // Calculate the expired date by adding 1 year - 1 day to the start date
             var expiredDate = new Date(startDate);
             expiredDate.setFullYear(startDate.getFullYear() + 1);
             expiredDate.setDate(startDate.getDate() - 1);
-            console.log(expiredDate);
-
-            // Format the expired date as "dd-mm-yyyy"
-            var formattedExpiredDate = ('0' + expiredDate.getDate()).slice(-2) + '-' + ('0' + (expiredDate.getMonth() + 1))
-                .slice(-2) + '-' + expiredDate.getFullYear();
-            console.log(formattedExpiredDate);
-            // Set the formatted expired date to the input field
-            $('#expired_date').datepicker('update', formattedExpiredDate);
+            
+            // Set the date using Flatpickr
+            if (expiredDateInput._flatpickr) {
+                expiredDateInput._flatpickr.setDate(expiredDate);
+            }
         }
         const inputElements = document.querySelectorAll('input[type="text"]');
 

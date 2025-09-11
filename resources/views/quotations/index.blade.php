@@ -4,24 +4,13 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
-                        <div class="mb-2 mb-md-0">
-                            <h1 class="h4 mb-0 text-primary font-weight-bold">
-                                <i class="fas fa-file-alt"></i> Quotations Management
-                            </h1>
-                            <small class="text-muted">Manage insurance quotations and quotes</small>
-                        </div>
-                        <div class="d-flex flex-wrap align-items-center gap-2">
-                            @can('quotation-create')
-                            <a href="{{ route('quotations.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Create New</span>
-                            </a>
-                            @endcan
-                        </div>
-                    </div>
-                </div>
+            <div class="card shadow mt-3 mb-4">
+                <x-list-header 
+                        title="Quotations Management"
+                        subtitle="Manage insurance quotations and quotes"
+                        addRoute="quotations.create"
+                        addPermission="quotation-create"
+                />
                 <div class="card-body">
                     <!-- Search and Filter Form -->
                     <form method="GET" action="{{ route('quotations.index') }}" class="mb-4">

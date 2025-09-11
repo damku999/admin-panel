@@ -8,13 +8,12 @@
 <div class="modal fade" id="delete_confirm">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-semibold text-dark">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
                     <span class="module_action">Delete</span> Confirmation
-                </h4>
-                <button type="button" class="close" onclick="hideModal('delete_confirm')" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                </h5>
+                <button type="button" class="btn-close" onclick="hideModal('delete_confirm')" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <p>Are you sure you want to <span class='module_action'>Delete</span> this <span

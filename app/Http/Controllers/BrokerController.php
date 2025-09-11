@@ -8,7 +8,11 @@ use App\Http\Requests\UpdateBrokerRequest;
 use App\Models\Broker;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\BrokersExport;
 
 class BrokerController extends Controller
 {
@@ -65,7 +69,7 @@ class BrokerController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->back()->with('success', 'Broker Created Successfully.');
+            return redirect()->route('brokers.index')->with('success', 'Broker Created Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();

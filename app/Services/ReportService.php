@@ -23,8 +23,9 @@ class ReportService implements ReportServiceInterface
 {
     public function __construct(
         private CacheService $cacheService
-    ) {}
-    
+    ) {
+    }
+
     /**
      * Get initial data for reports page with caching
      */
@@ -33,19 +34,19 @@ class ReportService implements ReportServiceInterface
         return $this->cacheService->cacheQuery('report_initial_data', [], function () {
             return [
                 'customers' => Customer::select('id', 'name')->get(),
-                'brokers' => $this->cacheService->getBrokers()->map(function($item) { 
-                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']]; 
+                'brokers' => $this->cacheService->getBrokers()->map(function ($item) {
+                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']];
                 }),
                 'relationship_managers' => RelationshipManager::select('id', 'name')->get(),
                 'branches' => Branch::select('id', 'name')->get(),
-                'insurance_companies' => $this->cacheService->getInsuranceCompanies()->map(function($item) { 
-                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']]; 
+                'insurance_companies' => $this->cacheService->getInsuranceCompanies()->map(function ($item) {
+                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']];
                 }),
-                'policy_type' => $this->cacheService->getPolicyTypes()->map(function($item) { 
-                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']]; 
+                'policy_type' => $this->cacheService->getPolicyTypes()->map(function ($item) {
+                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']];
                 }),
-                'fuel_type' => $this->cacheService->getFuelTypes()->map(function($item) { 
-                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']]; 
+                'fuel_type' => $this->cacheService->getFuelTypes()->map(function ($item) {
+                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']];
                 }),
                 'premium_types' => $this->cacheService->getPremiumTypes(),
                 'reference_by_user' => ReferenceUser::select('id', 'name')->get(),
@@ -54,48 +55,48 @@ class ReportService implements ReportServiceInterface
             ];
         });
     }
-    
+
     /**
      * Generate cross selling report with analysis - cached for performance
      */
     public function generateCrossSellingReport(array $parameters): array
     {
         return $this->cacheService->cacheReport('cross_selling', $parameters, function () use ($parameters) {
-            $premiumTypes = PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies');
+            $premiumTypes = PremiumType::select(['id', 'name', 'is_vehicle', 'is_life_insurance_policies']);
             if (!empty($parameters['premium_type_id'])) {
                 $premiumTypes = $premiumTypes->whereIn('id', $parameters['premium_type_id']);
             }
             $premiumTypes = $premiumTypes->get();
 
-        $customer_obj = Customer::with(['insurance.premiumType'])
-            ->orderBy('name');
+            $customer_obj = Customer::with(['insurance.premiumType'])
+                ->orderBy('name');
 
-        // Apply date filters if provided
-        $hasDateFilter = false;
-        if (!empty($parameters['issue_start_date']) || !empty($parameters['issue_end_date'])) {
-            $customer_obj = $customer_obj->whereHas('insurance', function ($query) use ($parameters) {
-                if (!empty($parameters['issue_start_date'])) {
-                    $startDate = \App\Helpers\DateHelper::isValidDatabaseFormat($parameters['issue_start_date']) 
-                        ? $parameters['issue_start_date'] 
-                        : formatDateForDatabase($parameters['issue_start_date']);
-                    $query->where('start_date', '>=', $startDate);
-                }
-                if (!empty($parameters['issue_end_date'])) {
-                    $endDate = \App\Helpers\DateHelper::isValidDatabaseFormat($parameters['issue_end_date']) 
-                        ? $parameters['issue_end_date'] 
-                        : formatDateForDatabase($parameters['issue_end_date']);
-                    $query->where('start_date', '<=', $endDate);
-                }
+            // Apply date filters if provided
+            $hasDateFilter = false;
+            if (!empty($parameters['issue_start_date']) || !empty($parameters['issue_end_date'])) {
+                $customer_obj = $customer_obj->whereHas('insurance', function ($query) use ($parameters) {
+                    if (!empty($parameters['issue_start_date'])) {
+                        $startDate = \App\Helpers\DateHelper::isValidDatabaseFormat($parameters['issue_start_date'])
+                            ? $parameters['issue_start_date']
+                            : formatDateForDatabase($parameters['issue_start_date']);
+                        $query->where('start_date', '>=', $startDate);
+                    }
+                    if (!empty($parameters['issue_end_date'])) {
+                        $endDate = \App\Helpers\DateHelper::isValidDatabaseFormat($parameters['issue_end_date'])
+                            ? $parameters['issue_end_date']
+                            : formatDateForDatabase($parameters['issue_end_date']);
+                        $query->where('start_date', '<=', $endDate);
+                    }
+                });
+                $hasDateFilter = true;
+            }
+
+            $customers = $customer_obj->get();
+            $oneYearAgo = Carbon::now()->subYear();
+
+            $results = $customers->map(function ($customer) use ($premiumTypes, $oneYearAgo, $hasDateFilter) {
+                return $this->analyzeCustomerCrossSellingData($customer, $premiumTypes, $oneYearAgo, $hasDateFilter);
             });
-            $hasDateFilter = true;
-        }
-
-        $customers = $customer_obj->get();
-        $oneYearAgo = Carbon::now()->subYear();
-
-        $results = $customers->map(function ($customer) use ($premiumTypes, $oneYearAgo, $hasDateFilter) {
-            return $this->analyzeCustomerCrossSellingData($customer, $premiumTypes, $oneYearAgo, $hasDateFilter);
-        });
 
             return [
                 'premiumTypes' => $premiumTypes,
@@ -103,31 +104,43 @@ class ReportService implements ReportServiceInterface
             ];
         });
     }
-    
+
     /**
      * Generate customer insurance report
      */
     public function generateCustomerInsuranceReport(array $parameters): array
     {
-        return Report::getInsuranceReport($parameters);
+        $result = Report::getInsuranceReport($parameters);
+        return $result ? $result->toArray() : [];
     }
-    
+
     /**
      * Export cross selling report to Excel
      */
     public function exportCrossSellingReport(array $parameters): BinaryFileResponse
     {
-        return Excel::download(new CrossSellingExport($parameters), 'cross_selling.xlsx');
+        $timestamp = date('Y-m-d_H-i-s');
+        return Excel::download(new CrossSellingExport($parameters), "cross_selling_report_{$timestamp}.xlsx");
     }
-    
+
     /**
      * Export customer insurance report to Excel
      */
     public function exportCustomerInsuranceReport(array $parameters): BinaryFileResponse
     {
-        return Excel::download(new CustomerInsurancesExport1($parameters), 'customer_insurances.xlsx');
+        // Generate filename based on report type
+        $reportName = $parameters['report_name'] ?? 'customer_insurances';
+        $timestamp = date('Y-m-d_H-i-s');
+        
+        $filename = match($reportName) {
+            'insurance_detail' => "insurance_detail_report_{$timestamp}.xlsx",
+            'due_policy_detail' => "due_policy_report_{$timestamp}.xlsx", 
+            default => "customer_insurances_{$timestamp}.xlsx"
+        };
+
+        return Excel::download(new CustomerInsurancesExport1($parameters), $filename);
     }
-    
+
     /**
      * Save user's selected columns for a report
      */
@@ -149,7 +162,7 @@ class ReportService implements ReportServiceInterface
             'selected_columns' => $updatedColumns,
         ]);
     }
-    
+
     /**
      * Load user's saved columns for a report
      */
@@ -162,7 +175,7 @@ class ReportService implements ReportServiceInterface
 
         return $report ? $report->selected_columns : null;
     }
-    
+
     /**
      * Analyze customer cross selling data for premium types
      */

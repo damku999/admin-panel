@@ -45,7 +45,7 @@ class MarketingWhatsAppController extends Controller
             'recipients' => 'required|in:all,selected',
             'selected_customers' => 'required_if:recipients,selected|array|min:1',
             'selected_customers.*' => 'exists:customers,id',
-            'image' => 'required_if:message_type,image|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB max
+            'image' => 'required_if:message_type,image|file|mimes:jpeg,png,jpg,gif,pdf|max:5120', // 5MB max
         ]);
 
         if ($validator->fails()) {
@@ -138,22 +138,23 @@ class MarketingWhatsAppController extends Controller
 
             DB::commit();
 
-            // Prepare response message
-            $message = "Marketing messages sent successfully!";
-            $message .= "\n✅ Success: {$successCount} messages";
-            
-            if ($failedCount > 0) {
-                $message .= "\n❌ Failed: {$failedCount} messages";
-                
-                if (count($failedCustomers) <= 5) {
-                    $message .= "\nFailed customers: " . implode(', ', $failedCustomers);
-                } else {
-                    $message .= "\nFailed customers: " . implode(', ', array_slice($failedCustomers, 0, 5)) . ' and ' . (count($failedCustomers) - 5) . ' more...';
-                }
-            }
+            // Prepare response data for better UI display
+            $responseData = [
+                'total_customers' => $customers->count(),
+                'success_count' => $successCount,
+                'failed_count' => $failedCount,
+                'failed_customers' => $failedCustomers
+            ];
 
-            return redirect()->route('marketing.whatsapp.index')
-                ->with('success', $message);
+            if ($failedCount > 0) {
+                return redirect()->route('marketing.whatsapp.index')
+                    ->with('marketing_result', $responseData)
+                    ->with('success', "Messages sent with some issues. Please check the details below.");
+            } else {
+                return redirect()->route('marketing.whatsapp.index')
+                    ->with('marketing_result', $responseData)
+                    ->with('success', "All marketing messages sent successfully!");
+            }
 
         } catch (\Exception $e) {
             DB::rollback();

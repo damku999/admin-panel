@@ -2,11 +2,12 @@
     aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalExample">Are you Sure You wanted to Delete?</h5>
-                <button class="close" type="button" onclick="hideModal('deleteModal')" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-semibold text-dark" id="deleteModalExample">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    Delete Reference User
+                </h5>
+                <x-modal-close-button modalId="deleteModal" />
             </div>
             <div class="modal-body">Select "Delete" below if you want to delete Reference User!.</div>
             <div class="modal-footer">

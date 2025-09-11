@@ -5,23 +5,13 @@
 @section('content')
 <div class="container-fluid">
     <!-- Search and Filter Card -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-3">
-                <div class="mb-2 mb-md-0">
-                    <h1 class="h4 mb-0 text-primary font-weight-bold">Family Groups Management</h1>
-                    <small class="text-muted">Manage family group records</small>
-                </div>
-                <div class="d-flex flex-wrap align-items-center gap-2">
-                    <a href="{{ route('family_groups.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Create Group</span>
-                    </a>
-                    <a href="{{ route('family_groups.export') }}" class="btn btn-success">
-                        <i class="fas fa-file-excel"></i> <span class="d-none d-sm-inline">Export</span>
-                    </a>
-                </div>
-            </div>
-        </div>
+    <div class="card shadow mt-3 mb-4">
+        <x-list-header 
+                title="Family Groups Management"
+                subtitle="Manage family group records"
+                addRoute="family_groups.create"
+                exportRoute="family_groups.export"
+            />
         <div class="card-body">
             <form method="GET" action="{{ route('family_groups.index') }}" id="search_form">
                 <div class="row">

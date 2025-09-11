@@ -21,7 +21,7 @@ class EventServiceProvider extends ServiceProvider
         
         // Customer Events
         \App\Events\Customer\CustomerRegistered::class => [
-            \App\Listeners\Customer\SendWelcomeEmail::class,
+            // SendWelcomeEmail is now handled synchronously in CustomerService
             \App\Listeners\Customer\CreateCustomerAuditLog::class,
             \App\Listeners\Customer\NotifyAdminOfRegistration::class,
         ],

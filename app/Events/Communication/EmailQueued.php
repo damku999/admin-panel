@@ -11,7 +11,7 @@ class EmailQueued
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public string $recipientEmail;
-    public string $recipientName;
+    public ?string $recipientName;
     public string $subject;
     public string $emailType;
     public array $emailData;
@@ -22,7 +22,7 @@ class EmailQueued
 
     public function __construct(
         string $recipientEmail,
-        string $recipientName,
+        ?string $recipientName,
         string $subject,
         string $emailType,
         array $emailData = [],
@@ -46,7 +46,7 @@ class EmailQueued
     {
         return [
             'recipient_email' => $this->recipientEmail,
-            'recipient_name' => $this->recipientName,
+            'recipient_name' => $this->recipientName ?? 'Unknown',
             'subject' => $this->subject,
             'email_type' => $this->emailType,
             'email_data' => $this->emailData,

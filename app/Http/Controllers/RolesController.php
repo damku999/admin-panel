@@ -70,7 +70,7 @@ class RolesController extends Controller
             return redirect()->back()->with('success', 'Roles created successfully.');
         } catch (\Throwable $th) {
             DB::rollback();
-            return redirect()->route('roles.add')->with('error', $th->getMessage());
+            return redirect()->route('roles.index')->with('error', $th->getMessage());
         }
 
     }

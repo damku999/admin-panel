@@ -19,16 +19,6 @@
                     <span>Back</span>
                 </a>
             </div>
-            @if ($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3 mb-0" role="alert">
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
             <form method="POST" action="{{ route('customer_insurances.store') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="card-body py-3">
@@ -298,7 +288,7 @@
                         <div class="row g-3 mt-1">
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold"><span class="text-danger">*</span> NCB %</label>
-                                <input type="text" class="form-control form-control-sm @error('ncb_percentage') is-invalid @enderror"
+                                <input type="number" min="-100" max="100" step="0.01" class="form-control form-control-sm @error('ncb_percentage') is-invalid @enderror"
                                     name="ncb_percentage" placeholder="Enter NCB percentage" value="{{ old('ncb_percentage') }}">
                                 @error('ncb_percentage')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -306,7 +296,7 @@
                             </div>
                             <div class="col-md-4 cgst_sgt2">
                                 <label class="form-label fw-semibold"><span class="text-danger">*</span> GVW</label>
-                                <input type="text" class="decimal-input form-control form-control-sm @error('gross_vehicle_weight') is-invalid @enderror"
+                                <input type="number" step="0.01" min="0" class="decimal-input form-control form-control-sm @error('gross_vehicle_weight') is-invalid @enderror"
                                     name="gross_vehicle_weight" placeholder="Enter GVW" value="{{ old('gross_vehicle_weight') }}">
                                 @error('gross_vehicle_weight')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -332,7 +322,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">Premium Paying Term</label>
-                                <input type="text" class="decimal-input form-control form-control-sm @error('premium_paying_term') is-invalid @enderror"
+                                <input type="number" step="1" min="0" class="decimal-input form-control form-control-sm @error('premium_paying_term') is-invalid @enderror"
                                     name="premium_paying_term" placeholder="Enter premium paying term" value="{{ old('premium_paying_term') }}">
                                 @error('premium_paying_term')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -340,7 +330,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">Policy Term</label>
-                                <input type="text" class="decimal-input form-control form-control-sm @error('policy_term') is-invalid @enderror"
+                                <input type="number" step="1" min="0" class="decimal-input form-control form-control-sm @error('policy_term') is-invalid @enderror"
                                     name="policy_term" placeholder="Enter policy term" value="{{ old('policy_term') }}">
                                 @error('policy_term')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -350,7 +340,7 @@
                         <div class="row g-3 mt-1">
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">Sum Insured</label>
-                                <input type="text" class="decimal-input form-control form-control-sm @error('sum_insured') is-invalid @enderror"
+                                <input type="number" step="0.01" min="0" class="decimal-input form-control form-control-sm @error('sum_insured') is-invalid @enderror"
                                     name="sum_insured" placeholder="Enter sum insured" value="{{ old('sum_insured') }}">
                                 @error('sum_insured')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -358,7 +348,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">Pension Amount Yearly</label>
-                                <input type="text" class="decimal-input form-control form-control-sm @error('pension_amount_yearly') is-invalid @enderror"
+                                <input type="number" step="0.01" min="0" class="decimal-input form-control form-control-sm @error('pension_amount_yearly') is-invalid @enderror"
                                     name="pension_amount_yearly" placeholder="Enter pension amount yearly" value="{{ old('pension_amount_yearly') }}">
                                 @error('pension_amount_yearly')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -366,7 +356,7 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">Approx Maturity Amount</label>
-                                <input type="text" class="decimal-input form-control form-control-sm @error('approx_maturity_amount') is-invalid @enderror"
+                                <input type="number" step="0.01" min="0" class="decimal-input form-control form-control-sm @error('approx_maturity_amount') is-invalid @enderror"
                                     name="approx_maturity_amount" placeholder="Enter approx maturity amount" value="{{ old('approx_maturity_amount') }}">
                                 @error('approx_maturity_amount')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -423,23 +413,23 @@
                         <div class="row g-3">
                             <div class="col-md-4 premium-fields">
                                 <label class="form-label fw-semibold">OD Premium</label>
-                                <input type="text" class="decimal-input form-control form-control-sm @error('od_premium') is-invalid @enderror"
-                                    name="od_premium" placeholder="Enter OD premium" value="{{ old('od_premium') }}">
+                                <input type="number" step="0.01" min="0" class="decimal-input form-control form-control-sm @error('od_premium') is-invalid @enderror"
+                                    name="od_premium" id="od_premium" placeholder="Enter OD premium" value="{{ old('od_premium') }}">
                                 @error('od_premium')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-4 premium-fields">
                                 <label class="form-label fw-semibold">TP Premium</label>
-                                <input type="text" class="decimal-input form-control form-control-sm @error('tp_premium') is-invalid @enderror"
-                                    name="tp_premium" placeholder="Enter TP premium" value="{{ old('tp_premium') }}">
+                                <input type="number" step="0.01" min="0" class="decimal-input form-control form-control-sm @error('tp_premium') is-invalid @enderror"
+                                    name="tp_premium" id="tp_premium" placeholder="Enter TP premium" value="{{ old('tp_premium') }}">
                                 @error('tp_premium')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-4 life-insurance-policies-fields">
                                 <label class="form-label fw-semibold"><span class="text-danger">*</span> Premium Amount</label>
-                                <input type="text" class="decimal-input form-control form-control-sm @error('premium_amount') is-invalid @enderror"
+                                <input type="number" step="0.01" min="0" class="decimal-input form-control form-control-sm @error('premium_amount') is-invalid @enderror"
                                     name="premium_amount" placeholder="Enter premium amount" value="{{ old('premium_amount') }}">
                                 @error('premium_amount')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -449,24 +439,24 @@
                         <div class="row g-3 mt-1">
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold"><span class="text-danger">*</span> Net Premium</label>
-                                <input type="text" class="decimal-input form-control form-control-sm @error('net_premium') is-invalid @enderror"
-                                    name="net_premium" placeholder="Enter net premium" value="{{ old('net_premium') }}">
+                                <input type="number" step="0.01" min="0" class="decimal-input form-control form-control-sm @error('net_premium') is-invalid @enderror"
+                                    name="net_premium" id="net_premium" placeholder="Enter net premium" value="{{ old('net_premium') }}" required>
                                 @error('net_premium')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold"><span class="text-danger">*</span> CGST 1</label>
-                                <input type="text" class="decimal-input form-control form-control-sm @error('cgst1') is-invalid @enderror"
-                                    name="cgst1" placeholder="Enter CGST 1" value="{{ old('cgst1') }}">
+                                <input type="number" step="0.01" min="0" class="decimal-input form-control form-control-sm @error('cgst1') is-invalid @enderror"
+                                    name="cgst1" id="cgst1" placeholder="Enter CGST 1" value="{{ old('cgst1') }}" required>
                                 @error('cgst1')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold"><span class="text-danger">*</span> SGST 1</label>
-                                <input type="text" class="decimal-input form-control form-control-sm @error('sgst1') is-invalid @enderror"
-                                    name="sgst1" placeholder="Enter SGST 1" value="{{ old('sgst1') }}">
+                                <input type="number" step="0.01" min="0" class="decimal-input form-control form-control-sm @error('sgst1') is-invalid @enderror"
+                                    name="sgst1" id="sgst1" placeholder="Enter SGST 1" value="{{ old('sgst1') }}" required>
                                 @error('sgst1')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -475,24 +465,24 @@
                         <div class="row g-3 mt-1">
                             <div class="col-md-4 cgst_sgt2">
                                 <label class="form-label fw-semibold"><span class="text-danger">*</span> CGST 2</label>
-                                <input type="text" class="decimal-input form-control form-control-sm @error('cgst2') is-invalid @enderror"
-                                    name="cgst2" placeholder="Enter CGST 2" value="{{ old('cgst2') }}">
+                                <input type="number" step="0.01" min="0" class="decimal-input form-control form-control-sm @error('cgst2') is-invalid @enderror"
+                                    name="cgst2" id="cgst2" placeholder="Enter CGST 2" value="{{ old('cgst2') }}">
                                 @error('cgst2')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-4 cgst_sgt2">
                                 <label class="form-label fw-semibold"><span class="text-danger">*</span> SGST 2</label>
-                                <input type="text" class="decimal-input form-control form-control-sm @error('sgst2') is-invalid @enderror"
-                                    name="sgst2" placeholder="Enter SGST 2" value="{{ old('sgst2') }}">
+                                <input type="number" step="0.01" min="0" class="decimal-input form-control form-control-sm @error('sgst2') is-invalid @enderror"
+                                    name="sgst2" id="sgst2" placeholder="Enter SGST 2" value="{{ old('sgst2') }}">
                                 @error('sgst2')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold"><span class="text-danger">*</span> Final Premium With GST</label>
-                                <input type="text" class="decimal-input form-control form-control-sm @error('final_premium_with_gst') is-invalid @enderror"
-                                    name="final_premium_with_gst" placeholder="Final premium with GST" value="{{ old('final_premium_with_gst') }}" readonly>
+                                <input type="number" step="0.01" min="0" class="decimal-input form-control form-control-sm @error('final_premium_with_gst') is-invalid @enderror"
+                                    name="final_premium_with_gst" id="final_premium_with_gst" placeholder="Final premium with GST" value="{{ old('final_premium_with_gst') }}" readonly required>
                                 @error('final_premium_with_gst')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -518,16 +508,16 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">My Commission Percentage</label>
-                                    <input type="text" class="decimal-input form-control form-control-sm @error('my_commission_percentage') is-invalid @enderror"
-                                        name="my_commission_percentage" placeholder="Enter my commission %" value="{{ old('my_commission_percentage') }}">
+                                    <input type="number" min="-100" max="100" step="0.01" class="form-control form-control-sm @error('my_commission_percentage') is-invalid @enderror"
+                                        name="my_commission_percentage" id="my_commission_percentage" placeholder="Enter my commission %" value="{{ old('my_commission_percentage') }}">
                                     @error('my_commission_percentage')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">My Commission Amount</label>
-                                    <input type="text" class="decimal-input form-control form-control-sm @error('my_commission_amount') is-invalid @enderror"
-                                        name="my_commission_amount" placeholder="My commission amount" value="{{ old('my_commission_amount') }}" readonly>
+                                    <input type="number" step="0.01" class="decimal-input form-control form-control-sm @error('my_commission_amount') is-invalid @enderror"
+                                        name="my_commission_amount" id="my_commission_amount" placeholder="My commission amount" value="{{ old('my_commission_amount') }}" readonly>
                                     @error('my_commission_amount')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -536,24 +526,24 @@
                             <div class="row g-3 mt-1">
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">Transfer Commission Percentage</label>
-                                    <input type="text" class="decimal-input form-control form-control-sm @error('transfer_commission_percentage') is-invalid @enderror"
-                                        name="transfer_commission_percentage" placeholder="Enter transfer commission %" value="{{ old('transfer_commission_percentage') }}">
+                                    <input type="number" min="-100" max="100" step="0.01" class="form-control form-control-sm @error('transfer_commission_percentage') is-invalid @enderror"
+                                        name="transfer_commission_percentage" id="transfer_commission_percentage" placeholder="Enter transfer commission %" value="{{ old('transfer_commission_percentage') }}">
                                     @error('transfer_commission_percentage')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold">Transfer Commission Amount</label>
-                                    <input type="text" class="decimal-input form-control form-control-sm @error('transfer_commission_amount') is-invalid @enderror"
-                                        name="transfer_commission_amount" placeholder="Transfer commission amount" value="{{ old('transfer_commission_amount') }}" readonly>
+                                    <input type="number" step="0.01" class="decimal-input form-control form-control-sm @error('transfer_commission_amount') is-invalid @enderror"
+                                        name="transfer_commission_amount" id="transfer_commission_amount" placeholder="Transfer commission amount" value="{{ old('transfer_commission_amount') }}" readonly>
                                     @error('transfer_commission_amount')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label fw-semibold"><span class="text-danger">*</span> Actual Earnings</label>
-                                    <input type="text" class="decimal-input form-control form-control-sm @error('actual_earnings') is-invalid @enderror"
-                                        name="actual_earnings" placeholder="Actual earnings" value="{{ old('actual_earnings') }}" readonly>
+                                    <input type="number" step="0.01" class="decimal-input form-control form-control-sm @error('actual_earnings') is-invalid @enderror"
+                                        name="actual_earnings" id="actual_earnings" placeholder="Actual earnings" value="{{ old('actual_earnings') }}" readonly>
                                     @error('actual_earnings')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -562,16 +552,16 @@
                             <div class="row g-3 mt-1">
                                 <div class="col-md-4 reference_commission_fields">
                                     <label class="form-label fw-semibold">Reference Commission Percentage</label>
-                                    <input type="text" class="decimal-input form-control form-control-sm @error('reference_commission_percentage') is-invalid @enderror"
-                                        name="reference_commission_percentage" placeholder="Enter reference commission %" value="{{ old('reference_commission_percentage') }}">
+                                    <input type="number" min="-100" max="100" step="0.01" class="form-control form-control-sm @error('reference_commission_percentage') is-invalid @enderror"
+                                        name="reference_commission_percentage" id="reference_commission_percentage" placeholder="Enter reference commission %" value="{{ old('reference_commission_percentage') }}">
                                     @error('reference_commission_percentage')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="col-md-4 reference_commission_fields">
                                     <label class="form-label fw-semibold">Reference Commission Amount</label>
-                                    <input type="text" class="decimal-input form-control form-control-sm @error('reference_commission_amount') is-invalid @enderror"
-                                        name="reference_commission_amount" placeholder="Reference commission amount" value="{{ old('reference_commission_amount') }}" readonly>
+                                    <input type="number" step="0.01" class="decimal-input form-control form-control-sm @error('reference_commission_amount') is-invalid @enderror"
+                                        name="reference_commission_amount" id="reference_commission_amount" placeholder="Reference commission amount" value="{{ old('reference_commission_amount') }}" readonly>
                                     @error('reference_commission_amount')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -642,19 +632,19 @@
             function calculateCommission() {
                 var commissionOn = $('#commission_on').val();
                 var baseRate = parseFloat($('input[name=' + commissionOn + ']').val()) || 0;
-                var myCommissionPercentage = parseFloat($('#my_commission_percentage').val().replace(",", ".")) ||
-                    0;
-                var transferCommissionPercentage = parseFloat($('#transfer_commission_percentage').val().replace(
-                    ",", ".")) || 0;
+                var myCommissionPercentageVal = $('#my_commission_percentage').val() || '';
+                var myCommissionPercentage = parseFloat(myCommissionPercentageVal.replace(",", ".")) || 0;
+                var transferCommissionPercentageVal = $('#transfer_commission_percentage').val() || '';
+                var transferCommissionPercentage = parseFloat(transferCommissionPercentageVal.replace(",", ".")) || 0;
 
-                var referenceCommissionPercentage = parseFloat($('#reference_commission_percentage').val().replace(
-                    ",", ".")) || 0;
+                var referenceCommissionPercentageVal = $('#reference_commission_percentage').val() || '';
+                var referenceCommissionPercentage = parseFloat(referenceCommissionPercentageVal.replace(",", ".")) || 0;
 
 
-                // Validate percentage values
-                myCommissionPercentage = Math.min(myCommissionPercentage, 100);
-                transferCommissionPercentage = Math.min(transferCommissionPercentage, 100);
-                referenceCommissionPercentage = Math.min(referenceCommissionPercentage, 100);
+                // Validate percentage values (clamp between -100 and 100)
+                myCommissionPercentage = Math.max(-100, Math.min(myCommissionPercentage, 100));
+                transferCommissionPercentage = Math.max(-100, Math.min(transferCommissionPercentage, 100));
+                referenceCommissionPercentage = Math.max(-100, Math.min(referenceCommissionPercentage, 100));
 
                 var myCommissionAmount = (baseRate * myCommissionPercentage) / 100;
                 var transferCommissionAmount = (baseRate * transferCommissionPercentage) / 100;
@@ -678,20 +668,107 @@
                 }
             });
 
+            // Validate percentage fields (-100 to 100 range)
+            $('input[name="ncb_percentage"], input[name="my_commission_percentage"], input[name="transfer_commission_percentage"], input[name="reference_commission_percentage"]').on('input change', function() {
+                var value = parseFloat($(this).val());
+                if (isNaN(value)) return;
+                
+                if (value > 100) {
+                    $(this).val(100);
+                } else if (value < -100) {
+                    $(this).val(-100);
+                }
+            });
+
             // Calculate on change of commission fields
             $('#commission_on, #my_commission_percentage, #transfer_commission_percentage, #reference_commission_percentage, #net_premium, #od_premium, #tp_premium')
-                .on('change',
+                .on('change input',
                     function() {
                         calculateCommission();
                     });
 
             // Initial calculation on page load
             calculateCommission();
+
+            // Client-side form validation
+            $('form').on('submit', function(e) {
+                let isValid = true;
+                let firstErrorField = null;
+
+                // Clear previous validation messages
+                $('.is-invalid').removeClass('is-invalid');
+                $('.invalid-feedback').remove();
+
+                // Validate required fields
+                const requiredFields = [
+                    { field: 'customer_id', name: 'Customer' },
+                    { field: 'issue_date', name: 'Issue Date' },
+                    { field: 'policy_type_id', name: 'Policy Type' },
+                    { field: 'branch_id', name: 'Branch' },
+                    { field: 'broker_id', name: 'Broker' },
+                    { field: 'relationship_manager_id', name: 'Relationship Manager' },
+                    { field: 'insurance_company_id', name: 'Insurance Company' },
+                    { field: 'premium_type_id', name: 'Premium Type' },
+                    { field: 'policy_no', name: 'Policy Number' },
+                    { field: 'start_date', name: 'Start Date' },
+                    { field: 'expired_date', name: 'Expired Date' },
+                    { field: 'net_premium', name: 'Net Premium' },
+                    { field: 'cgst1', name: 'CGST 1' },
+                    { field: 'sgst1', name: 'SGST 1' },
+                    { field: 'final_premium_with_gst', name: 'Final Premium With GST' }
+                ];
+
+                requiredFields.forEach(function(item) {
+                    const field = $(`[name="${item.field}"]`);
+                    if (field.length && (!field.val() || field.val().trim() === '')) {
+                        field.addClass('is-invalid');
+                        field.after(`<div class="invalid-feedback">The ${item.name} field is required.</div>`);
+                        isValid = false;
+                        if (!firstErrorField) firstErrorField = field;
+                    }
+                });
+
+                // Validate numeric fields
+                const numericFields = [
+                    'net_premium', 'cgst1', 'sgst1', 'cgst2', 'sgst2', 
+                    'od_premium', 'tp_premium', 'final_premium_with_gst',
+                    'ncb_percentage', 'mfg_year', 'premium_amount'
+                ];
+
+                numericFields.forEach(function(fieldName) {
+                    const field = $(`[name="${fieldName}"]`);
+                    if (field.length && field.val() && field.val().trim() !== '') {
+                        const value = parseFloat(field.val());
+                        if (isNaN(value) || value < 0) {
+                            field.addClass('is-invalid');
+                            field.after(`<div class="invalid-feedback">The ${fieldName.replace('_', ' ')} must be a valid positive number.</div>`);
+                            isValid = false;
+                            if (!firstErrorField) firstErrorField = field;
+                        }
+                    }
+                });
+
+                // Focus on first error field and show error message
+                if (!isValid) {
+                    if (firstErrorField) {
+                        firstErrorField.focus();
+                        $('html, body').animate({
+                            scrollTop: firstErrorField.offset().top - 100
+                        }, 500);
+                    }
+                    toastr.error('Please correct the errors in the form before submitting.');
+                    e.preventDefault();
+                    return false;
+                }
+
+                return isValid;
+            });
         });
         const referenceBySelect = document.getElementById('reference_by');
         const referenceCommissionFields = document.querySelectorAll('.reference_commission_fields');
 
         function toggleReferenceFields() {
+            if (!referenceBySelect) return;
             const selectedOptionValue = referenceBySelect.value;
             const isReferenceSelected = Number(selectedOptionValue) >= 1;
             // Loop through each element with the class and hide or show them accordingly
@@ -700,7 +777,9 @@
             });
         }
         toggleReferenceFields();
-        referenceBySelect.addEventListener('change', toggleReferenceFields);
+        if (referenceBySelect) {
+            referenceBySelect.addEventListener('change', toggleReferenceFields);
+        }
 
         var netPremiumInput = document.getElementById('net_premium');
         var odPremiumInput = document.getElementById('od_premium');
@@ -714,15 +793,24 @@
         var premiumTypeSelect = document.getElementById('premium_type_id');
 
         function calculateFinalPremium() {
-            var netPremium = parseFloat(netPremiumInput.value) || 0;
-            var odPremium = parseFloat(odPremiumInput.value) || 0;
-            var tpPremium = parseFloat(tpPremiumInput.value) || 0;
-            var cgst1 = parseFloat(cgst1Input.value) || 0;
-            var cgst2 = parseFloat(cgst2Input.value) || 0;
-            var sgst1 = parseFloat(sgst1Input.value) || 0;
-            var sgst2 = parseFloat(sgst2Input.value) || 0;
+            var netPremium = parseFloat(netPremiumInput ? netPremiumInput.value : 0) || 0;
+            var odPremium = parseFloat(odPremiumInput ? odPremiumInput.value : 0) || 0;
+            var tpPremium = parseFloat(tpPremiumInput ? tpPremiumInput.value : 0) || 0;
+            var cgst1 = parseFloat(cgst1Input ? cgst1Input.value : 0) || 0;
+            var cgst2 = parseFloat(cgst2Input ? cgst2Input.value : 0) || 0;
+            var sgst1 = parseFloat(sgst1Input ? sgst1Input.value : 0) || 0;
+            var sgst2 = parseFloat(sgst2Input ? sgst2Input.value : 0) || 0;
+
+
+            if (!premiumTypeSelect || premiumTypeSelect.selectedIndex === -1) {
+                return;
+            }
 
             var selectedOption = premiumTypeSelect.options[premiumTypeSelect.selectedIndex];
+            if (!selectedOption) {
+                return;
+            }
+            
             var isVehicle = selectedOption.getAttribute('data-is_vehicle');
             var selectedOptionText = selectedOption.text;
 
@@ -732,29 +820,36 @@
 
             var finalPremium = netPremium + cgst1 + cgst2 + sgst1 + sgst2;
 
-            if (!isNaN(finalPremium)) {
+            if (finalPremiumInput && !isNaN(finalPremium)) {
                 finalPremiumInput.value = finalPremium.toFixed(2);
-            } else {
+            } else if (finalPremiumInput) {
                 finalPremiumInput.value = '';
             }
         }
 
-        netPremiumInput.addEventListener('input', calculateFinalPremium);
-        odPremiumInput.addEventListener('input', calculateFinalPremium);
-        tpPremiumInput.addEventListener('input', calculateFinalPremium);
-        cgst1Input.addEventListener('input', calculateFinalPremium);
-        cgst2Input.addEventListener('input', calculateFinalPremium);
-        sgst1Input.addEventListener('input', calculateFinalPremium);
-        sgst2Input.addEventListener('input', calculateFinalPremium);
-        premiumTypeSelect.addEventListener('change', calculateFinalPremium);
+        if (netPremiumInput) netPremiumInput.addEventListener('input', calculateFinalPremium);
+        if (odPremiumInput) odPremiumInput.addEventListener('input', calculateFinalPremium);
+        if (tpPremiumInput) tpPremiumInput.addEventListener('input', calculateFinalPremium);
+        if (cgst1Input) cgst1Input.addEventListener('input', calculateFinalPremium);
+        if (cgst2Input) cgst2Input.addEventListener('input', calculateFinalPremium);
+        if (sgst1Input) sgst1Input.addEventListener('input', calculateFinalPremium);
+        if (sgst2Input) sgst2Input.addEventListener('input', calculateFinalPremium);
+        if (premiumTypeSelect) premiumTypeSelect.addEventListener('change', calculateFinalPremium);
+
+        // Initial calculation on page load
+        calculateFinalPremium();
 
         function premiumTypeChanged() {
             var premiumTypeSelect = document.getElementById('premium_type_id');
             var premiumFields = document.getElementsByClassName('premium-fields');
             var lifeInsuranceFields = document.getElementsByClassName('life-insurance-policies-fields');
             var sgst2Field = document.getElementsByClassName('cgst_sgt2');
-            var netPremiumInput = document.getElementById(
-                'net_premium'); // Replace 'net_premium' with the actual ID of the net premium input field
+            var netPremiumInput = document.getElementById('net_premium');
+
+            // Check if premium type is selected
+            if (premiumTypeSelect.selectedIndex === -1 || !premiumTypeSelect.options[premiumTypeSelect.selectedIndex]) {
+                return;
+            }
 
             // Get the selected option value
             var selectedOption = premiumTypeSelect.options[premiumTypeSelect.selectedIndex];
@@ -777,8 +872,10 @@
                         sgst2Field[i].style.display = 'none';
                     }
                 }
-                // Set netPremiumInput as readonly
-                netPremiumInput.readOnly = true;
+                // Set netPremiumInput as readonly if element exists
+                if (netPremiumInput) {
+                    netPremiumInput.readOnly = true;
+                }
             } else {
                 for (var i = 0; i < premiumFields.length; i++) {
                     premiumFields[i].style.display = 'none';
@@ -786,7 +883,9 @@
                 for (var i = 0; i < sgst2Field.length; i++) {
                     sgst2Field[i].style.display = 'none';
                 }
-                netPremiumInput.readOnly = false;
+                if (netPremiumInput) {
+                    netPremiumInput.readOnly = false;
+                }
             }
 
             // Show/hide life insurance policies fields based on the selected option value
@@ -799,34 +898,59 @@
                     lifeInsuranceFields[i].style.display = 'none';
                 }
             }
+
+            // Recalculate final premium when premium type changes
+            calculateFinalPremium();
         }
 
         // Event handler for OD premium change
-        odPremiumInput.addEventListener('input', calculateNetPremium);
+        if (odPremiumInput) {
+            odPremiumInput.addEventListener('input', calculateNetPremium);
+        }
 
         // Event handler for TP premium change
-        tpPremiumInput.addEventListener('input', calculateNetPremium);
+        if (tpPremiumInput) {
+            tpPremiumInput.addEventListener('input', calculateNetPremium);
+        }
 
         // Attach the event listeners to life_insurance_payment_mode and premium_amount to trigger the calculation
-        document.getElementById('life_insurance_payment_mode').addEventListener('change', calculateNetPremium);
-        document.getElementById('premium_amount').addEventListener('input', calculateNetPremium);
+        var lifeInsurancePaymentMode = document.getElementById('life_insurance_payment_mode');
+        var premiumAmountElement = document.getElementById('premium_amount');
+        
+        if (lifeInsurancePaymentMode) {
+            lifeInsurancePaymentMode.addEventListener('change', calculateNetPremium);
+        }
+        if (premiumAmountElement) {
+            premiumAmountElement.addEventListener('input', calculateNetPremium);
+        }
 
         function calculateNetPremium() {
             var lifeInsurancePaymentModeSelect = document.getElementById('life_insurance_payment_mode');
             var premiumAmountInput = document.getElementById('premium_amount');
             var netPremiumInput = document.getElementById('net_premium');
-            var selectedOption = lifeInsurancePaymentModeSelect.options[lifeInsurancePaymentModeSelect.selectedIndex];
 
-            var multiplyBy = parseFloat(selectedOption.getAttribute('data-multiply_by'));
-            var premiumAmount = parseFloat(premiumAmountInput.value) * multiplyBy;
+            if (!netPremiumInput) return;
 
-            var odValue = parseFloat(odPremiumInput.value) || 0;
-            var tpValue = parseFloat(tpPremiumInput.value) || 0;
-            var premiumAmount = parseFloat(premiumAmount) || 0;
-            var netPremium = odValue + tpValue + premiumAmount;
+            var odValue = parseFloat(odPremiumInput ? odPremiumInput.value : 0) || 0;
+            var tpValue = parseFloat(tpPremiumInput ? tpPremiumInput.value : 0) || 0;
+            var premiumAmount = 0;
+
+            // Only calculate premium amount if life insurance fields exist and have values
+            if (lifeInsurancePaymentModeSelect && premiumAmountInput && 
+                lifeInsurancePaymentModeSelect.selectedIndex >= 0 &&
+                premiumAmountInput.value) {
+                
+                var selectedOption = lifeInsurancePaymentModeSelect.options[lifeInsurancePaymentModeSelect.selectedIndex];
+                if (selectedOption) {
+                    var multiplyBy = parseFloat(selectedOption.getAttribute('data-multiply_by')) || 1;
+                    premiumAmount = parseFloat(premiumAmountInput.value) * multiplyBy;
+                }
+            }
+
+            var netPremium = odValue + tpValue + (premiumAmount || 0);
 
             if (!isNaN(netPremium)) {
-                netPremiumInput.value = netPremium.toFixed(2); // Adjust the decimal places as needed
+                netPremiumInput.value = netPremium.toFixed(2);
             } else {
                 netPremiumInput.value = '';
             }
@@ -837,28 +961,25 @@
         premiumTypeChanged();
 
         function setExpiredDate() {
-            var startDateStr = document.getElementById("start_date").value;
-            var startDateComponents = startDateStr.split("-"); // Split the date string by '-'
-
-            // Create a new Date object using the parsed components
-            var startDate = new Date(startDateComponents[2], startDateComponents[1] - 1, startDateComponents[0]);
-
-            // Ensure startDate is set to the correct time (typically midnight)
-            startDate.setHours(0, 0, 0, 0);
-            console.log(startDate);
+            var startDateInput = document.getElementById("start_date");
+            var expiredDateInput = document.getElementById("expired_date");
+            
+            if (!startDateInput || !startDateInput.value) return;
+            if (!expiredDateInput) return;
+            
+            // Get the date from Flatpickr instance
+            if (!startDateInput._flatpickr || !startDateInput._flatpickr.selectedDates[0]) return;
+            var startDate = startDateInput._flatpickr.selectedDates[0];
+            
             // Calculate the expired date by adding 1 year - 1 day to the start date
             var expiredDate = new Date(startDate);
             expiredDate.setFullYear(startDate.getFullYear() + 1);
             expiredDate.setDate(startDate.getDate() - 1);
-            console.log(expiredDate);
-
-            // Format the expired date as "dd-mm-yyyy"
-            var formattedExpiredDate = ('0' + expiredDate.getDate()).slice(-2) + '-' + ('0' + (expiredDate.getMonth() + 1))
-                .slice(-2) + '-' + expiredDate.getFullYear();
-            console.log(formattedExpiredDate);
-
-            // Set the formatted expired date to the input field
-            $('#expired_date').datepicker('update', formattedExpiredDate);
+            
+            // Set the date using Flatpickr
+            if (expiredDateInput._flatpickr) {
+                expiredDateInput._flatpickr.setDate(expiredDate);
+            }
         }
 
         const inputElements = document.querySelectorAll('input[type="text"]');

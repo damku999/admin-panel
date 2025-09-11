@@ -19,16 +19,6 @@
                     <span>Back</span>
                 </a>
             </div>
-            @if ($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3 mb-0" role="alert">
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
             <form method="POST" action="{{ route('insurance_companies.update', ['insurance_company' => $insurance_company->id]) }}">
                 @csrf
                 @method('PUT')
@@ -57,8 +47,8 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold">Mobile Number</label>
-                                <input type="text" class="form-control form-control-sm @error('mobile_number') is-invalid @enderror"
-                                    name="mobile_number" placeholder="Enter mobile number" 
+                                <input type="tel" class="form-control form-control-sm @error('mobile_number') is-invalid @enderror"
+                                    name="mobile_number" placeholder="Enter mobile number" pattern="[0-9+\-\s()]{10,15}"
                                     value="{{ old('mobile_number') ? old('mobile_number') : $insurance_company->mobile_number }}">
                                 @error('mobile_number')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -87,8 +77,34 @@
 
 @section('scripts')
     <script>
-        const inputElements = document.querySelectorAll('input[type="text"]');
+        // Initialize Form Validation
+        const validator = new FormValidator('form');
+        
+        // Define validation rules for insurance company edit form
+        validator.addRules({
+            name: { 
+                rules: { required: true, minLength: 2, maxLength: 100 },
+                displayName: 'Company Name'
+            },
+            email: { 
+                rules: { required: true, email: true },
+                displayName: 'Email'
+            },
+            mobile_number: { 
+                rules: { required: true, phone: true },
+                displayName: 'Mobile Number'
+            },
+            status: { 
+                rules: { required: true },
+                displayName: 'Status'
+            }
+        });
 
+        // Enable real-time validation
+        validator.enableRealTimeValidation();
+
+        // Convert text inputs to uppercase (preserve existing functionality)
+        const inputElements = document.querySelectorAll('input[type="text"]');
         function convertToUppercase(event) {
             const input = event.target;
             input.value = input.value.toUpperCase();

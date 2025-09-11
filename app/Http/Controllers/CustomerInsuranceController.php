@@ -80,7 +80,7 @@ class CustomerInsuranceController extends Controller
                 $this->customerInsuranceService->sendWhatsAppDocument($customer_insurance);
             }
 
-            return redirect()->back()->with('success', 'Customer Insurance Created Successfully.');
+            return redirect()->route('customer_insurances.index')->with('success', 'Customer Insurance Created Successfully.');
         } catch (\Throwable $th) {
             return redirect()->back()->withInput()->with('error', $th->getMessage());
         }

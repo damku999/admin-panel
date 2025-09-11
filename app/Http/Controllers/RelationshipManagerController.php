@@ -81,7 +81,7 @@ class RelationshipManagerController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->back()->with('success', 'RelationshipManager Created Successfully.');
+            return redirect()->route('relationship_managers.index')->with('success', 'RelationshipManager Created Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -156,7 +156,7 @@ class RelationshipManagerController extends Controller
 
         $request->validate($validation_array);
 
-        DB::beginTransaction($validation_array);
+        DB::beginTransaction();
         try {
             // Store Data
             $relationship_manager_updated = RelationshipManager::whereId($relationship_manager->id)->update([

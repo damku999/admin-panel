@@ -18,21 +18,21 @@
                         <div class="card-tools">
                             <div class="input-group input-group-sm" style="width: 750px;">
                                 <input type="text" placeholder="Search" name="search_box_policy_type"
-                                    class="form-control float-right filter_by_key"
+                                    class="form-control filter_by_key"
                                     value="{{ Session::get('search_box_policy_type') }}">
-                                <div class="input-group-append">
-                                    <button type="button" class="btn btn-default filter_by_click">
+                                <div class="input-group-text">
+                                    <button type="button" class="btn btn-outline-secondary filter_by_click">
                                         <i class="fas fa-search"></i>
                                     </button>
-                                    <button type="button" class="btn btn-default filter_by_click" reset="yes">
+                                    <button type="button" class="btn btn-outline-secondary filter_by_click" reset="yes">
                                         <i class="fas fa-redo"></i>
                                     </button>
 
                                     <a href="{{ url(config('app.url') . 'policy_type/create') }}"
-                                        class="btn btn-default ml15" style="max-width: 125px;">
+                                        class="btn btn-outline-secondary ms-2" style="max-width: 125px;">
                                         <i class="fas fa-plus"></i> &nbsp; Add {{ $module_name }}
                                     </a>
-                                    <button type="button" class="btn btn-default ml10 filter_by_click excel"><i
+                                    <button type="button" class="btn btn-outline-secondary ms-2 filter_by_click excel"><i
                                             class="fas fa-file-excel"></i></button>
                                 </div>
                             </div>

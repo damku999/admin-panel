@@ -7,7 +7,7 @@
                     <i class="fas fa-exclamation-triangle text-warning me-2"></i>
                     Delete Broker
                 </h5>
-                <button type="button" class="btn-close" onclick="hideModal('deleteModal')" aria-label="Close"></button>
+                <x-modal-close-button modalId="deleteModal" />
             </div>
             <div class="modal-body text-center py-4">
                 <div class="mb-3">

@@ -44,6 +44,11 @@ class CustomerService implements CustomerServiceInterface
 
     public function createCustomer(StoreCustomerRequest $request): Customer
     {
+        // Check for existing email first to provide better error message
+        if ($this->findByEmail($request->email)) {
+            throw new \Exception('A customer with this email address already exists. Please use a different email address.');
+        }
+
         DB::beginTransaction();
 
         try {
@@ -65,17 +70,45 @@ class CustomerService implements CustomerServiceInterface
             // Handle document uploads
             $this->handleCustomerDocuments($request, $customer);
 
+            // Send welcome email synchronously within transaction
+            // This will cause rollback if email sending fails
+            try {
+                $this->sendWelcomeEmailSync($customer);
+            } catch (\Throwable $emailError) {
+                // Log the email error but continue with transaction rollback
+                \Log::error('Customer welcome email failed during creation', [
+                    'customer_id' => $customer->id,
+                    'customer_email' => $customer->email,
+                    'error' => $emailError->getMessage()
+                ]);
+                
+                // Delete the customer record if it was created
+                $customer->delete();
+                
+                // Re-throw to trigger transaction rollback
+                throw new \Exception('Customer registration failed: Unable to send welcome email to ' . $customer->email . '. Please verify the email address and try again.');
+            }
+
             DB::commit();
 
-            // Fire CustomerRegistered event for async processing
-            CustomerRegistered::dispatch(
-                $customer,
-                [
-                    'request_data' => $request->only(['type', 'status']),
-                    'has_documents' => $request->hasFile('documents'),
-                ],
-                'admin'
-            );
+            // Fire other events for async processing (audit logs, admin notifications)
+            // These are non-critical and won't rollback the transaction
+            try {
+                CustomerRegistered::dispatch(
+                    $customer,
+                    [
+                        'request_data' => $request->only(['type', 'status']),
+                        'has_documents' => $request->hasFile('documents'),
+                    ],
+                    'admin'
+                );
+            } catch (\Throwable $eventError) {
+                // Log but don't rollback - customer was successfully created
+                \Log::warning('Post-creation events failed', [
+                    'customer_id' => $customer->id,
+                    'error' => $eventError->getMessage()
+                ]);
+            }
 
             return $customer;
         } catch (\Throwable $th) {
@@ -331,5 +364,45 @@ class CustomerService implements CustomerServiceInterface
     private function generateOnboardingMessage(Customer $customer): string
     {
         return $this->newCustomerAdd($customer);
+    }
+
+    /**
+     * Send welcome email synchronously within transaction
+     * This will throw exception if email fails, causing transaction rollback
+     */
+    private function sendWelcomeEmailSync(Customer $customer): void
+    {
+        try {
+
+            // Use Mail facade to send email synchronously
+            \Mail::send('emails.customer.welcome', [
+                'customer_name' => $customer->name,
+                'customer_email' => $customer->email,
+                'customer_type' => $customer->type,
+                'portal_url' => config('app.url') . '/customer',
+                'support_email' => config('mail.from.address'),
+                'company_name' => config('app.name')
+            ], function ($message) use ($customer) {
+                $message->to($customer->email, $customer->name)
+                        ->subject('Welcome to ' . config('app.name') . ' - Your Customer Account is Ready!');
+                $message->from(config('mail.from.address'), config('app.name'));
+            });
+
+            \Log::info('Welcome email sent successfully', [
+                'customer_id' => $customer->id,
+                'customer_email' => $customer->email
+            ]);
+
+        } catch (\Throwable $e) {
+            \Log::error('Failed to send welcome email', [
+                'customer_id' => $customer->id,
+                'customer_email' => $customer->email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Re-throw with user-friendly message
+            throw new \Exception('Unable to send welcome email to ' . $customer->email . '. Please verify the email address and try again.');
+        }
     }
 }

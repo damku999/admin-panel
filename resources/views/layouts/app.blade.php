@@ -54,11 +54,16 @@
 
     <!-- Modern Admin Portal JavaScript Bundle -->
     <script src="{{ url('js/admin.js') }}"></script>
+    
+    <!-- Form Validation Utility Library -->
+    <script src="{{ url('js/form-validation.js') }}"></script>
 
     <!-- Bootstrap 5 JS (included in admin.js bundle) -->
     <script src="{{ asset('admin/toastr/toastr.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="{{ asset('datepicker/js/bootstrap-datepicker.min.js') }}"></script>
+    <!-- Modern Flatpickr Date Picker -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 
     @yield('scripts')
     <script>
@@ -124,7 +129,6 @@
                 loaderMessage: 'Deleting ' + display_title + '...',
                 showSuccessNotification: false,
                 success: function(data) {
-                    console.log(data);
                     if (data.status == 'success') {
                         show_notification(data.status, data.message);
                         setTimeout(function() {
@@ -149,36 +153,19 @@
             }
         }
         $(document).ready(function() {
-            $('.datepicker').datepicker({
-                format: 'dd/mm/yyyy',
-                autoclose: true
-            }).on('changeDate', function() {
-                // Convert dd/mm/yyyy to yyyy-mm-dd for form submission
-                var $input = $(this);
-                var displayDate = $input.val();
-                if (displayDate) {
-                    var dateParts = displayDate.split('/');
-                    if (dateParts.length === 3) {
-                        var dbFormat = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0];
-                        // Store the database format in a hidden field or data attribute
-                        $input.attr('data-db-date', dbFormat);
-                    }
-                }
+            // Simple Clean Date Picker
+            $('.datepicker').flatpickr({
+                dateFormat: 'd/m/Y',
+                allowInput: true
             });
-
-            // Before form submission, convert all datepicker values to database format
-            $('form').on('submit', function() {
-                $(this).find('.datepicker').each(function() {
-                    var $input = $(this);
-                    var displayDate = $input.val();
-                    if (displayDate && displayDate.includes('/')) {
-                        var dateParts = displayDate.split('/');
-                        if (dateParts.length === 3) {
-                            var dbFormat = dateParts[2] + '-' + dateParts[1] + '-' + dateParts[0];
-                            $input.val(dbFormat);
-                        }
-                    }
-                });
+            
+            // Simple month picker for reports
+            $('.datepicker_month').flatpickr({
+                plugins: [new monthSelectPlugin({
+                    shorthand: true,
+                    dateFormat: "m/Y",
+                    altFormat: "F Y"
+                })]
             });
 
             // Fix menu collapse functionality (jQuery-only implementation)

@@ -9,25 +9,18 @@
         @include('common.alert')
 
         <!-- DataTales Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                        <h1 class="h4 mb-0 text-primary font-weight-bold">Users Management</h1>
-                        <small class="text-muted">Manage all system users</small>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        @if (auth()->user()->hasPermissionTo('user-create'))
-                            <a href="{{ route('users.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Add New
-                            </a>
-                        @endif
-                        <a href="{{ route('users.export') }}" class="btn btn-success">
-                            <i class="fas fa-file-excel"></i> Export To Excel
-                        </a>
-                    </div>
-                </div>
-            </div>
+        <div class="card shadow mt-3 mb-4">
+            <x-list-header 
+                title="Users Management"
+                subtitle="Manage all system users"
+                addRoute="users.create"
+                addPermission="user-create"
+                exportRoute="users.export"
+                exportText="Export To Excel"
+                :extraButtons="'<a href=\"' . route('users.import') . '\" class=\"btn btn-info btn-sm\">
+                    <i class=\"fas fa-file-import\"></i> <span class=\"d-none d-sm-inline\">Import</span>
+                </a>'"
+            />
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">

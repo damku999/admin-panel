@@ -60,7 +60,7 @@ class InsuranceCompanyController extends Controller
                 'mobile_number' => $request->mobile_number,
             ]);
 
-            return redirect()->back()->with('success', 'InsuranceCompany Created Successfully.');
+            return redirect()->route('insurance_companies.index')->with('success', 'InsuranceCompany Created Successfully.');
         } catch (\Throwable $th) {
             return redirect()->back()->withInput()->with('error', $th->getMessage());
         }

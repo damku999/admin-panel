@@ -78,7 +78,7 @@ class PolicyTypeController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->back()->with('success', 'Policy Type Created Successfully.');
+            return redirect()->route('policy_type.index')->with('success', 'Policy Type Created Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -153,7 +153,7 @@ class PolicyTypeController extends Controller
 
         $request->validate($validation_array);
 
-        DB::beginTransaction($validation_array);
+        DB::beginTransaction();
         try {
             // Store Data
             PolicyType::whereId($policy_type->id)->update([

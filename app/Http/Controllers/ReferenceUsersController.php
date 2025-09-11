@@ -84,7 +84,7 @@ class ReferenceUsersController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->back()->with('success', 'ReferenceUser Created Successfully.');
+            return redirect()->route('reference_users.index')->with('success', 'ReferenceUser Created Successfully.');
         } catch (Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();

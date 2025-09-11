@@ -60,16 +60,6 @@
                 </div>
             </div>
             <div class="card-body">
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <h6><i class="fas fa-exclamation-triangle"></i> Please fix the following errors:</h6>
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
 
                 <form method="POST" action="{{ route('quotations.update', $quotation) }}" id="quotationForm">
                     @csrf

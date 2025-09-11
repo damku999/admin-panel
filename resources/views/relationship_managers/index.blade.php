@@ -9,34 +9,46 @@
         @include('common.alert')
 
         <!-- DataTales Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-3">
-                    <div class="mb-2 mb-md-0">
-                        <h1 class="h4 mb-0 text-primary font-weight-bold">Relationship Managers Management</h1>
-                        <small class="text-muted">Manage relationship manager records</small>
-                    </div>
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                        @if (auth()->user()->hasPermissionTo('relationship_manager-create'))
-                            <a href="{{ route('relationship_managers.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add New</span>
-                            </a>
-                        @endif
-                        <a href="{{ route('relationship_managers.export') }}" class="btn btn-success">
-                            <i class="fas fa-file-excel"></i> <span class="d-none d-sm-inline">Export</span>
-                        </a>
-                    </div>
-                </div>
-                <form action="{{ route('relationship_managers.index') }}" method="GET" role="search">
-                    <div class="input-group-append">
-                        <input type="text" placeholder="Search" name="search"
-                            class="form-control float-end filter_by_key" value="{{ request('search') }}">
-                        <button type="submit" class="btn btn-default filter_by_click">
-                            <i class="fas fa-search"></i>
-                        </button>
-                        <a href="{{ route('relationship_managers.index') }}" class="btn btn-default filter_by_click">
-                            <i class="fas fa-redo"></i>
-                        </a>
+        <div class="card shadow mt-3 mb-4">
+            <x-list-header 
+                title="Relationship Managers Management"
+                subtitle="Manage relationship manager records"
+                addRoute="relationship_managers.create"
+                addPermission="relationship_manager-create"
+                exportRoute="relationship_managers.export"
+            />
+            <div class="card-body">
+                <form method="GET" action="{{ route('relationship_managers.index') }}" id="search_form">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="search">Search Relationship Managers</label>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       placeholder="Name, email, mobile..." 
+                                       value="{{ request('search') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="status">Status</label>
+                                <select class="form-control" id="status" name="status">
+                                    <option value="">All Status</option>
+                                    <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Active</option>
+                                    <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>&nbsp;</label><br>
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                                <a href="{{ route('relationship_managers.index') }}" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-times"></i> Clear
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </form>
             </div>

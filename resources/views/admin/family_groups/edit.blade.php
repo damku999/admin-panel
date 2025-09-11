@@ -4,18 +4,6 @@
 
 @section('content')
 <div class="container-fluid">
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Edit Family Group: {{ $familyGroup->name }}</h1>
-        <div class="d-sm-flex">
-            <a href="{{ route('family_groups.show', $familyGroup) }}" class="btn btn-info btn-sm mr-2">
-                <i class="fas fa-eye fa-sm text-white-50"></i> View Details
-            </a>
-            <a href="{{ route('family_groups.index') }}" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to List
-            </a>
-        </div>
-    </div>
 
     <form action="{{ route('family_groups.update', $familyGroup) }}" method="POST">
         @csrf
@@ -24,7 +12,7 @@
         <div class="row">
             <!-- Basic Information -->
             <div class="col-lg-8">
-                <div class="card shadow mb-4">
+                <div class="card shadow mb-4 mt-3">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">Family Group Information</h6>
                     </div>
@@ -244,9 +232,17 @@
 
             <!-- Status & Actions -->
             <div class="col-lg-4">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3">
-                        <h6 class="m-0 font-weight-bold text-primary">Status & Actions</h6>
+                <div class="card shadow mb-4 mt-3">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0 fw-bold text-primary">Status & Actions</h6>
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('family_groups.show', $familyGroup) }}" class="btn btn-info btn-sm">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                            <a href="{{ route('family_groups.index') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-chevron-left me-1"></i>Back
+                            </a>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="form-group">

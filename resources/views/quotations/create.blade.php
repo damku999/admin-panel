@@ -26,16 +26,6 @@
                 <span class="badge badge-info">Step 1 of 2</span>
             </div>
             <div class="card-body">
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <h6><i class="fas fa-exclamation-triangle"></i> Please fix the following errors:</h6>
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
 
                 <form method="POST" action="{{ route('quotations.store') }}" id="quotationForm">
                     @csrf
@@ -661,6 +651,72 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
+            // Initialize Form Validation for Quotation
+            const validator = new FormValidator('form');
+            
+            // Define validation rules for quotation form
+            validator.addRules({
+                customer_id: { 
+                    rules: { required: true },
+                    displayName: 'Customer'
+                },
+                branch_id: { 
+                    rules: { required: true },
+                    displayName: 'Branch'
+                },
+                insurance_company_id: { 
+                    rules: { required: true },
+                    displayName: 'Insurance Company'
+                },
+                policy_type_id: { 
+                    rules: { required: true },
+                    displayName: 'Policy Type'
+                },
+                vehicle_no: { 
+                    rules: { 
+                        required: true,
+                        pattern: '^[A-Z]{2}[0-9]{2}[A-Z]{1,2}[0-9]{4}$',
+                        patternMessage: 'Vehicle number must be in format: XX00XX0000'
+                    },
+                    displayName: 'Vehicle Number'
+                },
+                make: { 
+                    rules: { required: true, minLength: 2 },
+                    displayName: 'Vehicle Make'
+                },
+                model: { 
+                    rules: { required: true, minLength: 2 },
+                    displayName: 'Vehicle Model'
+                },
+                mfg_year: { 
+                    rules: { required: true, numeric: true, min: 1980, max: new Date().getFullYear() + 1 },
+                    displayName: 'Manufacturing Year'
+                },
+                reg_date: { 
+                    rules: { required: true, date: true },
+                    displayName: 'Registration Date'
+                },
+                engine_no: { 
+                    rules: { required: true, minLength: 5 },
+                    displayName: 'Engine Number'
+                },
+                chassis_no: { 
+                    rules: { required: true, minLength: 10 },
+                    displayName: 'Chassis Number'
+                },
+                fuel_type: { 
+                    rules: { required: true },
+                    displayName: 'Fuel Type'
+                },
+                whatsapp_number: { 
+                    rules: { phone: true }, // Optional but validated if provided
+                    displayName: 'WhatsApp Number'
+                }
+            });
+
+            // Enable real-time validation
+            validator.enableRealTimeValidation();
+            
             // Initialize Bootstrap tooltips
             $('[data-toggle="tooltip"]').tooltip();
             
@@ -708,14 +764,12 @@
                 
                 if (mobile) {
                     $('#whatsapp_number').val(mobile);
-                    console.log('Auto-populated WhatsApp number:', mobile);
                 }
             });
 
             // Clear WhatsApp number when customer is cleared
             $('#customer_id').on('select2:clear', function (e) {
                 $('#whatsapp_number').val('');
-                console.log('Cleared WhatsApp number');
             });
 
             // Auto-calculate total IDV function
@@ -744,18 +798,14 @@
             // Add event listeners to all IDV fields for main form
             $('#idv_vehicle, #idv_trailer, #idv_cng_lpg_kit, #idv_electrical_accessories, #idv_non_electrical_accessories')
                 .on('input change blur', function() {
-                    console.log('IDV field changed, calculating total IDV');
                     calculateTotalIdv();
                 });
 
             // Add event listeners to all IDV fields in quote cards
             $(document).on('input change blur', '[name*="[idv_vehicle]"], [name*="[idv_trailer]"], [name*="[idv_cng_lpg_kit]"], [name*="[idv_electrical_accessories]"], [name*="[idv_non_electrical_accessories]"], [name*="[total_idv]"]', function() {
-                console.log('Quote card IDV field changed');
                 const quoteCard = $(this).closest('.quote-entry');
                 if (quoteCard.length > 0) {
                     calculateIdvTotal(quoteCard);
-                } else {
-                    console.log('Warning: Could not find quote-entry parent for IDV field');
                 }
             });
 
@@ -878,10 +928,7 @@
             $(document).on('input change keyup blur', '.idv-field', function() {
                 const quoteCard = $(this).closest('.quote-entry');
                 if (quoteCard.length > 0) {
-                    console.log('IDV field changed, calculating total...'); // Debug log
                     calculateIdvTotal(quoteCard);
-                } else {
-                    console.log('Warning: Could not find quote-entry parent for IDV field'); // Debug log
                 }
             });
 
@@ -915,7 +962,6 @@
             });
 
             function calculateIdvTotal(quoteCard) {
-                console.log('calculateIdvTotal called for quote card:', quoteCard); // Debug log
                 
                 // Calculate total of all IDV fields for each company
                 let idvTotal = 0;
@@ -926,15 +972,12 @@
                 const idvElectrical = parseFloat(quoteCard.find('[name*="[idv_electrical_accessories]"]').val()) || 0;
                 const idvNonElectrical = parseFloat(quoteCard.find('[name*="[idv_non_electrical_accessories]"]').val()) || 0;
                 
-                console.log('IDV Values:', {idvVehicle, idvTrailer, idvCngLpg, idvElectrical, idvNonElectrical}); // Debug log
                 
                 idvTotal = idvVehicle + idvTrailer + idvCngLpg + idvElectrical + idvNonElectrical;
                 
-                console.log('Calculated IDV Total:', idvTotal); // Debug log
                 
                 // Update the total IDV field
                 const totalIdvField = quoteCard.find('.total-idv');
-                console.log('Total IDV field found:', totalIdvField.length); // Debug log
                 
                 totalIdvField.val(idvTotal.toFixed(2));
                 
@@ -945,7 +988,6 @@
                     totalIdvField.css('background-color', '');
                 }
                 
-                console.log('IDV total updated to:', idvTotal.toFixed(2)); // Debug log
             }
 
             function calculateAddonTotal(quoteCard) {
@@ -1055,7 +1097,6 @@
                 
                 // Calculate IDV for all existing quote cards on page load
                 $('.quote-entry').each(function() {
-                    console.log('Initializing IDV calculation for quote card on page load');
                     calculateIdvTotal($(this));
                 });
             }, 100);
@@ -1070,7 +1111,6 @@
                     
                     // Calculate IDV for the newly added quote card
                     const newQuoteCard = $('.quote-entry').last();
-                    console.log('Initializing IDV calculation for newly added quote card');
                     calculateIdvTotal(newQuoteCard);
                 }, 50);
             });

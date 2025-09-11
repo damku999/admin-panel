@@ -45,6 +45,7 @@ Route::get('/health/detailed', [App\Http\Controllers\HealthController::class, 'd
 Route::get('/health/liveness', [App\Http\Controllers\HealthController::class, 'liveness'])->name('health.liveness');
 Route::get('/health/readiness', [App\Http\Controllers\HealthController::class, 'readiness'])->name('health.readiness');
 
+
 // Admin-only monitoring routes
 Route::middleware(['auth', 'role:Super Admin'])->group(function () {
     Route::get('/monitoring/metrics', [App\Http\Controllers\HealthController::class, 'metrics'])->name('monitoring.metrics');

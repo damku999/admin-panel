@@ -5,32 +5,19 @@
 @section('content')
 
     <div class="container-fluid">
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Edit Customer Insurance</h1>
-            <a href="{{ route('customer_insurances.index') }}" onclick="window.history.go(-1); return false;"
-                class="d-none d-sm-inline-block btn btn-sm btn-secondary shadow-sm"><i
-                    class="fas fa-arrow-left fa-sm text-white-50"></i> Back</a>
-        </div>
 
         {{-- Alert Messages --}}
         @include('common.alert')
 
-        <!-- DataTales Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-edit mr-2"></i>Edit Customer Insurance
-                </h6>
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+        <!-- Customer Insurance Edit Form -->
+        <div class="card shadow mb-3 mt-2">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 fw-bold text-primary">Edit Customer Insurance</h6>
+                <a href="{{ route('customer_insurances.index') }}" onclick="window.history.go(-1); return false;"
+                    class="btn btn-outline-secondary btn-sm d-flex align-items-center">
+                    <i class="fas fa-chevron-left me-2"></i>
+                    <span>Back</span>
+                </a>
             </div>
             <form method="POST"
                 action="{{ route('customer_insurances.update', ['customer_insurance' => $customer_insurance->id]) }}"
@@ -464,24 +451,19 @@
                         </div>
                         {{-- Policy Document --}}
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label for="policy_document_path">Policy Document</label>
-                            <div class="input-group">
-                                <div class="custom-file">
-                                    <input type="file"
-                                        class="custom-file-input @error('policy_document_path') is-invalid @enderror"
-                                        id="policy_document_path" placeholder="Policy Document"
-                                        name="policy_document_path" value="{{ old('policy_document_path') }}">
-                                    <label class="custom-file-label" for="policy_document_path">Choose file</label>
-                                </div>
-                                <div class="input-group-append">
-                                    @if ($customer_insurance->policy_document_path)
-                                        <a href="{{ asset('storage/' . $customer_insurance->policy_document_path) }}"
-                                            class="btn btn-primary" target="__blank">Download</a>
-                                    @endif
-                                </div>
+                            <label for="policy_document_path" class="form-label fw-semibold">Policy Document</label>
+                            <div class="input-group input-group-sm">
+                                <input type="file" class="form-control form-control-sm @error('policy_document_path') is-invalid @enderror"
+                                    id="policy_document_path" name="policy_document_path" accept=".pdf,.jpg,.jpeg,.png">
+                                @if ($customer_insurance->policy_document_path)
+                                    <a href="{{ asset('storage/' . $customer_insurance->policy_document_path) }}" 
+                                       class="btn btn-outline-primary btn-sm" target="_blank" title="Download current document">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                @endif
                             </div>
                             @error('policy_document_path')
-                                <span class="text-danger">{{ $message }}</span>
+                                <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -503,8 +485,12 @@
                         </div>
                     </div>
 
-                    <div class="card mb-12 col-md-12 border-left-success">
-                        <div class="form-group row">
+                    <!-- Premium & Financial Details Section -->
+                    <div class="mt-4 mb-4">
+                        <h6 class="text-muted fw-bold mb-3"><i class="fas fa-dollar-sign me-2"></i>Premium & Financial Details</h6>
+                        <div class="card border-start border-success border-4 bg-light bg-opacity-25">
+                            <div class="card-body p-4">
+                                <div class="row g-3">
                             {{-- OD Premium --}}
                             <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 premium-fields">
                                 <label>OD Premium</label>
@@ -621,13 +607,18 @@
                                 @error('final_premium_with_gst')
                                     <span class="text-danger">{{ $message }}</span>
                                 @enderror
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <br>
+                    
+                    <!-- Commission Details Section -->
                     @if (auth()->user()->hasRole('Admin'))
-                        <div class="card mt-12 col-md-12 border-left-dark">
-                            <div class="form-group row">
+                        <div class="mt-4 mb-4">
+                            <h6 class="text-muted fw-bold mb-3"><i class="fas fa-percentage me-2"></i>Commission Details</h6>
+                            <div class="card border-start border-dark border-4 bg-light bg-opacity-25">
+                                <div class="card-body p-4">
+                                    <div class="row g-3">
                                 <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
                                     <label>Commission On</label>
                                     <select name="commission_on" class="form-control" id="commission_on">
@@ -728,11 +719,11 @@
                                     @error('actual_earnings')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     @endif
-                </div>
                 <div class="card-footer bg-light">
                     <button type="submit" class="btn btn-success">
                         <i class="fas fa-save mr-1"></i> Update Customer Insurance
@@ -984,28 +975,24 @@
         premiumTypeChanged();
 
         function setExpiredDate() {
-            var startDateStr = document.getElementById("start_date").value;
-            var startDateComponents = startDateStr.split("-"); // Split the date string by '-'
-
-            // Create a new Date object using the parsed components
-            var startDate = new Date(startDateComponents[2], startDateComponents[1] - 1, startDateComponents[0]);
-
-            // Ensure startDate is set to the correct time (typically midnight)
-            startDate.setHours(0, 0, 0, 0);
-            console.log(startDate);
+            var startDateInput = document.getElementById("start_date");
+            var expiredDateInput = document.getElementById("expired_date");
+            
+            if (!startDateInput.value) return;
+            
+            // Get the date from Flatpickr instance
+            var startDate = startDateInput._flatpickr.selectedDates[0];
+            if (!startDate) return;
+            
             // Calculate the expired date by adding 1 year - 1 day to the start date
             var expiredDate = new Date(startDate);
             expiredDate.setFullYear(startDate.getFullYear() + 1);
             expiredDate.setDate(startDate.getDate() - 1);
-            console.log(expiredDate);
-
-            // Format the expired date as "dd-mm-yyyy"
-            var formattedExpiredDate = ('0' + expiredDate.getDate()).slice(-2) + '-' + ('0' + (expiredDate.getMonth() + 1))
-                .slice(-2) + '-' + expiredDate.getFullYear();
-            console.log(formattedExpiredDate);
-
-            // Set the formatted expired date to the input field
-            $('#expired_date').datepicker('update', formattedExpiredDate);
+            
+            // Set the date using Flatpickr
+            if (expiredDateInput._flatpickr) {
+                expiredDateInput._flatpickr.setDate(expiredDate);
+            }
         }
         const inputElements = document.querySelectorAll('input[type="text"]');
 

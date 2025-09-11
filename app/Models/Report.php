@@ -82,11 +82,23 @@ class Report extends Authenticatable
     public static function getInsuranceReport($filters)
     {
 
-        $report = Report::where(['user_id' => auth()->user()->id, 'name' => $filters['report_name']])->first();
-        $report->selected_columns = collect($report->selected_columns)->map(function ($item) {
-            $item['select'] = $item['table_column_name'] . ' as ' . $item['display_name'];
-            return $item;
-        })->pluck('select');
+        $report = auth()->user() 
+            ? Report::where(['user_id' => auth()->user()->id, 'name' => $filters['report_name']])->first()
+            : null;
+        
+        // If no saved report exists, use default columns from config
+        if (!$report || !$report->selected_columns) {
+            $defaultColumns = config('constants.INSURANCE_DETAIL', []);
+            $selectedColumns = collect($defaultColumns)->map(function ($item) {
+                $item['select'] = $item['table_column_name'] . ' as ' . $item['display_name'];
+                return $item;
+            })->pluck('select');
+        } else {
+            $selectedColumns = collect($report->selected_columns)->map(function ($item) {
+                $item['select'] = $item['table_column_name'] . ' as ' . $item['display_name'];
+                return $item;
+            })->pluck('select');
+        }
 
         $customerInsurances = CustomerInsurance::with(
             'branch',
@@ -99,16 +111,28 @@ class Report extends Authenticatable
             'fuelType'
         )
             ->when(!empty($filters['record_creation_start_date']), function ($query) use ($filters) {
-                return $query->where('created_at', '>=', Carbon::parse($filters['record_creation_start_date'])->startOfDay()->format('Y-m-d H:i:s'));
+                $startDate = \App\Helpers\DateHelper::isValidDatabaseFormat($filters['record_creation_start_date']) 
+                    ? $filters['record_creation_start_date'] 
+                    : formatDateForDatabase($filters['record_creation_start_date']);
+                return $query->where('created_at', '>=', Carbon::parse($startDate)->startOfDay()->format('Y-m-d H:i:s'));
             })
             ->when(!empty($filters['record_creation_end_date']), function ($query) use ($filters) {
-                return $query->where('created_at', '<=', Carbon::parse($filters['record_creation_end_date'])->endOfDay()->format('Y-m-d H:i:s'));
+                $endDate = \App\Helpers\DateHelper::isValidDatabaseFormat($filters['record_creation_end_date']) 
+                    ? $filters['record_creation_end_date'] 
+                    : formatDateForDatabase($filters['record_creation_end_date']);
+                return $query->where('created_at', '<=', Carbon::parse($endDate)->endOfDay()->format('Y-m-d H:i:s'));
             })
             ->when(!empty($filters['issue_start_date']), function ($query) use ($filters) {
-                return $query->where('issue_date', '>=', Carbon::parse($filters['issue_start_date'])->format('Y-m-d'));
+                $startDate = \App\Helpers\DateHelper::isValidDatabaseFormat($filters['issue_start_date']) 
+                    ? $filters['issue_start_date'] 
+                    : formatDateForDatabase($filters['issue_start_date']);
+                return $query->where('issue_date', '>=', $startDate);
             })
             ->when(!empty($filters['issue_end_date']), function ($query) use ($filters) {
-                return $query->where('issue_date', '<=', Carbon::parse($filters['issue_end_date'])->format('Y-m-d'));
+                $endDate = \App\Helpers\DateHelper::isValidDatabaseFormat($filters['issue_end_date']) 
+                    ? $filters['issue_end_date'] 
+                    : formatDateForDatabase($filters['issue_end_date']);
+                return $query->where('issue_date', '<=', $endDate);
             })
             ->when(!empty($filters['branch_id']), function ($query) use ($filters) {
                 return $query->whereHas('branch', function ($query) use ($filters) {
@@ -155,10 +179,58 @@ class Report extends Authenticatable
                 });
             })
             ->when(!empty($filters['due_start_date']), function ($query) use ($filters) {
-                return $query->where('expired_date', '>=', Carbon::parse($filters['due_start_date'])->format('Y-m-01'));
+                // Due dates can be in m/Y or mm/Y format, handle both
+                try {
+                    $dateStr = $filters['due_start_date'];
+                    // Try different date formats
+                    $startDate = null;
+                    try {
+                        $startDate = Carbon::createFromFormat('m/Y', $dateStr);
+                    } catch (\Exception $e1) {
+                        $startDate = Carbon::createFromFormat('n/Y', $dateStr);
+                    }
+                    $formattedDate = $startDate->format('Y-m-01');
+                    
+                    \Log::info('Due start date filter', [
+                        'input' => $dateStr,
+                        'parsed' => $formattedDate
+                    ]);
+                    
+                    return $query->where('expired_date', '>=', $formattedDate);
+                } catch (\Exception $e) {
+                    \Log::error('Due start date parsing failed', [
+                        'input' => $filters['due_start_date'],
+                        'error' => $e->getMessage()
+                    ]);
+                    return $query;
+                }
             })
             ->when(!empty($filters['due_end_date']), function ($query) use ($filters) {
-                return $query->where('expired_date', '<=', Carbon::parse($filters['due_end_date'])->format('Y-m-31'));
+                // Due dates can be in m/Y or mm/Y format, handle both
+                try {
+                    $dateStr = $filters['due_end_date'];
+                    // Try different date formats
+                    $endDate = null;
+                    try {
+                        $endDate = Carbon::createFromFormat('m/Y', $dateStr);
+                    } catch (\Exception $e1) {
+                        $endDate = Carbon::createFromFormat('n/Y', $dateStr);
+                    }
+                    $formattedDate = $endDate->endOfMonth()->format('Y-m-d');
+                    
+                    \Log::info('Due end date filter', [
+                        'input' => $dateStr,
+                        'parsed' => $formattedDate
+                    ]);
+                    
+                    return $query->where('expired_date', '<=', $formattedDate);
+                } catch (\Exception $e) {
+                    \Log::error('Due end date parsing failed', [
+                        'input' => $filters['due_end_date'],
+                        'error' => $e->getMessage()
+                    ]);
+                    return $query;
+                }
             })
             ->get();
         return $customerInsurances;

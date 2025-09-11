@@ -9,68 +9,71 @@
         @include('common.alert')
 
         <!-- DataTales Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-3">
-                    <div class="mb-2 mb-md-0">
-                        <h1 class="h4 mb-0 text-primary font-weight-bold">Customer Insurances Management</h1>
-                        @if(request('renewal_due_start') && request('renewal_due_end'))
-                            <small class="text-warning">
-                                <i class="fas fa-filter"></i> Showing policies expiring between {{ request('renewal_due_start') }} and {{ request('renewal_due_end') }}
-                            </small>
-                        @else
-                            <small class="text-muted">Manage all active insurance policies</small>
-                        @endif
-                    </div>
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                        @if (auth()->user()->hasPermissionTo('customer-insurance-create'))
-                            <a href="{{ route('customer_insurances.create') }}" class="btn btn-primary btn-sm">
-                                <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add New</span>
-                            </a>
-                        @endif
-                        <a href="{{ route('customer_insurances.export') }}" class="btn btn-success btn-sm">
-                            <i class="fas fa-file-excel"></i> <span class="d-none d-sm-inline">Export</span>
-                        </a>
-                    </div>
-                </div>
-                <form action="{{ route('customer_insurances.index') }}" method="GET" role="search">
-                    <div class="input-group">
-                        <input type="text" placeholder="Search" name="search"
-                            class="form-control float-end filter_by_key me-2" value="{{ request('search') }}">
-
-                        <input type="text" placeholder="Exp Start Date" name="start_date"
-                            class="form-control datepicker me-2" value="{{ request('start_date') ?: request('renewal_due_start') }}">
-
-                        <input type="text" placeholder="Exp End Date" name="end_date"
-                            class="form-control datepicker me-2" value="{{ request('end_date') ?: request('renewal_due_end') }}">
-                        
-                        <!-- Hidden fields to preserve renewal filter parameters -->
-                        @if(request('renewal_due_start'))
-                            <input type="hidden" name="renewal_due_start" value="{{ request('renewal_due_start') }}">
-                        @endif
-                        @if(request('renewal_due_end'))
-                            <input type="hidden" name="renewal_due_end" value="{{ request('renewal_due_end') }}">
-                        @endif
-
-                        {{-- <select name="status" class="form-control" id="status">
-                            <option value="all" {{ request('status', '1') == 'all' ? 'selected' : '' }}>All</option>
-                            <option value="1" {{ request('status', '1') == '1' ? 'selected' : '' }}>Active</option>
-                            <option value="0" {{ request('status', '1') == '0' ? 'selected' : '' }}>In Active</option>
-                        </select> --}}
-
-                        <div class="input-group-append">
-                            <button type="submit" class="btn btn-default filter_by_click">
-                                <i class="fas fa-search"></i>
-                            </button>
-
-                            <a href="{{ route('customer_insurances.index') }}" class="btn btn-default filter_by_click">
-                                <i class="fas fa-redo"></i>
-                            </a>
+        <div class="card shadow mt-3 mb-4">
+            <x-list-header 
+                    title="Customer Insurances Management"
+                    subtitle="Manage all active insurance policies"
+                    addRoute="customer_insurances.create"
+                    addPermission="customer-insurance-create"
+                    exportRoute="customer_insurances.export"
+            />
+            <div class="card-body">
+                <form method="GET" action="{{ route('customer_insurances.index') }}" id="search_form">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="search">Search Customer Insurances</label>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       placeholder="Customer, policy number..." 
+                                       value="{{ request('search') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="start_date">Expiry Start Date</label>
+                                <input type="text" class="form-control datepicker" id="start_date" name="start_date" 
+                                       placeholder="Start Date" 
+                                       value="{{ request('start_date') ?: request('renewal_due_start') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="end_date">Expiry End Date</label>
+                                <input type="text" class="form-control datepicker" id="end_date" name="end_date" 
+                                       placeholder="End Date" 
+                                       value="{{ request('end_date') ?: request('renewal_due_end') }}">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="status">Status</label>
+                                <select class="form-control" id="status" name="status">
+                                    <option value="">All Status</option>
+                                    <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Active</option>
+                                    <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>&nbsp;</label><br>
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-search"></i> Search
+                                </button>
+                                <a href="{{ route('customer_insurances.index') }}" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-times"></i> Clear
+                                </a>
+                            </div>
                         </div>
                     </div>
-                    <div class="input-group mt-2">
-
-                    </div>
+                    
+                    <!-- Hidden fields to preserve renewal filter parameters -->
+                    @if(request('renewal_due_start'))
+                        <input type="hidden" name="renewal_due_start" value="{{ request('renewal_due_start') }}">
+                    @endif
+                    @if(request('renewal_due_end'))
+                        <input type="hidden" name="renewal_due_end" value="{{ request('renewal_due_end') }}">
+                    @endif
                     <input type="hidden" name="sort" value="{{ request('sort', 'updated_at') }}">
                     <input type="hidden" name="direction" value="{{ request('direction', 'asc') }}">
                 </form>

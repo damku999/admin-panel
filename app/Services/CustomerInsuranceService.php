@@ -121,26 +121,27 @@ class CustomerInsuranceService implements CustomerInsuranceServiceInterface
             'policy_type_id' => 'required|exists:policy_types,id',
             'fuel_type_id' => 'nullable|exists:fuel_types,id',
             'premium_type_id' => 'required|exists:premium_types,id',
-            'issue_date' => 'required|date_format:Y-m-d',
-            'expired_date' => 'required|date_format:Y-m-d',
-            'start_date' => 'required|date_format:Y-m-d',
-            'tp_expiry_date' => 'nullable|date_format:Y-m-d',
+            'issue_date' => 'required|date_format:d/m/Y',
+            'expired_date' => 'required|date_format:d/m/Y',
+            'start_date' => 'required|date_format:d/m/Y',
+            'tp_expiry_date' => 'nullable|date_format:d/m/Y',
+            'maturity_date' => 'nullable|date_format:d/m/Y',
             'policy_no' => 'required',
-            'net_premium' => 'nullable|numeric',
-            'premium_amount' => 'nullable|numeric',
-            'gst' => 'nullable|numeric',
-            'final_premium_with_gst' => 'required|numeric',
+            'net_premium' => 'nullable|numeric|min:0',
+            'premium_amount' => 'nullable|numeric|min:0',
+            'gst' => 'nullable|numeric|min:0',
+            'final_premium_with_gst' => 'required|numeric|min:0',
             'mode_of_payment' => 'nullable|string',
             'cheque_no' => 'nullable|string',
             'rto' => 'nullable|string',
             'registration_no' => 'nullable|string',
             'make_model' => 'nullable|string',
-            'od_premium' => 'nullable|numeric',
-            'tp_premium' => 'nullable|numeric',
-            'cgst1' => 'nullable|numeric',
-            'sgst1' => 'nullable|numeric',
-            'cgst2' => 'nullable|numeric',
-            'sgst2' => 'nullable|numeric',
+            'od_premium' => 'nullable|numeric|min:0',
+            'tp_premium' => 'nullable|numeric|min:0',
+            'cgst1' => 'required|numeric|min:0',
+            'sgst1' => 'required|numeric|min:0',
+            'cgst2' => 'nullable|numeric|min:0',
+            'sgst2' => 'nullable|numeric|min:0',
             'commission_on' => 'nullable|in:net_premium,od_premium,tp_premium',
             'my_commission_percentage' => 'nullable|numeric',
             'my_commission_amount' => 'nullable|numeric',
@@ -276,6 +277,24 @@ class CustomerInsuranceService implements CustomerInsuranceServiceInterface
         foreach ($dateFields as $field) {
             if (!empty($request->$field)) {
                 $data_to_store[$field] = $request->$field;
+            }
+        }
+
+        // Handle numeric fields - convert empty strings to null
+        $numericFields = [
+            'net_premium', 'premium_amount', 'gst', 'final_premium_with_gst',
+            'od_premium', 'tp_premium', 'cgst1', 'sgst1', 'cgst2', 'sgst2',
+            'my_commission_percentage', 'my_commission_amount', 
+            'transfer_commission_percentage', 'transfer_commission_amount',
+            'reference_commission_percentage', 'reference_commission_amount',
+            'actual_earnings', 'ncb_percentage', 'gross_vehicle_weight', 
+            'mfg_year', 'sum_insured', 'pension_amount_yearly', 'approx_maturity_amount',
+            'premium_paying_term', 'policy_term'
+        ];
+        
+        foreach ($numericFields as $field) {
+            if (array_key_exists($field, $data_to_store)) {
+                $data_to_store[$field] = $data_to_store[$field] === '' ? null : $data_to_store[$field];
             }
         }
 

@@ -19,16 +19,6 @@
                     <span>Back</span>
                 </a>
             </div>
-            @if ($errors->any())
-                <div class="alert alert-danger alert-dismissible fade show mx-3 mt-3 mb-0" role="alert">
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
             <form method="POST" action="{{ route('customers.store') }}" enctype="multipart/form-data">
                 @csrf
                 <div class="card-body py-3">
@@ -54,8 +44,8 @@
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold"><span class="text-danger">*</span> Mobile Number</label>
-                                <input type="text" class="form-control form-control-sm @error('mobile_number') is-invalid @enderror"
-                                    name="mobile_number" placeholder="Enter mobile number" value="{{ old('mobile_number') }}">
+                                <input type="tel" class="form-control form-control-sm @error('mobile_number') is-invalid @enderror"
+                                    name="mobile_number" placeholder="Enter mobile number" pattern="[0-9+\-\s()]{10,15}" value="{{ old('mobile_number') }}">
                                 @error('mobile_number')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -229,8 +219,85 @@
 
         // Event listener for customer type change
         customerTypeSelect.addEventListener('change', toggleGSTSection);
-        const inputElements = document.querySelectorAll('input[type="text"]');
+        
+        // Initialize Form Validation
+        const validator = new FormValidator('form');
+        
+        // Define validation rules for customer form
+        validator.addRules({
+            company_name: { 
+                rules: { required: true, minLength: 2, maxLength: 100 },
+                displayName: 'Company Name'
+            },
+            email: { 
+                rules: { required: true, email: true },
+                displayName: 'Email'
+            },
+            mobile: { 
+                rules: { required: true, phone: true },
+                displayName: 'Mobile Number'
+            },
+            type: { 
+                rules: { required: true },
+                displayName: 'Customer Type'
+            },
+            status: { 
+                rules: { required: true },
+                displayName: 'Status'
+            },
+            address_line_1: { 
+                rules: { required: true, minLength: 10 },
+                displayName: 'Address Line 1'
+            },
+            pincode: { 
+                rules: { required: true, pattern: '^[0-9]{6}$', patternMessage: 'Pincode must be 6 digits' },
+                displayName: 'Pincode'
+            },
+            city: { 
+                rules: { required: true, minLength: 2 },
+                displayName: 'City'
+            },
+            state: { 
+                rules: { required: true, minLength: 2 },
+                displayName: 'State'
+            },
+            country: { 
+                rules: { required: true, minLength: 2 },
+                displayName: 'Country'
+            }
+        });
 
+        // Add conditional GST number validation
+        function updateGSTValidation() {
+            const customerType = customerTypeSelect.value;
+            const gstField = document.querySelector('[name="gst_number"]');
+            
+            if (customerType === 'Corporate' && gstField) {
+                validator.addRule('gst_number', {
+                    required: true,
+                    pattern: '^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$',
+                    patternMessage: 'GST number must be in valid format (e.g., 27AAPFU0939F1ZV)'
+                }, 'GST Number');
+            } else if (gstField) {
+                // Remove GST validation for Retail customers
+                delete validator.validationRules['gst_number'];
+            }
+        }
+
+        // Update GST validation when customer type changes
+        customerTypeSelect.addEventListener('change', () => {
+            toggleGSTSection();
+            updateGSTValidation();
+        });
+
+        // Initialize GST validation
+        updateGSTValidation();
+
+        // Enable real-time validation
+        validator.enableRealTimeValidation();
+
+        // Convert text inputs to uppercase (preserve existing functionality)
+        const inputElements = document.querySelectorAll('input[type="text"]');
         function convertToUppercase(event) {
             const input = event.target;
             input.value = input.value.toUpperCase();

@@ -76,7 +76,7 @@ class FuelTypeController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->back()->with('success', 'Fuel Type Created Successfully.');
+            return redirect()->route('fuel_type.index')->with('success', 'Fuel Type Created Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -144,7 +144,7 @@ class FuelTypeController extends Controller
 
         $request->validate($validation_array);
 
-        DB::beginTransaction($validation_array);
+        DB::beginTransaction();
         try {
             FuelType::whereId($fuel_type->id)->update([
                 'name' => $request->name,

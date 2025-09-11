@@ -4,26 +4,22 @@
 
 @section('content')
 <div class="container-fluid">
-    <!-- Page Heading -->
-    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-        <h1 class="h3 mb-0 text-gray-800">Family Group: {{ $familyGroup->name }}</h1>
-        <div class="d-sm-flex">
-            <a href="{{ route('family_groups.edit', $familyGroup) }}" class="btn btn-warning btn-sm mr-2">
-                <i class="fas fa-edit fa-sm text-white-50"></i> Edit Group
-            </a>
-            <a href="{{ route('family_groups.index') }}" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to List
-            </a>
-        </div>
-    </div>
 
     <div class="row">
         <!-- Family Group Information -->
         <div class="col-lg-8">
             <!-- Basic Info -->
             <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Basic Information</h6>
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Family Group: {{ $familyGroup->name }}</h6>
+                    <div class="d-flex">
+                        <a href="{{ route('family_groups.edit', $familyGroup) }}" class="btn btn-warning btn-sm me-2">
+                            <i class="fas fa-edit me-1"></i> Edit Group
+                        </a>
+                        <a href="{{ route('family_groups.index') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i> Back to List
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="row">

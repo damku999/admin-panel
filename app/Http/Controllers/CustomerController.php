@@ -62,7 +62,7 @@ class CustomerController extends Controller
     {
         try {
             $customer = $this->customerService->createCustomer($request);
-            return redirect()->back()->with('success', 'Customer Created Successfully.');
+            return redirect()->route('customers.index')->with('success', 'Customer Created Successfully.');
         } catch (\Throwable $th) {
             return redirect()->back()->withInput()->with('error', $th->getMessage());
         }

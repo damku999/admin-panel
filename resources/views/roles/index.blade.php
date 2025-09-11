@@ -9,22 +9,13 @@
         @include('common.alert')
 
         <!-- DataTales Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
-                    <div class="mb-2 mb-md-0">
-                        <h1 class="h4 mb-0 text-primary font-weight-bold">Roles Management</h1>
-                        <small class="text-muted">Manage user roles and permissions</small>
-                    </div>
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                        @if (auth()->user()->hasPermissionTo('role-create'))
-                            <a href="{{ route('roles.create') }}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> <span class="d-none d-sm-inline">Add New</span>
-                            </a>
-                        @endif
-                    </div>
-                </div>
-            </div>
+        <div class="card shadow mt-3 mb-4">
+            <x-list-header 
+                title="Roles Management"
+                subtitle="Manage user roles and permissions"
+                addRoute="roles.create"
+                addPermission="role-create"
+            />
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">

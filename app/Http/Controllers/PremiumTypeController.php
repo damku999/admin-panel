@@ -84,7 +84,7 @@ class PremiumTypeController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->back()->with('success', 'Policy Type Created Successfully.');
+            return redirect()->route('premium_type.index')->with('success', 'Premium Type Created Successfully.');
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
@@ -163,7 +163,7 @@ class PremiumTypeController extends Controller
         if ($request->input('is_vehicle') && $request->input('is_life_insurance_policies')) {
             return redirect()->back()->withInput()->with('error', 'Both "Is it for Vehicle?" and "Is Life Insurance Policies?" cannot be true at the same time.');
         }
-        DB::beginTransaction($validation_array);
+        DB::beginTransaction();
         try {
             // Store Data
             PremiumType::whereId($premium_type->id)->update([

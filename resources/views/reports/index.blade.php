@@ -8,15 +8,11 @@
         @include('common.alert')
 
         <!-- DataTales Example -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between">
-                    <div class="mb-2 mb-md-0">
-                        <h1 class="h4 mb-0 text-primary font-weight-bold">Reports Management</h1>
-                        <small class="text-muted">Generate and export system reports</small>
-                    </div>
-                </div>
-            </div>
+        <div class="card shadow mt-3 mb-4">
+            <x-list-header 
+                    title="Reports Management"
+                    subtitle="Generate and export system reports"
+            />
             <form action="{{ route('reports.index') }}" method="GET" role="search">
                 @csrf
                 <div class="card-body">
@@ -45,15 +41,20 @@
                             @enderror
                         </div>
                         <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 fields-to-toggle due_policy_detail">
-                            <label for="policyDueDate" class="form-label"><span style="color:red;">*</span>Due Month &
-                                Year</label>
-                            <div class="d-flex">
-                                <input type="text" placeholder="Start Date" name="due_start_date"
-                                    class="form-control datepicker_month" value="{{ request('due_start_date') }}"
-                                    style="margin-right: 10px;" autocomplete="off" readonly id="due_start_date">
-                                <input type="text" placeholder="End Date" name="due_end_date"
-                                    class="form-control datepicker_month" value="{{ request('due_end_date') }}"
-                                    style="margin-right: 10px;" autocomplete="off" readonly id="due_end_date">
+                            <label class="form-label"><span style="color:red;">*</span>Report Period</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <label for="due_start_date" class="form-label text-muted small">From Month:</label>
+                                    <input type="text" placeholder="Select month" name="due_start_date"
+                                        class="form-control form-control-sm datepicker_month" value="{{ request('due_start_date') }}"
+                                        autocomplete="off" readonly id="due_start_date">
+                                </div>
+                                <div class="col-6">
+                                    <label for="due_end_date" class="form-label text-muted small">To Month:</label>
+                                    <input type="text" placeholder="Select month" name="due_end_date"
+                                        class="form-control form-control-sm datepicker_month" value="{{ request('due_end_date') }}"
+                                        autocomplete="off" readonly id="due_end_date">
+                                </div>
                             </div>
                         </div>
                         {{-- <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
@@ -211,11 +212,11 @@
                     {{-- <button type="submit" name="search"
                         class="btn btn-success btn-reprts float-right mb-3 filter_by_click"><i class="fas fa-search"></i>
                         Search</button> --}}
-                    <button type="submit" name="download"
+                    <button type="submit" name="download" onclick="setDownloadAction(this)"
                         class="btn btn-primary btn-reprts float-right  mr-3 mb-3 filter_by_click"><i
                             class="fas fa-download"></i> Download</button>
-                    <button type="submit" name="view"
-                        class="btn btn-primary btn-reprts float-right  mr-3 mb-3 filter_by_click"><i
+                    <button type="submit" name="view" value="1" onclick="return validateReportForm()"
+                        class="btn btn-primary btn-reprts float-right  mr-3 mb-3"><i
                             class="fa-solid fa-eye"></i> View</button>
                     <a class="btn btn-warning float-right mr-3 mb-3 filter_by_click" href="{{ route('reports.index') }}">
                         <i class="fas fa-redo"></i> Cancel</a>
@@ -254,6 +255,21 @@
             </div>
         </div>
     </div>
+    {{-- Debug info --}}
+    @if(request()->has('view') && config('app.debug'))
+        <div class="alert alert-info">
+            <strong>Debug Info:</strong><br>
+            Report Name: {{ request('report_name') }}<br>
+            Issue Start Date: {{ request('issue_start_date') }}<br>
+            Issue End Date: {{ request('issue_end_date') }}<br>
+            <strong>Has View Parameter:</strong> {{ request()->has('view') ? 'YES' : 'NO' }}<br>
+            <strong>Has Download Parameter:</strong> {{ request()->has('download') ? 'YES' : 'NO' }}<br>
+            <strong>Report Name:</strong> {{ request()->get('report_name', 'Not set') }}<br>
+            Results Count: {{ isset($customerInsurances) ? (is_countable($customerInsurances) ? count($customerInsurances) : 'Not countable') : 'Not set' }}<br>
+            Results Type: {{ isset($customerInsurances) ? gettype($customerInsurances) : 'Not set' }}
+        </div>
+    @endif
+    
     @if (!empty($customerInsurances))
         <div class="card shadow mb-4">
             <div class="card-header py-3">
@@ -378,9 +394,6 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"
-        integrity="sha512-LsnSViqQyaXpD4mBBdRYeP6sRwJiJveh2ZIbW41EBrNmKxgr/LFZIiWT6yr+nycvhvauz8c2nYMhrP80YhG7Cw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -394,7 +407,6 @@
                             "{{ route('reports.load.selected.columns', ['report_name' => ':reportName']) }}"
                             .replace(':reportName', reportName))
                         .then(function(response) {
-                            console.log(response);
                             $('#myModal').modal('show');
                             var responseData = response.data;
                             document.querySelector('#sortableTableBody').innerHTML = responseData;
@@ -449,7 +461,6 @@
                         selected_columns: selectedColumns,
                     },
                     success: function(response) {
-                        console.log(response);
                         $('#myModal').modal('hide');
 
                         toastr.success('Form submitted successfully!', 'Success');
@@ -513,55 +524,108 @@
                 // Trigger change event to update Select2
                 $('#premium_type_id').trigger('change');
 
-                $('.datepicker[name="issue_start_date"]').on('changeDate', function(selected) {
-                    var endDate = $('.datepicker[name="issue_end_date"]');
-                    endDate.datepicker('setStartDate', selected.date);
-                    if (selected.date > endDate.datepicker('getDate')) {
-                        endDate.datepicker('setDate', selected.date);
-                    }
-                });
-                $('.datepicker[name="issue_end_date"]').on('changeDate', function(selected) {
-                    var startDate = $('.datepicker[name="issue_start_date"]');
-                    startDate.datepicker('setEndDate', selected.date);
-                    if (selected.date < startDate.datepicker('getDate')) {
-                        startDate.datepicker('setDate', selected.date);
-                    }
-                });
-
-                $('.datepicker[name="record_creation_start_date"]').on('changeDate', function(selected) {
-                    var endDate = $('.datepicker[name="record_creation_end_date"]');
-                    endDate.datepicker('setStartDate', selected.date);
-                    if (selected.date > endDate.datepicker('getDate')) {
-                        endDate.datepicker('setDate', selected.date);
-                    }
-                });
-                $('.datepicker[name="record_creation_end_date"]').on('changeDate', function(selected) {
-                    var startDate = $('.datepicker[name="record_creation_start_date"]');
-                    startDate.datepicker('setEndDate', selected.date);
-                    if (selected.date < startDate.datepicker('getDate')) {
-                        startDate.datepicker('setDate', selected.date);
-                    }
-                });
-
-                // Month picker changes
-                $('.datepicker_month').datepicker({
-                    format: 'yyyy-mm', // Adjust the format as per your requirement
-                    viewMode: "months",
-                    minViewMode: "months",
-                    autoclose: true,
-                    onChangeMonthYear: function(year, month, inst) {
-                        var selectedDate = new Date(year, month - 1, 1);
-                        console.log(this);
-                        var selectedDate = $(this).datepicker('getDate');
-                        if ($(this).attr('id') == 'due_start_date') {
-                            $('#due_end_date').datepicker('option', 'minDate', selectedDate);
-                        } else {
-                            $('#due_start_date').datepicker('option', 'maxDate', selectedDate);
+                // Initialize Issue Date pickers with Flatpickr API
+                const issueStartPicker = flatpickr('input[name="issue_start_date"]', {
+                    dateFormat: 'd/m/Y',
+                    allowInput: true,
+                    onChange: function(selectedDates, dateStr, instance) {
+                        if (selectedDates.length > 0) {
+                            // Set minimum date for end date picker
+                            issueEndPicker.set('minDate', selectedDates[0]);
                         }
                     }
                 });
+                
+                const issueEndPicker = flatpickr('input[name="issue_end_date"]', {
+                    dateFormat: 'd/m/Y',
+                    allowInput: true,
+                    onChange: function(selectedDates, dateStr, instance) {
+                        if (selectedDates.length > 0) {
+                            // Set maximum date for start date picker
+                            issueStartPicker.set('maxDate', selectedDates[0]);
+                        }
+                    }
+                });
+
+
+                // Month picker dependencies are now handled globally in app.blade.php
             });
         });
+
+        // Validation function for report form
+        function validateReportForm() {
+            const reportName = document.getElementById('reportName').value;
+            
+            if (!reportName) {
+                toastr.error('Please select a Report Name first.', 'Validation Error');
+                return false;
+            }
+            
+            // For due_policy_detail report, check if due date range is provided
+            if (reportName === 'due_policy_detail') {
+                const dueStartDate = document.getElementById('due_start_date').value;
+                const dueEndDate = document.getElementById('due_end_date').value;
+                
+                if (!dueStartDate && !dueEndDate) {
+                    toastr.error('Please provide Due Date range for Due Policy Details report.', 'Validation Error');
+                    return false;
+                }
+            }
+            
+            // For insurance_detail and cross_selling, check if issue date is provided
+            if (reportName === 'insurance_detail' || reportName === 'cross_selling') {
+                const issueStartDate = document.querySelector('input[name="issue_start_date"]').value;
+                const issueEndDate = document.querySelector('input[name="issue_end_date"]').value;
+                
+                if (!issueStartDate && !issueEndDate) {
+                    toastr.error('Please provide Issue Date range for this report type.', 'Validation Error');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        function setDownloadAction(button) {
+            // Change form action to export route when download is clicked
+            const form = button.closest('form');
+            form.action = '{{ route("reports.export") }}';
+            
+            if (validateReportForm()) {
+                // Show processing state
+                const originalHTML = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                button.disabled = true;
+                
+                // Better approach: Reset when page becomes visible again (after download)
+                const resetButton = () => {
+                    button.innerHTML = originalHTML;
+                    button.disabled = false;
+                };
+                
+                // Multiple reset triggers
+                setTimeout(resetButton, 5000); // Fallback after 5 seconds
+                
+                // Reset when user returns to page (after download)
+                document.addEventListener('visibilitychange', function onVisibilityChange() {
+                    if (!document.hidden) {
+                        resetButton();
+                        document.removeEventListener('visibilitychange', onVisibilityChange);
+                    }
+                });
+                
+                // Reset on window focus (when user returns to page)
+                window.addEventListener('focus', function onFocus() {
+                    setTimeout(() => {
+                        resetButton();
+                        window.removeEventListener('focus', onFocus);
+                    }, 1000);
+                });
+                
+                return true;
+            }
+            return false;
+        }
     </script>
 
 @endsection

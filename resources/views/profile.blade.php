@@ -5,10 +5,6 @@
 @section('content')
     <div class="container-fluid">
 
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4 border-bottom">
-            <h1 class="h3 mb-0 text-gray-800">Profile</h1>
-        </div>
 
         {{-- Alert Messages --}}
         @include('common.alert')

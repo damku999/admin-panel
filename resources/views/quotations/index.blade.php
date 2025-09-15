@@ -220,9 +220,7 @@
                         <h6 class="modal-title" id="sendWhatsAppModalLabel{{ $quotation->id }}">
                             <i class="fab fa-whatsapp"></i> Send Quotation via WhatsApp
                         </h6>
-                        <button type="button" class="close text-white" onclick="hideWhatsAppModal('sendWhatsAppModal{{ $quotation->id }}')" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <button type="button" class="btn-close btn-close-white" onclick="hideWhatsAppModal('sendWhatsAppModal{{ $quotation->id }}')" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="text-center mb-3">
@@ -256,9 +254,7 @@
                         <h6 class="modal-title" id="resendWhatsAppModalLabel{{ $quotation->id }}">
                             <i class="fab fa-whatsapp"></i> Resend Quotation via WhatsApp
                         </h6>
-                        <button type="button" class="close" onclick="hideWhatsAppModal('resendWhatsAppModal{{ $quotation->id }}')" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+                        <button type="button" class="btn-close" onclick="hideWhatsAppModal('resendWhatsAppModal{{ $quotation->id }}')" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="text-center mb-3">
@@ -294,9 +290,7 @@
                     <h6 class="modal-title" id="deleteQuotationModalLabel{{ $quotation->id }}">
                         <i class="fas fa-trash"></i> Delete Quotation
                     </h6>
-                    <button type="button" class="close text-white" onclick="hideDeleteModal('deleteQuotationModal{{ $quotation->id }}')" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close btn-close-white" onclick="hideDeleteModal('deleteQuotationModal{{ $quotation->id }}')" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-3">

@@ -401,9 +401,7 @@
                     <h5 class="modal-title" id="sendWhatsAppModalLabel">
                         <i class="fab fa-whatsapp"></i> Send Quotation via WhatsApp
                     </h5>
-                    <button type="button" class="close text-white" onclick="hideWhatsAppModal('sendWhatsAppModal')" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close btn-close-white" onclick="hideWhatsAppModal('sendWhatsAppModal')" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-3">
@@ -439,9 +437,7 @@
                     <h5 class="modal-title" id="resendWhatsAppModalLabel">
                         <i class="fab fa-whatsapp"></i> Resend Quotation via WhatsApp
                     </h5>
-                    <button type="button" class="close" onclick="hideWhatsAppModal('resendWhatsAppModal')" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" onclick="hideWhatsAppModal('resendWhatsAppModal')" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-3">
@@ -479,9 +475,7 @@
                     <h5 class="modal-title" id="deleteQuotationModalLabel">
                         <i class="fas fa-trash"></i> Delete Quotation
                     </h5>
-                    <button type="button" class="close text-white" onclick="hideDeleteModal()" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close btn-close-white" onclick="hideDeleteModal()" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-3">

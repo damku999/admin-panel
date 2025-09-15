@@ -486,9 +486,7 @@
                     <i class="fas fa-exclamation-triangle me-2"></i>
                     Confirm Company Removal
                 </h5>
-                <button type="button" class="close text-white" onclick="hideCustomModal()" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close btn-close-white" onclick="hideCustomModal()" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
                 <div class="d-flex align-items-center mb-3">
@@ -1090,16 +1088,14 @@
 @endsection
 
 <!-- Send WhatsApp Modal -->
-<div class="modal fade" id="sendWhatsAppModal" tabindex="-1" role="dialog" aria-labelledby="sendWhatsAppModalLabel" aria-hidden="true">
+<div class="modal fade whatsapp-modal" id="sendWhatsAppModal" tabindex="-1" role="dialog" aria-labelledby="sendWhatsAppModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title" id="sendWhatsAppModalLabel">
                     <i class="fab fa-whatsapp"></i> Send Quotation via WhatsApp
                 </h5>
-                <button type="button" class="close text-white" onclick="hideWhatsAppModal('sendWhatsAppModal')" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close btn-close-white" onclick="hideWhatsAppModal('sendWhatsAppModal')" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="text-center mb-3">
@@ -1134,9 +1130,7 @@
                 <h5 class="modal-title" id="resendWhatsAppModalLabel">
                     <i class="fab fa-whatsapp"></i> Resend Quotation via WhatsApp
                 </h5>
-                <button type="button" class="close" onclick="hideWhatsAppModal('resendWhatsAppModal')" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" onclick="hideWhatsAppModal('resendWhatsAppModal')" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="text-center mb-3">

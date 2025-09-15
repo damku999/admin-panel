@@ -181,7 +181,7 @@
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold"><span class="text-danger">*</span> Start Date</label>
                                 <input type="text" class="form-control form-control-sm datepicker @error('start_date') is-invalid @enderror"
-                                    name="start_date" placeholder="DD/MM/YYYY" value="{{ old('start_date') ? formatDateForUi(old('start_date')) : '' }}"
+                                    name="start_date" id="start_date" placeholder="DD/MM/YYYY" value="{{ old('start_date') ? formatDateForUi(old('start_date')) : '' }}"
                                     onchange="setExpiredDate()">
                                 @error('start_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -190,7 +190,7 @@
                             <div class="col-md-4">
                                 <label class="form-label fw-semibold"><span class="text-danger">*</span> Expired Date</label>
                                 <input type="text" class="form-control form-control-sm datepicker @error('expired_date') is-invalid @enderror"
-                                    name="expired_date" placeholder="DD/MM/YYYY" value="{{ old('expired_date') ? formatDateForUi(old('expired_date')) : '' }}">
+                                    name="expired_date" id="expired_date" placeholder="DD/MM/YYYY" value="{{ old('expired_date') ? formatDateForUi(old('expired_date')) : '' }}">
                                 @error('expired_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -971,10 +971,17 @@
             if (!startDateInput._flatpickr || !startDateInput._flatpickr.selectedDates[0]) return;
             var startDate = startDateInput._flatpickr.selectedDates[0];
             
-            // Calculate the expired date by adding 1 year - 1 day to the start date
+            // Calculate expired date: start date + 1 year - 1 day with proper leap year handling
             var expiredDate = new Date(startDate);
+            
+            // Add exactly 1 year
             expiredDate.setFullYear(startDate.getFullYear() + 1);
-            expiredDate.setDate(startDate.getDate() - 1);
+            
+            // Handle leap year edge case: if start date is Feb 29 and next year is not leap year
+            // JavaScript automatically adjusts Feb 29 to Feb 28, which is correct
+            
+            // Now subtract 1 day from the year anniversary
+            expiredDate.setDate(expiredDate.getDate() - 1);
             
             // Set the date using Flatpickr
             if (expiredDateInput._flatpickr) {

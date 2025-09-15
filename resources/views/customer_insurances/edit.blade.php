@@ -984,10 +984,17 @@
             var startDate = startDateInput._flatpickr.selectedDates[0];
             if (!startDate) return;
             
-            // Calculate the expired date by adding 1 year - 1 day to the start date
+            // Calculate expired date: start date + 1 year - 1 day with proper leap year handling
             var expiredDate = new Date(startDate);
+            
+            // Add exactly 1 year
             expiredDate.setFullYear(startDate.getFullYear() + 1);
-            expiredDate.setDate(startDate.getDate() - 1);
+            
+            // Handle leap year edge case: if start date is Feb 29 and next year is not leap year
+            // JavaScript automatically adjusts Feb 29 to Feb 28, which is correct
+            
+            // Now subtract 1 day from the year anniversary
+            expiredDate.setDate(expiredDate.getDate() - 1);
             
             // Set the date using Flatpickr
             if (expiredDateInput._flatpickr) {

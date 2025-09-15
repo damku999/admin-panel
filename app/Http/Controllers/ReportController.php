@@ -21,28 +21,45 @@ class ReportController extends Controller
 
     public function index(Request $request)
     {
+        // dd('DEBUG: Index method called', [
+        //     'method' => $request->method(),
+        //     'all_data' => $request->all(),
+        //     'has_view' => $request->has('view'),
+        //     'view_value' => $request->input('view'),
+        //     'report_name' => $request->input('report_name'),
+        //     'url' => $request->url(),
+        //     'full_url' => $request->fullUrl(),
+        //     'raw_input' => $request->input()
+        // ]);
+
         $response = $this->reportService->getInitialData();
-        
-        // Debug: Log the incoming request data
-        error_log('Report Request Data: ' . json_encode($request->all()));
-        
-        if ($request->has('view') && $request['report_name']) {
+
+        if (($request->has('view') || $request->isMethod('post')) && !empty($request->input('report_name'))) {
             $request->validate([
                 'report_name' => 'required|in:cross_selling,insurance_detail,due_policy_detail'
             ]);
 
+            \Log::info('Processing report request', [
+                'report_name' => $request['report_name'],
+                'request_data' => $request->all()
+            ]);
+
             if ($request['report_name'] == 'cross_selling') {
                 $crossSellingData = $this->reportService->generateCrossSellingReport($request->all());
-                $response['cross_selling_report'] = $crossSellingData['cross_selling_report'] ?? [];
+                $response['cross_selling_report'] = $crossSellingData['crossSelling'] ?? [];
+                $response['premiumTypes'] = $crossSellingData['premiumTypes'] ?? [];
             } elseif ($request['report_name'] == 'insurance_detail') {
                 $insuranceData = $this->reportService->generateCustomerInsuranceReport($request->all());
+                \Log::info('Insurance data received', ['count' => count($insuranceData)]);
                 $response['insurance_reports'] = $insuranceData;
             } elseif ($request['report_name'] == 'due_policy_detail') {
                 $duePolicyData = $this->reportService->generateCustomerInsuranceReport($request->all());
+                \Log::info('Due policy data received', ['count' => count($duePolicyData)]);
                 $response['due_policy_reports'] = $duePolicyData;
             }
         }
 
+        \Log::info('Final response data', ['response_keys' => array_keys($response)]);
         return view('reports.index', $response);
     }
 

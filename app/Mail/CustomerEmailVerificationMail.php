@@ -28,7 +28,12 @@ class CustomerEmailVerificationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Verify Your Customer Portal Email Address',
+            null, // from
+            [], // to
+            [], // cc
+            [], // bcc
+            [], // replyTo
+            'Verify Your Customer Portal Email Address' // subject
         );
     }
 
@@ -38,12 +43,15 @@ class CustomerEmailVerificationMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.customer.email-verification',
-            with: [
+            null, // view
+            null, // html
+            null, // text
+            'emails.customer.email-verification', // markdown
+            [
                 'customer' => $this->customer,
                 'token' => $this->token,
                 'verificationUrl' => route('customer.verify-email', $this->token)
-            ]
+            ] // with
         );
     }
 

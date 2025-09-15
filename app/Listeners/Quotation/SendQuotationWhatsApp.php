@@ -25,20 +25,21 @@ class SendQuotationWhatsApp implements ShouldQueue
         $message = $this->prepareWhatsAppMessage($quotation, $event);
         
         WhatsAppMessageQueued::dispatch(
-            phoneNumber: $customer->mobile,
-            message: $message,
-            messageType: 'template',
-            templateData: [
+            $customer->mobile,
+            $message,
+            'template',
+            null,
+            [
                 'customer_name' => $customer->name,
                 'quotation_number' => $quotation->quotation_number,
                 'best_premium' => $event->bestPremium ? number_format($event->bestPremium, 2) : 'N/A',
                 'company_count' => $event->companyCount,
-                'policy_type' => $quotation->policyType->name ?? 'Insurance',
+                'policy_type' => $quotation->policy_type ?? 'Insurance',
                 'portal_link' => route('customer.quotations.show', $quotation->id),
             ],
-            priority: $event->isHighValueQuotation() ? 2 : 5,
-            referenceId: "quotation_whatsapp_{$quotation->id}",
-            customerId: $customer->id
+            $event->isHighValueQuotation() ? 2 : 5,
+            "quotation_whatsapp_{$quotation->id}",
+            $customer->id
         );
     }
 
@@ -49,7 +50,7 @@ class SendQuotationWhatsApp implements ShouldQueue
         
         return "Hi {$customer->name}! 🎉\n\n" .
                "Your quotation #{$quotation->quotation_number} is ready!\n\n" .
-               "📋 Policy: {$quotation->policyType->name}\n" .
+               "📋 Policy: {$quotation->policy_type}\n" .
                "💰 Best Premium: {$bestPremium}\n" .
                "🏢 Companies: {$event->companyCount}\n\n" .
                "View detailed quotation: " . route('customer.quotations.show', $quotation->id) . "\n\n" .

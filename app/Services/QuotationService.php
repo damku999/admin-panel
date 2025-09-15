@@ -4,13 +4,11 @@ namespace App\Services;
 
 use App\Contracts\Repositories\QuotationRepositoryInterface;
 use App\Contracts\Services\QuotationServiceInterface;
-use App\Events\Quotation\QuotationRequested;
 use App\Events\Quotation\QuotationGenerated;
 use App\Models\Customer;
 use App\Models\InsuranceCompany;
 use App\Models\Quotation;
 use App\Models\QuotationCompany;
-use App\Models\PolicyType;
 use App\Services\PdfGenerationService;
 use App\Traits\WhatsAppApiTrait;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -32,18 +30,8 @@ class QuotationService implements QuotationServiceInterface
         DB::beginTransaction();
         
         try {
-            // Fire QuotationRequested event first
-            $customer = Customer::find($data['customer_id']);
-            $policyType = PolicyType::find($data['policy_type_id']);
-            
-            if ($customer && $policyType) {
-                QuotationRequested::dispatch(
-                    $customer,
-                    $policyType,
-                    $data,
-                    'admin'
-                );
-            }
+            // Note: QuotationRequested event temporarily disabled as policy types are handled at company level
+            // TODO: Refactor event to handle company-level policy types if needed
 
             $data['total_idv'] = $this->calculateTotalIdv($data);
 

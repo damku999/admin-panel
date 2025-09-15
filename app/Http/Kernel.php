@@ -22,7 +22,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\SecurityHeadersMiddleware::class,
-        \App\Http\Middleware\PerformanceMonitoringMiddleware::class,
+        // \App\Http\Middleware\PerformanceMonitoringMiddleware::class, // Temporarily disabled due to logging config issues
     ];
 
     /**

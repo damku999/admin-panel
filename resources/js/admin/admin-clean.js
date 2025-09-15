@@ -52,10 +52,55 @@ $(document).ready(function() {
         return false;
     });
 
-    // Form validation enhancement
-    $('form').on('submit', function() {
-        $(this).find('button[type="submit"]').prop('disabled', true)
-               .html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+    // Form validation enhancement with proper error handling
+    $('form').on('submit', function(e) {
+        var $form = $(this);
+        var $submitBtn = $form.find('button[type="submit"]');
+        var originalBtnText = $submitBtn.html();
+        
+        // Store original button text if not already stored
+        if (!$submitBtn.data('original-text')) {
+            $submitBtn.data('original-text', originalBtnText);
+        }
+        
+        // Check if form has HTML5 validation and if it's valid
+        var formElement = $form[0];
+        if (formElement.checkValidity && !formElement.checkValidity()) {
+            // Form is invalid, don't disable button
+            return;
+        }
+        
+        // Check for client-side validation errors
+        var hasValidationErrors = $form.find('.is-invalid').length > 0 || 
+                                 $form.find('.error').length > 0 ||
+                                 $form.find('.has-error').length > 0;
+        
+        if (hasValidationErrors) {
+            // Don't disable button if there are validation errors
+            return;
+        }
+        
+        // Only disable if validation passes
+        $submitBtn.prop('disabled', true)
+                 .html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+        
+        // Re-enable button after 10 seconds as fallback
+        setTimeout(function() {
+            if ($submitBtn.prop('disabled')) {
+                $submitBtn.prop('disabled', false)
+                         .html($submitBtn.data('original-text') || originalBtnText);
+            }
+        }, 10000);
+    });
+    
+    // Re-enable submit buttons when validation errors are detected
+    $(document).on('invalid', 'input, select, textarea', function() {
+        var $form = $(this).closest('form');
+        var $submitBtn = $form.find('button[type="submit"]');
+        if ($submitBtn.prop('disabled')) {
+            $submitBtn.prop('disabled', false)
+                     .html($submitBtn.data('original-text') || $submitBtn.html().replace('<i class="fas fa-spinner fa-spin"></i> Processing...', '<i class="fas fa-save me-1"></i>Save'));
+        }
     });
     
     console.log('Clean Bootstrap 5 admin portal initialized');

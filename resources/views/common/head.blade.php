@@ -26,6 +26,9 @@
     <!-- Minimal Essential Styles -->
     <link href="{{ url('css/admin-minimal.css') }}" rel="stylesheet">
     
+    <!-- Modern Close Button Styles -->
+    <link href="{{ asset('css/modern-close-button.css') }}" rel="stylesheet">
+    
     <!-- Third-party CSS -->
     <link rel="stylesheet" href="{{ asset('admin/toastr/toastr.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">

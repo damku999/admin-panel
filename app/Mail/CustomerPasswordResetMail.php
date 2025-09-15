@@ -28,7 +28,12 @@ class CustomerPasswordResetMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Reset Your Customer Portal Password',
+            null, // from
+            [], // to
+            [], // cc
+            [], // bcc
+            [], // replyTo
+            'Reset Your Customer Portal Password' // subject
         );
     }
 
@@ -38,12 +43,15 @@ class CustomerPasswordResetMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.customer.password-reset',
-            with: [
+            null, // view
+            null, // html
+            null, // text
+            'emails.customer.password-reset', // markdown
+            [
                 'customer' => $this->customer,
                 'token' => $this->token,
                 'resetUrl' => route('customer.password.reset', ['token' => $this->token, 'email' => $this->customer->email])
-            ]
+            ] // with
         );
     }
 

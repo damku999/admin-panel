@@ -20,27 +20,27 @@ class GenerateQuotationPDF implements ShouldQueue
         
         // Request PDF generation
         PDFGenerationRequested::dispatch(
-            documentType: 'quotation',
-            templateView: 'pdfs.quotation',
-            templateData: [
-                'quotation' => $quotation->load(['customer', 'policyType', 'quotationCompanies.insuranceCompany']),
+            'quotation',
+            'pdfs.quotation',
+            [
+                'quotation' => $quotation->load(['customer', 'quotationCompanies.insuranceCompany']),
                 'generated_date' => now()->format('d/m/Y'),
                 'best_premium' => $event->bestPremium,
                 'company_count' => $event->companyCount,
                 'generated_by' => $event->generatedBy,
             ],
-            fileName: $fileName,
-            storagePath: 'pdfs/quotations',
-            pdfOptions: [
+            $fileName,
+            'pdfs/quotations',
+            [
                 'format' => 'A4',
                 'orientation' => 'portrait',
                 'margin_top' => 15,
                 'margin_bottom' => 15,
             ],
-            priority: $event->isHighValueQuotation() ? 3 : 5,
-            referenceId: "quotation_{$quotation->id}",
-            customerId: $quotation->customer_id,
-            callbackEvent: 'QuotationPDFGenerated'
+            $event->isHighValueQuotation() ? 3 : 5,
+            "quotation_{$quotation->id}",
+            $quotation->customer_id,
+            'QuotationPDFGenerated'
         );
     }
 

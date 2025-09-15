@@ -25,10 +25,10 @@ class StoreEventInEventStore implements ShouldQueue
         [$aggregateType, $aggregateId] = $this->extractAggregateInfo($event);
         
         $this->eventSourcingService->store(
-            eventName: $eventName,
-            eventData: $eventData,
-            aggregateType: $aggregateType,
-            aggregateId: $aggregateId
+            $eventName,
+            $eventData,
+            $aggregateType,
+            $aggregateId
         );
     }
 

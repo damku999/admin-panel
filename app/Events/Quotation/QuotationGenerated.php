@@ -25,9 +25,9 @@ class QuotationGenerated
         // Calculate quotation metrics
         $this->companyCount = $quotation->quotationCompanies()->count();
         $this->companyPremiums = $quotation->quotationCompanies()
-            ->pluck('premium', 'insurance_company_id')
+            ->pluck('final_premium', 'insurance_company_id')
             ->toArray();
-        $this->bestPremium = $quotation->quotationCompanies()->min('premium');
+        $this->bestPremium = $quotation->quotationCompanies()->min('final_premium');
     }
 
     public function getEventData(): array

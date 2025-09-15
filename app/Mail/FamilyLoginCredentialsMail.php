@@ -35,7 +35,12 @@ class FamilyLoginCredentialsMail extends Mailable
             : 'Your Family Group Portal - Login Credentials';
 
         return new Envelope(
-            subject: $subject,
+            null, // from
+            [], // to
+            [], // cc
+            [], // bcc
+            [], // replyTo
+            $subject // subject
         );
     }
 
@@ -45,15 +50,18 @@ class FamilyLoginCredentialsMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.customer.family-login-credentials',
-            with: [
+            null, // view
+            null, // html
+            null, // text
+            'emails.customer.family-login-credentials', // markdown
+            [
                 'customer' => $this->customer,
                 'password' => $this->password,
                 'familyGroup' => $this->familyGroup,
                 'isHead' => $this->isHead,
                 'loginUrl' => route('customer.login'),
                 'verificationUrl' => route('customer.verify-email', $this->customer->email_verification_token)
-            ]
+            ] // with
         );
     }
 

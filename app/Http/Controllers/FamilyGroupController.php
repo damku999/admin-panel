@@ -452,10 +452,10 @@ class FamilyGroupController extends Controller
 
                 // Send actual email notification only to family head
                 \Mail::to($customer->email)->send(new \App\Mail\FamilyLoginCredentialsMail(
-                    customer: $customer,
-                    password: $password,
-                    familyGroup: $familyGroup,
-                    isHead: $isHead
+                    $customer,
+                    $password,
+                    $familyGroup,
+                    $isHead
                 ));
 
                 \Log::info('Family group login credentials email sent to family head only', [

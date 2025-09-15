@@ -80,9 +80,9 @@ class InsuranceSummarySheet implements FromCollection, WithHeadings, ShouldAutoS
         
         // Status breakdown
         $activeCount = $customerInsurances->where('status', 1)->count();
-        $inactiveCount = $customerInsurances->where('status', 0)->count();
+        $notRenewedCount = $customerInsurances->where('status', 0)->count();
         $summary[] = ['Active Policies', $activeCount];
-        $summary[] = ['Inactive Policies', $inactiveCount];
+        $summary[] = ['Not Renewed', $notRenewedCount];
         
         return collect($summary);
     }

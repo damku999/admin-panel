@@ -23,63 +23,23 @@ class ReportController extends Controller
     {
         $response = $this->reportService->getInitialData();
         
-        // Debug: Log all request parameters
-        \Log::info('Reports index called', [
-            'has_view' => $request->has('view'),
-            'has_download' => $request->has('download'),
-            'report_name' => $request->get('report_name'),
-            'all_params' => $request->all()
-        ]);
+        // Debug: Log the incoming request data
+        error_log('Report Request Data: ' . json_encode($request->all()));
         
-        if ($request['report_name'] == 'cross_selling') {
-            if ($request->has('view')) {
-                $crossSellingData = $this->reportService->generateCrossSellingReport($request->all());
-                $response = array_merge($response, $crossSellingData);
-            } else {
-                return $this->reportService->exportCrossSellingReport($request->all());
-            }
-        } elseif ($request['report_name'] == 'insurance_detail') {
-            if ($request->has('download')) {
-                $request->validate(['report_name' => 'required']);
-                \Log::info('Insurance Detail Export requested', $request->all());
-                return $this->reportService->exportCustomerInsuranceReport($request->all());
-            }
-            if ($request->has('view')) {
-                $request->validate(['report_name' => 'required']);
-                $customerInsurances = $this->reportService->generateCustomerInsuranceReport($request->all());
-                $response['customerInsurances'] = $customerInsurances;
-
-                // Debug: Log the count and filters for troubleshooting
-                \Log::info('Insurance Detail Report generated', [
-                    'report_name' => $request['report_name'],
-                    'filters' => $request->all(),
-                    'count' => $customerInsurances ? count($customerInsurances) : 0
-                ]);
-            }
-        } elseif ($request['report_name'] == 'due_policy_detail') {
-            \Log::info('Due Policy Detail Report requested', [
-                'has_download' => $request->has('download'),
-                'has_view' => $request->has('view'),
-                'all_params' => $request->all()
+        if ($request->has('view') && $request['report_name']) {
+            $request->validate([
+                'report_name' => 'required|in:cross_selling,insurance_detail,due_policy_detail'
             ]);
-            
-            if ($request->has('download')) {
-                $request->validate(['report_name' => 'required']);
-                \Log::info('Due Policy Detail Export requested', $request->all());
-                return $this->reportService->exportCustomerInsuranceReport($request->all());
-            }
-            if ($request->has('view')) {
-                $request->validate(['report_name' => 'required']);
-                $customerInsurances = $this->reportService->generateCustomerInsuranceReport($request->all());
-                $response['customerInsurances'] = $customerInsurances;
 
-                // Debug: Log the count and filters for troubleshooting
-                \Log::info('Due Policy Detail Report generated', [
-                    'report_name' => $request['report_name'],
-                    'filters' => $request->all(),
-                    'count' => $customerInsurances ? count($customerInsurances) : 0,
-                    'sample_data' => $customerInsurances ? $customerInsurances->take(2)->toArray() : []
-                ]);
+            if ($request['report_name'] == 'cross_selling') {
+                $crossSellingData = $this->reportService->generateCrossSellingReport($request->all());
+                $response['cross_selling_report'] = $crossSellingData['cross_selling_report'] ?? [];
+            } elseif ($request['report_name'] == 'insurance_detail') {
+                $insuranceData = $this->reportService->generateCustomerInsuranceReport($request->all());
+                $response['insurance_reports'] = $insuranceData;
+            } elseif ($request['report_name'] == 'due_policy_detail') {
+                $duePolicyData = $this->reportService->generateCustomerInsuranceReport($request->all());
+                $response['due_policy_reports'] = $duePolicyData;
             }
         }
 

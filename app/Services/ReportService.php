@@ -27,33 +27,21 @@ class ReportService implements ReportServiceInterface
     }
 
     /**
-     * Get initial data for reports page with caching
+     * Get initial data for reports page with comprehensive filter options
      */
     public function getInitialData(): array
     {
-        return $this->cacheService->cacheQuery('report_initial_data', [], function () {
-            return [
-                'customers' => Customer::select('id', 'name')->get(),
-                'brokers' => $this->cacheService->getBrokers()->map(function ($item) {
-                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']];
-                }),
-                'relationship_managers' => RelationshipManager::select('id', 'name')->get(),
-                'branches' => Branch::select('id', 'name')->get(),
-                'insurance_companies' => $this->cacheService->getInsuranceCompanies()->map(function ($item) {
-                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']];
-                }),
-                'policy_type' => $this->cacheService->getPolicyTypes()->map(function ($item) {
-                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']];
-                }),
-                'fuel_type' => $this->cacheService->getFuelTypes()->map(function ($item) {
-                    return (object)['id' => $item->id ?? $item['id'], 'name' => $item->name ?? $item['name']];
-                }),
-                'premium_types' => $this->cacheService->getPremiumTypes(),
-                'reference_by_user' => ReferenceUser::select('id', 'name')->get(),
-                'customerInsurances' => [],
-                'crossSelling' => [],
-            ];
-        });
+        return [
+            'brokers' => Broker::select('id', 'name')->orderBy('name')->get(),
+            'relationship_managers' => RelationshipManager::select('id', 'name')->orderBy('name')->get(),
+            'insurance_companies' => InsuranceCompany::select('id', 'name')->orderBy('name')->get(),
+            'policy_types' => PolicyType::select('id', 'name')->orderBy('name')->get(),
+            'fuel_types' => FuelType::select('id', 'name')->orderBy('name')->get(),
+            'premium_types' => PremiumType::select('id', 'name')->orderBy('name')->get(),
+            'customers' => Customer::select('id', 'name')->orderBy('name')->get(),
+            'customerInsurances' => [],
+            'crossSelling' => [],
+        ];
     }
 
     /**
@@ -68,27 +56,56 @@ class ReportService implements ReportServiceInterface
             }
             $premiumTypes = $premiumTypes->get();
 
-            $customer_obj = Customer::with(['insurance.premiumType'])
+            $customer_obj = Customer::with(['insurance.premiumType', 'insurance.broker', 'insurance.relationshipManager', 'insurance.insuranceCompany'])
                 ->orderBy('name');
 
-            // Apply date filters if provided
+            // Apply comprehensive filters
             $hasDateFilter = false;
+            
+            // Date filters
             if (!empty($parameters['issue_start_date']) || !empty($parameters['issue_end_date'])) {
                 $customer_obj = $customer_obj->whereHas('insurance', function ($query) use ($parameters) {
                     if (!empty($parameters['issue_start_date'])) {
-                        $startDate = \App\Helpers\DateHelper::isValidDatabaseFormat($parameters['issue_start_date'])
-                            ? $parameters['issue_start_date']
-                            : formatDateForDatabase($parameters['issue_start_date']);
-                        $query->where('start_date', '>=', $startDate);
+                        try {
+                            $startDate = Carbon::createFromFormat('d/m/Y', $parameters['issue_start_date'])->format('Y-m-d');
+                            $query->where('start_date', '>=', $startDate);
+                        } catch (\Exception $e) {
+                            $query->where('start_date', '>=', $parameters['issue_start_date']);
+                        }
                     }
                     if (!empty($parameters['issue_end_date'])) {
-                        $endDate = \App\Helpers\DateHelper::isValidDatabaseFormat($parameters['issue_end_date'])
-                            ? $parameters['issue_end_date']
-                            : formatDateForDatabase($parameters['issue_end_date']);
-                        $query->where('start_date', '<=', $endDate);
+                        try {
+                            $endDate = Carbon::createFromFormat('d/m/Y', $parameters['issue_end_date'])->format('Y-m-d');
+                            $query->where('start_date', '<=', $endDate);
+                        } catch (\Exception $e) {
+                            $query->where('start_date', '<=', $parameters['issue_end_date']);
+                        }
                     }
                 });
                 $hasDateFilter = true;
+            }
+            
+            // Business entity filters
+            if (!empty($parameters['broker_id'])) {
+                $customer_obj = $customer_obj->whereHas('insurance', function ($query) use ($parameters) {
+                    $query->where('broker_id', $parameters['broker_id']);
+                });
+            }
+            
+            if (!empty($parameters['relationship_manager_id'])) {
+                $customer_obj = $customer_obj->whereHas('insurance', function ($query) use ($parameters) {
+                    $query->where('relationship_manager_id', $parameters['relationship_manager_id']);
+                });
+            }
+            
+            if (!empty($parameters['insurance_company_id'])) {
+                $customer_obj = $customer_obj->whereHas('insurance', function ($query) use ($parameters) {
+                    $query->where('insurance_company_id', $parameters['insurance_company_id']);
+                });
+            }
+            
+            if (!empty($parameters['customer_id'])) {
+                $customer_obj = $customer_obj->where('id', $parameters['customer_id']);
             }
 
             $customers = $customer_obj->get();

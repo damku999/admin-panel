@@ -73,7 +73,7 @@ return [
             'path' => storage_path('logs/structured.log'),
             'level' => 'info',
             'days' => 30,
-            'tap' => [\App\Logging\StructuredLogFormatter::class],
+            // 'tap' => [\App\Logging\StructuredLogFormatter::class], // Temporarily disabled
         ],
         
         // Performance monitoring logs

@@ -1,631 +1,963 @@
 @extends('layouts.app')
 
-@section('title', 'Reports List')
+@section('title', 'Reports Dashboard')
 
 @section('content')
     <div class="container-fluid">
         {{-- Alert Messages --}}
         @include('common.alert')
 
-        <!-- DataTales Example -->
-        <div class="card shadow mt-3 mb-4">
-            <x-list-header 
-                    title="Reports Management"
-                    subtitle="Generate and export system reports"
-            />
-            <form action="{{ route('reports.index') }}" method="GET" role="search">
-                @csrf
-                <div class="card-body">
-                    <div class="form-group row">
-                        {{-- <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label for="Select Columns" class="form-label">&nbsp;</label>
-                            <button type="button" class="btn btn-primary form-control" id="openModalPopUpColumn">
-                                Select Columns
-                            </button>
-                        </div> --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
-                            <label for="reportName" class="form-label"><span style="color:red;">*</span>Report
-                                Name:</label>
-                            <select class="form-control form-control-reprts @error('report_name') is-invalid @enderror"
-                                id="reportName" name="report_name">
-                                <option value="">Select Report Name</option>
-                                @foreach (config('constants.REPORTS') as $reportName => $reportDescription)
-                                    <option
-                                        value="{{ $reportName }}"{{ request('report_name') === $reportName ? ' selected' : '' }}>
-                                        {{ $reportDescription }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('report_name')
-                                <span class="text-danger">{{ $message }}</span>
-                            @enderror
+        <!-- Modern Reports Dashboard -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow border-0 rounded">
+                    <div class="card-header bg-gradient-primary text-white py-2">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-chart-bar fa-lg me-2"></i>
+                            <div>
+                                <h5 class="mb-0 font-weight-bold">Reports Dashboard</h5>
+                                <small class="opacity-75">Generate comprehensive insurance reports</small>
+                            </div>
                         </div>
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 fields-to-toggle due_policy_detail">
-                            <label class="form-label"><span style="color:red;">*</span>Report Period</label>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <label for="due_start_date" class="form-label text-muted small">From Month:</label>
-                                    <input type="text" placeholder="Select month" name="due_start_date"
-                                        class="form-control form-control-sm datepicker_month" value="{{ request('due_start_date') }}"
-                                        autocomplete="off" readonly id="due_start_date">
-                                </div>
-                                <div class="col-6">
-                                    <label for="due_end_date" class="form-label text-muted small">To Month:</label>
-                                    <input type="text" placeholder="Select month" name="due_end_date"
-                                        class="form-control form-control-sm datepicker_month" value="{{ request('due_end_date') }}"
-                                        autocomplete="off" readonly id="due_end_date">
+                    </div>
+                    
+                    <form action="{{ route('reports.index') }}" method="POST" id="reportForm" class="modern-form">
+                        @csrf
+                        <div class="card-body p-3">
+                            <!-- Report Type Selection - Compact Design -->
+                            <div class="row mb-3">
+                                <div class="col-lg-8 col-md-10 mx-auto">
+                                    <div class="report-selector-card">
+                                        <label class="form-label fw-bold text-primary mb-2">
+                                            <i class="fas fa-chart-line me-1"></i>Select Report Type <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="custom-select-wrapper">
+                                            <select class="custom-select form-select @error('report_name') is-invalid @enderror" 
+                                                    id="reportName" name="report_name" required>
+                                                <option value="">Choose a report to generate...</option>
+                                                @foreach (config('constants.REPORTS') as $reportName => $reportDescription)
+                                                    <option value="{{ $reportName }}"{{ request('report_name') === $reportName ? ' selected' : '' }}>
+                                                        {{ $reportDescription }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <i class="fas fa-chevron-down select-arrow"></i>
+                                        </div>
+                                        @error('report_name')
+                                            <div class="invalid-feedback d-block mt-2">{{ $message }}</div>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        {{-- <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label for="daterange" class="form-label"><span style="color:red;">*</span>Creation
-                                Date</label>
-                            <div class="d-flex">
-                                <input type="text" placeholder="Start Date" name="record_creation_start_date"
-                                    class="form-control datepicker" value="{{ request('record_creation_start_date') }}"
-                                    style="margin-right: 10px;">
-                                <input type="text" placeholder="End Date" name="record_creation_end_date"
-                                    class="form-control datepicker" value="{{ request('record_creation_end_date') }}"
-                                    style="margin-right: 10px;">
+
+                            <!-- Primary Date Filters (Always Visible) -->
+                            <div class="primary-filters-container mb-3">
+                                <div class="row mb-2">
+                                    <!-- Issue Date Range (Required for insurance_detail, Optional for cross_selling) -->
+                                    <div class="col-lg-6 col-md-6 mb-2 fields-to-toggle insurance_detail cross_selling" style="display: none;">
+                                        <div class="card border-primary">
+                                            <div class="card-header bg-primary text-white py-1">
+                                                <small>
+                                                    <i class="fas fa-calendar-alt me-1"></i>Issue Date Range 
+                                                    <span class="date-requirement insurance_detail text-warning fw-bold">(Required)</span>
+                                                    <span class="date-requirement cross_selling text-light">(Optional)</span>
+                                                </small>
+                                            </div>
+                                            <div class="card-body p-2">
+                                                <div class="row g-2">
+                                                    <div class="col-6">
+                                                        <div class="form-floating">
+                                                            <input type="text" class="form-control form-control-sm datepicker" 
+                                                                   id="issue_start_date" name="issue_start_date" 
+                                                                   value="{{ request('issue_start_date') }}" 
+                                                                   placeholder="From Date" readonly>
+                                                            <label for="issue_start_date"><small>From Date</small></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="form-floating">
+                                                            <input type="text" class="form-control form-control-sm datepicker" 
+                                                                   id="issue_end_date" name="issue_end_date" 
+                                                                   value="{{ request('issue_end_date') }}" 
+                                                                   placeholder="To Date" readonly>
+                                                            <label for="issue_end_date"><small>To Date</small></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Due Policy Period (Required for due_policy_detail) -->
+                                    <div class="col-lg-6 col-md-6 mb-2 fields-to-toggle due_policy_detail" style="display: none;">
+                                        <div class="card border-warning">
+                                            <div class="card-header bg-warning text-dark py-1">
+                                                <small>
+                                                    <i class="fas fa-calendar-check me-1"></i>Due Policy Period 
+                                                    <span class="text-danger fw-bold">(Required)</span>
+                                                </small>
+                                            </div>
+                                            <div class="card-body p-2">
+                                                <div class="row g-2">
+                                                    <div class="col-6">
+                                                        <div class="form-floating">
+                                                            <input type="text" class="form-control form-control-sm datepicker_month" 
+                                                                   id="due_start_date" name="due_start_date" 
+                                                                   value="{{ request('due_start_date') }}" 
+                                                                   placeholder="From Month" readonly>
+                                                            <label for="due_start_date"><small>From Month</small></label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="form-floating">
+                                                            <input type="text" class="form-control form-control-sm datepicker_month" 
+                                                                   id="due_end_date" name="due_end_date" 
+                                                                   value="{{ request('due_end_date') }}" 
+                                                                   placeholder="To Month" readonly>
+                                                            <label for="due_end_date"><small>To Month</small></label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div> --}}
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
-                            <label for="customer_id" class="form-label">Customer : </label>
-                            <select name="customer_id" id="customer_id" class=" w-100">
-                                <option selected="selected" disabled="disabled">Select Customer</option>
-                                @foreach ($customers as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        data-mobile="{{ $item->mobile_number }}"
-                                        {{ request('customer_id') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                        @if ($item->mobile_number)
-                                            - {{ $item->mobile_number }}
-                                        @endif
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
 
-                        {{-- <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
-                            <label for="branch_id" class="form-label">Branches : </label>
-                            <select name="branch_id" class="form-control" id="branch_id">
-                                <option selected="selected" disabled="disabled">Select Branches</option>
-                                @foreach ($branches as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ request('branch_id') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div> --}}
+                            <!-- Advanced Filters Section -->
+                            <div class="advanced-filters-container mb-3">
+                                <div class="filter-toggle-header text-center mb-2">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="toggleFilters">
+                                        <i class="fas fa-filter me-1"></i>Advanced Filters <small>(Optional)</small>
+                                        <i class="fas fa-chevron-down ms-1" id="filterChevron"></i>
+                                    </button>
+                                </div>
+                                
+                                <div class="filters-content" id="filtersContent" style="display: none;">
+                                    <!-- Optional Date Range Filters Row -->
+                                    <div class="row mb-2">
+                                        <!-- Record Creation Date -->
+                                        <div class="col-lg-4 col-md-6 mb-2">
+                                            <div class="filter-card">
+                                                <div class="filter-header">
+                                                    <i class="fas fa-plus-circle me-1"></i><small>Record Creation Date</small>
+                                                </div>
+                                                <div class="row g-1">
+                                                    <div class="col-6">
+                                                        <input type="text" class="form-control form-control-sm datepicker" 
+                                                               id="record_creation_start_date" name="record_creation_start_date" 
+                                                               value="{{ request('record_creation_start_date') }}" 
+                                                               placeholder="From Date" readonly>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <input type="text" class="form-control form-control-sm datepicker" 
+                                                               id="record_creation_end_date" name="record_creation_end_date" 
+                                                               value="{{ request('record_creation_end_date') }}" 
+                                                               placeholder="To Date" readonly>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
-                            <label for="broker_id" class="form-label">Brokers : </label>
-                            <select name="broker_id" class="form-control" id="broker_id">
-                                <option selected="selected" disabled="disabled">Select Brokers</option>
-                                @foreach ($brokers as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ request('broker_id') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                                    <!-- Business Entity Filters Row -->
+                                    <div class="row mb-2">
+                                        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+                                            <div class="filter-card">
+                                                <div class="filter-header">
+                                                    <i class="fas fa-user-tie me-1"></i><small>Broker</small>
+                                                </div>
+                                                <select class="form-select form-select-sm" name="broker_id">
+                                                    <option value="">All Brokers</option>
+                                                    @if(isset($brokers))
+                                                        @foreach($brokers as $broker)
+                                                            <option value="{{ $broker->id }}" {{ request('broker_id') == $broker->id ? 'selected' : '' }}>{{ $broker->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                        </div>
 
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
-                            <label for="relationship_manager_id" class="form-label">RM : </label>
-                            <select name="relationship_manager_id" class="form-control" id="relationship_manager_id">
-                                <option selected="selected" disabled="disabled">Select RM</option>
-                                @foreach ($relationship_managers as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ request('relationship_manager_id') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                                        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+                                            <div class="filter-card">
+                                                <div class="filter-header">
+                                                    <i class="fas fa-user-friends me-1"></i><small>RM</small>
+                                                </div>
+                                                <select class="form-select form-select-sm" name="relationship_manager_id">
+                                                    <option value="">All RMs</option>
+                                                    @if(isset($relationship_managers))
+                                                        @foreach($relationship_managers as $rm)
+                                                            <option value="{{ $rm->id }}" {{ request('relationship_manager_id') == $rm->id ? 'selected' : '' }}>{{ $rm->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                        </div>
 
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
-                            <label for="insurance_company_id" class="form-label">Insurance Company : </label>
-                            <select name="insurance_company_id" class="form-control" id="insurance_company_id">
-                                <option selected="selected" disabled="disabled">Select Insurance Company</option>
-                                @foreach ($insurance_companies as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ request('insurance_company_id') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                                        <div class="col-lg-3 col-md-6 mb-2">
+                                            <div class="filter-card">
+                                                <div class="filter-header">
+                                                    <i class="fas fa-shield-alt me-1"></i><small>Insurance Company</small>
+                                                </div>
+                                                <select class="form-select form-select-sm" name="insurance_company_id">
+                                                    <option value="">All Companies</option>
+                                                    @if(isset($insurance_companies))
+                                                        @foreach($insurance_companies as $company)
+                                                            <option value="{{ $company->id }}" {{ request('insurance_company_id') == $company->id ? 'selected' : '' }}>{{ $company->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                        </div>
 
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
-                            <label for="policy_type_id" class="form-label">Policy Type : </label>
-                            <select name="policy_type_id" class="form-control" id="policy_type_id">
-                                <option selected="selected" disabled="disabled">Select Policy Type</option>
-                                @foreach ($policy_type as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ request('policy_type_id') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                                        <div class="col-lg-3 col-md-6 mb-2">
+                                            <div class="filter-card">
+                                                <div class="filter-header">
+                                                    <i class="fas fa-users me-1"></i><small>Customer</small>
+                                                </div>
+                                                <select class="form-select form-select-sm" name="customer_id">
+                                                    <option value="">All Customers</option>
+                                                    @if(isset($customers))
+                                                        @foreach($customers as $customer)
+                                                            <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>{{ $customer->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
-                            <label for="fuel_type_id" class="form-label">Fuel Type : </label>
-                            <select name="fuel_type_id" class="form-control" id="fuel_type_id">
-                                <option selected="selected" disabled="disabled">Select Fuel Type</option>
-                                @foreach ($fuel_type as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ request('fuel_type_id') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <label for="premium_type_id" class="form-label">Premium Type:</label>
-                            <select name="premium_type_id[]" class="form-control" id="premium_type_id"
-                                multiple="multiple">
-                                <option value="" disabled>Select Premium Type</option>
-                                @foreach ($premium_types as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ in_array($item->id, request('premium_type_id', [])) ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                                    <!-- Policy & Premium Filters Row -->
+                                    <div class="row mb-2">
+                                        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+                                            <div class="filter-card">
+                                                <div class="filter-header">
+                                                    <i class="fas fa-file-contract me-1"></i><small>Policy Type</small>
+                                                </div>
+                                                <select class="form-select form-select-sm" name="policy_type_id">
+                                                    <option value="">All Policy Types</option>
+                                                    @if(isset($policy_types))
+                                                        @foreach($policy_types as $policyType)
+                                                            <option value="{{ $policyType->id }}" {{ request('policy_type_id') == $policyType->id ? 'selected' : '' }}>{{ $policyType->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                        </div>
 
-                        {{-- <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 ">
-                            <label for="reference_by" class="form-label">Reference By : </label>
-                            <select name="reference_by" class="form-control" id="reference_by">
-                                <option selected="selected" disabled="disabled">Select Reference By</option>
-                                @foreach ($reference_by_user as $item)
-                                    <option id="{{ $item->id }}" value="{{ $item->id }}"
-                                        {{ request('reference_by') == $item->id ? 'selected' : '' }}>
-                                        {{ $item->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div> --}}
+                                        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+                                            <div class="filter-card">
+                                                <div class="filter-header">
+                                                    <i class="fas fa-gas-pump me-1"></i><small>Fuel Type</small>
+                                                </div>
+                                                <select class="form-select form-select-sm" name="fuel_type_id">
+                                                    <option value="">All Fuel Types</option>
+                                                    @if(isset($fuel_types))
+                                                        @foreach($fuel_types as $fuelType)
+                                                            <option value="{{ $fuelType->id }}" {{ request('fuel_type_id') == $fuelType->id ? 'selected' : '' }}>{{ $fuelType->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                        </div>
 
-                    </div>
-                    <div class="form-group row">
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 fields-to-toggle insurance_detail cross_selling">
-                            <label for="issueDate" class="form-label"><span style="color:red;">*</span>Issue Date</label>
-                            <div class="d-flex">
-                                <input type="text" placeholder="Start Date" name="issue_start_date"
-                                    class="form-control datepicker" value="{{ request('issue_start_date') }}"
-                                    style="margin-right: 10px;">
-                                <input type="text" placeholder="End Date" name="issue_end_date"
-                                    class="form-control datepicker" value="{{ request('issue_end_date') }}"
-                                    style="margin-right: 10px;">
+                                        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+                                            <div class="filter-card">
+                                                <div class="filter-header">
+                                                    <i class="fas fa-money-bill-wave me-1"></i><small>Premium Type</small>
+                                                </div>
+                                                <select class="form-select form-select-sm" name="premium_type_id">
+                                                    <option value="">All Premium Types</option>
+                                                    @if(isset($premium_types))
+                                                        @foreach($premium_types as $premiumType)
+                                                            <option value="{{ $premiumType->id }}" {{ request('premium_type_id') == $premiumType->id ? 'selected' : '' }}>{{ $premiumType->name }}</option>
+                                                        @endforeach
+                                                    @endif
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-2 col-md-4 col-sm-6 mb-2">
+                                            <div class="filter-card">
+                                                <div class="filter-header">
+                                                    <i class="fas fa-toggle-on me-1"></i><small>Status</small>
+                                                </div>
+                                                <select class="form-select form-select-sm" name="status">
+                                                    <option value="">All Status</option>
+                                                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                                                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-4 col-md-8 mb-2">
+                                            <div class="filter-card">
+                                                <div class="filter-header">
+                                                    <i class="fas fa-rupee-sign me-1"></i><small>Premium Amount Range</small>
+                                                </div>
+                                                <div class="row g-1">
+                                                    <div class="col-6">
+                                                        <input type="number" class="form-control form-control-sm" 
+                                                               name="premium_amount_min" 
+                                                               value="{{ request('premium_amount_min') }}" 
+                                                               placeholder="Min Amount" min="0" step="0.01">
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <input type="number" class="form-control form-control-sm" 
+                                                               name="premium_amount_max" 
+                                                               value="{{ request('premium_amount_max') }}" 
+                                                               placeholder="Max Amount" min="0" step="0.01">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 fields-to-toggle policy_detail ">
+                        
+                        <!-- Action Buttons -->
+                        <div class="card-footer bg-light p-2">
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="resetForm()">
+                                    <i class="fas fa-redo me-1"></i>Reset
+                                </button>
+                                <button type="submit" name="view" value="1" class="btn btn-primary btn-sm px-3" onclick="return validateForm(this);">
+                                    <i class="fas fa-eye me-1"></i>View Report
+                                </button>
+                                <button type="button" class="btn btn-success btn-sm px-3" onclick="downloadReport(this)">
+                                    <i class="fas fa-download me-1"></i>Download Excel
+                                </button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 </div>
-                <div class="card-footer">
-                    {{-- <button type="submit" name="search"
-                        class="btn btn-success btn-reprts float-right mb-3 filter_by_click"><i class="fas fa-search"></i>
-                        Search</button> --}}
-                    <button type="submit" name="download" onclick="setDownloadAction(this)"
-                        class="btn btn-primary btn-reprts float-right  mr-3 mb-3 filter_by_click"><i
-                            class="fas fa-download"></i> Download</button>
-                    <button type="submit" name="view" value="1" onclick="return validateReportForm()"
-                        class="btn btn-primary btn-reprts float-right  mr-3 mb-3"><i
-                            class="fa-solid fa-eye"></i> View</button>
-                    <a class="btn btn-warning float-right mr-3 mb-3 filter_by_click" href="{{ route('reports.index') }}">
-                        <i class="fas fa-redo"></i> Cancel</a>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
 
-
-    <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <form id="columnSelectionForm" action="{{ route('reports.save.selected.columns') }}" method="POST">
-                    @csrf
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Select and Reorder Columns</h5>
-                        <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
-                            <button type="button" class="btn btn-secondary float-right ml-2"
-                                onclick="hideModal('modalPopUpColumn')">Close</button>
-                            <button type="button" class="btn btn-primary float-right ml-2 saveColumns">Save
-                                changes</button>
+        <!-- Report Results Section -->
+        @if(isset($cross_selling_report) && !empty($cross_selling_report))
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-header bg-success text-white">
+                            <h4 class="mb-0"><i class="fas fa-table me-2"></i>Cross Selling Report Results</h4>
                         </div>
-                    </div>
-                    <div class="modal-body">
-                        <table class="table table-responsive table-bordered table-striped draggable-table">
-                            <tbody id="sortableTableBody" class="table-hover">
-
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" onclick="hideModal('modalPopUpColumn')">Close</button>
-                        <button type="button" class="btn btn-primary saveColumns">Save changes</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    {{-- Debug info --}}
-    @if(request()->has('view') && config('app.debug'))
-        <div class="alert alert-info">
-            <strong>Debug Info:</strong><br>
-            Report Name: {{ request('report_name') }}<br>
-            Issue Start Date: {{ request('issue_start_date') }}<br>
-            Issue End Date: {{ request('issue_end_date') }}<br>
-            <strong>Has View Parameter:</strong> {{ request()->has('view') ? 'YES' : 'NO' }}<br>
-            <strong>Has Download Parameter:</strong> {{ request()->has('download') ? 'YES' : 'NO' }}<br>
-            <strong>Report Name:</strong> {{ request()->get('report_name', 'Not set') }}<br>
-            Results Count: {{ isset($customerInsurances) ? (is_countable($customerInsurances) ? count($customerInsurances) : 'Not countable') : 'Not set' }}<br>
-            Results Type: {{ isset($customerInsurances) ? gettype($customerInsurances) : 'Not set' }}
-        </div>
-    @endif
-    
-    @if (!empty($customerInsurances))
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Report</h6>
-            </div>
-            <div class="card-body">
-                <div class="container-fluid">
-                    <div class="table-responsive">
-                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                            <thead>
-                                <tr>
-                                    <th>Customer Name</th>
-                                    <th>Policy No</th>
-                                    <th>Broker Name</th>
-                                    <th>RM Name</th>
-                                    <th>Premium Type</th>
-                                    <th>Insurance Company Name</th>
-                                    <th>Commission %</th>
-                                    <th>My Commission Amount</th>
-                                    <th>Transfer Commission</th>
-                                    <th>Actual Earnings</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @php
-                                    $totalCommissionAmount = 0;
-                                    $totalTransferCommission = 0;
-                                    $totalActualEarnings = 0;
-                                @endphp
-                                @foreach ($customerInsurances as $customerInsurance)
-                                    <tr>
-                                        <td>{{ $customerInsurance->customer->name }}</td>
-                                        <td>{{ $customerInsurance->policy_no }}</td>
-                                        <td>{{ $customerInsurance->broker->name }}</td>
-                                        <td>{{ $customerInsurance->relationshipManager->name }}</td>
-                                        <td>{{ $customerInsurance->premiumType->name }}</td>
-                                        <td>{{ $customerInsurance->insuranceCompany->name }}</td>
-                                        <td>{{ $customerInsurance->my_commission_percentage }}</td>
-                                        <td>{{ $customerInsurance->my_commission_amount }}</td>
-                                        <td>{{ $customerInsurance->transfer_commission_amount }}</td>
-                                        <td>{{ $customerInsurance->actual_earnings }}</td>
-                                    </tr>
-                                    @php
-                                        $totalCommissionAmount += $customerInsurance->my_commission_amount;
-                                        $totalTransferCommission += $customerInsurance->transfer_commission_amount;
-                                        $totalActualEarnings += $customerInsurance->actual_earnings;
-                                    @endphp
-                                @endforeach
-                                <tr>
-                                    <td colspan="7" class="text-right">Total:</td>
-                                    <td>{{ $totalCommissionAmount }}</td>
-                                    <td>{{ $totalTransferCommission }}</td>
-                                    <td>{{ $totalActualEarnings }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-    @if (!empty($crossSelling) && !empty($premium_types))
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Cross Selling Report</h6>
-            </div>
-            <div class="card-body">
-                <div class="container-fluid">
-                    <div class="table-responsive">
-                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                            <thead>
-                                <tr>
-                                    <th>Customer Name</th>
-                                    <th>Total Premium Collected (Last Year)</th>
-                                    <th>Actual Earnings (Last Year)</th>
-                                    @foreach ($premiumTypes as $premiumType)
-                                        <th>{{ $premiumType->name }}</th>
-                                    @endforeach
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($crossSelling as $customerData)
-                                    <tr>
-                                        <td>
-                                            <a href="{{ route('customer_insurances.index', ['customer_id' => $customerData['id']]) }}"
-                                                target="_blank">
-                                                {{ $customerData['customer_name'] }}
-                                            </a>
-                                        </td>
-
-                                        <td>{{ number_format($customerData['total_premium_last_year'], 2) }}</td>
-                                        <td>{{ number_format($customerData['actual_earnings_last_year'], 2) }}</td>
-                                        <!-- New Total Premium Column -->
-                                        @foreach ($premiumTypes as $premiumType)
-                                            <td>{{ $customerData['premium_totals'][$premiumType->name]['has_premium'] }}
-                                                @if (!empty($customerData['premium_totals'][$premiumType->name]['amount']))
-                                                    /
-                                                    <i class="fa fas fa-rupee-sign"></i>
-                                                    {{ $customerData['premium_totals'][$premiumType->name]['amount'] }}
-                                                @endif
-                                            </td>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover" id="dataTable">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            @foreach($cross_selling_report->first() as $key => $value)
+                                                <th>{{ ucwords(str_replace('_', ' ', $key)) }}</th>
+                                            @endforeach
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($cross_selling_report as $row)
+                                            <tr>
+                                                @foreach($row as $cell)
+                                                    <td>{{ $cell }}</td>
+                                                @endforeach
+                                            </tr>
                                         @endforeach
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    @endif
-@endsection
+        @endif
 
-@section('stylesheets')
+        @if(isset($insurance_reports) && !empty($insurance_reports))
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-header bg-info text-white">
+                            <h4 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Insurance Detail Report Results</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover" id="dataTable">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Sr No</th>
+                                            <th>Customer Name</th>
+                                            <th>Policy Number</th>
+                                            <th>Insurance Company</th>
+                                            <th>Issue Date</th>
+                                            <th>Expiry Date</th>
+                                            <th>Premium Amount</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($insurance_reports as $index => $report)
+                                            <tr>
+                                                <td>{{ $index + 1 }}</td>
+                                                <td>{{ $report->customer_name ?? 'N/A' }}</td>
+                                                <td>{{ $report->policy_number ?? 'N/A' }}</td>
+                                                <td>{{ $report->insurance_company ?? 'N/A' }}</td>
+                                                <td>{{ $report->issue_date ?? 'N/A' }}</td>
+                                                <td>{{ $report->expired_date ?? 'N/A' }}</td>
+                                                <td>{{ $report->premium_amount ?? 'N/A' }}</td>
+                                                <td>
+                                                    <span class="badge {{ $report->status == 1 ? 'bg-success' : 'bg-danger' }}">
+                                                        {{ $report->status == 1 ? 'Active' : 'Inactive' }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(isset($due_policy_reports) && !empty($due_policy_reports))
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-header bg-warning text-dark">
+                            <h4 class="mb-0"><i class="fas fa-clock me-2"></i>Due Policy Report Results</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover" id="dataTable">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Sr No</th>
+                                            <th>Customer Name</th>
+                                            <th>Policy Number</th>
+                                            <th>Insurance Company</th>
+                                            <th>Issue Date</th>
+                                            <th>Expiry Date</th>
+                                            <th>Premium Amount</th>
+                                            <th>Days Remaining</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($due_policy_reports as $index => $report)
+                                            <tr>
+                                                <td>{{ $index + 1 }}</td>
+                                                <td>{{ $report->customer_name ?? 'N/A' }}</td>
+                                                <td>{{ $report->policy_number ?? 'N/A' }}</td>
+                                                <td>{{ $report->insurance_company ?? 'N/A' }}</td>
+                                                <td>{{ $report->issue_date ?? 'N/A' }}</td>
+                                                <td>{{ $report->expired_date ?? 'N/A' }}</td>
+                                                <td>{{ $report->premium_amount ?? 'N/A' }}</td>
+                                                <td>
+                                                    @php
+                                                        $daysRemaining = \Carbon\Carbon::parse($report->expired_date)->diffInDays(now());
+                                                    @endphp
+                                                    <span class="badge {{ $daysRemaining <= 7 ? 'bg-danger' : ($daysRemaining <= 30 ? 'bg-warning' : 'bg-success') }}">
+                                                        {{ $daysRemaining }} days
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+    </div>
+
     <style>
-        .hidden {
-            display: none;
+        .modern-form {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        
+        .card {
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .form-floating > .form-control,
+        .form-floating > .form-select {
+            height: calc(2.5rem + 2px);
+        }
+        
+        .form-floating > .form-control-sm {
+            height: calc(2rem + 2px);
+        }
+        
+        .btn-lg {
+            padding: 0.75rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 0.5rem;
+        }
+        
+        .bg-gradient-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+        }
+        
+        .fields-to-toggle {
+            transition: all 0.5s ease;
+        }
+        
+        .table th {
+            border-top: none;
+            font-weight: 600;
+        }
+        
+        .badge {
+            font-size: 0.75rem;
+        }
+        
+        /* Compact Dropdown Styling */
+        .report-selector-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .report-selector-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .custom-select-wrapper {
+            position: relative;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .custom-select-wrapper:hover {
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .custom-select {
+            appearance: none;
+            background: transparent;
+            border: 2px solid transparent;
+            padding: 0.75rem 2.5rem 0.75rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .custom-select:focus {
+            outline: none;
+            border-color: #007bff;
+            background: #f8f9ff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+        
+        .custom-select option {
+            padding: 0.75rem;
+            font-weight: 500;
+            background: white;
+            color: #2c3e50;
+        }
+        
+        .custom-select option:hover {
+            background: #e3f2fd;
+        }
+        
+        .select-arrow {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #007bff;
+            font-size: 0.8rem;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        
+        .custom-select-wrapper:hover .select-arrow {
+            color: #0056b3;
+            transform: translateY(-50%) rotate(180deg);
+        }
+        
+        .custom-select:focus + .select-arrow {
+            transform: translateY(-50%) rotate(180deg);
+        }
+        
+        /* Enhanced Date Range Cards */
+        .fields-to-toggle .card {
+            border: none;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .fields-to-toggle .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .fields-to-toggle .card-header {
+            border: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.3px;
+        }
+        
+        .form-floating > .form-control {
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        
+        .form-floating > .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+        }
+        
+        /* Action Buttons Enhancement */
+        .btn-sm {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-sm::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-sm:hover::before {
+            left: 100%;
+        }
+        
+        .btn-sm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .btn-outline-secondary {
+            background: transparent;
+            border: 2px solid #6c757d;
+            color: #6c757d;
+        }
+        
+        .btn-outline-secondary:hover {
+            background: #6c757d;
+            color: white;
+        }
+        
+        /* Primary Date Filters Container */
+        .primary-filters-container {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid #ffc107;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.1);
+        }
+        
+        /* Advanced Filters Container */
+        .advanced-filters-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+        }
+        
+        .filter-toggle-header button {
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+        }
+        
+        .filter-toggle-header button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+        }
+        
+        .filters-content {
+            transition: all 0.5s ease;
+            overflow: hidden;
+        }
+        
+        /* Compact Filter Cards */
+        .filter-card {
+            background: white;
+            border-radius: 6px;
+            padding: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .filter-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-color: #007bff;
+        }
+        
+        .filter-header {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .filter-card .form-select,
+        .filter-card .form-control {
+            border: 1px solid #ced4da;
+            font-size: 0.85rem;
+            padding: 0.25rem 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-card .form-select:focus,
+        .filter-card .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 1px rgba(0, 123, 255, 0.1);
+        }
+        
+        /* Responsive adjustments for filters */
+        @media (max-width: 768px) {
+            .filter-card {
+                margin-bottom: 0.5rem;
+            }
+            
+            .advanced-filters-container {
+                padding: 0.75rem;
+            }
+        }
+        
+        /* Animation for chevron */
+        #filterChevron {
+            transition: transform 0.3s ease;
+        }
+        
+        #filterChevron.rotated {
+            transform: rotate(180deg);
         }
     </style>
 
-@endsection
-@section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-
-            /* var openModalPopUpColumn = document.getElementById("openModalPopUpColumn");
-
-            openModalPopUpColumn.addEventListener("click", function() {
-                var reportName = document.querySelector("#reportName").value;
-                if (reportName !== '') {
-                    axios.get(
-                            "{{ route('reports.load.selected.columns', ['report_name' => ':reportName']) }}"
-                            .replace(':reportName', reportName))
-                        .then(function(response) {
-                            $('#myModal').modal('show');
-                            var responseData = response.data;
-                            document.querySelector('#sortableTableBody').innerHTML = responseData;
-                            toastr.success('Data fetched successfully!', 'Success');
-                        })
-                        .catch(function(error) {
-                            toastr.error('An error occurred while fetching data.', 'Error');
-                        });
-                } else
-                    toastr.error('Select Report first.', 'Error');
-            }); */
-            const reportNameSelect = document.getElementById("reportName");
-            const fieldsToToggle = document.querySelectorAll(".fields-to-toggle");
-
-            function toggleFieldsVisibility(selectedReportValue) {
-                fieldsToToggle.forEach(function(field) {
-                    if (field.classList.contains(selectedReportValue)) {
-                        field.classList.remove("hidden");
-                    } else {
-                        field.classList.add("hidden");
-                    }
-                });
-            }
-
-            // Check the selected report value on page load
-            const initialSelectedReportValue = reportNameSelect.value;
-            toggleFieldsVisibility(initialSelectedReportValue);
-
-            reportNameSelect.addEventListener("change", function() {
-                const selectedReportValue = this.value;
-                toggleFieldsVisibility(selectedReportValue);
-            });
-
-            const saveButton = document.querySelector(".saveColumns");
-
-            saveButton.addEventListener("click", function() {
-                const reportName = document.querySelector("#reportName").value;
-                const sortedRows = Array.from(sortableTableBody.children);
-                const sortedIds = sortedRows.map(row => row.getAttribute('data-id'));
-                const selectedColumns = [];
-                document.querySelectorAll(".form-check-input:checked").forEach(function(checkbox) {
-                    selectedColumns.push(checkbox.name);
-                });
-
-                $.ajax({
-                    url: "{{ route('reports.save.selected.columns') }}",
-                    method: 'POST',
-                    data: {
-                        sorted_column_ids: sortedIds,
-                        _token: '{{ csrf_token() }}',
-                        report_name: reportName,
-                        selected_columns: selectedColumns,
-                    },
-                    success: function(response) {
-                        $('#myModal').modal('hide');
-
-                        toastr.success('Form submitted successfully!', 'Success');
-                    },
-                    error: function(error) {
-                        toastr.error(error, 'Error');
-                    }
-                });
-            });
-
-            $(document).ready(function() {
-                // Initialize Select2
-                // Initialize Select2 for Customer dropdown with enhanced search
-                $('#customer_id').select2({
-                    placeholder: 'Search and select customer...',
-                    allowClear: true,
-                    width: '100%',
-                    minimumInputLength: 0,
-                    escapeMarkup: function(markup) {
-                        return markup; // Allow HTML in results
-                    },
-                    templateResult: function(option) {
-                        if (!option.id || option.loading) {
-                            return option.text;
-                        }
-                        
-                        // Get mobile number from data attribute if available  
-                        const $option = $(option.element);
-                        const mobile = $option.data('mobile');
-                        const customerName = option.text.split(' - ')[0];
-                        
-                        if (mobile) {
-                            return '<div style="padding: 5px;"><strong>' + customerName + '</strong><br><small class="text-muted" style="color: #6c757d;">📱 ' + mobile + '</small></div>';
-                        }
-                        
-                        return '<div style="padding: 5px;">' + customerName + '</div>';
-                    },
-                    templateSelection: function(option) {
-                        if (!option.id) {
-                            return option.text;
-                        }
-                        
-                        // Show just the customer name in the selection
-                        const customerName = option.text.split(' - ')[0];
-                        return customerName;
-                    }
-                });
-                // Get selected values from the request
-                const selectedValues = {!! json_encode(request('premium_type_id', [])) !!};
-
-                // If no values are selected in the request, select all options except empty values
-                if (selectedValues.length === 0) {
-                    $('#premium_type_id option').each(function() {
-                        const value = $(this).val();
-                        if (value) { // Avoid selecting empty options
-                            $(this).prop('selected', true);
-                        }
-                    });
-                }
-
-                // Trigger change event to update Select2
-                $('#premium_type_id').trigger('change');
-
-                // Initialize Issue Date pickers with Flatpickr API
-                const issueStartPicker = flatpickr('input[name="issue_start_date"]', {
-                    dateFormat: 'd/m/Y',
-                    allowInput: true,
-                    onChange: function(selectedDates, dateStr, instance) {
-                        if (selectedDates.length > 0) {
-                            // Set minimum date for end date picker
-                            issueEndPicker.set('minDate', selectedDates[0]);
-                        }
-                    }
-                });
-                
-                const issueEndPicker = flatpickr('input[name="issue_end_date"]', {
-                    dateFormat: 'd/m/Y',
-                    allowInput: true,
-                    onChange: function(selectedDates, dateStr, instance) {
-                        if (selectedDates.length > 0) {
-                            // Set maximum date for start date picker
-                            issueStartPicker.set('maxDate', selectedDates[0]);
-                        }
-                    }
-                });
-
-
-                // Month picker dependencies are now handled globally in app.blade.php
-            });
-        });
-
-        // Validation function for report form
-        function validateReportForm() {
+        // Enhanced validation for view action with date requirements
+        function validateForm(button) {
             const reportName = document.getElementById('reportName').value;
             
             if (!reportName) {
-                toastr.error('Please select a Report Name first.', 'Validation Error');
+                toastr.error('Please select a Report Type first.', 'Validation Error');
                 return false;
             }
             
-            // For due_policy_detail report, check if due date range is provided
+            // Validate required date fields based on report type
+            if (reportName === 'insurance_detail') {
+                const startDate = document.getElementById('issue_start_date').value;
+                const endDate = document.getElementById('issue_end_date').value;
+                
+                if (!startDate || !endDate) {
+                    toastr.error('Issue Date Range is required for Insurance Detail reports.', 'Validation Error');
+                    return false;
+                }
+            }
+            
             if (reportName === 'due_policy_detail') {
-                const dueStartDate = document.getElementById('due_start_date').value;
-                const dueEndDate = document.getElementById('due_end_date').value;
+                const startMonth = document.getElementById('due_start_date').value;
+                const endMonth = document.getElementById('due_end_date').value;
                 
-                if (!dueStartDate && !dueEndDate) {
-                    toastr.error('Please provide Due Date range for Due Policy Details report.', 'Validation Error');
+                if (!startMonth || !endMonth) {
+                    toastr.error('Due Policy Period is required for Due Policy reports.', 'Validation Error');
                     return false;
                 }
             }
             
-            // For insurance_detail and cross_selling, check if issue date is provided
-            if (reportName === 'insurance_detail' || reportName === 'cross_selling') {
-                const issueStartDate = document.querySelector('input[name="issue_start_date"]').value;
-                const issueEndDate = document.querySelector('input[name="issue_end_date"]').value;
-                
-                if (!issueStartDate && !issueEndDate) {
-                    toastr.error('Please provide Issue Date range for this report type.', 'Validation Error');
-                    return false;
-                }
-            }
+            // Show loading state
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating...';
+            button.disabled = true;
             
-            return true;
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            }, 5000);
+            
+            return true; // Allow form submission
         }
         
-        function setDownloadAction(button) {
-            // Change form action to export route when download is clicked
-            const form = button.closest('form');
-            form.action = '{{ route("reports.export") }}';
+        // Download action with enhanced validation
+        function downloadReport(button) {
+            const reportName = document.getElementById('reportName').value;
             
-            if (validateReportForm()) {
-                // Show processing state
-                const originalHTML = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-                button.disabled = true;
-                
-                // Better approach: Reset when page becomes visible again (after download)
-                const resetButton = () => {
-                    button.innerHTML = originalHTML;
-                    button.disabled = false;
-                };
-                
-                // Multiple reset triggers
-                setTimeout(resetButton, 5000); // Fallback after 5 seconds
-                
-                // Reset when user returns to page (after download)
-                document.addEventListener('visibilitychange', function onVisibilityChange() {
-                    if (!document.hidden) {
-                        resetButton();
-                        document.removeEventListener('visibilitychange', onVisibilityChange);
-                    }
-                });
-                
-                // Reset on window focus (when user returns to page)
-                window.addEventListener('focus', function onFocus() {
-                    setTimeout(() => {
-                        resetButton();
-                        window.removeEventListener('focus', onFocus);
-                    }, 1000);
-                });
-                
-                return true;
+            if (!reportName) {
+                toastr.error('Please select a Report Type first.', 'Validation Error');
+                return;
             }
-            return false;
+            
+            // Validate required date fields based on report type
+            if (reportName === 'insurance_detail') {
+                const startDate = document.getElementById('issue_start_date').value;
+                const endDate = document.getElementById('issue_end_date').value;
+                
+                if (!startDate || !endDate) {
+                    toastr.error('Issue Date Range is required for Insurance Detail reports.', 'Validation Error');
+                    return;
+                }
+            }
+            
+            if (reportName === 'due_policy_detail') {
+                const startMonth = document.getElementById('due_start_date').value;
+                const endMonth = document.getElementById('due_end_date').value;
+                
+                if (!startMonth || !endMonth) {
+                    toastr.error('Due Policy Period is required for Due Policy reports.', 'Validation Error');
+                    return;
+                }
+            }
+            
+            // Show loading state
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Downloading...';
+            button.disabled = true;
+            
+            // Build query string from form data
+            const form = document.getElementById('reportForm');
+            const formData = new FormData(form);
+            const params = new URLSearchParams();
+            
+            for (let [key, value] of formData.entries()) {
+                if (value && key !== '_token' && key !== '_method') {
+                    params.append(key, value);
+                }
+            }
+            
+            // Create download URL
+            const downloadUrl = "{{ route('reports.export') }}?" + params.toString();
+            
+            // Trigger download
+            window.location.href = downloadUrl;
+            
+            // Reset button state
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            }, 3000);
         }
-    </script>
 
+        // Advanced Filters Toggle
+        document.getElementById('toggleFilters').addEventListener('click', function() {
+            const filtersContent = document.getElementById('filtersContent');
+            const chevron = document.getElementById('filterChevron');
+            
+            if (filtersContent.style.display === 'none') {
+                filtersContent.style.display = 'block';
+                chevron.classList.add('rotated');
+                this.innerHTML = '<i class="fas fa-filter me-1"></i>Hide Filters <small>(Optional)</small> <i class="fas fa-chevron-up ms-1" id="filterChevron"></i>';
+            } else {
+                filtersContent.style.display = 'none';
+                chevron.classList.remove('rotated');
+                this.innerHTML = '<i class="fas fa-filter me-1"></i>Advanced Filters <small>(Optional)</small> <i class="fas fa-chevron-down ms-1" id="filterChevron"></i>';
+            }
+        });
+
+        // Toggle fields based on report type
+        document.getElementById('reportName').addEventListener('change', function() {
+            const selectedReport = this.value;
+            const fieldsToToggle = document.querySelectorAll('.fields-to-toggle');
+            
+            // Hide all conditional fields first
+            fieldsToToggle.forEach(field => {
+                field.style.display = 'none';
+            });
+            
+            // Show relevant primary date filters immediately (always visible when report is selected)
+            if (selectedReport) {
+                const primaryFields = document.querySelectorAll('.primary-filters-container .fields-to-toggle.' + selectedReport);
+                primaryFields.forEach(field => {
+                    field.style.display = 'block';
+                });
+                
+                // Show/hide appropriate requirement indicators
+                const dateRequirements = document.querySelectorAll('.date-requirement');
+                dateRequirements.forEach(req => {
+                    req.style.display = 'none';
+                });
+                
+                if (selectedReport === 'insurance_detail') {
+                    const reqElements = document.querySelectorAll('.date-requirement.insurance_detail');
+                    reqElements.forEach(req => req.style.display = 'inline');
+                } else if (selectedReport === 'cross_selling') {
+                    const reqElements = document.querySelectorAll('.date-requirement.cross_selling');
+                    reqElements.forEach(req => req.style.display = 'inline');
+                }
+                
+                // Show relevant advanced filter fields if filters are open
+                if (document.getElementById('filtersContent').style.display === 'block') {
+                    const advancedFields = document.querySelectorAll('.filters-content .fields-to-toggle.' + selectedReport);
+                    advancedFields.forEach(field => {
+                        field.style.display = 'block';
+                    });
+                }
+            }
+        });
+
+        // Reset form function
+        function resetForm() {
+            document.getElementById('reportForm').reset();
+            
+            // Hide filters
+            const filtersContent = document.getElementById('filtersContent');
+            const chevron = document.getElementById('filterChevron');
+            const toggleButton = document.getElementById('toggleFilters');
+            
+            filtersContent.style.display = 'none';
+            chevron.classList.remove('rotated');
+            toggleButton.innerHTML = '<i class="fas fa-filter me-1"></i>Advanced Filters <small>(Optional)</small> <i class="fas fa-chevron-down ms-1" id="filterChevron"></i>';
+            
+            // Hide all conditional fields
+            const fieldsToToggle = document.querySelectorAll('.fields-to-toggle');
+            fieldsToToggle.forEach(field => {
+                field.style.display = 'none';
+            });
+        }
+
+
+        // Initialize form functionality when document is ready
+        $(document).ready(function() {
+            console.log('Reports dashboard initialized successfully');
+        });
+    </script>
 @endsection

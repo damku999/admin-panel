@@ -8,62 +8,221 @@ use Illuminate\Support\Carbon;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class CrossSellingExport implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles
+class CrossSellingExport implements WithMultipleSheets
 {
-    protected $premiumTypes;
     protected $filters;
+    
     public function __construct(array $filters)
     {
         $this->filters = $filters;
-        $premiumTypes = PremiumType::select('id', 'name', 'is_vehicle', 'is_life_insurance_policies');
-        if ($filters['premium_type_id']) {
-            $premiumTypes = $premiumTypes->whereIn('id', $filters['premium_type_id']);
-        }
-        $this->premiumTypes = $premiumTypes->get();
-
     }
 
-    /**
-     * @return \Illuminate\Support\Collection
-     */
+    public function sheets(): array
+    {
+        return [
+            'Summary' => new CrossSellingSummarySheet($this->filters),
+            'Detailed Data' => new CrossSellingDataSheet($this->filters),
+        ];
+    }
+}
+
+class CrossSellingSummarySheet implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles, WithEvents
+{
+    protected $filters;
+    
+    public function __construct(array $filters)
+    {
+        $this->filters = $filters;
+    }
+
     public function collection()
     {
-        $customer_obj = Customer::with(['insurance.premiumType'])
-            ->orderBy('name');
+        // Get basic summary data
+        $premiumTypes = PremiumType::select('id', 'name');
+        if (!empty($this->filters['premium_type_id'])) {
+            $premiumTypes = $premiumTypes->whereIn('id', $this->filters['premium_type_id']);
+        }
+        $premiumTypes = $premiumTypes->get();
 
-        $hasDateFilter = false; // Flag to check if date filters are applied
+        $customers = Customer::with(['insurance.premiumType'])->get();
+        
+        $summary = [];
+        $summary[] = ['Total Customers', $customers->count()];
+        $summary[] = ['Total Premium', number_format($customers->sum(function($customer) {
+            return $customer->insurance->sum('final_premium_with_gst');
+        }), 2)];
+        $summary[] = ['Total Earnings', number_format($customers->sum(function($customer) {
+            return $customer->insurance->sum('actual_earnings');
+        }), 2)];
+        
+        $summary[] = ['', '']; // Empty row
+        
+        // Premium type breakdown
+        foreach ($premiumTypes as $premiumType) {
+            $yesCount = $customers->filter(function($customer) use ($premiumType) {
+                return $customer->insurance->contains('premium_type_id', $premiumType->id);
+            })->count();
+            
+            $noCount = $customers->count() - $yesCount;
+            
+            $totalAmount = $customers->sum(function($customer) use ($premiumType) {
+                return $customer->insurance->where('premium_type_id', $premiumType->id)->sum('final_premium_with_gst');
+            });
+            
+            $summary[] = [$premiumType->name . ' - Yes Count', $yesCount];
+            $summary[] = [$premiumType->name . ' - No Count', $noCount];
+            $summary[] = [$premiumType->name . ' - Total Amount', number_format($totalAmount, 2)];
+            $summary[] = ['', '']; // Empty row
+        }
+        
+        return collect($summary);
+    }
 
+    public function headings(): array
+    {
+        return ['Metric', 'Value'];
+    }
+
+    public function styles(Worksheet $sheet): array
+    {
+        return [
+            1 => [
+                'font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2B7EC8']], // WebMonks Blue
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
+            ],
+        ];
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $sheet = $event->sheet;
+                
+                // Style all data rows with alternating colors
+                $lastRow = $sheet->getHighestRow();
+                
+                // Header styling
+                $sheet->getStyle('A1:B1')->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => 'FFFFFF']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2B7EC8']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    'borders' => [
+                        'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']],
+                    ],
+                ]);
+                
+                // Alternate row colors for data
+                for ($row = 2; $row <= $lastRow; $row++) {
+                    $fillColor = ($row % 2 == 0) ? 'E8F4FD' : 'FFFFFF'; // Light blue and white alternating
+                    $sheet->getStyle("A{$row}:B{$row}")->applyFromArray([
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $fillColor]],
+                        'borders' => [
+                            'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'CCCCCC']],
+                        ],
+                        'font' => ['size' => 11]
+                    ]);
+                }
+                
+                // Make metric column bold
+                $sheet->getStyle("A2:A{$lastRow}")->applyFromArray([
+                    'font' => ['bold' => true]
+                ]);
+                
+                // Auto-fit columns
+                $sheet->getColumnDimension('A')->setAutoSize(true);
+                $sheet->getColumnDimension('B')->setAutoSize(true);
+            },
+        ];
+    }
+}
+
+class CrossSellingDataSheet implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles, WithEvents
+{
+    protected $filters;
+    
+    public function __construct(array $filters)
+    {
+        $this->filters = $filters;
+    }
+
+    public function collection()
+    {
+        $premiumTypes = PremiumType::select('id', 'name');
+        if (!empty($this->filters['premium_type_id'])) {
+            $premiumTypes = $premiumTypes->whereIn('id', $this->filters['premium_type_id']);
+        }
+        $premiumTypes = $premiumTypes->get();
+
+        $customer_obj = Customer::with(['insurance.premiumType', 'insurance.broker', 'insurance.relationshipManager', 'insurance.insuranceCompany'])->orderBy('name');
+        $hasDateFilter = false;
+
+        // Apply comprehensive filters matching ReportService
         if (!empty($this->filters['issue_start_date']) || !empty($this->filters['issue_end_date'])) {
             $customer_obj = $customer_obj->whereHas('insurance', function ($query) {
                 if (!empty($this->filters['issue_start_date'])) {
-                    $query->where('start_date', '>=', Carbon::parse($this->filters['issue_start_date'])->format('Y-m-d'));
+                    try {
+                        $startDate = Carbon::createFromFormat('d/m/Y', $this->filters['issue_start_date'])->format('Y-m-d');
+                        $query->where('start_date', '>=', $startDate);
+                    } catch (\Exception $e) {
+                        $query->where('start_date', '>=', $this->filters['issue_start_date']);
+                    }
                 }
                 if (!empty($this->filters['issue_end_date'])) {
-                    $query->where('start_date', '<=', Carbon::parse($this->filters['issue_end_date'])->format('Y-m-d'));
+                    try {
+                        $endDate = Carbon::createFromFormat('d/m/Y', $this->filters['issue_end_date'])->format('Y-m-d');
+                        $query->where('start_date', '<=', $endDate);
+                    } catch (\Exception $e) {
+                        $query->where('start_date', '<=', $this->filters['issue_end_date']);
+                    }
                 }
             });
-            $hasDateFilter = true; // Set the flag to true if filters are applied
+            $hasDateFilter = true;
+        }
+        
+        // Business entity filters
+        if (!empty($this->filters['broker_id'])) {
+            $customer_obj = $customer_obj->whereHas('insurance', function ($query) {
+                $query->where('broker_id', $this->filters['broker_id']);
+            });
+        }
+        
+        if (!empty($this->filters['relationship_manager_id'])) {
+            $customer_obj = $customer_obj->whereHas('insurance', function ($query) {
+                $query->where('relationship_manager_id', $this->filters['relationship_manager_id']);
+            });
+        }
+        
+        if (!empty($this->filters['insurance_company_id'])) {
+            $customer_obj = $customer_obj->whereHas('insurance', function ($query) {
+                $query->where('insurance_company_id', $this->filters['insurance_company_id']);
+            });
+        }
+        
+        if (!empty($this->filters['customer_id'])) {
+            $customer_obj = $customer_obj->where('id', $this->filters['customer_id']);
         }
 
-// Execute the query
         $customers = $customer_obj->get();
-        $oneYearAgo = Carbon::now()->subYear(); // Calculate one year ago from today
+        $oneYearAgo = Carbon::now()->subYear();
 
-        $results = $customers->map(function ($customer) use ($oneYearAgo, $hasDateFilter) {
-            // Initialize customer data
+        $results = $customers->map(function ($customer) use ($premiumTypes, $oneYearAgo, $hasDateFilter) {
             $customerData = ['customer_name' => $customer->name];
 
-            // Calculate total premium and actual earnings only if no date filters are applied
             if (!$hasDateFilter) {
                 $customerData['total_premium_last_year'] = $customer->insurance
                     ->where('start_date', '>=', $oneYearAgo)
                     ->sum('final_premium_with_gst');
-
                 $customerData['actual_earnings_last_year'] = $customer->insurance
                     ->where('start_date', '>=', $oneYearAgo)
                     ->sum('actual_earnings');
@@ -74,21 +233,17 @@ class CrossSellingExport implements FromCollection, WithHeadings, ShouldAutoSize
                     ->sum('actual_earnings');
             }
 
-            // Loop through each premium type dynamically
-            foreach ($this->premiumTypes as $premiumType) {
-                // Check if the customer has this premium type
+            foreach ($premiumTypes as $premiumType) {
                 $hasPremiumType = $customer->insurance->contains(function ($insurance) use ($premiumType) {
                     return $insurance->premiumType->id === $premiumType->id;
                 });
 
-                // Calculate the total amount for the current premium type
                 $premiumTotal = $customer->insurance
-                    ->where('premium_type_id', $premiumType->id) // Filter by premium type
-                    ->sum('final_premium_with_gst'); // Sum the 'final_premium_with_gst' column
+                    ->where('premium_type_id', $premiumType->id)
+                    ->sum('final_premium_with_gst');
 
-                // Add the premium type status and amount to the customer data
-                $customerData[$premiumType->name] = $hasPremiumType ? 'Yes' : 'No'; // Status
-                $customerData[$premiumType->name . ' (Sum Insured)'] = $premiumTotal; // Amount
+                $customerData[$premiumType->name] = $hasPremiumType ? 'Yes' : 'No';
+                $customerData[$premiumType->name . ' (Sum Insured)'] = $premiumTotal;
             }
 
             return $customerData;
@@ -97,68 +252,73 @@ class CrossSellingExport implements FromCollection, WithHeadings, ShouldAutoSize
         return $results;
     }
 
-    /**
-     * @return array
-     */
     public function headings(): array
     {
+        $premiumTypes = PremiumType::select('id', 'name');
+        if (!empty($this->filters['premium_type_id'])) {
+            $premiumTypes = $premiumTypes->whereIn('id', $this->filters['premium_type_id']);
+        }
+        $premiumTypes = $premiumTypes->get();
+
         $header = ['Customer Name', 'Total Premium (Last Year)', 'Actual Earnings (Last Year)'];
 
-        // Add dynamic premium type headers with 'Yes/No' and 'amount' suffix
-        foreach ($this->premiumTypes as $premiumType) {
-            $header[] = $premiumType->name; // Header for Yes/No status
-            $header[] = $premiumType->name . ' (Sum Insured)'; // Header for amount
+        foreach ($premiumTypes as $premiumType) {
+            $header[] = $premiumType->name;
+            $header[] = $premiumType->name . ' (Sum Insured)';
         }
 
         return $header;
     }
 
-    /**
-     * @param Worksheet $sheet
-     * @return array
-     */
     public function styles(Worksheet $sheet): array
     {
         return [
             1 => [
-                'font' => ['bold' => true],
-                'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '58C4A7']],
+                'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2B7EC8']], // WebMonks Blue
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
             ],
         ];
     }
 
-    /**
-     * @return array
-     */
     public function registerEvents(): array
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet;
-
-                // Dynamically calculate filter range based on number of premium types
-                $totalColumns = 2 + $this->premiumTypes->count(); // 2 for Customer Name and Total Premium
-                $filterRange = 'A1:' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($totalColumns) . '1';
-
-                // Apply filter
-                $sheet->setAutoFilter($filterRange);
-
-                // Header styles
-                $sheet->getStyle('A1:' . \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($totalColumns) . '1')
-                    ->applyFromArray([
-                        'font' => [
-                            'bold' => true,
+                
+                $lastRow = $sheet->getHighestRow();
+                $lastColumn = $sheet->getHighestColumn();
+                
+                // Header styling
+                $sheet->getStyle("A1:{$lastColumn}1")->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FFFFFF']],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2B7EC8']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    'borders' => [
+                        'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => '000000']],
+                    ],
+                ]);
+                
+                // Alternate row colors for data
+                for ($row = 2; $row <= $lastRow; $row++) {
+                    $fillColor = ($row % 2 == 0) ? 'F0F8FF' : 'FFFFFF'; // Very light blue and white alternating
+                    $sheet->getStyle("A{$row}:{$lastColumn}{$row}")->applyFromArray([
+                        'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $fillColor]],
+                        'borders' => [
+                            'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'DDDDDD']],
                         ],
-                        'fill' => [
-                            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                            'startColor' => [
-                                'rgb' => '58C4A7',
-                            ],
-                        ],
+                        'font' => ['size' => 10]
                     ]);
-
-                // Page setup
-                $sheet->getPageSetup()->setOrientation(PageSetup::ORIENTATION_LANDSCAPE);
+                }
+                
+                // Auto-fit all columns
+                foreach (range('A', $lastColumn) as $column) {
+                    $sheet->getColumnDimension($column)->setAutoSize(true);
+                }
+                
+                // Add auto-filter to header row
+                $sheet->setAutoFilter("A1:{$lastColumn}1");
             },
         ];
     }

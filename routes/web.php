@@ -246,6 +246,7 @@ Route::middleware('auth')->prefix('quotations')->name('quotations.')->group(func
 // Reports
 Route::middleware('auth')->prefix('reports')->name('reports.')->group(function () {
     Route::get('/', [ReportController::class, 'index'])->name('index');
+    Route::post('/', [ReportController::class, 'index'])->name('index.post');
     Route::get('export/', [ReportController::class, 'export'])->name('export');
     Route::post('selected/columns', [ReportController::class, 'saveColumns'])->name('save.selected.columns');
     Route::get('load/columns/{report_name}', [ReportController::class, 'loadColumns'])->name('load.selected.columns');

@@ -82,23 +82,8 @@ class Report extends Authenticatable
     public static function getInsuranceReport($filters)
     {
 
-        $report = auth()->user() 
-            ? Report::where(['user_id' => auth()->user()->id, 'name' => $filters['report_name']])->first()
-            : null;
-        
-        // If no saved report exists, use default columns from config
-        if (!$report || !$report->selected_columns) {
-            $defaultColumns = config('constants.INSURANCE_DETAIL', []);
-            $selectedColumns = collect($defaultColumns)->map(function ($item) {
-                $item['select'] = $item['table_column_name'] . ' as ' . $item['display_name'];
-                return $item;
-            })->pluck('select');
-        } else {
-            $selectedColumns = collect($report->selected_columns)->map(function ($item) {
-                $item['select'] = $item['table_column_name'] . ' as ' . $item['display_name'];
-                return $item;
-            })->pluck('select');
-        }
+        // Note: Column selection will be handled by frontend/views, 
+        // this method just retrieves the data with all necessary relationships
 
         $customerInsurances = CustomerInsurance::with(
             'branch',
@@ -123,21 +108,20 @@ class Report extends Authenticatable
                 return $query->where('created_at', '<=', Carbon::parse($endDate)->endOfDay()->format('Y-m-d H:i:s'));
             })
             ->when(!empty($filters['issue_start_date']), function ($query) use ($filters) {
-                $startDate = \App\Helpers\DateHelper::isValidDatabaseFormat($filters['issue_start_date']) 
-                    ? $filters['issue_start_date'] 
-                    : formatDateForDatabase($filters['issue_start_date']);
-                return $query->where('issue_date', '>=', $startDate);
+                try {
+                    $startDate = Carbon::createFromFormat('d/m/Y', $filters['issue_start_date'])->format('Y-m-d');
+                    return $query->where('issue_date', '>=', $startDate);
+                } catch (\Exception $e) {
+                    return $query->where('issue_date', '>=', $filters['issue_start_date']);
+                }
             })
             ->when(!empty($filters['issue_end_date']), function ($query) use ($filters) {
-                $endDate = \App\Helpers\DateHelper::isValidDatabaseFormat($filters['issue_end_date']) 
-                    ? $filters['issue_end_date'] 
-                    : formatDateForDatabase($filters['issue_end_date']);
-                return $query->where('issue_date', '<=', $endDate);
-            })
-            ->when(!empty($filters['branch_id']), function ($query) use ($filters) {
-                return $query->whereHas('branch', function ($query) use ($filters) {
-                    $query->where('id', $filters['branch_id']);
-                });
+                try {
+                    $endDate = Carbon::createFromFormat('d/m/Y', $filters['issue_end_date'])->format('Y-m-d');
+                    return $query->where('issue_date', '<=', $endDate);
+                } catch (\Exception $e) {
+                    return $query->where('issue_date', '<=', $filters['issue_end_date']);
+                }
             })
             ->when(!empty($filters['broker_id']), function ($query) use ($filters) {
                 return $query->whereHas('broker', function ($query) use ($filters) {
@@ -191,17 +175,11 @@ class Report extends Authenticatable
                     }
                     $formattedDate = $startDate->format('Y-m-01');
                     
-                    \Log::info('Due start date filter', [
-                        'input' => $dateStr,
-                        'parsed' => $formattedDate
-                    ]);
+                    error_log('Due start date filter: ' . $dateStr . ' -> ' . $formattedDate);
                     
                     return $query->where('expired_date', '>=', $formattedDate);
                 } catch (\Exception $e) {
-                    \Log::error('Due start date parsing failed', [
-                        'input' => $filters['due_start_date'],
-                        'error' => $e->getMessage()
-                    ]);
+                    error_log('Due start date parsing failed: ' . $filters['due_start_date']);
                     return $query;
                 }
             })
@@ -218,19 +196,27 @@ class Report extends Authenticatable
                     }
                     $formattedDate = $endDate->endOfMonth()->format('Y-m-d');
                     
-                    \Log::info('Due end date filter', [
-                        'input' => $dateStr,
-                        'parsed' => $formattedDate
-                    ]);
+                    error_log('Due end date filter: ' . $dateStr . ' -> ' . $formattedDate);
                     
                     return $query->where('expired_date', '<=', $formattedDate);
                 } catch (\Exception $e) {
-                    \Log::error('Due end date parsing failed', [
-                        'input' => $filters['due_end_date'],
-                        'error' => $e->getMessage()
-                    ]);
+                    error_log('Due end date parsing failed: ' . $filters['due_end_date']);
                     return $query;
                 }
+            })
+            ->when(!empty($filters['status']), function ($query) use ($filters) {
+                if ($filters['status'] === 'active') {
+                    return $query->where('status', 1);
+                } elseif ($filters['status'] === 'inactive') {
+                    return $query->where('status', 0);
+                }
+                return $query;
+            })
+            ->when(!empty($filters['premium_amount_min']), function ($query) use ($filters) {
+                return $query->where('final_premium_with_gst', '>=', $filters['premium_amount_min']);
+            })
+            ->when(!empty($filters['premium_amount_max']), function ($query) use ($filters) {
+                return $query->where('final_premium_with_gst', '<=', $filters['premium_amount_max']);
             })
             ->get();
         return $customerInsurances;

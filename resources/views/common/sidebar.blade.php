@@ -3,10 +3,7 @@
 
     <!-- Sidebar Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center py-4 text-decoration-none border-bottom border-light border-opacity-25" href="{{ route('home') }}">
-        <div class="sidebar-brand-icon me-2">
-            <i class="fas fa-shield-alt text-white fs-4"></i>
-        </div>
-        <div class="sidebar-brand-text fw-bold text-white">{{ config('app.name') }}</div>
+        <img src="{{ asset('images/parth_logo.png') }}" alt="Parth Rawal Insurance Advisor" class="img-fluid" style="max-height: 60px; width: auto;">
     </a>
 
     <!-- Dashboard -->

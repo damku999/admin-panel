@@ -54,7 +54,7 @@
                             <li><strong>Dashboard:</strong> View your family's insurance policies and member information
                             </li>
                             <li><strong>Family Policies:</strong>
-                                @if ($isHead)
+                                @if (isset($isHead) && $isHead)
                                     As family head, you can view all family members' policies
                                 @else
                                     You can view all policies in your family group

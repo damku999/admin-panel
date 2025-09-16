@@ -312,7 +312,7 @@
         
         // Define validation rules for customer edit form
         validator.addRules({
-            company_name: { 
+            name: { 
                 rules: { required: true, minLength: 2, maxLength: 100 },
                 displayName: 'Company Name'
             },

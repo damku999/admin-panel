@@ -17,6 +17,7 @@ use App\Http\Controllers\InsuranceCompanyController;
 use App\Http\Controllers\CustomerInsuranceController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RelationshipManagerController;
+use App\Http\Controllers\ClaimController;
 
 /*
 |--------------------------------------------------------------------------
@@ -268,6 +269,41 @@ Route::middleware('auth')->prefix('branches')->name('branches.')->group(function
     Route::put('/update/{branch}', [App\Http\Controllers\BranchController::class, 'update'])->name('update');
     Route::get('/update/status/{branch_id}/{status}', [App\Http\Controllers\BranchController::class, 'updateStatus'])->name('status');
     Route::get('export/', [App\Http\Controllers\BranchController::class, 'export'])->name('export');
+});
+
+// Claims Management
+Route::middleware('auth:web')->prefix('insurance-claims')->name('claims.')->group(function () {
+    Route::get('/', [ClaimController::class, 'index'])->name('index');
+    Route::get('/create', [ClaimController::class, 'create'])->name('create');
+    Route::post('/store', [ClaimController::class, 'store'])->name('store');
+    Route::get('/show/{claim}', [ClaimController::class, 'show'])->name('show');
+    Route::get('/edit/{claim}', [ClaimController::class, 'edit'])->name('edit');
+    Route::put('/update/{claim}', [ClaimController::class, 'update'])->name('update');
+    Route::delete('/delete/{claim}', [ClaimController::class, 'delete'])->name('delete');
+    Route::get('/update/status/{claim_id}/{status}', [ClaimController::class, 'updateStatus'])->name('status');
+    Route::get('export/', [ClaimController::class, 'export'])->name('export');
+
+    // AJAX endpoints
+    Route::get('/search-policies', [ClaimController::class, 'searchPolicies'])->name('searchPolicies');
+    Route::get('/statistics', [ClaimController::class, 'getStatistics'])->name('statistics');
+
+    // WhatsApp functionality
+    Route::post('/whatsapp/document-list/{claim}', [ClaimController::class, 'sendDocumentListWhatsApp'])->name('whatsapp.documentList');
+    Route::post('/whatsapp/pending-documents/{claim}', [ClaimController::class, 'sendPendingDocumentsWhatsApp'])->name('whatsapp.pendingDocuments');
+    Route::post('/whatsapp/claim-number/{claim}', [ClaimController::class, 'sendClaimNumberWhatsApp'])->name('whatsapp.claimNumber');
+    Route::get('/whatsapp/preview/{claim}/{type}', [ClaimController::class, 'getWhatsAppPreview'])->name('whatsapp.preview');
+
+    // Document management
+    Route::post('/documents/{claim}/{document}/update-status', [ClaimController::class, 'updateDocumentStatus'])->name('documents.updateStatus');
+
+    // Stage management
+    Route::post('/stages/{claim}/add', [ClaimController::class, 'addStage'])->name('stages.add');
+
+    // Claim number management
+    Route::post('/claim-number/{claim}/update', [ClaimController::class, 'updateClaimNumber'])->name('claimNumber.update');
+
+    // Liability details management
+    Route::post('/liability/{claim}/update', [ClaimController::class, 'updateLiabilityDetails'])->name('liability.update');
 });
 
 // CSP violation reporting (no middleware, public endpoint)

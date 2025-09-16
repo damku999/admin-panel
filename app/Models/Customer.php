@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\CustomerInsurance;
 use App\Models\Quotation;
+use App\Models\Claim;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
@@ -204,6 +205,14 @@ class Customer extends Authenticatable
     public function quotations(): HasMany
     {
         return $this->hasMany(Quotation::class);
+    }
+
+    /**
+     * Get all claims for the customer.
+     */
+    public function claims(): HasMany
+    {
+        return $this->hasMany(Claim::class);
     }
 
     /**

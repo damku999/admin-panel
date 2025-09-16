@@ -34,6 +34,8 @@ class CustomerAuthController extends Controller
             'showQuotations',
             'showQuotationDetail',
             'downloadQuotation',
+            'showClaims',
+            'showClaimDetail',
             'showFamilyMemberProfile',
             'showFamilyMemberPasswordForm',
             'updateFamilyMemberPassword'
@@ -52,6 +54,8 @@ class CustomerAuthController extends Controller
             'showQuotations',
             'showQuotationDetail',
             'downloadQuotation',
+            'showClaims',
+            'showClaimDetail',
             'showFamilyMemberProfile',
             'showFamilyMemberPasswordForm',
             'updateFamilyMemberPassword'
@@ -1114,6 +1118,133 @@ class CustomerAuthController extends Controller
             ]);
 
             return redirect()->back()->with('error', 'Failed to generate PDF. Please try again later.');
+        }
+    }
+
+    /**
+     * Show customer claims.
+     */
+    public function showClaims()
+    {
+        try {
+            $customer = auth('customer')->user();
+
+            // Get all claims for customer and family members
+            $claimsQuery = \App\Models\Claim::with([
+                'customer:id,name,email,mobile_number',
+                'customerInsurance:id,policy_no,registration_no,insurance_company_id',
+                'customerInsurance.insuranceCompany:id,name',
+                'currentStage:id,claim_id,stage_name'
+            ]);
+
+            if ($customer->isFamilyHead()) {
+                // Family head can see all family claims
+                $familyMemberIds = $customer->familyGroup->familyMembers()->pluck('customer_id')->toArray();
+                $familyMemberIds[] = $customer->id;
+                $claimsQuery->whereIn('customer_id', $familyMemberIds);
+            } else {
+                // Regular customer can only see their own claims
+                $claimsQuery->where('customer_id', $customer->id);
+            }
+
+            $claims = $claimsQuery->orderBy('created_at', 'desc')->paginate(10);
+
+            CustomerAuditLog::logAction('view_claims', 'Customer viewed claims list', [
+                'total_claims' => $claims->total(),
+                'is_family_head' => $customer->isFamilyHead()
+            ]);
+
+            return view('customer.claims', compact('claims'));
+
+        } catch (\Throwable $e) {
+            CustomerAuditLog::logFailure('view_claims', 'Failed to load customer claims list', [
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine()
+            ]);
+
+            return redirect()->route('customer.dashboard')
+                ->with('error', 'Failed to load claims. Please try again later.');
+        }
+    }
+
+    /**
+     * Show specific claim detail.
+     */
+    public function showClaimDetail(\App\Models\Claim $claim)
+    {
+        try {
+            $customer = auth('customer')->user();
+
+            // Check access permissions
+            $hasAccess = false;
+
+            if ($claim->customer_id === $customer->id) {
+                // Own claim
+                $hasAccess = true;
+            } elseif ($customer->isFamilyHead() && $customer->family_group_id) {
+                // Family head accessing family member's claim
+                $claimCustomer = $claim->customer;
+                if ($claimCustomer->family_group_id === $customer->family_group_id) {
+                    $hasAccess = true;
+                }
+            } elseif ($customer->family_group_id) {
+                // Family member - check if they have access to family claims
+                $claimCustomer = $claim->customer;
+                if ($claimCustomer->family_group_id === $customer->family_group_id) {
+                    $hasAccess = true;
+                }
+            }
+
+            if (!$hasAccess) {
+                CustomerAuditLog::logFailure('view_claim_detail', 'Unauthorized claim detail access attempt', [
+                    'claim_id' => $claim->id,
+                    'claim_number' => $claim->claim_number,
+                    'claim_customer_id' => $claim->customer_id,
+                    'claim_family_group_id' => $claim->customer->family_group_id,
+                    'accessing_customer_id' => $customer->id,
+                    'accessing_family_group_id' => $customer->family_group_id,
+                    'is_family_head' => $customer->isFamilyHead(),
+                    'security_violation' => 'unauthorized_claim_access'
+                ]);
+
+                return redirect()->route('customer.claims')
+                    ->with('error', 'You do not have permission to view this claim.');
+            }
+
+            // Load claim with all relationships for detailed view
+            $claim->load([
+                'customer:id,name,email,mobile_number',
+                'customerInsurance:id,policy_no,registration_no,insurance_company_id',
+                'customerInsurance.insuranceCompany:id,name',
+                'customerInsurance.policyType:id,policy_type',
+                'stages' => function ($query) {
+                    $query->orderBy('created_at', 'desc');
+                },
+                'documents:id,claim_id,document_name,description,is_required,is_submitted,submitted_date',
+                'liabilityDetail:id,claim_id,claim_type,claim_amount,salvage_amount,less_claim_charge,amount_to_be_paid,less_salvage_amount,less_deductions,claim_amount_received,notes'
+            ]);
+
+            CustomerAuditLog::logAction('view_claim_detail', 'Customer viewed claim detail', [
+                'claim_id' => $claim->id,
+                'claim_number' => $claim->claim_number,
+                'insurance_type' => $claim->insurance_type,
+                'current_stage' => $claim->currentStage->stage_name ?? 'N/A',
+                'is_own_claim' => $claim->customer_id === $customer->id
+            ]);
+
+            return view('customer.claim-detail', compact('claim'));
+
+        } catch (\Throwable $e) {
+            CustomerAuditLog::logFailure('view_claim_detail', 'Failed to load claim detail', [
+                'claim_id' => $claim->id ?? null,
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine()
+            ]);
+
+            return redirect()->route('customer.claims')
+                ->with('error', 'Failed to load claim details. Please try again later.');
         }
     }
 }

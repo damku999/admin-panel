@@ -31,14 +31,33 @@ class CustomerController extends Controller
      */
     public function index(Request $request): View
     {
-        $customers = $this->customerService->getCustomers($request);
-        
-        return view('customers.index', [
-            'customers' => $customers,
-            'sortField' => $request->input('sort_field', 'name'),
-            'sortOrder' => $request->input('sort_order', 'asc'),
-            'request' => $request->all()
-        ]);
+        try {
+            $customers = $this->customerService->getCustomers($request);
+
+            return view('customers.index', [
+                'customers' => $customers,
+                'sortField' => $request->input('sort_field', 'name'),
+                'sortOrder' => $request->input('sort_order', 'asc'),
+                'request' => $request->all()
+            ]);
+        } catch (\Throwable $th) {
+            // Create empty paginated result to maintain view compatibility
+            $emptyPaginator = new \Illuminate\Pagination\LengthAwarePaginator(
+                collect(), // empty collection
+                0, // total count
+                10, // per page (matches CustomerService default)
+                1, // current page
+                ['path' => request()->url(), 'pageName' => 'page']
+            );
+
+            return view('customers.index', [
+                'customers' => $emptyPaginator,
+                'sortField' => 'name',
+                'sortOrder' => 'asc',
+                'request' => $request->all(),
+                'error' => 'Failed to load customers: ' . $th->getMessage()
+            ]);
+        }
     }
 
     /**

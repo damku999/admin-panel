@@ -48,11 +48,12 @@ class RouteServiceProvider extends ServiceProvider
                 ->namespace($this->namespace)
                 ->group(base_path('routes/api.php'));
 
+            // Load web routes first (admin routes have priority)
             Route::middleware('web')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/web.php'));
 
-            // Customer Portal Routes (separate file for better organization)
+            // Customer Portal Routes loaded last to avoid conflicts
             Route::middleware('web')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/customer.php'));

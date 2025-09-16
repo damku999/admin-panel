@@ -38,7 +38,8 @@
 
     <!-- Additional page-specific styles -->
     @yield('stylesheets')
-    
+    @stack('styles')
+
     <!-- Performance optimization for critical rendering path -->
     <style>
         /* Critical CSS for above-the-fold content */

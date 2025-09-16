@@ -118,6 +118,14 @@ Route::prefix('customer')->name('customer.')->group(function () {
         Route::get('/quotations/{quotation}/download', [CustomerAuthController::class, 'downloadQuotation'])
             ->middleware(['throttle:10,1'])
             ->name('quotations.download');
+
+        // ==========================================
+        // CLAIMS MANAGEMENT (Read-Only)
+        // ==========================================
+
+        // Claims Listing and Details
+        Route::get('/view-claims', [CustomerAuthController::class, 'showClaims'])->name('claims');
+        Route::get('/view-claims/{claim}', [CustomerAuthController::class, 'showClaimDetail'])->name('claims.detail');
     });
 });
 

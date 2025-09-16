@@ -35,6 +35,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('customer.claims*') ? 'active' : '' }}"
+                            href="{{ route('customer.claims') }}">
+                            <i class="fas fa-clipboard-list me-2"></i> Claims
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('customer.profile*') ? 'active' : '' }}"
                             href="{{ route('customer.profile') }}">
                             <i class="fas fa-user me-2"></i> Profile

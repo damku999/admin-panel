@@ -38,6 +38,16 @@
         </a>
     </div>
 
+    <!-- Claims -->
+    @if(auth()->check() && auth()->user()->hasPermissionTo('claim-list'))
+    <div class="nav-item">
+        <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('claims.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('claims.index') }}" data-tooltip="Claims">
+            <i class="fas fa-file-medical me-3"></i>
+            <span>Claims</span>
+        </a>
+    </div>
+    @endif
+
     <!-- WhatsApp Marketing -->
     <div class="nav-item">
         <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('marketing.whatsapp.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('marketing.whatsapp.index') }}" data-tooltip="WhatsApp Marketing">

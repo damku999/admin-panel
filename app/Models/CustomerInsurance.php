@@ -5,20 +5,18 @@ namespace App\Models;
 use App\Models\Branch;
 use App\Models\Broker;
 use App\Models\Customer;
+use App\Models\Claim;
 use App\Models\FuelType;
 use App\Models\PolicyType;
 use App\Models\PremiumType;
 use App\Models\InsuranceCompany;
-use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use App\Models\RelationshipManager;
 use App\Traits\TableRecordObserver;
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * App\Models\CustomerInsurance
@@ -169,9 +167,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance withoutTrashed()
  * @mixin \Eloquent
  */
-class CustomerInsurance extends Authenticatable
+class CustomerInsurance extends Model
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
+    use HasFactory, SoftDeletes, TableRecordObserver, LogsActivity;
     protected $guarded = [];
     protected static $logAttributes = ['*'];
     protected static $logOnlyDirty = true;
@@ -214,6 +212,14 @@ class CustomerInsurance extends Authenticatable
     public function fuelType()
     {
         return $this->belongsTo(FuelType::class, 'fuel_type_id');
+    }
+
+    /**
+     * Get all claims for this insurance policy.
+     */
+    public function claims()
+    {
+        return $this->hasMany(Claim::class);
     }
 
     public function getActivitylogOptions(): LogOptions

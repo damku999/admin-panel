@@ -58,7 +58,8 @@
     <!-- Form Validation Utility Library -->
     <script src="{{ url('js/form-validation.js') }}"></script>
 
-    <!-- Bootstrap 5 JS (included in admin.js bundle) -->
+    <!-- Bootstrap 5 JS (explicit loading) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('admin/toastr/toastr.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <!-- Modern Flatpickr Date Picker -->
@@ -491,6 +492,8 @@
             });
         });
     </script>
+
+    @stack('scripts')
 </body>
 
 </html>

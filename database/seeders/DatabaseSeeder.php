@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             CustomAdminSeeder::class,
             RoleSeeder::class,
             PermissionSeeder::class,
+            AddonCoversSeeder::class,
         ]);
     }
 }

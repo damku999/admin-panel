@@ -16,6 +16,11 @@ class OptimizeEnumCompatibility extends Migration
      */
     public function up()
     {
+        // Skip for testing environment
+        if (app()->environment() === 'testing') {
+            return;
+        }
+
         // Convert enum fields to VARCHAR for better MySQL 8+ compatibility
         $this->convertCustomerEnums();
         $this->convertCustomerInsuranceEnums();

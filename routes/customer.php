@@ -59,16 +59,16 @@ Route::prefix('customer')->name('customer.')->group(function () {
         Route::get('/profile', [CustomerAuthController::class, 'showProfile'])->name('profile');
 
         // Password Change Functionality
-        Route::get('/change-password', [CustomerAuthController::class, 'showChangePasswordForm'])->name('change-password');
+        Route::get('/change-password', [CustomerAuthController::class, 'showChangePasswordForm'])->name('change-password-form');
         Route::post('/change-password', [CustomerAuthController::class, 'changePassword'])
             ->middleware(['throttle:10,1'])
-            ->name('change-password.update');
+            ->name('change-password');
 
         // Email Verification Management
         Route::get('/email/verify-notice', [CustomerAuthController::class, 'showEmailVerificationNotice'])->name('verify-email-notice');
         Route::post('/email/resend', [CustomerAuthController::class, 'resendVerification'])
             ->middleware(['throttle:3,1'])
-            ->name('verification.send');
+            ->name('resend-verification');
             
         // ==========================================
         // FAMILY MEMBER MANAGEMENT (Family Heads Only)
@@ -80,10 +80,10 @@ Route::prefix('customer')->name('customer.')->group(function () {
             
         // Family Member Password Management
         Route::get('/family-member/{member}/change-password', [CustomerAuthController::class, 'showFamilyMemberPasswordForm'])
-            ->name('family-member.change-password');
-        Route::post('/family-member/{member}/change-password', [CustomerAuthController::class, 'updateFamilyMemberPassword'])
+            ->name('family-member.password-form');
+        Route::put('/family-member/{member}/password', [CustomerAuthController::class, 'updateFamilyMemberPassword'])
             ->middleware(['throttle:10,1'])
-            ->name('family-member.update-password');
+            ->name('family-member.password');
     });
 
     // ==========================================

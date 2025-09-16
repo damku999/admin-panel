@@ -16,13 +16,15 @@ class ClaimFactory extends Factory
             'customer_insurance_id' => CustomerInsurance::factory(),
             'claim_number' => 'CL-' . $this->faker->unique()->numerify('########'),
             'insurance_type' => $this->faker->randomElement(['Health', 'Vehicle']),
-            'incident_date' => $this->faker->dateTimeBetween('-30 days', 'now'),
+            'incident_date' => $this->faker->dateTimeBetween('-30 days', 'now')->format('Y-m-d'),
             'description' => $this->faker->paragraph(),
             'whatsapp_number' => $this->faker->phoneNumber(),
             'status' => $this->faker->boolean(80), // 80% chance of being active
             'send_email_notifications' => $this->faker->boolean(30), // 30% chance of email notifications
             'created_at' => now(),
             'updated_at' => now(),
+            'created_by' => 0,
+            'updated_by' => 0,
         ];
     }
 }

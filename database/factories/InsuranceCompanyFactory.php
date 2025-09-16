@@ -12,10 +12,12 @@ class InsuranceCompanyFactory extends Factory
     public function definition()
     {
         return [
-            'company_name' => $this->faker->company() . ' Insurance',
+            'name' => $this->faker->company() . ' Insurance',
             'status' => true,
             'created_at' => now(),
             'updated_at' => now(),
+            'created_by' => 0,
+            'updated_by' => 0,
         ];
     }
 }

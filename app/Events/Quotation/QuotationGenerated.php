@@ -41,7 +41,7 @@ class QuotationGenerated
             'best_premium' => $this->bestPremium,
             'total_premium_range' => [
                 'min' => $this->bestPremium,
-                'max' => max($this->companyPremiums) ?? 0,
+                'max' => !empty($this->companyPremiums) ? max($this->companyPremiums) : 0,
             ],
             'generated_by' => $this->generatedBy,
             'generated_at' => $this->quotation->created_at->format('Y-m-d H:i:s'),

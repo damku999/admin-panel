@@ -13,6 +13,8 @@ class CreateClaimsTable extends Migration
      */
     public function up()
     {
+        // Skip for testing environment - needs to run for test database
+
         Schema::create('claims', function (Blueprint $table) {
             $table->id();
             $table->string('claim_number')->unique();

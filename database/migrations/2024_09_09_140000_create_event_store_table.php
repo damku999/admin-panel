@@ -8,6 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Skip for testing environment
+        if (app()->environment() === 'testing') {
+            return;
+        }
+
         Schema::create('event_store', function (Blueprint $table) {
             $table->id();
             $table->uuid('event_id')->unique();

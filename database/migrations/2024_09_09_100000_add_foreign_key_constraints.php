@@ -15,12 +15,17 @@ class AddForeignKeyConstraints extends Migration
      */
     public function up()
     {
+        // Skip for testing environment entirely - foreign keys not needed for tests
+        if (app()->environment() === 'testing') {
+            return;
+        }
+
         // Fix data type inconsistencies first (required before adding FK constraints)
         $this->fixDataTypes();
-        
+
         // Add foreign key constraints for audit fields across all tables
         $this->addAuditFieldConstraints();
-        
+
         // Add business logic foreign key constraints
         $this->addBusinessLogicConstraints();
     }

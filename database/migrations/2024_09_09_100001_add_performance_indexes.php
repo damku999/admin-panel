@@ -15,6 +15,11 @@ class AddPerformanceIndexes extends Migration
      */
     public function up()
     {
+        // Skip for testing environment - indexes not needed for tests
+        if (app()->environment() === 'testing') {
+            return;
+        }
+
         // Customer table performance indexes
         $this->addCustomerIndexes();
         

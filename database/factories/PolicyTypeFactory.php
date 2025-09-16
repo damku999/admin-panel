@@ -12,10 +12,12 @@ class PolicyTypeFactory extends Factory
     public function definition()
     {
         return [
-            'policy_type' => $this->faker->randomElement(['Health Insurance', 'Vehicle Insurance', 'Life Insurance']),
+            'name' => $this->faker->randomElement(['Health Insurance', 'Vehicle Insurance', 'Life Insurance']),
             'status' => true,
             'created_at' => now(),
             'updated_at' => now(),
+            'created_by' => 0,
+            'updated_by' => 0,
         ];
     }
 }

@@ -318,6 +318,12 @@
                 }
             });
 
+            // Initialize Bootstrap 5 dropdowns manually for compatibility
+            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                return new bootstrap.Dropdown(dropdownToggleEl);
+            });
+
             // =======================================================
             // GLOBAL AJAX ERROR HANDLING & SETUP
             // =======================================================

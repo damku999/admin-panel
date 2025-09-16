@@ -1672,59 +1672,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         window.toggleLiabilityFields();
 
-        // Fix ALL dropdowns on the page
-        setTimeout(() => {
-            console.log('Fixing all dropdown functionality...');
-
-            // Find ALL dropdown buttons on the page
-            const dropdownBtns = document.querySelectorAll('[data-bs-toggle="dropdown"]');
-            console.log('Found dropdown buttons:', dropdownBtns.length);
-
-            dropdownBtns.forEach((btn, index) => {
-                console.log(`Setting up dropdown ${index}:`, btn);
-
-                // Add click handler to each dropdown
-                btn.addEventListener('click', function(e) {
-                    console.log(`Dropdown ${index} clicked:`, this);
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    // Find the dropdown menu (could be next sibling or inside parent)
-                    let menu = this.nextElementSibling;
-                    if (!menu || !menu.classList.contains('dropdown-menu')) {
-                        menu = this.closest('.dropdown')?.querySelector('.dropdown-menu');
-                    }
-
-                    if (menu && menu.classList.contains('dropdown-menu')) {
-                        console.log(`Toggling menu for dropdown ${index}`);
-
-                        // Close all other dropdowns
-                        document.querySelectorAll('.dropdown-menu.show').forEach(otherMenu => {
-                            if (otherMenu !== menu) {
-                                otherMenu.classList.remove('show');
-                            }
-                        });
-
-                        // Toggle this dropdown
-                        menu.classList.toggle('show');
-
-                        console.log(`Menu ${index} is now:`, menu.classList.contains('show') ? 'OPEN' : 'CLOSED');
-                    } else {
-                        console.log(`No menu found for dropdown ${index}`);
-                    }
-                });
-            });
-
-            // Click outside to close all dropdowns
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.dropdown')) {
-                    document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
-                        menu.classList.remove('show');
-                    });
-                }
-            });
-
-        }, 1000);
+        // Bootstrap dropdowns work automatically - no custom code needed
     });
 </script>
 @endsection

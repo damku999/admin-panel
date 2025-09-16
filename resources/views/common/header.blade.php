@@ -31,7 +31,7 @@
                 </a>
                 
                 <!-- Simplified Dropdown -->
-                <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="min-width: 200px;">
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="min-width: 200px; max-width: 250px; right: 0; left: auto; transform: none !important;">
                     <!-- User Info Header -->
                     <li class="dropdown-header bg-light px-3 py-2">
                         <strong>{{ auth()->user()->full_name ?? 'Guest User' }}</strong><br>

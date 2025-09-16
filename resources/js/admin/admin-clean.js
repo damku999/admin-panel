@@ -15,10 +15,16 @@ $(document).ready(function() {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
-    // Initialize Bootstrap 5 popovers  
+    // Initialize Bootstrap 5 popovers
     var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
     popoverTriggerList.map(function(popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl);
+    });
+
+    // Initialize Bootstrap 5 dropdowns
+    var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+    var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+        return new bootstrap.Dropdown(dropdownToggleEl);
     });
 
     // Initialize Select2 dropdowns (Bootstrap 5 compatible)

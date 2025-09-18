@@ -33,12 +33,6 @@ class AppServiceProvider extends ServiceProvider
         // Configure asset URL for subdirectory installation
         if (env('ASSET_URL')) {
             URL::forceRootUrl(env('ASSET_URL'));
-        }
-        
-        // Register cache invalidation observers for performance optimization
-        Customer::observe(CacheInvalidationObserver::class);
-        CustomerInsurance::observe(CacheInvalidationObserver::class);
-        Broker::observe(CacheInvalidationObserver::class);
-        InsuranceCompany::observe(CacheInvalidationObserver::class);
+        }      
     }
 }

@@ -306,7 +306,3 @@ Route::middleware('auth:web')->prefix('insurance-claims')->name('claims.')->grou
     // Liability details management
     Route::post('/liability/{claim}/update', [ClaimController::class, 'updateLiabilityDetails'])->name('liability.update');
 });
-
-// CSP violation reporting (no middleware, public endpoint)
-Route::post('/security/csp-report', [\App\Http\Controllers\Security\CspViolationController::class, 'report'])
-    ->name('security.csp.report');

@@ -22,7 +22,6 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\SecurityHeadersMiddleware::class,
-        // \App\Http\Middleware\PerformanceMonitoringMiddleware::class, // Temporarily disabled due to logging config issues
     ];
 
     /**
@@ -73,13 +72,5 @@ class Kernel extends HttpKernel
         'customer.family' => \App\Http\Middleware\VerifyFamilyAccess::class,
         'customer.secure' => \App\Http\Middleware\SecureSession::class,
         'customer.timeout' => \App\Http\Middleware\CustomerSessionTimeout::class,
-        
-        // API-specific middleware
-        'api.rate.limit' => \App\Http\Middleware\ApiRateLimitMiddleware::class,
-        'api.throttle' => \App\Http\Middleware\ApiThrottleMiddleware::class,
-        
-        // Monitoring and observability middleware
-        'monitor.performance' => \App\Http\Middleware\CachePerformanceMiddleware::class,
-        'monitor.application' => \App\Http\Middleware\ApplicationMonitoringMiddleware::class,
     ];
 }

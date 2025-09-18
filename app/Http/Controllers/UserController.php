@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Imports\UsersImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
@@ -195,18 +194,6 @@ class UserController extends Controller
     public function importUsers()
     {
         return view('users.import');
-    }
-
-    /**
-     * Upload Users
-     * @param Request $request
-     * @return Redirect
-     */
-    public function uploadUsers(Request $request)
-    {
-        Excel::import(new UsersImport, $request->file);
-
-        return redirect()->back()->with('success', 'User Imported Successfully');
     }
 
     /**

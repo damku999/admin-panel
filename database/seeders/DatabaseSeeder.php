@@ -15,10 +15,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             // Core setup seeders
-            AdminSeeder::class,
-            CustomAdminSeeder::class,
             RoleSeeder::class,
-            UnifiedPermissionsSeeder::class, // Replaces PermissionSeeder, QuotationPermissionsSeeder, ClaimPermissionsSeeder
+            AdminSeeder::class,
+            UnifiedPermissionsSeeder::class,
 
             // Lookup table seeders (must run before data migration)
             CustomerTypesSeeder::class,

@@ -18,12 +18,18 @@ class AdminSeeder extends Seeder
     {
         // Create Admin User
         $user = User::create([
-            'first_name'    => 'Super',
-            'last_name'     => 'Admin',
-            'email'         =>  'admin@admin.com',
-            'mobile_number' =>  '9028187696',
-            'password'      =>  Hash::make('Admin@123#'),
-            'role_id'       => 1
+            'first_name'    => 'Darshan',
+            'last_name'     => 'Baraiya',
+            'email'         =>  'webmonks.in@gmail.com',
+            'mobile_number' =>  '8000071314',
+            'password'      =>  Hash::make('Webmonks239#'),
+            'role_id'       => 1,
+            'email_verified_at' => now(),
+            'status' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+            'created_by' => 1,
+            'updated_by' => 1,
         ]);
     }
 }

@@ -40,9 +40,7 @@ class OptimizeEnumCompatibility extends Migration
             $table->string('type', 20)->nullable()->change();
         });
         
-        // Update existing data to ensure consistency
-        DB::statement("UPDATE customers SET type = 'Corporate' WHERE type = 'Corporate'");
-        DB::statement("UPDATE customers SET type = 'Retail' WHERE type = 'Retail'");
+        // Note: Data consistency handled by seeders
     }
     
     /**
@@ -57,10 +55,7 @@ class OptimizeEnumCompatibility extends Migration
             }
         });
         
-        // Update existing data
-        DB::statement("UPDATE customer_insurances SET commission_on = 'net_premium' WHERE commission_on = 'net_premium'");
-        DB::statement("UPDATE customer_insurances SET commission_on = 'od_premium' WHERE commission_on = 'od_premium'");
-        DB::statement("UPDATE customer_insurances SET commission_on = 'tp_premium' WHERE commission_on = 'tp_premium'");
+        // Note: Data consistency handled by seeders
     }
     
     /**
@@ -86,22 +81,7 @@ class OptimizeEnumCompatibility extends Migration
                 }
             });
             
-            // Update existing data
-            DB::statement("UPDATE quotations SET fuel_type = 'Petrol' WHERE fuel_type = 'Petrol'");
-            DB::statement("UPDATE quotations SET fuel_type = 'Diesel' WHERE fuel_type = 'Diesel'");
-            DB::statement("UPDATE quotations SET fuel_type = 'CNG' WHERE fuel_type = 'CNG'");
-            DB::statement("UPDATE quotations SET fuel_type = 'Electric' WHERE fuel_type = 'Electric'");
-            DB::statement("UPDATE quotations SET fuel_type = 'Hybrid' WHERE fuel_type = 'Hybrid'");
-            
-            DB::statement("UPDATE quotations SET policy_type = 'Comprehensive' WHERE policy_type = 'Comprehensive'");
-            DB::statement("UPDATE quotations SET policy_type = 'Own Damage' WHERE policy_type = 'Own Damage'");
-            DB::statement("UPDATE quotations SET policy_type = 'Third Party' WHERE policy_type = 'Third Party'");
-            
-            DB::statement("UPDATE quotations SET status = 'Draft' WHERE status = 'Draft'");
-            DB::statement("UPDATE quotations SET status = 'Generated' WHERE status = 'Generated'");
-            DB::statement("UPDATE quotations SET status = 'Sent' WHERE status = 'Sent'");
-            DB::statement("UPDATE quotations SET status = 'Accepted' WHERE status = 'Accepted'");
-            DB::statement("UPDATE quotations SET status = 'Rejected' WHERE status = 'Rejected'");
+            // Note: Data consistency handled by seeders
         }
     }
     
@@ -187,117 +167,9 @@ class OptimizeEnumCompatibility extends Migration
             $table->index(['is_active', 'sort_order']);
         });
         
-        // Insert default data
-        $this->insertDefaultLookupData();
+        // Note: Default data moved to seeders (CustomerTypesSeeder, CommissionTypesSeeder, QuotationStatusesSeeder)
     }
     
-    /**
-     * Insert default data for lookup tables
-     */
-    private function insertDefaultLookupData()
-    {
-        // Customer types
-        DB::table('customer_types')->insert([
-            [
-                'name' => 'Corporate',
-                'description' => 'Corporate customers with business insurance needs',
-                'status' => 1,
-                'sort_order' => 1,
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'name' => 'Retail',
-                'description' => 'Individual retail customers',
-                'status' => 1,
-                'sort_order' => 2,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]
-        ]);
-        
-        // Commission types
-        DB::table('commission_types')->insert([
-            [
-                'name' => 'net_premium',
-                'description' => 'Commission calculated on net premium amount',
-                'status' => 1,
-                'sort_order' => 1,
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'name' => 'od_premium',
-                'description' => 'Commission calculated on Own Damage premium',
-                'status' => 1,
-                'sort_order' => 2,
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'name' => 'tp_premium',
-                'description' => 'Commission calculated on Third Party premium',
-                'status' => 1,
-                'sort_order' => 3,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]
-        ]);
-        
-        // Quotation statuses
-        DB::table('quotation_statuses')->insert([
-            [
-                'name' => 'Draft',
-                'description' => 'Quotation is in draft mode',
-                'color' => '#6c757d',
-                'is_active' => 1,
-                'is_final' => 0,
-                'sort_order' => 1,
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'name' => 'Generated',
-                'description' => 'Quotation has been generated',
-                'color' => '#17a2b8',
-                'is_active' => 1,
-                'is_final' => 0,
-                'sort_order' => 2,
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'name' => 'Sent',
-                'description' => 'Quotation has been sent to customer',
-                'color' => '#ffc107',
-                'is_active' => 1,
-                'is_final' => 0,
-                'sort_order' => 3,
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'name' => 'Accepted',
-                'description' => 'Quotation has been accepted by customer',
-                'color' => '#28a745',
-                'is_active' => 1,
-                'is_final' => 1,
-                'sort_order' => 4,
-                'created_at' => now(),
-                'updated_at' => now()
-            ],
-            [
-                'name' => 'Rejected',
-                'description' => 'Quotation has been rejected by customer',
-                'color' => '#dc3545',
-                'is_active' => 1,
-                'is_final' => 1,
-                'sort_order' => 5,
-                'created_at' => now(),
-                'updated_at' => now()
-            ]
-        ]);
-    }
 
     /**
      * Reverse the migrations.

@@ -24,8 +24,7 @@ class ConnectLookupTables extends Migration
         // Step 1: Add foreign key columns to tables
         $this->addForeignKeyColumns();
 
-        // Step 2: Migrate data from enum/varchar to lookup table IDs
-        $this->migrateExistingData();
+        // Note: Data migration moved to DataMigrationSeeder
 
         // Step 3: Add foreign key constraints
         $this->addForeignKeyConstraints();
@@ -61,64 +60,6 @@ class ConnectLookupTables extends Migration
         }
     }
 
-    /**
-     * Migrate existing data from enum/varchar to lookup table IDs
-     */
-    private function migrateExistingData()
-    {
-        // Migrate customer types (only if customers table exists)
-        if (Schema::hasTable('customers')) {
-            $customerTypeMapping = [
-                'Corporate' => 1,
-                'Retail' => 2,
-                'corporate' => 1,
-                'retail' => 2,
-            ];
-
-            foreach ($customerTypeMapping as $typeName => $typeId) {
-                DB::table('customers')
-                    ->where('type', $typeName)
-                    ->update(['customer_type_id' => $typeId]);
-            }
-        }
-
-        // Migrate commission types (only if customer_insurances table exists)
-        if (Schema::hasTable('customer_insurances')) {
-            $commissionTypeMapping = [
-                'net_premium' => 1,
-                'od_premium' => 2,
-                'tp_premium' => 3,
-            ];
-
-            foreach ($commissionTypeMapping as $commissionName => $commissionId) {
-                DB::table('customer_insurances')
-                    ->where('commission_on', $commissionName)
-                    ->update(['commission_type_id' => $commissionId]);
-            }
-        }
-
-        // Migrate quotation statuses (only if quotations table exists)
-        if (Schema::hasTable('quotations')) {
-            $quotationStatusMapping = [
-                'Draft' => 1,
-                'Generated' => 2,
-                'Sent' => 3,
-                'Accepted' => 4,
-                'Rejected' => 5,
-                'draft' => 1,
-                'generated' => 2,
-                'sent' => 3,
-                'accepted' => 4,
-                'rejected' => 5,
-            ];
-
-            foreach ($quotationStatusMapping as $statusName => $statusId) {
-                DB::table('quotations')
-                    ->where('status', $statusName)
-                    ->update(['quotation_status_id' => $statusId]);
-            }
-        }
-    }
 
     /**
      * Add foreign key constraints

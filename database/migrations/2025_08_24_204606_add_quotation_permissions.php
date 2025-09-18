@@ -12,30 +12,7 @@ return new class () extends Migration {
      */
     public function up(): void
     {
-        // Create quotation permissions
-        // $permissions = [
-        //     'quotation-list',
-        //     'quotation-create',
-        //     'quotation-edit',
-        //     'quotation-delete',
-        //     'quotation-generate',
-        //     'quotation-send-whatsapp',
-        //     'quotation-download-pdf',
-        // ];
-
-        // foreach ($permissions as $permission) {
-        //     Permission::create([
-        //         'name' => $permission,
-        //         'guard_name' => 'web'
-        //     ]);
-        // }
-
-        // // Assign all quotation permissions to admin role (assuming role ID 1 is admin)
-        // $adminRole = Role::find(1);
-        // if ($adminRole) {
-        //     $quotationPermissions = Permission::whereIn('name', $permissions)->get();
-        //     $adminRole->givePermissionTo($quotationPermissions);
-        // }
+        // Note: Quotation permissions data moved to QuotationPermissionsSeeder
     }
 
     /**
@@ -43,17 +20,6 @@ return new class () extends Migration {
      */
     public function down(): void
     {
-        // Remove quotation permissions
-        // $permissions = [
-        //     'quotation-list',
-        //     'quotation-create',
-        //     'quotation-edit',
-        //     'quotation-delete',
-        //     'quotation-generate',
-        //     'quotation-send-whatsapp',
-        //     'quotation-download-pdf',
-        // ];
-
-        // Permission::whereIn('name', $permissions)->delete();
+        // Note: Quotation permissions removal handled by QuotationPermissionsSeeder
     }
 };

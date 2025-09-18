@@ -214,6 +214,11 @@ class CustomerInsurance extends Model
         return $this->belongsTo(FuelType::class, 'fuel_type_id');
     }
 
+    public function commissionType()
+    {
+        return $this->belongsTo(CommissionType::class, 'commission_type_id');
+    }
+
     /**
      * Get all claims for this insurance policy.
      */

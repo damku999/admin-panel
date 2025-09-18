@@ -2,7 +2,7 @@
 
 namespace App\Listeners\Quotation;
 
-use App\Events\Communication\WhatsAppMessageQueued;
+use Illuminate\Support\Facades\Mail;
 use App\Events\Quotation\QuotationGenerated;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -24,23 +24,14 @@ class SendQuotationWhatsApp implements ShouldQueue
         // Prepare WhatsApp message
         $message = $this->prepareWhatsAppMessage($quotation, $event);
         
-        WhatsAppMessageQueued::dispatch(
-            $customer->mobile,
-            $message,
-            'template',
-            null,
-            [
-                'customer_name' => $customer->name,
-                'quotation_number' => $quotation->quotation_number,
-                'best_premium' => $event->bestPremium ? number_format($event->bestPremium, 2) : 'N/A',
-                'company_count' => $event->companyCount,
-                'policy_type' => $quotation->policy_type ?? 'Insurance',
-                'portal_link' => route('customer.quotations.show', $quotation->id),
-            ],
-            $event->isHighValueQuotation() ? 2 : 5,
-            "quotation_whatsapp_{$quotation->id}",
-            $customer->id
-        );
+        // Send WhatsApp message directly using actual WhatsApp API
+        if ($customer->mobile) {
+            // WhatsApp service integration placeholder
+            // WhatsAppService::sendMessage($customer->mobile, $message);
+
+            // For development: just skip sending
+            // Remove this when WhatsApp service is implemented
+        }
     }
 
     private function prepareWhatsAppMessage($quotation, $event): string

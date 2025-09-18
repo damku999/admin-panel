@@ -53,8 +53,13 @@ class AddPerformanceIndexes extends Migration
             // Mobile number lookups
             $table->index(['mobile_number', 'status'], 'idx_customers_mobile_status');
             
-            // Multi-column search optimization
-            $table->index(['name', 'email', 'mobile_number', 'status'], 'idx_customers_search');
+            // Multi-column search optimization (with prefix lengths to stay under 1000 byte limit)
+            if (Schema::getConnection()->getDriverName() === 'mysql') {
+                // Use prefix lengths for MySQL to avoid 1000 byte limit
+                Schema::getConnection()->statement('CREATE INDEX idx_customers_search ON customers (name(20), email(30), mobile_number(15), status)');
+            } else {
+                $table->index(['name', 'email', 'mobile_number', 'status'], 'idx_customers_search');
+            }
             
             // Date-based queries
             $table->index(['date_of_birth'], 'idx_customers_dob');

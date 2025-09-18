@@ -48,7 +48,6 @@ class AddForeignKeyConstraints extends Migration
             $table->unsignedBigInteger('policy_type_id')->nullable()->change();
             $table->unsignedBigInteger('premium_type_id')->nullable()->change();
             $table->unsignedBigInteger('fuel_type_id')->nullable()->change();
-            $table->unsignedBigInteger('reference_by_user_id')->nullable()->change();
             $table->unsignedBigInteger('created_by')->nullable()->change();
             $table->unsignedBigInteger('updated_by')->nullable()->change();
             $table->unsignedBigInteger('deleted_by')->nullable()->change();
@@ -168,11 +167,6 @@ class AddForeignKeyConstraints extends Migration
                   ->references('id')->on('fuel_types')
                   ->onDelete('set null');
                   
-            if (Schema::hasColumn('customer_insurances', 'reference_by_user_id')) {
-                $table->foreign('reference_by_user_id', 'fk_ci_reference_user')
-                      ->references('id')->on('reference_users')
-                      ->onDelete('set null');
-            }
         });
         
         // Family groups constraints
@@ -238,9 +232,6 @@ class AddForeignKeyConstraints extends Migration
             $table->dropForeign('fk_ci_policy_type');
             $table->dropForeign('fk_ci_premium_type');
             $table->dropForeign('fk_ci_fuel_type');
-            if (Schema::hasColumn('customer_insurances', 'reference_by_user_id')) {
-                $table->dropForeign('fk_ci_reference_user');
-            }
         });
         
         // Other constraints

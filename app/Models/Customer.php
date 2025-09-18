@@ -224,6 +224,14 @@ class Customer extends Authenticatable
     }
 
     /**
+     * Get the customer type (Corporate/Retail) for this customer.
+     */
+    public function customerType(): BelongsTo
+    {
+        return $this->belongsTo(CustomerType::class);
+    }
+
+    /**
      * Get the family member record for this customer.
      */
     public function familyMember(): HasOne

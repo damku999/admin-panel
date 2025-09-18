@@ -57,14 +57,6 @@ class EventServiceProvider extends ServiceProvider
             \App\Listeners\Insurance\SendPolicyRenewalReminder::class,
         ],
         
-        // Communication Events
-        \App\Events\Communication\WhatsAppMessageQueued::class => [
-            \App\Listeners\Communication\ProcessWhatsAppMessage::class,
-        ],
-        
-        \App\Events\Communication\EmailQueued::class => [
-            \App\Listeners\Communication\ProcessEmailMessage::class,
-        ],
         
         // Audit Events
         \App\Events\Audit\CustomerActionLogged::class => [
@@ -92,48 +84,6 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // Register global event listener for event sourcing
-        $this->registerEventSourcingListener();
-    }
-
-    /**
-     * Register a global listener to capture all events for event sourcing
-     */
-    private function registerEventSourcingListener(): void
-    {
-        Event::listen('*', function ($eventName, array $data) {
-            // Only capture domain events, not framework events
-            if ($this->isDomainEvent($eventName)) {
-                $event = $data[0] ?? null;
-                if ($event && method_exists($event, 'shouldQueue') && $event->shouldQueue()) {
-                    // Dispatch to event sourcing
-                    app(\App\Listeners\EventSourcing\StoreEventInEventStore::class)
-                        ->handle($event);
-                }
-            }
-        });
-    }
-
-    /**
-     * Check if the event is a domain event that should be stored
-     */
-    private function isDomainEvent(string $eventName): bool
-    {
-        $domainEventNamespaces = [
-            'App\\Events\\Customer\\',
-            'App\\Events\\Quotation\\',
-            'App\\Events\\Insurance\\',
-            'App\\Events\\Communication\\',
-            'App\\Events\\Document\\',
-            'App\\Events\\Audit\\',
-        ];
-
-        foreach ($domainEventNamespaces as $namespace) {
-            if (str_starts_with($eventName, $namespace)) {
-                return true;
-            }
-        }
-
-        return false;
+        //
     }
 }

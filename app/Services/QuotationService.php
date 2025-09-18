@@ -30,8 +30,7 @@ class QuotationService implements QuotationServiceInterface
         DB::beginTransaction();
         
         try {
-            // Note: QuotationRequested event temporarily disabled as policy types are handled at company level
-            // TODO: Refactor event to handle company-level policy types if needed
+            // Note: QuotationRequested event disabled - policy types handled at company level
 
             $data['total_idv'] = $this->calculateTotalIdv($data);
 

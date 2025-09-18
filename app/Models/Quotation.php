@@ -83,6 +83,11 @@ class Quotation extends Model
         return $this->hasMany(QuotationCompany::class)->orderBy('ranking');
     }
 
+    public function quotationStatus(): BelongsTo
+    {
+        return $this->belongsTo(QuotationStatus::class);
+    }
+
     public function recommendedQuote(): ?QuotationCompany
     {
         return $this->quotationCompanies()->where('is_recommended', true)->first();

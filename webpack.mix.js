@@ -1,4 +1,4 @@
-const mix = require('laravel-mix');
+const mix = require("laravel-mix");
 
 /*
  |--------------------------------------------------------------------------
@@ -12,50 +12,106 @@ const mix = require('laravel-mix');
  |
  */
 
+// Global Sass options to suppress deprecation warnings
+const sassOptions = {
+    sassOptions: {
+        quietDeps: true,
+        verbose: false,
+        silenceDeprecations: [
+            "legacy-js-api",
+            "import",
+            "global-builtin",
+            "color-functions",
+            "mixed-decls",
+        ],
+    },
+};
+
 // Admin Portal Assets (Clean Bootstrap 5 only)
-mix.js('resources/js/admin/admin-clean.js', 'public/js/admin.js')
-    .sass('resources/sass/admin/admin-clean.scss', 'public/css/admin.css')
+mix.js("resources/js/admin/admin-clean.js", "public/js/admin.js")
+    .sass(
+        "resources/sass/admin/admin-clean.scss",
+        "public/css/admin.css",
+        sassOptions
+    )
     .options({
         processCssUrls: false,
         autoprefixer: {
             options: {
-                browsers: [
-                    'last 6 versions',
-                ]
-            }
-        }
+                browsers: ["last 6 versions"],
+            },
+        },
     });
 
-// Customer Portal Assets  
-mix.js('resources/js/customer/customer.js', 'public/js')
-    .sass('resources/sass/customer/customer.scss', 'public/css');
+// Customer Portal Assets
+mix.js("resources/js/customer/customer.js", "public/js").sass(
+    "resources/sass/customer/customer.scss",
+    "public/css",
+    sassOptions
+);
 
 // Shared Assets (Legacy compatibility)
-mix.js('resources/js/app.js', 'public/js')
-    .sass('resources/sass/app.scss', 'public/css');
+mix.js("resources/js/app.js", "public/js").sass(
+    "resources/sass/app.scss",
+    "public/css",
+    sassOptions
+);
 
 // Copy FontAwesome webfonts
-mix.copyDirectory('node_modules/@fortawesome/fontawesome-free/webfonts', 'public/webfonts');
+mix.copyDirectory(
+    "node_modules/@fortawesome/fontawesome-free/webfonts",
+    "public/webfonts"
+);
 
 // Asset optimization for production
 if (mix.inProduction()) {
-    mix.version()
-        .options({
-            terser: {
-                terserOptions: {
-                    compress: {
-                        drop_console: true,
-                    },
+    mix.version().options({
+        terser: {
+            terserOptions: {
+                compress: {
+                    drop_console: true,
                 },
             },
-        });
+        },
+    });
 } else {
     mix.sourceMaps();
 }
 
-// Add webpack stats to see warnings
+// Enhanced webpack config to suppress warnings and improve build output
 mix.webpackConfig({
     stats: {
         children: true,
-    }
+        warningsFilter: [
+            /Deprecation/,
+            /sass-loader/,
+            /legacy-js-api/,
+            /color-functions/,
+            /global-builtin/,
+        ],
+    },
+    module: {
+        rules: [
+            {
+                test: /\.s[ac]ss$/i,
+                use: [
+                    {
+                        loader: "sass-loader",
+                        options: {
+                            sassOptions: {
+                                quietDeps: true,
+                                silenceDeprecations: [
+                                    "legacy-js-api",
+                                    "import",
+                                    "global-builtin",
+                                    "color-functions",
+                                    "mixed-decls",
+                                ],
+                            },
+                        },
+                    },
+                ],
+            },
+        ],
+    },
 });

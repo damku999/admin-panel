@@ -168,11 +168,11 @@
 
                             @can('quotation-send-whatsapp')
                                 @if ($quotation->status === 'Sent')
-                                    <button type="button" class="btn btn-warning btn-block mb-2" onclick="showResendWhatsAppModal()">
+                                    <button type="button" class="btn btn-warning btn-block mb-2" onclick="showModal('resendWhatsAppModal')">
                                         <i class="fab fa-whatsapp"></i> Resend via WhatsApp
                                     </button>
                                 @else
-                                    <button type="button" class="btn btn-success btn-block mb-2" onclick="showSendWhatsAppModal()">
+                                    <button type="button" class="btn btn-success btn-block mb-2" onclick="showModal('sendWhatsAppModal')">
                                         <i class="fab fa-whatsapp"></i> Send via WhatsApp
                                     </button>
                                 @endif

@@ -27,13 +27,13 @@
                         @can('quotation-send-whatsapp')
                             @if($quotation->status === 'Sent')
                                 <button type="button" class="btn btn-warning btn-sm d-flex align-items-center"
-                                        onclick="showResendWhatsAppModal()">
+                                        onclick="showModal('resendWhatsAppModal')">
                                     <i class="fab fa-whatsapp me-2"></i>
                                     <span>Resend via WhatsApp</span>
                                 </button>
                             @else
                                 <button type="button" class="btn btn-success btn-sm d-flex align-items-center"
-                                        onclick="showSendWhatsAppModal()">
+                                        onclick="showModal('sendWhatsAppModal')">
                                     <i class="fab fa-whatsapp me-2"></i>
                                     <span>Send via WhatsApp</span>
                                 </button>
@@ -1087,7 +1087,7 @@
                 <h5 class="modal-title" id="sendWhatsAppModalLabel">
                     <i class="fab fa-whatsapp"></i> Send Quotation via WhatsApp
                 </h5>
-                <button type="button" class="btn-close btn-close-white" onclick="hideWhatsAppModal('sendWhatsAppModal')" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" onclick="hideModal('sendWhatsAppModal')" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="text-center mb-3">
@@ -1102,7 +1102,7 @@
                 <p class="text-muted small">This will generate and attach a PDF comparison of all quotes.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="hideWhatsAppModal('sendWhatsAppModal')">Cancel</button>
+                <button type="button" class="btn btn-secondary" onclick="hideModal('sendWhatsAppModal')">Cancel</button>
                 <form method="POST" action="{{ route('quotations.send-whatsapp', $quotation) }}" class="d-inline">
                     @csrf
                     <button type="submit" class="btn btn-success">
@@ -1122,7 +1122,7 @@
                 <h5 class="modal-title" id="resendWhatsAppModalLabel">
                     <i class="fab fa-whatsapp"></i> Resend Quotation via WhatsApp
                 </h5>
-                <button type="button" class="btn-close" onclick="hideWhatsAppModal('resendWhatsAppModal')" aria-label="Close"></button>
+                <button type="button" class="btn-close" onclick="hideModal('resendWhatsAppModal')" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="text-center mb-3">
@@ -1138,7 +1138,7 @@
                 <p class="text-muted small">This will generate a fresh PDF with current quotes and send it again.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="hideWhatsAppModal('resendWhatsAppModal')">Cancel</button>
+                <button type="button" class="btn btn-secondary" onclick="hideModal('resendWhatsAppModal')">Cancel</button>
                 <form method="POST" action="{{ route('quotations.send-whatsapp', $quotation) }}" class="d-inline">
                     @csrf
                     <button type="submit" class="btn btn-warning">

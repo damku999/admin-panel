@@ -6,7 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class CustomerTypesSeeder extends Seeder
+class PolicyTypesSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,33 +14,39 @@ class CustomerTypesSeeder extends Seeder
     public function run(): void
     {
         // Clear existing data
-        DB::table('customer_types')->truncate();
+        DB::table('policy_types')->truncate();
 
-        // Insert customer types data
-        DB::table('customer_types')->insert([
+        // Insert policy types data
+        DB::table('policy_types')->insert([
             [
-                'name' => 'Corporate',
-                'description' => 'Corporate customers with business insurance needs',
+                'name' => 'FRESH',
                 'status' => 1,
-                'sort_order' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
+                'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null,
-                'deleted_at' => null
+                'deleted_by' => null
             ],
             [
-                'name' => 'Retail',
-                'description' => 'Individual retail customers',
+                'name' => 'ROLLOVER',
                 'status' => 1,
-                'sort_order' => 2,
                 'created_at' => now(),
                 'updated_at' => now(),
+                'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null,
-                'deleted_at' => null
+                'deleted_by' => null
+            ],
+            [
+                'name' => 'RENEWAL',
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => null,
+                'created_by' => null,
+                'updated_by' => null,
+                'deleted_by' => null
             ]
         ]);
     }

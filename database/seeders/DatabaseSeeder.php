@@ -24,6 +24,10 @@ class DatabaseSeeder extends Seeder
             CommissionTypesSeeder::class,
             QuotationStatusesSeeder::class,
             AddonCoversSeeder::class,
+            PolicyTypesSeeder::class,
+            PremiumTypesSeeder::class,
+            FuelTypesSeeder::class,
+            InsuranceCompaniesSeeder::class,
 
             // Data migration seeders (must run at the end)
             EmailCleanupSeeder::class,

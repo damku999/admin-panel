@@ -26,7 +26,11 @@ class QuotationStatusesSeeder extends Seeder
                 'is_final' => 0,
                 'sort_order' => 1,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
+                'created_by' => null,
+                'updated_by' => null,
+                'deleted_by' => null,
+                'deleted_at' => null
             ],
             [
                 'name' => 'Generated',
@@ -36,7 +40,11 @@ class QuotationStatusesSeeder extends Seeder
                 'is_final' => 0,
                 'sort_order' => 2,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
+                'created_by' => null,
+                'updated_by' => null,
+                'deleted_by' => null,
+                'deleted_at' => null
             ],
             [
                 'name' => 'Sent',
@@ -46,7 +54,11 @@ class QuotationStatusesSeeder extends Seeder
                 'is_final' => 0,
                 'sort_order' => 3,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
+                'created_by' => null,
+                'updated_by' => null,
+                'deleted_by' => null,
+                'deleted_at' => null
             ],
             [
                 'name' => 'Accepted',
@@ -56,7 +68,11 @@ class QuotationStatusesSeeder extends Seeder
                 'is_final' => 1,
                 'sort_order' => 4,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
+                'created_by' => null,
+                'updated_by' => null,
+                'deleted_by' => null,
+                'deleted_at' => null
             ],
             [
                 'name' => 'Rejected',
@@ -66,7 +82,11 @@ class QuotationStatusesSeeder extends Seeder
                 'is_final' => 1,
                 'sort_order' => 5,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
+                'created_by' => null,
+                'updated_by' => null,
+                'deleted_by' => null,
+                'deleted_at' => null
             ]
         ]);
     }

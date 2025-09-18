@@ -6,7 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class CommissionTypesSeeder extends Seeder
+class FuelTypesSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,45 +14,49 @@ class CommissionTypesSeeder extends Seeder
     public function run(): void
     {
         // Clear existing data
-        DB::table('commission_types')->truncate();
+        DB::table('fuel_types')->truncate();
 
-        // Insert commission types data
-        DB::table('commission_types')->insert([
+        // Insert fuel types data
+        DB::table('fuel_types')->insert([
             [
-                'name' => 'net_premium',
-                'description' => 'Commission calculated on net premium amount',
+                'name' => 'PETROL',
                 'status' => 1,
-                'sort_order' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
+                'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null,
-                'deleted_at' => null
+                'deleted_by' => null
             ],
             [
-                'name' => 'od_premium',
-                'description' => 'Commission calculated on Own Damage premium',
+                'name' => 'DIESEL',
                 'status' => 1,
-                'sort_order' => 2,
                 'created_at' => now(),
                 'updated_at' => now(),
+                'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null,
-                'deleted_at' => null
+                'deleted_by' => null
             ],
             [
-                'name' => 'tp_premium',
-                'description' => 'Commission calculated on Third Party premium',
+                'name' => 'CNG',
                 'status' => 1,
-                'sort_order' => 3,
                 'created_at' => now(),
                 'updated_at' => now(),
+                'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null,
-                'deleted_at' => null
+                'deleted_by' => null
+            ],
+            [
+                'name' => 'EV',
+                'status' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'deleted_at' => null,
+                'created_by' => null,
+                'updated_by' => null,
+                'deleted_by' => null
             ]
         ]);
     }

@@ -199,20 +199,49 @@ class QuotationService implements QuotationServiceInterface
 
     public function sendQuotationViaWhatsApp(Quotation $quotation): void
     {
+        \Log::info('Starting WhatsApp quotation send', [
+            'quotation_id' => $quotation->id,
+            'quotation_number' => $quotation->quotation_number,
+            'customer_name' => $quotation->customer->name ?? 'N/A',
+            'whatsapp_number' => $quotation->whatsapp_number,
+            'user_id' => auth()->user()->id ?? 'System'
+        ]);
+
         $message = $this->generateWhatsAppMessageWithAttachment($quotation);
         $pdfPath = $this->pdfService->generateQuotationPdfForWhatsApp($quotation);
 
         try {
             $response = $this->whatsAppSendMessageWithAttachment($message, $quotation->whatsapp_number, $pdfPath);
 
+            \Log::info('WhatsApp quotation sent successfully', [
+                'quotation_id' => $quotation->id,
+                'quotation_number' => $quotation->quotation_number,
+                'whatsapp_number' => $quotation->whatsapp_number,
+                'response' => $response,
+                'user_id' => auth()->user()->id ?? 'System'
+            ]);
+
             $quotation->update([
                 'status' => 'Sent',
                 'sent_at' => now(),
             ]);
+        } catch (\Exception $e) {
+            \Log::error('WhatsApp quotation send failed', [
+                'quotation_id' => $quotation->id,
+                'quotation_number' => $quotation->quotation_number,
+                'customer_name' => $quotation->customer->name ?? 'N/A',
+                'whatsapp_number' => $quotation->whatsapp_number,
+                'error' => $e->getMessage(),
+                'user_id' => auth()->user()->id ?? 'System',
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            throw $e; // Re-throw to maintain the error flow
         } finally {
             // Clean up temporary PDF file
             if (file_exists($pdfPath)) {
                 unlink($pdfPath);
+                \Log::debug('Temporary PDF file cleaned up', ['path' => $pdfPath]);
             }
         }
     }

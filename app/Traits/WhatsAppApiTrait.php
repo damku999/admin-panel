@@ -13,6 +13,11 @@ trait WhatsAppApiTrait
     // mediaurl
     protected function whatsAppSendMessage($messageText, $receiverId)
     {
+        $formattedNumber = $this->validateAndFormatMobileNumber($receiverId);
+
+        if (!$formattedNumber) {
+            throw new \Exception("Invalid mobile number format: {$receiverId}");
+        }
 
         $curl = curl_init();
 
@@ -21,7 +26,7 @@ trait WhatsAppApiTrait
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
+            CURLOPT_TIMEOUT => 30,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
@@ -29,28 +34,78 @@ trait WhatsAppApiTrait
                 'senderId' => $this->senderId,
                 'authToken' => $this->authToken,
                 'messageText' => $messageText,
-                'receiverId' => $this->validateAndFormatMobileNumber($receiverId),
+                'receiverId' => $formattedNumber,
             ],
         ));
+
         $response = curl_exec($curl);
+        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($curl);
         curl_close($curl);
+
+        if ($curlError) {
+            throw new \Exception("WhatsApp API connection failed: {$curlError}");
+        }
+
+        if ($httpCode !== 200) {
+            throw new \Exception("WhatsApp API returned HTTP {$httpCode}");
+        }
+
+        $decodedResponse = json_decode($response, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception("Invalid JSON response from WhatsApp API: {$response}");
+        }
+
+        // Check if response indicates failure
+        if (is_array($decodedResponse)) {
+            foreach ($decodedResponse as $result) {
+                if (isset($result['success']) && $result['success'] === false) {
+                    $errorMsg = $result['message'] ?? 'Unknown error';
+
+                    // Check for specific error conditions
+                    if (isset($result['error']['status']) && $result['error']['status'] === 'session offline') {
+                        throw new \Exception("WhatsApp session is offline. Please reconnect your WhatsApp session in BotMasterSender dashboard.");
+                    }
+
+                    if (isset($result['error']['error'])) {
+                        $specificError = $result['error']['error'];
+                        throw new \Exception("WhatsApp sending failed: {$specificError}");
+                    }
+
+                    throw new \Exception("WhatsApp sending failed: {$errorMsg}");
+                }
+            }
+        }
+
         return $response;
     }
     protected function whatsAppSendMessageWithAttachment($messageText, $receiverId, $filePath)
     {
+        $formattedNumber = $this->validateAndFormatMobileNumber($receiverId);
+
+        if (!$formattedNumber) {
+            throw new \Exception("Invalid mobile number format: {$receiverId}");
+        }
+
+        if (!file_exists($filePath)) {
+            throw new \Exception("Attachment file not found: {$filePath}");
+        }
+
+        if (!is_readable($filePath)) {
+            throw new \Exception("Attachment file is not readable: {$filePath}");
+        }
+
         try {
-
             $curl = curl_init();
-
             $fileHandle = fopen($filePath, 'r');
 
-            $fileSize = filesize($filePath);
             curl_setopt_array($curl, [
                 CURLOPT_URL => $this->base_url . '?action=send',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
+                CURLOPT_TIMEOUT => 60, // Longer timeout for file uploads
                 CURLOPT_FOLLOWLOCATION => true,
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => 'POST',
@@ -58,17 +113,57 @@ trait WhatsAppApiTrait
                     'senderId' => $this->senderId,
                     'authToken' => $this->authToken,
                     'messageText' => $messageText,
-                    'receiverId' => $this->validateAndFormatMobileNumber($receiverId),
+                    'receiverId' => $formattedNumber,
                     'uploadFile' => curl_file_create($filePath, mime_content_type($filePath), basename($filePath)),
                 ],
             ]);
 
             $response = curl_exec($curl);
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($curl);
             curl_close($curl);
             fclose($fileHandle);
+
+            if ($curlError) {
+                throw new \Exception("WhatsApp API connection failed: {$curlError}");
+            }
+
+            if ($httpCode !== 200) {
+                throw new \Exception("WhatsApp API returned HTTP {$httpCode}");
+            }
+
+            $decodedResponse = json_decode($response, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new \Exception("Invalid JSON response from WhatsApp API: {$response}");
+            }
+
+            // Check if response indicates failure
+            if (is_array($decodedResponse)) {
+                foreach ($decodedResponse as $result) {
+                    if (isset($result['success']) && $result['success'] === false) {
+                        $errorMsg = $result['message'] ?? 'Unknown error';
+
+                        // Check for specific error conditions
+                        if (isset($result['error']['status']) && $result['error']['status'] === 'session offline') {
+                            throw new \Exception("WhatsApp session is offline. Please reconnect your WhatsApp session in BotMasterSender dashboard.");
+                        }
+
+                        if (isset($result['error']['error'])) {
+                            $specificError = $result['error']['error'];
+                            throw new \Exception("WhatsApp sending failed: {$specificError}");
+                        }
+
+                        throw new \Exception("WhatsApp sending failed: {$errorMsg}");
+                    }
+                }
+            }
+
             return $response;
+
         } catch (\Throwable $th) {
-            return $th->getMessage();
+            // Re-throw as a more descriptive exception
+            throw new \Exception("WhatsApp message with attachment failed: " . $th->getMessage());
         }
     }
 

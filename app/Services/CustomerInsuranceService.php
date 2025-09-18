@@ -410,25 +410,103 @@ class CustomerInsuranceService implements CustomerInsuranceServiceInterface
 
     public function sendWhatsAppDocument(CustomerInsurance $customerInsurance): bool
     {
-        if (!empty($customerInsurance->policy_document_path)) {
+        \Log::info('Starting WhatsApp document send', [
+            'customer_insurance_id' => $customerInsurance->id,
+            'policy_no' => $customerInsurance->policy_no,
+            'customer_name' => $customerInsurance->customer->name ?? 'N/A',
+            'mobile_number' => $customerInsurance->customer->mobile_number,
+            'document_path' => $customerInsurance->policy_document_path,
+            'user_id' => auth()->user()->id ?? 'System'
+        ]);
+
+        if (empty($customerInsurance->policy_document_path)) {
+            \Log::warning('WhatsApp document send skipped - no document path', [
+                'customer_insurance_id' => $customerInsurance->id,
+                'policy_no' => $customerInsurance->policy_no
+            ]);
+            return false;
+        }
+
+        try {
             $message = $this->insuranceAdded($customerInsurance);
             $filePath = Storage::path('public' . DIRECTORY_SEPARATOR . $customerInsurance->policy_document_path);
-            $this->whatsAppSendMessageWithAttachment($message, $customerInsurance->customer->mobile_number, $filePath);
+
+            if (!file_exists($filePath)) {
+                throw new \Exception("Policy document file not found: {$filePath}");
+            }
+
+            $response = $this->whatsAppSendMessageWithAttachment($message, $customerInsurance->customer->mobile_number, $filePath);
+
+            \Log::info('WhatsApp document sent successfully', [
+                'customer_insurance_id' => $customerInsurance->id,
+                'policy_no' => $customerInsurance->policy_no,
+                'mobile_number' => $customerInsurance->customer->mobile_number,
+                'response' => $response,
+                'user_id' => auth()->user()->id ?? 'System'
+            ]);
+
             return true;
+
+        } catch (\Exception $e) {
+            \Log::error('WhatsApp document send failed', [
+                'customer_insurance_id' => $customerInsurance->id,
+                'policy_no' => $customerInsurance->policy_no,
+                'customer_name' => $customerInsurance->customer->name ?? 'N/A',
+                'mobile_number' => $customerInsurance->customer->mobile_number,
+                'document_path' => $customerInsurance->policy_document_path,
+                'error' => $e->getMessage(),
+                'user_id' => auth()->user()->id ?? 'System',
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            throw $e; // Re-throw to maintain the error flow
         }
-        return false;
     }
 
     public function sendRenewalReminderWhatsApp(CustomerInsurance $customerInsurance): bool
     {
-        $messageText = $customerInsurance->premiumType->is_vehicle == 1 
-            ? $this->renewalReminderVehicle($customerInsurance) 
-            : $this->renewalReminder($customerInsurance);
-        
-        $receiverId = $customerInsurance->customer->mobile_number;
-        $this->whatsAppSendMessage($messageText, $receiverId);
-        
-        return true;
+        \Log::info('Starting WhatsApp renewal reminder send', [
+            'customer_insurance_id' => $customerInsurance->id,
+            'policy_no' => $customerInsurance->policy_no,
+            'customer_name' => $customerInsurance->customer->name ?? 'N/A',
+            'mobile_number' => $customerInsurance->customer->mobile_number,
+            'expired_date' => $customerInsurance->expired_date,
+            'is_vehicle' => $customerInsurance->premiumType->is_vehicle ?? 0,
+            'user_id' => auth()->user()->id ?? 'System'
+        ]);
+
+        try {
+            $messageText = $customerInsurance->premiumType->is_vehicle == 1
+                ? $this->renewalReminderVehicle($customerInsurance)
+                : $this->renewalReminder($customerInsurance);
+
+            $receiverId = $customerInsurance->customer->mobile_number;
+            $response = $this->whatsAppSendMessage($messageText, $receiverId);
+
+            \Log::info('WhatsApp renewal reminder sent successfully', [
+                'customer_insurance_id' => $customerInsurance->id,
+                'policy_no' => $customerInsurance->policy_no,
+                'mobile_number' => $receiverId,
+                'response' => $response,
+                'user_id' => auth()->user()->id ?? 'System'
+            ]);
+
+            return true;
+
+        } catch (\Exception $e) {
+            \Log::error('WhatsApp renewal reminder send failed', [
+                'customer_insurance_id' => $customerInsurance->id,
+                'policy_no' => $customerInsurance->policy_no,
+                'customer_name' => $customerInsurance->customer->name ?? 'N/A',
+                'mobile_number' => $customerInsurance->customer->mobile_number,
+                'expired_date' => $customerInsurance->expired_date,
+                'error' => $e->getMessage(),
+                'user_id' => auth()->user()->id ?? 'System',
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            throw $e; // Re-throw to maintain the error flow
+        }
     }
 
     public function renewPolicy(CustomerInsurance $customerInsurance, array $data): CustomerInsurance

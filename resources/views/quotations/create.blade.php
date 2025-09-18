@@ -4,26 +4,23 @@
 
 @section('content')
     <div class="container-fluid">
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-file-alt"></i> Create Insurance Quotation
-            </h1>
-            <a href="{{ route('quotations.index') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-                <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to List
-            </a>
-        </div>
-
         {{-- Alert Messages --}}
         @include('common.alert')
 
-        <!-- Quotation Form -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-plus"></i> New Quotation Details
-                </h6>
-                <span class="badge badge-info">Step 1 of 2</span>
+        <!-- Quotation Create Form -->
+        <div class="card shadow mb-3 mt-2">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0 fw-bold text-primary">Create Insurance Quotation</h6>
+                    <small class="text-muted">Step 1 of 2 - Customer Information & Vehicle Details</small>
+                </div>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-info text-white px-2 py-1">Step 1 of 2</span>
+                    <a href="{{ route('quotations.index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center">
+                        <i class="fas fa-list me-2"></i>
+                        <span>Back to List</span>
+                    </a>
+                </div>
             </div>
             <div class="card-body">
 

@@ -4,59 +4,51 @@
 
 @section('content')
     <div class="container-fluid">
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-edit"></i> Edit Insurance Quotation
-            </h1>
-            <div class="d-flex">
-                @if($quotation->quotationCompanies->count() > 0)
-                    @can('quotation-download-pdf')
-                        <a href="{{ route('quotations.download-pdf', $quotation) }}" 
-                           class="btn btn-sm btn-primary shadow-sm mr-2">
-                            <i class="fas fa-download fa-sm text-white-50"></i> Download PDF
-                        </a>
-                    @endcan
-
-                    @can('quotation-send-whatsapp')
-                        @if($quotation->status === 'Sent')
-                            <button type="button" class="btn btn-sm btn-warning shadow-sm mr-2" 
-                                    onclick="showResendWhatsAppModal()">
-                                <i class="fab fa-whatsapp fa-sm text-white-50"></i> Resend via WhatsApp
-                            </button>
-                        @else
-                            <button type="button" class="btn btn-sm btn-success shadow-sm mr-2" 
-                                    onclick="showSendWhatsAppModal()">
-                                <i class="fab fa-whatsapp fa-sm text-white-50"></i> Send via WhatsApp
-                            </button>
-                        @endif
-                    @endcan
-                @endif
-                
-                <a href="{{ route('quotations.show', $quotation) }}" class="btn btn-sm btn-info shadow-sm mr-2">
-                    <i class="fas fa-eye fa-sm text-white-50"></i> View Quotation
-                </a>
-                <a href="{{ route('quotations.index') }}" class="btn btn-sm btn-secondary shadow-sm">
-                    <i class="fas fa-arrow-left fa-sm text-white-50"></i> Back to List
-                </a>
-            </div>
-        </div>
-
         {{-- Alert Messages --}}
         @include('common.alert')
 
-        <!-- Quotation Form -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="fas fa-edit"></i> Edit Quotation: {{ $quotation->getQuoteReference() }}
-                </h6>
-                <div class="d-flex">
-                    <span
-                        class="badge badge-{{ $quotation->status == 'Draft' ? 'secondary' : ($quotation->status == 'Generated' ? 'info' : ($quotation->status == 'Sent' ? 'warning' : ($quotation->status == 'Accepted' ? 'success' : 'danger'))) }} mr-2">
-                        {{ $quotation->status }}
-                    </span>
-                    <span class="badge badge-info">{{ $quotation->quotationCompanies->count() }} Companies</span>
+        <!-- Quotation Edit Form -->
+        <div class="card shadow mb-3 mt-2">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0 fw-bold text-primary">Edit Insurance Quotation</h6>
+                    <small class="text-muted">{{ $quotation->quotation_number }} | {{ $quotation->customer->name ?? 'N/A' }} | {{ ucfirst($quotation->status) }} | {{ $quotation->quotationCompanies->count() }} Companies</small>
+                </div>
+                <div class="d-flex gap-2">
+                    @if($quotation->quotationCompanies->count() > 0)
+                        @can('quotation-download-pdf')
+                            <a href="{{ route('quotations.download-pdf', $quotation) }}"
+                               class="btn btn-primary btn-sm d-flex align-items-center">
+                                <i class="fas fa-download me-2"></i>
+                                <span>Download PDF</span>
+                            </a>
+                        @endcan
+
+                        @can('quotation-send-whatsapp')
+                            @if($quotation->status === 'Sent')
+                                <button type="button" class="btn btn-warning btn-sm d-flex align-items-center"
+                                        onclick="showResendWhatsAppModal()">
+                                    <i class="fab fa-whatsapp me-2"></i>
+                                    <span>Resend via WhatsApp</span>
+                                </button>
+                            @else
+                                <button type="button" class="btn btn-success btn-sm d-flex align-items-center"
+                                        onclick="showSendWhatsAppModal()">
+                                    <i class="fab fa-whatsapp me-2"></i>
+                                    <span>Send via WhatsApp</span>
+                                </button>
+                            @endif
+                        @endcan
+                    @endif
+
+                    <a href="{{ route('quotations.show', $quotation) }}" class="btn btn-info btn-sm d-flex align-items-center">
+                        <i class="fas fa-eye me-2"></i>
+                        <span>View Details</span>
+                    </a>
+                    <a href="{{ route('quotations.index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center">
+                        <i class="fas fa-list me-2"></i>
+                        <span>Back to List</span>
+                    </a>
                 </div>
             </div>
             <div class="card-body">

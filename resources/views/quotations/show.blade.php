@@ -4,27 +4,31 @@
 
 @section('content')
     <div class="container-fluid">
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-file-alt"></i> Quotation Details
-            </h1>
-            <div class="d-flex">
-                <a href="{{ route('quotations.index') }}" class="btn btn-secondary btn-sm mr-2">
-                    <i class="fas fa-arrow-left"></i> Back to List
-                </a>
-                @can('quotation-edit')
-                    <a href="{{ route('quotations.edit', $quotation) }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-edit"></i> Edit Quotation
-                    </a>
-                @endcan
-            </div>
-        </div>
-
         {{-- Alert Messages --}}
         @include('common.alert')
 
-        <div class="row">
+        <!-- Quotation Details Card -->
+        <div class="card shadow mb-3 mt-2">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0 fw-bold text-primary">Quotation Details</h6>
+                    <small class="text-muted">{{ $quotation->quotation_number }} | {{ $quotation->customer->name ?? 'N/A' }} | {{ ucfirst($quotation->status) }} | {{ $quotation->quotationCompanies->count() }} Companies</small>
+                </div>
+                <div class="d-flex gap-2">
+                    @can('quotation-edit')
+                        <a href="{{ route('quotations.edit', $quotation) }}" class="btn btn-primary btn-sm d-flex align-items-center">
+                            <i class="fas fa-edit me-2"></i>
+                            <span>Edit Quotation</span>
+                        </a>
+                    @endcan
+                    <a href="{{ route('quotations.index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center">
+                        <i class="fas fa-list me-2"></i>
+                        <span>Back to List</span>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="row m-0">
             <!-- Quotation Summary -->
             <div class="col-lg-4 mb-4">
                 <div class="card shadow">
@@ -505,7 +509,9 @@
                 </div>
             </div>
         </div>
-    </div>
+            </div> <!-- End card-body -->
+        </div> <!-- End wrapper card -->
+    </div> <!-- End container-fluid -->
 @endsection
 
 @section('scripts')

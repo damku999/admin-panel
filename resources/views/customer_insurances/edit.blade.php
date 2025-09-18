@@ -684,7 +684,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 reference_commission_fields">
                                     <label>Reference Commission Percentage</label>
                                     <input type="text"
                                         class="decimal-input form-control form-control-customer @error('reference_commission_percentage') is-invalid @enderror"
@@ -696,7 +696,7 @@
                                     @enderror
                                 </div>
 
-                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0">
+                                <div class="col-sm-6 col-md-4 mb-3 mt-3 mb-sm-0 reference_commission_fields">
                                     <label>Reference Commission Amount</label>
                                     <input type="text"
                                         class="decimal-input form-control form-control-customer @error('reference_commission_amount') is-invalid @enderror"

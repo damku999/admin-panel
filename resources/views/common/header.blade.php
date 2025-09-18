@@ -12,7 +12,7 @@
         <ul class="navbar-nav">
             <!-- User Profile Dropdown -->
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle d-flex align-items-center py-1 px-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="text-decoration: none;">
+                <a class="nav-link dropdown-toggle d-flex align-items-center py-1 px-2" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" data-toggle="dropdown" aria-expanded="false" style="text-decoration: none;" onclick="toggleUserDropdown(event)">
                     <!-- Simple User Avatar -->
                     @if(auth()->user()->profile_photo_path ?? false)
                         <img class="rounded-circle me-2" src="{{ Storage::url(auth()->user()->profile_photo_path) }}" 

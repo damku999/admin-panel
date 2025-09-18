@@ -7,8 +7,9 @@ try {
     window.Popper = createPopper;
     window.$ = window.jQuery = require('jquery');
 
-    // Load Bootstrap 5 JavaScript
-    require('bootstrap');
+    // Load Bootstrap 5 JavaScript and expose to global scope
+    const bootstrap = require('bootstrap');
+    window.bootstrap = bootstrap;
 } catch (e) {
     console.warn('Bootstrap initialization failed:', e);
 }

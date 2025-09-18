@@ -154,6 +154,22 @@
             }
         }
         $(document).ready(function() {
+            // Prevent jQuery datepicker conflicts - provide fallback
+            if (typeof $.fn.datepicker === 'undefined') {
+                $.fn.datepicker = function(options) {
+                    console.warn('jQuery datepicker not available, using Flatpickr fallback');
+                    return this.each(function() {
+                        if (!$(this).hasClass('flatpickr-input')) {
+                            var flatpickrOptions = $.extend({
+                                dateFormat: 'd/m/Y',
+                                allowInput: true
+                            }, options || {});
+                            $(this).flatpickr(flatpickrOptions);
+                        }
+                    });
+                };
+            }
+
             // Simple Clean Date Picker
             $('.datepicker').flatpickr({
                 dateFormat: 'd/m/Y',
@@ -322,6 +338,48 @@
             var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
             var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
                 return new bootstrap.Dropdown(dropdownToggleEl);
+            });
+
+            // Additional fix for dropdown functionality
+            $(document).on('click', '.dropdown-toggle', function(e) {
+                e.preventDefault();
+                var dropdown = bootstrap.Dropdown.getInstance(this) || new bootstrap.Dropdown(this);
+                dropdown.toggle();
+            });
+
+            // Specific function for user dropdown toggle
+            window.toggleUserDropdown = function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                const userDropdown = document.getElementById('userDropdown');
+                const dropdown = bootstrap.Dropdown.getInstance(userDropdown) || new bootstrap.Dropdown(userDropdown);
+                dropdown.toggle();
+            };
+
+            // Alternative fallback for dropdowns that might fail
+            $(document).on('click', '#userDropdown', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const $dropdown = $(this).next('.dropdown-menu');
+                if ($dropdown.hasClass('show')) {
+                    $dropdown.removeClass('show');
+                    $(this).attr('aria-expanded', 'false');
+                } else {
+                    // Close any other open dropdowns first
+                    $('.dropdown-menu.show').removeClass('show');
+                    $('[aria-expanded="true"]').attr('aria-expanded', 'false');
+                    // Show this dropdown
+                    $dropdown.addClass('show');
+                    $(this).attr('aria-expanded', 'true');
+                }
+            });
+
+            // Close dropdown when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.dropdown').length) {
+                    $('.dropdown-menu.show').removeClass('show');
+                    $('[aria-expanded="true"]').attr('aria-expanded', 'false');
+                }
             });
 
             // =======================================================

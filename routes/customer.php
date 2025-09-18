@@ -67,8 +67,13 @@ Route::prefix('customer')->name('customer.')->group(function () {
         // Email Verification Management
         Route::get('/email/verify-notice', [CustomerAuthController::class, 'showEmailVerificationNotice'])->name('verify-email-notice');
         Route::post('/email/resend', [CustomerAuthController::class, 'resendVerification'])
-            ->middleware(['throttle:3,1'])
+            ->middleware(['throttle:10,1'])
             ->name('resend-verification');
+
+        // Alternative route name for compatibility (same endpoint, different name)
+        Route::post('/email/verification/send', [CustomerAuthController::class, 'resendVerification'])
+            ->middleware(['throttle:10,1'])
+            ->name('verification.send');
             
         // ==========================================
         // FAMILY MEMBER MANAGEMENT (Family Heads Only)
@@ -80,7 +85,7 @@ Route::prefix('customer')->name('customer.')->group(function () {
             
         // Family Member Password Management
         Route::get('/family-member/{member}/change-password', [CustomerAuthController::class, 'showFamilyMemberPasswordForm'])
-            ->name('family-member.password-form');
+            ->name('family-member.change-password');
         Route::put('/family-member/{member}/password', [CustomerAuthController::class, 'updateFamilyMemberPassword'])
             ->middleware(['throttle:10,1'])
             ->name('family-member.password');

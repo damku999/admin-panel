@@ -9,6 +9,8 @@
 
 ### **Primary Context Files** (Start Here)
 - `MASTER_SESSION_CONTEXT.md` ← **MAIN SESSION CONTEXT** (read first)
+- `QUICK_CONTEXT_SUMMARY.md` ← **QUICK START** summary for fast context resumption
+- `MODULE_WISE_IMPLEMENTATION_STATUS.md` ← Complete module implementation status
 - `progress/CURRENT_TODO_STATUS.md` ← Current implementation status
 - `CLAUDE.md` ← Laravel project guidance for Claude Code
 - `README.md` ← Workspace overview and protocols

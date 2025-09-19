@@ -8,19 +8,18 @@ use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Contracts\Services\UserServiceInterface;
 
-class UserController extends Controller
+/**
+ * User Controller
+ *
+ * Handles User CRUD operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class UserController extends AbstractBaseCrudController
 {
-    /**
-     * Create a new controller instance.
-     */
     public function __construct(
         private UserServiceInterface $userService
     ) {
-        $this->middleware('auth');
-        $this->middleware('permission:user-list|user-create|user-edit|user-delete', ['only' => ['index']]);
-        $this->middleware('permission:user-create', ['only' => ['create', 'store', 'updateStatus']]);
-        $this->middleware('permission:user-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:user-delete', ['only' => ['delete']]);
+        $this->setupPermissionMiddleware('user');
     }
 
 
@@ -68,9 +67,12 @@ class UserController extends Controller
             // Assign roles through service
             $this->userService->assignRoles($user, [$request->role_id]);
 
-            return redirect()->route('users.index')->with('success', 'User Created Successfully.');
+            return $this->redirectWithSuccess('users.index',
+                $this->getSuccessMessage('User', 'created'));
         } catch (\Throwable $th) {
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('User', 'create') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -94,16 +96,18 @@ class UserController extends Controller
 
         // If Validations Fails
         if ($validate->fails()) {
-            return redirect()->back()->with('error', $validate->errors()->first());
+            return $this->redirectWithError($validate->errors()->first());
         }
 
         try {
             // Update status through service
             $this->userService->updateStatus($user_id, $status);
 
-            return redirect()->back()->with('success', 'User Status Updated Successfully!');
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('User status', 'updated'));
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('User status', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -163,9 +167,12 @@ class UserController extends Controller
                 $this->userService->changePassword($user, $request->new_password);
             }
 
-            return redirect()->back()->with('success', 'User Updated Successfully.');
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('User', 'updated'));
         } catch (\Throwable $th) {
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('User', 'update') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -181,9 +188,11 @@ class UserController extends Controller
             // Delete user through service
             $this->userService->deleteUser($user);
 
-            return redirect()->back()->with('success', 'User Deleted Successfully!.');
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('User', 'deleted'));
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('User', 'delete') . ': ' . $th->getMessage());
         }
     }
 

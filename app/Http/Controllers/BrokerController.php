@@ -59,23 +59,14 @@ class BrokerController extends AbstractBaseCrudController
      */
     public function store(StoreBrokerRequest $request): RedirectResponse
     {
-        DB::beginTransaction();
-
         try {
-            // Store Data
-            $broker = Broker::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'mobile_number' => $request->mobile_number,
-            ]);
-
-            // Commit And Redirected To Listing
-            DB::commit();
-            return redirect()->route('brokers.index')->with('success', 'Broker Created Successfully.');
+            $broker = $this->brokerService->createBroker($request->validated());
+            return $this->redirectWithSuccess('brokers.index',
+                $this->getSuccessMessage('Broker', 'created'));
         } catch (\Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Broker', 'create') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -87,34 +78,13 @@ class BrokerController extends AbstractBaseCrudController
      */
     public function updateStatus(int $broker_id, int $status): RedirectResponse
     {
-        // Validation
-        $validate = Validator::make([
-            'broker_id' => $broker_id,
-            'status' => $status,
-        ], [
-            'broker_id' => 'required|exists:brokers,id',
-            'status' => 'required|in:0,1',
-        ]);
-
-        // If Validations Fails
-        if ($validate->fails()) {
-            return redirect()->back()->with('error', $validate->errors()->first());
-        }
-
         try {
-            DB::beginTransaction();
-
-            // Update Status
-            Broker::whereId($broker_id)->update(['status' => $status]);
-
-            // Commit And Redirect on index with Success Message
-            DB::commit();
-            return redirect()->back()->with('success', 'Broker Status Updated Successfully!');
+            $this->brokerService->updateStatus($broker_id, $status);
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('Broker status', 'updated'));
         } catch (\Throwable $th) {
-
-            // Rollback & Return Error Message
-            DB::rollBack();
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Broker status', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -139,22 +109,14 @@ class BrokerController extends AbstractBaseCrudController
      */
     public function update(UpdateBrokerRequest $request, Broker $broker): RedirectResponse
     {
-
-        DB::beginTransaction();
         try {
-            // Store Data
-            $broker_updated = Broker::whereId($broker->id)->update([
-                'name' => $request->name,
-                'email' => $request->email,
-                'mobile_number' => $request->mobile_number,
-            ]);
-            // Commit And Redirected To Listing
-            DB::commit();
-            return redirect()->back()->with('success', 'Broker Updated Successfully.');
+            $this->brokerService->updateBroker($broker, $request->validated());
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('Broker', 'updated'));
         } catch (\Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Broker', 'update') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -166,16 +128,13 @@ class BrokerController extends AbstractBaseCrudController
      */
     public function delete(Broker $broker): RedirectResponse
     {
-        DB::beginTransaction();
         try {
-            // Delete Broker
-            Broker::whereId($broker->id)->delete();
-
-            DB::commit();
-            return redirect()->back()->with('success', 'Broker Deleted Successfully!.');
+            $this->brokerService->deleteBroker($broker);
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('Broker', 'deleted'));
         } catch (\Throwable $th) {
-            DB::rollBack();
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Broker', 'delete') . ': ' . $th->getMessage());
         }
     }
 

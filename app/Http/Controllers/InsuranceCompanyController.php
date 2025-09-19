@@ -6,16 +6,18 @@ use App\Contracts\Services\InsuranceCompanyServiceInterface;
 use App\Models\InsuranceCompany;
 use Illuminate\Http\Request;
 
-class InsuranceCompanyController extends Controller
+/**
+ * Insurance Company Controller
+ *
+ * Handles InsuranceCompany CRUD operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class InsuranceCompanyController extends AbstractBaseCrudController
 {
     public function __construct(
         private InsuranceCompanyServiceInterface $insuranceCompanyService
     ) {
-        $this->middleware('auth');
-        $this->middleware('permission:insurance_company-list|insurance_company-create|insurance_company-edit|insurance_company-delete', ['only' => ['index']]);
-        $this->middleware('permission:insurance_company-create', ['only' => ['create', 'store', 'updateStatus']]);
-        $this->middleware('permission:insurance_company-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:insurance_company-delete', ['only' => ['delete']]);
+        $this->setupPermissionMiddleware('insurance_company');
     }
 
     /**
@@ -60,9 +62,12 @@ class InsuranceCompanyController extends Controller
                 'mobile_number' => $request->mobile_number,
             ]);
 
-            return redirect()->route('insurance_companies.index')->with('success', 'InsuranceCompany Created Successfully.');
+            return $this->redirectWithSuccess('insurance_companies.index',
+                $this->getSuccessMessage('Insurance Company', 'created'));
         } catch (\Throwable $th) {
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Insurance Company', 'create') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -76,9 +81,11 @@ class InsuranceCompanyController extends Controller
     {
         try {
             $this->insuranceCompanyService->updateStatus($insurance_company_id, $status);
-            return redirect()->back()->with('success', 'InsuranceCompany Status Updated Successfully!');
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('Insurance Company status', 'updated'));
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Insurance Company status', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -114,9 +121,12 @@ class InsuranceCompanyController extends Controller
                 'mobile_number' => $request->mobile_number,
             ]);
 
-            return redirect()->back()->with('success', 'InsuranceCompany Updated Successfully.');
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('Insurance Company', 'updated'));
         } catch (\Throwable $th) {
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Insurance Company', 'update') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -130,9 +140,11 @@ class InsuranceCompanyController extends Controller
     {
         try {
             $this->insuranceCompanyService->deleteInsuranceCompany($insurance_company);
-            return redirect()->back()->with('success', 'InsuranceCompany Deleted Successfully!.');
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('Insurance Company', 'deleted'));
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Insurance Company', 'delete') . ': ' . $th->getMessage());
         }
     }
 

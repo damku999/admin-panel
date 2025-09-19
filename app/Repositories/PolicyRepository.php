@@ -6,10 +6,19 @@ use App\Contracts\Repositories\PolicyRepositoryInterface;
 use App\Models\CustomerInsurance;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
-class PolicyRepository implements PolicyRepositoryInterface
+/**
+ * Policy Repository
+ *
+ * Extends base repository functionality for Policy-specific operations.
+ * Common CRUD operations are inherited from AbstractBaseRepository.
+ */
+class PolicyRepository extends AbstractBaseRepository implements PolicyRepositoryInterface
 {
+    protected string $modelClass = CustomerInsurance::class;
+    protected array $searchableFields = ['policy_number'];
     public function getAll(array $filters = []): Collection
     {
         $query = CustomerInsurance::with(['customer', 'insuranceCompany', 'policyType', 'premiumType']);
@@ -29,8 +38,12 @@ class PolicyRepository implements PolicyRepositoryInterface
         return $query->latest()->get();
     }
 
-    public function getPaginated(array $filters = [], int $perPage = 10): LengthAwarePaginator
+    /**
+     * Override base getPaginated to support complex filtering with relationships
+     */
+    public function getPaginated(Request $request, int $perPage = 10): LengthAwarePaginator
     {
+        $filters = $request->all();
         $query = CustomerInsurance::with(['customer', 'insuranceCompany', 'policyType', 'premiumType']);
 
         // Search filter
@@ -73,25 +86,35 @@ class PolicyRepository implements PolicyRepositoryInterface
         return $query->latest()->paginate($perPage);
     }
 
-    public function findById(int $id): ?CustomerInsurance
+    /**
+     * Override findById to include relationships
+     */
+    public function findById(int $id)
     {
         return CustomerInsurance::with(['customer', 'insuranceCompany', 'policyType', 'premiumType'])
                                 ->find($id);
     }
 
-    public function create(array $data): CustomerInsurance
+    /**
+     * Override update method to match interface signature
+     */
+    public function update($entity, array $data)
     {
-        return CustomerInsurance::create($data);
+        if (is_int($entity)) {
+            return CustomerInsurance::whereId($entity)->update($data);
+        }
+        return parent::update($entity, $data);
     }
 
-    public function update(int $id, array $data): bool
+    /**
+     * Override delete method to match interface signature
+     */
+    public function delete($entity): bool
     {
-        return CustomerInsurance::whereId($id)->update($data);
-    }
-
-    public function delete(int $id): bool
-    {
-        return CustomerInsurance::whereId($id)->delete();
+        if (is_int($entity)) {
+            return CustomerInsurance::whereId($entity)->delete();
+        }
+        return parent::delete($entity);
     }
 
     public function getByCustomer(int $customerId): Collection
@@ -110,6 +133,9 @@ class PolicyRepository implements PolicyRepositoryInterface
                                 ->get();
     }
 
+    /**
+     * Override getActive to include policy-specific logic
+     */
     public function getActive(): Collection
     {
         return CustomerInsurance::with(['customer', 'insuranceCompany', 'policyType'])

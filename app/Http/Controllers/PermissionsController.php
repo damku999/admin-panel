@@ -6,20 +6,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 
-class PermissionsController extends Controller
+/**
+ * Permissions Controller
+ *
+ * Handles Permission CRUD operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class PermissionsController extends AbstractBaseCrudController
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
-        $this->middleware('auth');
-        $this->middleware('permission:permission-list|permission-create|permission-edit|permission-delete', ['only' => ['index']]);
-        $this->middleware('permission:permission-create', ['only' => ['create', 'store']]);
-        $this->middleware('permission:permission-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:permission-delete', ['only' => ['destroy']]);
+        $this->setupCustomPermissionMiddleware([
+            ['permission' => 'permission-list|permission-create|permission-edit|permission-delete', 'only' => ['index']],
+            ['permission' => 'permission-create', 'only' => ['create', 'store']],
+            ['permission' => 'permission-edit', 'only' => ['edit', 'update']],
+            ['permission' => 'permission-delete', 'only' => ['destroy']]
+        ]);
     }
 
     /**
@@ -54,20 +56,22 @@ class PermissionsController extends Controller
      */
     public function store(Request $request)
     {
-        DB::beginTransaction();
         try {
             $request->validate([
                 'name' => 'required',
                 'guard_name' => 'required'
             ]);
 
+            DB::beginTransaction();
             Permission::create($request->all());
-
             DB::commit();
-            return redirect()->back()->with('success', 'Permissions created successfully.');
+
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('Permission', 'created'));
         } catch (\Throwable $th) {
             DB::rollback();
-            return redirect()->route('permissions.index')->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Permission', 'create') . ': ' . $th->getMessage());
         }
     }
 
@@ -104,24 +108,25 @@ class PermissionsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        DB::beginTransaction();
         try {
             $request->validate([
                 'name' => 'required',
                 'guard_name' => 'required'
             ]);
 
+            DB::beginTransaction();
             $permission = Permission::whereId($id)->first();
             $permission->name = $request->name;
             $permission->guard_name = $request->guard_name;
             $permission->save();
-
-
             DB::commit();
-            return redirect()->back()->with('success', 'Permissions updated successfully.');
+
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('Permission', 'updated'));
         } catch (\Throwable $th) {
             DB::rollback();
-            return redirect()->route('permissions.edit', ['permission' => $permission])->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Permission', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -133,16 +138,17 @@ class PermissionsController extends Controller
      */
     public function destroy($id)
     {
-        DB::beginTransaction();
         try {
-
+            DB::beginTransaction();
             Permission::whereId($id)->delete();
-
             DB::commit();
-            return redirect()->back()->with('success', 'Permissions deleted successfully.');
+
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('Permission', 'deleted'));
         } catch (\Throwable $th) {
             DB::rollback();
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Permission', 'delete') . ': ' . $th->getMessage());
         }
     }
 }

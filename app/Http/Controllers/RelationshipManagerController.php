@@ -9,20 +9,17 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 
-class RelationshipManagerController extends Controller
+/**
+ * Relationship Manager Controller
+ *
+ * Handles RelationshipManager CRUD operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class RelationshipManagerController extends AbstractBaseCrudController
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
-        $this->middleware('auth');
-        $this->middleware('permission:relationship_manager-list|relationship_manager-create|relationship_manager-edit|relationship_manager-delete', ['only' => ['index']]);
-        $this->middleware('permission:relationship_manager-create', ['only' => ['create', 'store', 'updateStatus']]);
-        $this->middleware('permission:relationship_manager-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:relationship_manager-delete', ['only' => ['delete']]);
+        $this->setupPermissionMiddleware('relationship_manager');
     }
 
 
@@ -81,11 +78,11 @@ class RelationshipManagerController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('relationship_managers.index')->with('success', 'RelationshipManager Created Successfully.');
+            return $this->redirectWithSuccess('relationship_managers.index', $this->getSuccessMessage('Relationship Manager', 'created'));
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Relationship Manager', 'create') . ': ' . $th->getMessage());
         }
     }
 
@@ -108,7 +105,7 @@ class RelationshipManagerController extends Controller
 
         // If Validations Fails
         if ($validate->fails()) {
-            return redirect()->back()->with('error', $validate->errors()->first());
+            return $this->redirectWithError($validate->errors()->first());
         }
 
         try {
@@ -119,12 +116,12 @@ class RelationshipManagerController extends Controller
 
             // Commit And Redirect on index with Success Message
             DB::commit();
-            return redirect()->back()->with('success', 'RelationshipManager Status Updated Successfully!');
+            return $this->redirectWithSuccess('relationship_managers.index', $this->getSuccessMessage('Relationship Manager Status', 'updated'));
         } catch (\Throwable $th) {
 
             // Rollback & Return Error Message
             DB::rollBack();
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Relationship Manager Status', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -166,11 +163,11 @@ class RelationshipManagerController extends Controller
             ]);
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->back()->with('success', 'RelationshipManager Updated Successfully.');
+            return $this->redirectWithSuccess('relationship_managers.index', $this->getSuccessMessage('Relationship Manager', 'updated'));
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Relationship Manager', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -188,10 +185,10 @@ class RelationshipManagerController extends Controller
             RelationshipManager::whereId($relationship_manager->id)->delete();
 
             DB::commit();
-            return redirect()->back()->with('success', 'RelationshipManager Deleted Successfully!.');
+            return $this->redirectWithSuccess('relationship_managers.index', $this->getSuccessMessage('Relationship Manager', 'deleted'));
         } catch (\Throwable $th) {
             DB::rollBack();
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Relationship Manager', 'delete') . ': ' . $th->getMessage());
         }
     }
 

@@ -15,7 +15,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class QuotationService implements QuotationServiceInterface
+class QuotationService extends BaseService implements QuotationServiceInterface
 {
     use WhatsAppApiTrait;
 
@@ -27,9 +27,7 @@ class QuotationService implements QuotationServiceInterface
 
     public function createQuotation(array $data): Quotation
     {
-        DB::beginTransaction();
-        
-        try {
+        return $this->createInTransaction(function () use ($data) {
             // Note: QuotationRequested event disabled - policy types handled at company level
 
             $data['total_idv'] = $this->calculateTotalIdv($data);
@@ -45,16 +43,11 @@ class QuotationService implements QuotationServiceInterface
                 $this->createManualCompanyQuotes($quotation, $companies);
             }
 
-            DB::commit();
-
             // Fire QuotationGenerated event after successful creation
             QuotationGenerated::dispatch($quotation);
 
             return $quotation;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        });
     }
 
     public function generateCompanyQuotes(Quotation $quotation): void
@@ -541,22 +534,9 @@ class QuotationService implements QuotationServiceInterface
 
     public function deleteQuotation(Quotation $quotation): bool
     {
-        DB::beginTransaction();
-
-        try {
-            $deleted = $this->quotationRepository->delete($quotation->id);
-            
-            if ($deleted) {
-                DB::commit();
-                return true;
-            }
-
-            DB::rollBack();
-            return false;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        return $this->deleteInTransaction(
+            fn() => $this->quotationRepository->delete($quotation->id)
+        );
     }
 
     public function calculatePremium(array $data): float

@@ -9,20 +9,17 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 
-class PremiumTypeController extends Controller
+/**
+ * Premium Type Controller
+ *
+ * Handles PremiumType CRUD operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class PremiumTypeController extends AbstractBaseCrudController
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
-        $this->middleware('auth');
-        $this->middleware('permission:premium-type-list|premium-type-create|premium-type-edit|premium-type-delete', ['only' => ['index']]);
-        $this->middleware('permission:premium-type-create', ['only' => ['create', 'store', 'updateStatus']]);
-        $this->middleware('permission:premium-type-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:premium-type-delete', ['only' => ['delete']]);
+        $this->setupPermissionMiddleware('premium-type');
     }
 
 
@@ -70,7 +67,7 @@ class PremiumTypeController extends Controller
 
         $request->validate($validation_array);
         if ($request->input('is_vehicle') && $request->input('is_life_insurance_policies')) {
-            return redirect()->back()->withInput()->with('error', 'Both "Is it for Vehicle?" and "Is Life Insurance Policies?" cannot be true at the same time.');
+            return $this->redirectWithError('Both "Is it for Vehicle?" and "Is Life Insurance Policies?" cannot be true at the same time.');
         }
         DB::beginTransaction();
 
@@ -84,11 +81,11 @@ class PremiumTypeController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('premium_type.index')->with('success', 'Premium Type Created Successfully.');
+            return $this->redirectWithSuccess('premium_type.index', $this->getSuccessMessage('Premium Type', 'created'));
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Premium Type', 'create') . ': ' . $th->getMessage());
         }
     }
 
@@ -111,7 +108,7 @@ class PremiumTypeController extends Controller
 
         // If Validations Fails
         if ($validate->fails()) {
-            return redirect()->back()->with('error', $validate->errors()->first());
+            return $this->redirectWithError($validate->errors()->first());
         }
 
         try {
@@ -122,12 +119,12 @@ class PremiumTypeController extends Controller
 
             // Commit And Redirect on index with Success Message
             DB::commit();
-            return redirect()->back()->with('success', 'Policy Type Status Updated Successfully!');
+            return $this->redirectWithSuccess('premium_type.index', $this->getSuccessMessage('Premium Type Status', 'updated'));
         } catch (\Throwable $th) {
 
             // Rollback & Return Error Message
             DB::rollBack();
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Premium Type Status', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -161,7 +158,7 @@ class PremiumTypeController extends Controller
 
         $request->validate($validation_array);
         if ($request->input('is_vehicle') && $request->input('is_life_insurance_policies')) {
-            return redirect()->back()->withInput()->with('error', 'Both "Is it for Vehicle?" and "Is Life Insurance Policies?" cannot be true at the same time.');
+            return $this->redirectWithError('Both "Is it for Vehicle?" and "Is Life Insurance Policies?" cannot be true at the same time.');
         }
         DB::beginTransaction();
         try {
@@ -173,11 +170,11 @@ class PremiumTypeController extends Controller
             ]);
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->back()->with('success', 'Policy Type Updated Successfully.');
+            return $this->redirectWithSuccess('premium_type.index', $this->getSuccessMessage('Premium Type', 'updated'));
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Premium Type', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -195,10 +192,10 @@ class PremiumTypeController extends Controller
             PremiumType::whereId($premium_type->id)->delete();
 
             DB::commit();
-            return redirect()->back()->with('success', 'Policy Type Deleted Successfully!.');
+            return $this->redirectWithSuccess('premium_type.index', $this->getSuccessMessage('Premium Type', 'deleted'));
         } catch (\Throwable $th) {
             DB::rollBack();
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Premium Type', 'delete') . ': ' . $th->getMessage());
         }
     }
 

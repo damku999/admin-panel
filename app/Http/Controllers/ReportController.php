@@ -6,16 +6,20 @@ use App\Contracts\Services\ReportServiceInterface;
 use App\Models\Report;
 use Illuminate\Http\Request;
 
-class ReportController extends Controller
+/**
+ * Report Controller
+ *
+ * Handles Report operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class ReportController extends AbstractBaseCrudController
 {
-    /**
-     * Create a new controller instance.
-     */
     public function __construct(
         private ReportServiceInterface $reportService
     ) {
-        $this->middleware('auth');
-        $this->middleware('permission:report-list', ['only' => ['index']]);
+        $this->setupCustomPermissionMiddleware([
+            ['permission' => 'report-list', 'only' => ['index']]
+        ]);
     }
 
 

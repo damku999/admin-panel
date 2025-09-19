@@ -7,20 +7,22 @@ use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-class RolesController extends Controller
+/**
+ * Roles Controller
+ *
+ * Handles Role CRUD operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class RolesController extends AbstractBaseCrudController
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
-        $this->middleware('auth');
-        $this->middleware('permission:role-list|role-create|role-edit|role-delete', ['only' => ['index']]);
-        $this->middleware('permission:role-create', ['only' => ['create','store']]);
-        $this->middleware('permission:role-edit', ['only' => ['edit','update']]);
-        $this->middleware('permission:role-delete', ['only' => ['destroy']]);
+        $this->setupCustomPermissionMiddleware([
+            ['permission' => 'role-list|role-create|role-edit|role-delete', 'only' => ['index']],
+            ['permission' => 'role-create', 'only' => ['create','store']],
+            ['permission' => 'role-edit', 'only' => ['edit','update']],
+            ['permission' => 'role-delete', 'only' => ['destroy']]
+        ]);
     }
 
     /**
@@ -57,22 +59,23 @@ class RolesController extends Controller
      */
     public function store(Request $request)
     {
-        DB::beginTransaction();
         try {
             $request->validate([
                 'name' => 'required',
                 'guard_name' => 'required'
             ]);
 
+            DB::beginTransaction();
             Role::create($request->all());
-
             DB::commit();
-            return redirect()->back()->with('success', 'Roles created successfully.');
+
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('Role', 'created'));
         } catch (\Throwable $th) {
             DB::rollback();
-            return redirect()->route('roles.index')->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Role', 'create') . ': ' . $th->getMessage());
         }
-
     }
 
     /**
@@ -110,17 +113,14 @@ class RolesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        DB::beginTransaction();
         try {
-
-            // Validate Request
             $request->validate([
                 'name' => 'required',
                 'guard_name' => 'required'
             ]);
 
+            DB::beginTransaction();
             $role = Role::whereId($id)->first();
-
             $role->name = $request->name;
             $role->guard_name = $request->guard_name;
             $role->save();
@@ -128,12 +128,14 @@ class RolesController extends Controller
             // Sync Permissions
             $permissions = $request->permissions;
             $role->syncPermissions($permissions);
-
             DB::commit();
-            return redirect()->back()->with('success', 'Roles updated successfully.');
+
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('Role', 'updated'));
         } catch (\Throwable $th) {
             DB::rollback();
-            return redirect()->route('roles.edit', ['role' => $role])->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Role', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -145,16 +147,17 @@ class RolesController extends Controller
      */
     public function destroy($id)
     {
-        DB::beginTransaction();
         try {
-
+            DB::beginTransaction();
             Role::whereId($id)->delete();
-
             DB::commit();
-            return redirect()->back()->with('success', 'Roles deleted successfully.');
+
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('Role', 'deleted'));
         } catch (\Throwable $th) {
             DB::rollback();
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Role', 'delete') . ': ' . $th->getMessage());
         }
     }
 }

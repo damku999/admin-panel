@@ -3,25 +3,15 @@
 namespace App\Contracts\Repositories;
 
 use App\Models\InsuranceCompany;
-use Illuminate\Http\Request;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
 
-interface InsuranceCompanyRepositoryInterface
+/**
+ * Insurance Company Repository Interface
+ *
+ * Extends base repository functionality for InsuranceCompany-specific operations.
+ * Common CRUD operations are inherited from BaseRepositoryInterface.
+ */
+interface InsuranceCompanyRepositoryInterface extends BaseRepositoryInterface
 {
-    public function getPaginated(Request $request, int $perPage = 10): LengthAwarePaginator;
-    
-    public function create(array $data): InsuranceCompany;
-    
-    public function update(InsuranceCompany $insuranceCompany, array $data): InsuranceCompany;
-    
-    public function delete(InsuranceCompany $insuranceCompany): bool;
-    
-    public function findById(int $id): ?InsuranceCompany;
-    
-    public function updateStatus(int $id, int $status): bool;
-    
-    public function getActive(): Collection;
-    
-    public function getAllForExport(): Collection;
+    // All common methods inherited from BaseRepositoryInterface
+    // Add insurance-company-specific methods here if needed in the future
 }

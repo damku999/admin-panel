@@ -9,19 +9,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
-class FuelTypeController extends Controller
+/**
+ * Fuel Type Controller
+ *
+ * Handles FuelType CRUD operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class FuelTypeController extends AbstractBaseCrudController
 {
-    /**
-     * Create a new controller instance.
-     * @return void
-     */
     public function __construct()
     {
-        $this->middleware('auth');
-        $this->middleware('permission:fuel-type-list|fuel-type-create|fuel-type-edit|fuel-type-delete', ['only' => ['index']]);
-        $this->middleware('permission:fuel-type-create', ['only' => ['create', 'store', 'updateStatus']]);
-        $this->middleware('permission:fuel-type-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:fuel-type-delete', ['only' => ['delete']]);
+        $this->setupPermissionMiddleware('fuel-type');
     }
 
     /**
@@ -76,11 +74,11 @@ class FuelTypeController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('fuel_type.index')->with('success', 'Fuel Type Created Successfully.');
+            return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type', 'created'));
         } catch (\Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'create') . ': ' . $th->getMessage());
         }
     }
 
@@ -103,17 +101,17 @@ class FuelTypeController extends Controller
 
         // If Validations Fails
         if ($validate->fails()) {
-            return redirect()->back()->with('error', $validate->errors()->first());
+            return $this->redirectWithError($validate->errors()->first());
         }
 
         try {
             DB::beginTransaction();
             FuelType::whereId($fuel_type_id)->update(['status' => $status]);
             DB::commit();
-            return redirect()->back()->with('success', 'Fuel Type Status Updated Successfully!');
+            return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type Status', 'updated'));
         } catch (\Throwable $th) {
             DB::rollBack();
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Fuel Type Status', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -150,10 +148,10 @@ class FuelTypeController extends Controller
                 'name' => $request->name,
             ]);
             DB::commit();
-            return redirect()->back()->with('success', 'Fuel Type Updated Successfully.');
+            return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type', 'updated'));
         } catch (\Throwable $th) {
             DB::rollBack();
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -169,10 +167,10 @@ class FuelTypeController extends Controller
         try {
             FuelType::whereId($fuel_type->id)->delete();
             DB::commit();
-            return redirect()->back()->with('success', 'Fuel Type Deleted Successfully!.');
+            return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type', 'deleted'));
         } catch (\Throwable $th) {
             DB::rollBack();
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'delete') . ': ' . $th->getMessage());
         }
     }
 

@@ -13,15 +13,23 @@ use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ClaimsExport;
 
-class ClaimController extends Controller
+/**
+ * Claim Controller
+ *
+ * Handles Claim CRUD operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class ClaimController extends AbstractBaseCrudController
 {
     public function __construct(private ClaimService $claimService)
     {
         $this->middleware('auth:web'); // Explicitly use web guard for admin
-        $this->middleware('permission:claim-list|claim-create|claim-edit|claim-delete', ['only' => ['index']]);
-        $this->middleware('permission:claim-create', ['only' => ['create', 'store', 'updateStatus']]);
-        $this->middleware('permission:claim-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:claim-delete', ['only' => ['delete']]);
+        $this->setupCustomPermissionMiddleware([
+            ['permission' => 'claim-list|claim-create|claim-edit|claim-delete', 'only' => ['index']],
+            ['permission' => 'claim-create', 'only' => ['create', 'store', 'updateStatus']],
+            ['permission' => 'claim-edit', 'only' => ['edit', 'update']],
+            ['permission' => 'claim-delete', 'only' => ['delete']]
+        ]);
     }
 
     /**
@@ -129,7 +137,7 @@ class ClaimController extends Controller
                                ->with('success', 'Claim updated successfully.');
             }
 
-            return redirect()->back()->with('error', 'Failed to update claim.');
+            return $this->redirectWithError($this->getErrorMessage('Claim', 'update'));
         } catch (\Throwable $th) {
             return redirect()->back()
                            ->withInput()
@@ -146,12 +154,12 @@ class ClaimController extends Controller
             $updated = $this->claimService->updateClaimStatus($claimId, (bool) $status);
 
             if ($updated) {
-                return redirect()->back()->with('success', 'Claim status updated successfully!');
+                return $this->redirectWithSuccess('claims.index', $this->getSuccessMessage('Claim Status', 'updated'));
             }
 
-            return redirect()->back()->with('error', 'Failed to update claim status.');
+            return $this->redirectWithError($this->getErrorMessage('Claim Status', 'update'));
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Failed to update claim status: ' . $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Claim Status', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -164,12 +172,12 @@ class ClaimController extends Controller
             $deleted = $this->claimService->deleteClaim($claim);
 
             if ($deleted) {
-                return redirect()->back()->with('success', 'Claim deleted successfully!');
+                return $this->redirectWithSuccess('claims.index', $this->getSuccessMessage('Claim', 'deleted'));
             }
 
-            return redirect()->back()->with('error', 'Failed to delete claim.');
+            return $this->redirectWithError($this->getErrorMessage('Claim', 'delete'));
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Failed to delete claim: ' . $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Claim', 'delete') . ': ' . $th->getMessage());
         }
     }
 
@@ -181,7 +189,7 @@ class ClaimController extends Controller
         try {
             return Excel::download(new ClaimsExport($request->all()), 'claims.xlsx');
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Failed to export claims: ' . $th->getMessage());
+            return $this->redirectWithError('Failed to export claims: ' . $th->getMessage());
         }
     }
 

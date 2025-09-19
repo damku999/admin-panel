@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\{Carbon, Facades\DB, Facades\Storage};
 use Maatwebsite\Excel\Facades\Excel;
 
-class CustomerInsuranceService implements CustomerInsuranceServiceInterface
+class CustomerInsuranceService extends BaseService implements CustomerInsuranceServiceInterface
 {
     use WhatsAppApiTrait;
     
@@ -303,72 +303,48 @@ class CustomerInsuranceService implements CustomerInsuranceServiceInterface
 
     public function createCustomerInsurance(array $data): CustomerInsurance
     {
-        DB::beginTransaction();
-        try {
+        return $this->createInTransaction(function () use ($data) {
             // Calculate commission breakdown
             $data = $this->calculateCommissionFields($data);
-            
-            $customerInsurance = $this->customerInsuranceRepository->create($data);
-            
-            DB::commit();
-            return $customerInsurance;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+
+            return $this->customerInsuranceRepository->create($data);
+        });
     }
     
     public function updateCustomerInsurance(CustomerInsurance $customerInsurance, array $data): CustomerInsurance
     {
-        DB::beginTransaction();
-        try {
+        return $this->updateInTransaction(function () use ($customerInsurance, $data) {
             // Calculate commission breakdown
             $data = $this->calculateCommissionFields($data);
-            
+
             $updatedCustomerInsurance = $this->customerInsuranceRepository->update($customerInsurance, $data);
-            
+
             // Handle policy document upload if present
             if (isset($data['policy_document']) && $data['policy_document']) {
                 $this->handlePolicyDocument($updatedCustomerInsurance, $data['policy_document']);
             }
-            
-            DB::commit();
+
             return $updatedCustomerInsurance;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        });
     }
     
     public function deleteCustomerInsurance(CustomerInsurance $customerInsurance): bool
     {
-        DB::beginTransaction();
-        try {
+        return $this->deleteInTransaction(function () use ($customerInsurance) {
             // Delete policy document if exists
             if ($customerInsurance->policy_document_path && Storage::exists($customerInsurance->policy_document_path)) {
                 Storage::delete($customerInsurance->policy_document_path);
             }
-            
-            $result = $this->customerInsuranceRepository->delete($customerInsurance);
-            DB::commit();
-            return $result;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+
+            return $this->customerInsuranceRepository->delete($customerInsurance);
+        });
     }
     
     public function updateStatus(int $customerInsuranceId, int $status): bool
     {
-        DB::beginTransaction();
-        try {
-            $result = $this->customerInsuranceRepository->updateStatus($customerInsuranceId, $status);
-            DB::commit();
-            return $result;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        return $this->executeInTransaction(
+            fn() => $this->customerInsuranceRepository->updateStatus($customerInsuranceId, $status)
+        );
     }
     
     public function handleFileUpload(Request $request, CustomerInsurance $customerInsurance): void
@@ -511,15 +487,14 @@ class CustomerInsuranceService implements CustomerInsuranceServiceInterface
 
     public function renewPolicy(CustomerInsurance $customerInsurance, array $data): CustomerInsurance
     {
-        DB::beginTransaction();
-        try {
+        return $this->executeInTransaction(function () use ($customerInsurance, $data) {
             // Calculate commission breakdown for renewal data
             $data = $this->calculateCommissionFields($data);
-            
+
             // Create new policy record for renewal
             $renewalData = $this->prepareRenewalStorageData($data);
             $newPolicy = $this->customerInsuranceRepository->create($renewalData);
-            
+
             // Mark original policy as renewed
             $this->customerInsuranceRepository->update($customerInsurance, [
                 'status' => 0,
@@ -527,13 +502,9 @@ class CustomerInsuranceService implements CustomerInsuranceServiceInterface
                 'renewed_date' => Carbon::now(),
                 'new_insurance_id' => $newPolicy->id
             ]);
-            
-            DB::commit();
+
             return $newPolicy;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        });
     }
     
     public function exportCustomerInsurances(): \Symfony\Component\HttpFoundation\BinaryFileResponse

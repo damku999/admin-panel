@@ -3,40 +3,20 @@
 namespace App\Contracts\Repositories;
 
 use App\Models\Quotation;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
-interface QuotationRepositoryInterface
+/**
+ * Quotation Repository Interface
+ *
+ * Extends base repository functionality for Quotation-specific operations.
+ * Common CRUD operations are inherited from BaseRepositoryInterface.
+ */
+interface QuotationRepositoryInterface extends BaseRepositoryInterface
 {
     /**
      * Get all quotations with optional filters.
      */
     public function getAll(array $filters = []): Collection;
-
-    /**
-     * Get paginated quotations with search and filters.
-     */
-    public function getPaginated(array $filters = [], int $perPage = 15): LengthAwarePaginator;
-
-    /**
-     * Find quotation by ID with relationships.
-     */
-    public function findById(int $id): ?Quotation;
-
-    /**
-     * Create a new quotation.
-     */
-    public function create(array $data): Quotation;
-
-    /**
-     * Update quotation by ID.
-     */
-    public function update(int $id, array $data): bool;
-
-    /**
-     * Delete quotation by ID.
-     */
-    public function delete(int $id): bool;
 
     /**
      * Get quotations by customer ID.

@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class PolicyService implements PolicyServiceInterface
+class PolicyService extends BaseService implements PolicyServiceInterface
 {
     use WhatsAppApiTrait;
 
@@ -39,37 +39,16 @@ class PolicyService implements PolicyServiceInterface
 
     public function createPolicy(array $data): CustomerInsurance
     {
-        DB::beginTransaction();
-
-        try {
-            $policy = $this->policyRepository->create($data);
-            DB::commit();
-            
-            return $policy;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        return $this->createInTransaction(
+            fn() => $this->policyRepository->create($data)
+        );
     }
 
     public function updatePolicy(CustomerInsurance $policy, array $data): bool
     {
-        DB::beginTransaction();
-
-        try {
-            $updated = $this->policyRepository->update($policy->id, $data);
-            
-            if ($updated) {
-                DB::commit();
-                return true;
-            }
-
-            DB::rollBack();
-            return false;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        return $this->updateInTransaction(
+            fn() => $this->policyRepository->update($policy->id, $data)
+        );
     }
 
     public function getCustomerPolicies(Customer $customer): Collection
@@ -189,22 +168,9 @@ class PolicyService implements PolicyServiceInterface
      */
     public function deletePolicy(CustomerInsurance $policy): bool
     {
-        DB::beginTransaction();
-
-        try {
-            $deleted = $this->policyRepository->delete($policy->id);
-            
-            if ($deleted) {
-                DB::commit();
-                return true;
-            }
-
-            DB::rollBack();
-            return false;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        return $this->deleteInTransaction(
+            fn() => $this->policyRepository->delete($policy->id)
+        );
     }
 
     /**

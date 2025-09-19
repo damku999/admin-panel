@@ -9,15 +9,17 @@ use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\BranchesExport;
 
-class BranchController extends Controller
+/**
+ * Branch Controller
+ *
+ * Handles Branch CRUD operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class BranchController extends AbstractBaseCrudController
 {
     public function __construct()
     {
-        $this->middleware('auth');
-        $this->middleware('permission:branch-list|branch-create|branch-edit|branch-delete', ['only' => ['index']]);
-        $this->middleware('permission:branch-create', ['only' => ['create', 'store', 'updateStatus']]);
-        $this->middleware('permission:branch-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:branch-delete', ['only' => ['delete']]);
+        $this->setupPermissionMiddleware('branch');
     }
 
     /**
@@ -67,7 +69,7 @@ class BranchController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        return redirect()->route('branches.index')->with('success', 'Branch created successfully.');
+        return $this->redirectWithSuccess('branches.index', $this->getSuccessMessage('Branch', 'created'));
     }
 
     /**
@@ -101,7 +103,7 @@ class BranchController extends Controller
             'updated_by' => auth()->id(),
         ]);
 
-        return redirect()->route('branches.index')->with('success', 'Branch updated successfully.');
+        return $this->redirectWithSuccess('branches.index', $this->getSuccessMessage('Branch', 'updated'));
     }
 
     /**
@@ -119,7 +121,7 @@ class BranchController extends Controller
         ]);
 
         $message = $status == 1 ? 'Branch activated successfully.' : 'Branch deactivated successfully.';
-        return redirect()->route('branches.index')->with('success', $message);
+        return $this->redirectWithSuccess('branches.index', $message);
     }
 
     /**

@@ -62,11 +62,14 @@ class AddonCoverController extends AbstractBaseCrudController
                 'order_no' => $request->order_no,
                 'status' => $request->has('status') ? 1 : 0,
             ];
-            
+
             $this->addonCoverService->createAddonCover($data);
-            return redirect()->route('addon-covers.index')->with('success', 'Add-on Cover Created Successfully.');
+            return $this->redirectWithSuccess('addon-covers.index',
+                $this->getSuccessMessage('Add-on Cover', 'created'));
         } catch (\Throwable $th) {
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Add-on Cover', 'create') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -87,14 +90,16 @@ class AddonCoverController extends AbstractBaseCrudController
         ]);
 
         if ($validate->fails()) {
-            return redirect()->back()->with('error', $validate->errors()->first());
+            return $this->redirectWithError($validate->errors()->first());
         }
 
         try {
             $this->addonCoverService->updateStatus($addon_cover_id, $status);
-            return redirect()->back()->with('success', 'Add-on Cover Status Updated Successfully!');
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('Add-on Cover status', 'updated'));
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Add-on Cover status', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -129,11 +134,14 @@ class AddonCoverController extends AbstractBaseCrudController
                 'order_no' => $request->order_no,
                 'status' => $request->has('status') ? 1 : 0,
             ];
-            
+
             $this->addonCoverService->updateAddonCover($addon_cover, $data);
-            return redirect()->route('addon-covers.index')->with('success', 'Add-on Cover Updated Successfully.');
+            return $this->redirectWithSuccess('addon-covers.index',
+                $this->getSuccessMessage('Add-on Cover', 'updated'));
         } catch (\Throwable $th) {
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Add-on Cover', 'update') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -147,9 +155,11 @@ class AddonCoverController extends AbstractBaseCrudController
     {
         try {
             $this->addonCoverService->deleteAddonCover($addon_cover);
-            return redirect()->back()->with('success', 'Add-on Cover Deleted Successfully!.');
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('Add-on Cover', 'deleted'));
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Add-on Cover', 'delete') . ': ' . $th->getMessage());
         }
     }
 

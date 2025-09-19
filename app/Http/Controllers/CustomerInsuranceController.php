@@ -9,21 +9,25 @@ use App\Traits\WhatsAppApiTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class CustomerInsuranceController extends Controller
+/**
+ * Customer Insurance Controller
+ *
+ * Handles CustomerInsurance CRUD operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class CustomerInsuranceController extends AbstractBaseCrudController
 {
     use WhatsAppApiTrait;
 
-    /**
-     * Create a new controller instance.
-     */
     public function __construct(
         private CustomerInsuranceServiceInterface $customerInsuranceService
     ) {
-        $this->middleware('auth');
-        $this->middleware('permission:customer-insurance-list|customer-insurance-create|customer-insurance-edit|customer-insurance-delete', ['only' => ['index']]);
-        $this->middleware('permission:customer-insurance-create', ['only' => ['create', 'store', 'updateStatus']]);
-        $this->middleware('permission:customer-insurance-edit', ['only' => ['edit', 'update', 'renew', 'storeRenew']]);
-        $this->middleware('permission:customer-insurance-delete', ['only' => ['delete']]);
+        $this->setupCustomPermissionMiddleware([
+            ['permission' => 'customer-insurance-list|customer-insurance-create|customer-insurance-edit|customer-insurance-delete', 'only' => ['index']],
+            ['permission' => 'customer-insurance-create', 'only' => ['create', 'store', 'updateStatus']],
+            ['permission' => 'customer-insurance-edit', 'only' => ['edit', 'update', 'renew', 'storeRenew']],
+            ['permission' => 'customer-insurance-delete', 'only' => ['delete']]
+        ]);
     }
 
     /**
@@ -80,9 +84,9 @@ class CustomerInsuranceController extends Controller
                 $this->customerInsuranceService->sendWhatsAppDocument($customer_insurance);
             }
 
-            return redirect()->route('customer_insurances.index')->with('success', 'Customer Insurance Created Successfully.');
+            return $this->redirectWithSuccess('customer_insurances.index', $this->getSuccessMessage('Customer Insurance', 'created'));
         } catch (\Throwable $th) {
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Customer Insurance', 'create') . ': ' . $th->getMessage());
         }
     }
 
@@ -105,14 +109,14 @@ class CustomerInsuranceController extends Controller
         ]);
 
         if ($validate->fails()) {
-            return redirect()->back()->with('error', $validate->errors()->first());
+            return $this->redirectWithError($validate->errors()->first());
         }
 
         try {
             $this->customerInsuranceService->updateStatus($customer_insurance_id, $status);
-            return redirect()->back()->with('success', 'CustomerInsurance Status Updated Successfully!');
+            return $this->redirectWithSuccess('customer_insurances.index', $this->getSuccessMessage('Customer Insurance Status', 'updated'));
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Customer Insurance', 'operation') . ': ' . $th->getMessage());
         }
     }
 
@@ -142,12 +146,12 @@ class CustomerInsuranceController extends Controller
             $sent = $this->customerInsuranceService->sendWhatsAppDocument($customer_insurance);
             
             if ($sent) {
-                return redirect()->back()->with('success', 'Document Sent Successfully!');
+                return $this->redirectWithSuccess('customer_insurances.index', 'Document Sent Successfully!');
             } else {
-                return redirect()->back()->with('error', 'Document Not Sent!');
+                return $this->redirectWithError('Document Not Sent!');
             }
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Customer Insurance', 'operation') . ': ' . $th->getMessage());
         }
     }
 
@@ -160,9 +164,9 @@ class CustomerInsuranceController extends Controller
     {
         try {
             $this->customerInsuranceService->sendRenewalReminderWhatsApp($customer_insurance);
-            return redirect()->back()->with('success', 'Renewal Reminder Sent Successfully!');
+            return $this->redirectWithSuccess('customer_insurances.index', 'Renewal Reminder Sent Successfully!');
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Customer Insurance', 'operation') . ': ' . $th->getMessage());
         }
     }
 
@@ -185,9 +189,9 @@ class CustomerInsuranceController extends Controller
             // Handle file uploads
             $this->customerInsuranceService->handleFileUpload($request, $customer_insurance);
 
-            return redirect()->back()->with('success', 'CustomerInsurance Updated Successfully.');
+            return $this->redirectWithSuccess('customer_insurances.index', $this->getSuccessMessage('Customer Insurance', 'updated'));
         } catch (\Throwable $th) {
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Customer Insurance', 'create') . ': ' . $th->getMessage());
         }
     }
 
@@ -201,9 +205,9 @@ class CustomerInsuranceController extends Controller
     {
         try {
             $this->customerInsuranceService->deleteCustomerInsurance($customer_insurance);
-            return redirect()->back()->with('success', 'CustomerInsurance Deleted Successfully!.');
+            return $this->redirectWithSuccess('customer_insurances.index', $this->getSuccessMessage('Customer Insurance', 'deleted'));
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Customer Insurance', 'operation') . ': ' . $th->getMessage());
         }
     }
 
@@ -263,9 +267,9 @@ class CustomerInsuranceController extends Controller
                 $this->customerInsuranceService->sendWhatsAppDocument($renewedPolicy);
             }
 
-            return redirect()->route('customer_insurances.index')->with('success', 'Customer Insurance Renewed Successfully.');
+            return $this->redirectWithSuccess('customer_insurances.index', $this->getSuccessMessage('Customer Insurance', 'renewed'));
         } catch (\Throwable $th) {
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Customer Insurance', 'create') . ': ' . $th->getMessage());
         }
     }
 }

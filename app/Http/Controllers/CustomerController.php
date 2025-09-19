@@ -12,15 +12,17 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 
-class CustomerController extends Controller
+/**
+ * Customer Controller
+ *
+ * Handles Customer CRUD operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class CustomerController extends AbstractBaseCrudController
 {
     public function __construct(private CustomerServiceInterface $customerService)
     {
-        $this->middleware('auth');
-        $this->middleware('permission:customer-list|customer-create|customer-edit|customer-delete', ['only' => ['index']]);
-        $this->middleware('permission:customer-create', ['only' => ['create', 'store', 'updateStatus']]);
-        $this->middleware('permission:customer-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:customer-delete', ['only' => ['delete']]);
+        $this->setupPermissionMiddleware('customer');
     }
 
     /**
@@ -81,9 +83,12 @@ class CustomerController extends Controller
     {
         try {
             $customer = $this->customerService->createCustomer($request);
-            return redirect()->route('customers.index')->with('success', 'Customer Created Successfully.');
+            return $this->redirectWithSuccess('customers.index',
+                $this->getSuccessMessage('Customer', 'created'));
         } catch (\Throwable $th) {
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Customer', 'create') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -100,12 +105,14 @@ class CustomerController extends Controller
             $updated = $this->customerService->updateCustomerStatus($customer_id, $status);
             
             if ($updated) {
-                return redirect()->back()->with('success', 'Customer Status Updated Successfully!');
+                return redirect()->back()->with('success',
+                    $this->getSuccessMessage('Customer status', 'updated'));
             }
-            
-            return redirect()->back()->with('error', 'Failed to update customer status.');
+
+            return $this->redirectWithError('Failed to update customer status.');
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Customer status', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -135,12 +142,15 @@ class CustomerController extends Controller
             $updated = $this->customerService->updateCustomer($request, $customer);
             
             if ($updated) {
-                return redirect()->back()->with('success', 'Customer Updated Successfully.');
+                return redirect()->back()->with('success',
+                    $this->getSuccessMessage('Customer', 'updated'));
             }
-            
-            return redirect()->back()->with('error', 'Failed to update customer.');
+
+            return $this->redirectWithError('Failed to update customer.');
         } catch (\Throwable $th) {
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Customer', 'update') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -156,12 +166,14 @@ class CustomerController extends Controller
             $deleted = $this->customerService->deleteCustomer($customer);
             
             if ($deleted) {
-                return redirect()->back()->with('success', 'Customer Deleted Successfully!');
+                return redirect()->back()->with('success',
+                    $this->getSuccessMessage('Customer', 'deleted'));
             }
-            
-            return redirect()->back()->with('error', 'Failed to delete customer.');
+
+            return $this->redirectWithError('Failed to delete customer.');
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError(
+                $this->getErrorMessage('Customer', 'delete') . ': ' . $th->getMessage());
         }
     }
 
@@ -185,10 +197,11 @@ class CustomerController extends Controller
         $sent = $this->customerService->sendOnboardingMessage($customer);
         
         if ($sent) {
-            return redirect()->back()->with('success', 'Onboarding Message Sent Successfully!');
+            return redirect()->back()->with('success',
+                $this->getSuccessMessage('Onboarding message', 'sent'));
         }
-        
-        return redirect()->back()->with('error', 'Failed to send onboarding message.');
+
+        return $this->redirectWithError('Failed to send onboarding message.');
     }
 
 }

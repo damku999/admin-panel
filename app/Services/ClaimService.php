@@ -9,10 +9,15 @@ use App\Models\CustomerInsurance;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class ClaimService
+/**
+ * Claim Service
+ *
+ * Handles Claim business logic including document and stage management.
+ * Inherits transaction management from BaseService.
+ */
+class ClaimService extends BaseService
 {
     /**
      * Get paginated list of claims with filters and search.
@@ -88,9 +93,7 @@ class ClaimService
      */
     public function createClaim(StoreClaimRequest $request): Claim
     {
-        try {
-            DB::beginTransaction();
-
+        return $this->createInTransaction(function () use ($request) {
             // Get customer insurance details
             $customerInsurance = CustomerInsurance::with('customer')->findOrFail($request->customer_insurance_id);
 
@@ -121,9 +124,7 @@ class ClaimService
                 'notes' => 'Initial liability detail record created',
             ]);
 
-            DB::commit();
-
-            // Send email notification if enabled
+            // Send email notification if enabled (after transaction)
             $claim->sendClaimCreatedNotification();
 
             Log::info('Claim created successfully', [
@@ -134,16 +135,7 @@ class ClaimService
             ]);
 
             return $claim;
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to create claim', [
-                'error' => $e->getMessage(),
-                'request_data' => $request->validated(),
-                'user_id' => auth()->id(),
-            ]);
-            throw $e;
-        }
+        });
     }
 
     /**
@@ -151,9 +143,7 @@ class ClaimService
      */
     public function updateClaim(UpdateClaimRequest $request, Claim $claim): bool
     {
-        try {
-            DB::beginTransaction();
-
+        return $this->updateInTransaction(function () use ($request, $claim) {
             // Get customer insurance details if changed
             if ($request->customer_insurance_id !== $claim->customer_insurance_id) {
                 $customerInsurance = CustomerInsurance::with('customer')->findOrFail($request->customer_insurance_id);
@@ -176,8 +166,6 @@ class ClaimService
                 $claim->liabilityDetail->update(['claim_type' => $newClaimType]);
             }
 
-            DB::commit();
-
             if ($updated) {
                 Log::info('Claim updated successfully', [
                     'claim_id' => $claim->id,
@@ -187,17 +175,7 @@ class ClaimService
             }
 
             return $updated;
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Failed to update claim', [
-                'claim_id' => $claim->id,
-                'error' => $e->getMessage(),
-                'request_data' => $request->validated(),
-                'user_id' => auth()->id(),
-            ]);
-            throw $e;
-        }
+        });
     }
 
     /**

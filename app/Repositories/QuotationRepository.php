@@ -6,9 +6,22 @@ use App\Contracts\Repositories\QuotationRepositoryInterface;
 use App\Models\Quotation;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 
-class QuotationRepository implements QuotationRepositoryInterface
+/**
+ * Quotation Repository
+ *
+ * Extends base repository functionality for Quotation-specific operations.
+ * Common CRUD operations are inherited from AbstractBaseRepository.
+ */
+class QuotationRepository extends AbstractBaseRepository implements QuotationRepositoryInterface
 {
+    protected string $modelClass = Quotation::class;
+    protected array $searchableFields = ['vehicle_number', 'make_model_variant'];
+
+    /**
+     * Get all quotations with optional filters.
+     */
     public function getAll(array $filters = []): Collection
     {
         $query = Quotation::with(['customer', 'quotationCompanies.insuranceCompany']);
@@ -24,8 +37,12 @@ class QuotationRepository implements QuotationRepositoryInterface
         return $query->latest()->get();
     }
 
-    public function getPaginated(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    /**
+     * Override base getPaginated to support complex filtering with relationships
+     */
+    public function getPaginated(Request $request, int $perPage = 10): LengthAwarePaginator
     {
+        $filters = $request->all();
         $query = Quotation::with(['customer', 'quotationCompanies.insuranceCompany']);
 
         // Search filter
@@ -54,25 +71,35 @@ class QuotationRepository implements QuotationRepositoryInterface
         return $query->latest()->paginate($perPage);
     }
 
-    public function findById(int $id): ?Quotation
+    /**
+     * Override findById to include relationships
+     */
+    public function findById(int $id)
     {
         return Quotation::with(['customer', 'quotationCompanies.insuranceCompany'])
                        ->find($id);
     }
 
-    public function create(array $data): Quotation
+    /**
+     * Override update method to match interface signature
+     */
+    public function update($entity, array $data)
     {
-        return Quotation::create($data);
+        if (is_int($entity)) {
+            return Quotation::whereId($entity)->update($data);
+        }
+        return parent::update($entity, $data);
     }
 
-    public function update(int $id, array $data): bool
+    /**
+     * Override delete method to match interface signature
+     */
+    public function delete($entity): bool
     {
-        return Quotation::whereId($id)->update($data);
-    }
-
-    public function delete(int $id): bool
-    {
-        return Quotation::whereId($id)->delete();
+        if (is_int($entity)) {
+            return Quotation::whereId($entity)->delete();
+        }
+        return parent::delete($entity);
     }
 
     public function getByCustomer(int $customerId): Collection

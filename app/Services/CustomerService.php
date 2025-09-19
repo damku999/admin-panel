@@ -17,7 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
-class CustomerService implements CustomerServiceInterface
+class CustomerService extends BaseService implements CustomerServiceInterface
 {
     use WhatsAppApiTrait;
 
@@ -49,9 +49,7 @@ class CustomerService implements CustomerServiceInterface
             throw new \Exception('A customer with this email address already exists. Please use a different email address.');
         }
 
-        DB::beginTransaction();
-
-        try {
+        return $this->createInTransaction(function () use ($request) {
             // Create customer with validated data
             $customer = $this->customerRepository->create([
                 'name' => $request->name,
@@ -81,15 +79,13 @@ class CustomerService implements CustomerServiceInterface
                     'customer_email' => $customer->email,
                     'error' => $emailError->getMessage()
                 ]);
-                
+
                 // Delete the customer record if it was created
                 $customer->delete();
-                
+
                 // Re-throw to trigger transaction rollback
                 throw new \Exception('Customer registration failed: Unable to send welcome email to ' . $customer->email . '. Please verify the email address and try again.');
             }
-
-            DB::commit();
 
             // Fire other events for async processing (audit logs, admin notifications)
             // These are non-critical and won't rollback the transaction
@@ -111,17 +107,12 @@ class CustomerService implements CustomerServiceInterface
             }
 
             return $customer;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        });
     }
 
     public function updateCustomer(UpdateCustomerRequest $request, Customer $customer): bool
     {
-        DB::beginTransaction();
-
-        try {
+        return $this->updateInTransaction(function () use ($request, $customer) {
             // Capture original values for change tracking
             $originalValues = $customer->only([
                 'name', 'email', 'mobile_number', 'status', 'type',
@@ -148,7 +139,6 @@ class CustomerService implements CustomerServiceInterface
             if ($updated) {
                 // Handle document uploads
                 $this->handleCustomerDocuments($request, $customer);
-                DB::commit();
 
                 // Identify changed fields
                 $changedFields = [];
@@ -170,12 +160,8 @@ class CustomerService implements CustomerServiceInterface
                 return true;
             }
 
-            DB::rollBack();
             return false;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        });
     }
 
     public function updateCustomerStatus(int $customerId, int $status): bool
@@ -193,42 +179,16 @@ class CustomerService implements CustomerServiceInterface
             throw new \InvalidArgumentException($validate->errors()->first());
         }
 
-        DB::beginTransaction();
-
-        try {
-            $updated = $this->customerRepository->updateStatus($customerId, $status);
-            
-            if ($updated) {
-                DB::commit();
-                return true;
-            }
-
-            DB::rollBack();
-            return false;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        return $this->executeInTransaction(
+            fn() => $this->customerRepository->updateStatus($customerId, $status)
+        );
     }
 
     public function deleteCustomer(Customer $customer): bool
     {
-        DB::beginTransaction();
-
-        try {
-            $deleted = $this->customerRepository->delete($customer->id);
-            
-            if ($deleted) {
-                DB::commit();
-                return true;
-            }
-
-            DB::rollBack();
-            return false;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        return $this->deleteInTransaction(
+            fn() => $this->customerRepository->delete($customer->id)
+        );
     }
 
     public function handleCustomerDocuments(StoreCustomerRequest|UpdateCustomerRequest $request, Customer $customer): void

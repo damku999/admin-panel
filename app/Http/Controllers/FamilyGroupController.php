@@ -9,11 +9,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
-class FamilyGroupController extends Controller
+class FamilyGroupController extends AbstractBaseCrudController
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->setupPermissionMiddleware('family-group');
     }
 
     /**

@@ -6,9 +6,22 @@ use App\Contracts\Repositories\CustomerRepositoryInterface;
 use App\Models\Customer;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 
-class CustomerRepository implements CustomerRepositoryInterface
+/**
+ * Customer Repository
+ *
+ * Extends base repository functionality for Customer-specific operations.
+ * Common CRUD operations are inherited from AbstractBaseRepository.
+ */
+class CustomerRepository extends AbstractBaseRepository implements CustomerRepositoryInterface
 {
+    protected string $modelClass = Customer::class;
+    protected array $searchableFields = ['name', 'email', 'mobile_number'];
+
+    /**
+     * Get all customers with optional filters.
+     */
     public function getAll(array $filters = []): Collection
     {
         $query = Customer::query();
@@ -28,9 +41,13 @@ class CustomerRepository implements CustomerRepositoryInterface
         return $query->get();
     }
 
-    public function getPaginated(array $filters = [], int $perPage = 10): LengthAwarePaginator
+    /**
+     * Override base getPaginated to support advanced filtering
+     */
+    public function getPaginated(Request $request, int $perPage = 10): LengthAwarePaginator
     {
         $query = Customer::query();
+        $filters = $request->all();
 
         // Search filter
         if (!empty($filters['search'])) {
@@ -65,11 +82,6 @@ class CustomerRepository implements CustomerRepositoryInterface
         return $query->paginate($perPage);
     }
 
-    public function findById(int $id): ?Customer
-    {
-        return Customer::find($id);
-    }
-
     public function findByEmail(string $email): ?Customer
     {
         return Customer::where('email', $email)->first();
@@ -80,24 +92,26 @@ class CustomerRepository implements CustomerRepositoryInterface
         return Customer::where('mobile_number', $mobileNumber)->first();
     }
 
-    public function create(array $data): Customer
+    /**
+     * Override base update method to match interface signature
+     */
+    public function update($entity, array $data)
     {
-        return Customer::create($data);
+        if (is_int($entity)) {
+            return Customer::whereId($entity)->update($data);
+        }
+        return parent::update($entity, $data);
     }
 
-    public function update(int $id, array $data): bool
+    /**
+     * Override base delete method to match interface signature
+     */
+    public function delete($entity): bool
     {
-        return Customer::whereId($id)->update($data);
-    }
-
-    public function delete(int $id): bool
-    {
-        return Customer::whereId($id)->delete();
-    }
-
-    public function getActive(): Collection
-    {
-        return Customer::where('status', 1)->orderBy('name')->get();
+        if (is_int($entity)) {
+            return Customer::whereId($entity)->delete();
+        }
+        return parent::delete($entity);
     }
 
     public function getByFamilyGroup(int $familyGroupId): Collection
@@ -117,11 +131,6 @@ class CustomerRepository implements CustomerRepositoryInterface
                       ->orWhere('email', 'LIKE', $searchTerm)
                       ->orWhere('mobile_number', 'LIKE', $searchTerm)
                       ->get();
-    }
-
-    public function updateStatus(int $id, int $status): bool
-    {
-        return Customer::whereId($id)->update(['status' => $status]);
     }
 
     public function exists(int $id): bool

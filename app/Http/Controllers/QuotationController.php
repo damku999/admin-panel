@@ -11,18 +11,25 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
-class QuotationController extends Controller
+/**
+ * Quotation Controller
+ *
+ * Handles Quotation CRUD operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class QuotationController extends AbstractBaseCrudController
 {
     public function __construct(private QuotationServiceInterface $quotationService)
     {
-        $this->middleware('auth');
-        $this->middleware('permission:quotation-list|quotation-create|quotation-edit|quotation-delete', ['only' => ['index']]);
-        $this->middleware('permission:quotation-create', ['only' => ['create', 'store']]);
-        $this->middleware('permission:quotation-edit', ['only' => ['show', 'edit', 'update']]);
-        $this->middleware('permission:quotation-generate', ['only' => ['generateQuotes']]);
-        $this->middleware('permission:quotation-send-whatsapp', ['only' => ['sendToWhatsApp']]);
-        $this->middleware('permission:quotation-download-pdf', ['only' => ['downloadPdf']]);
-        $this->middleware('permission:quotation-delete', ['only' => ['delete']]);
+        $this->setupCustomPermissionMiddleware([
+            ['permission' => 'quotation-list|quotation-create|quotation-edit|quotation-delete', 'only' => ['index']],
+            ['permission' => 'quotation-create', 'only' => ['create', 'store']],
+            ['permission' => 'quotation-edit', 'only' => ['show', 'edit', 'update']],
+            ['permission' => 'quotation-generate', 'only' => ['generateQuotes']],
+            ['permission' => 'quotation-send-whatsapp', 'only' => ['sendToWhatsApp']],
+            ['permission' => 'quotation-download-pdf', 'only' => ['downloadPdf']],
+            ['permission' => 'quotation-delete', 'only' => ['delete']]
+        ]);
     }
 
     public function index(Request $request): View

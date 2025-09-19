@@ -10,20 +10,17 @@ use App\Exports\ReferenceUsersExport;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
-class ReferenceUsersController extends Controller
+/**
+ * Reference Users Controller
+ *
+ * Handles ReferenceUser CRUD operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class ReferenceUsersController extends AbstractBaseCrudController
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
-        $this->middleware('auth');
-        $this->middleware('permission:reference-user-list|reference-user-create|reference-user-edit|reference-user-delete', ['only' => ['index']]);
-        $this->middleware('permission:reference-user-create', ['only' => ['create', 'store', 'updateStatus']]);
-        $this->middleware('permission:reference-user-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:reference-user-delete', ['only' => ['delete']]);
+        $this->setupPermissionMiddleware('reference-user');
     }
 
     /**
@@ -84,11 +81,11 @@ class ReferenceUsersController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->route('reference_users.index')->with('success', 'ReferenceUser Created Successfully.');
+            return $this->redirectWithSuccess('reference_users.index', $this->getSuccessMessage('Reference User', 'created'));
         } catch (Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Reference User', 'create') . ': ' . $th->getMessage());
         }
     }
 
@@ -112,7 +109,7 @@ class ReferenceUsersController extends Controller
         ], $validationRules);
 
         if ($validator->fails()) {
-            return redirect()->back()->with('error', $validator->errors()->first());
+            return $this->redirectWithError($validator->errors()->first());
         }
 
         try {
@@ -123,11 +120,11 @@ class ReferenceUsersController extends Controller
 
             // Commit And Redirect on index with Success Message
             DB::commit();
-            return redirect()->back()->with('success', 'ReferenceUser Status Updated Successfully!');
+            return $this->redirectWithSuccess('reference_users.index', $this->getSuccessMessage('Reference User Status', 'updated'));
         } catch (Throwable $th) {
             // Rollback & Return Error Message
             DB::rollBack();
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Reference User Status', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -169,11 +166,11 @@ class ReferenceUsersController extends Controller
 
             // Commit And Redirected To Listing
             DB::commit();
-            return redirect()->back()->with('success', 'ReferenceUser Updated Successfully.');
+            return $this->redirectWithSuccess('reference_users.index', $this->getSuccessMessage('Reference User', 'updated'));
         } catch (Throwable $th) {
             // Rollback and return with Error
             DB::rollBack();
-            return redirect()->back()->withInput()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Reference User', 'update') . ': ' . $th->getMessage());
         }
     }
 
@@ -192,10 +189,10 @@ class ReferenceUsersController extends Controller
             $reference_user->delete();
 
             DB::commit();
-            return redirect()->back()->with('success', 'ReferenceUser Deleted Successfully!.');
+            return $this->redirectWithSuccess('reference_users.index', $this->getSuccessMessage('Reference User', 'deleted'));
         } catch (Throwable $th) {
             DB::rollBack();
-            return redirect()->back()->with('error', $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Reference User', 'delete') . ': ' . $th->getMessage());
         }
     }
 

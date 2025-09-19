@@ -10,15 +10,22 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
-class MarketingWhatsAppController extends Controller
+/**
+ * Marketing WhatsApp Controller
+ *
+ * Handles WhatsApp marketing operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class MarketingWhatsAppController extends AbstractBaseCrudController
 {
     use WhatsAppApiTrait;
 
     public function __construct(private FileUploadService $fileUploadService)
     {
-        $this->middleware('auth');
-        $this->middleware('permission:customer-list|customer-edit', ['only' => ['index', 'show']]);
-        $this->middleware('permission:customer-edit', ['only' => ['send']]);
+        $this->setupCustomPermissionMiddleware([
+            ['permission' => 'customer-list|customer-edit', 'only' => ['index', 'show']],
+            ['permission' => 'customer-edit', 'only' => ['send']]
+        ]);
     }
 
     /**

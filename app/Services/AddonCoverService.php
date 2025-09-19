@@ -9,10 +9,15 @@ use App\Models\AddonCover;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
-class AddonCoverService implements AddonCoverServiceInterface
+/**
+ * Addon Cover Service
+ *
+ * Handles AddonCover business logic operations.
+ * Inherits transaction management from BaseService.
+ */
+class AddonCoverService extends BaseService implements AddonCoverServiceInterface
 {
     public function __construct(
         private AddonCoverRepositoryInterface $addonCoverRepository
@@ -25,54 +30,30 @@ class AddonCoverService implements AddonCoverServiceInterface
     
     public function createAddonCover(array $data): AddonCover
     {
-        DB::beginTransaction();
-        try {
-            $addonCover = $this->addonCoverRepository->create($data);
-            DB::commit();
-            return $addonCover;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        return $this->createInTransaction(
+            fn() => $this->addonCoverRepository->create($data)
+        );
     }
-    
+
     public function updateAddonCover(AddonCover $addonCover, array $data): AddonCover
     {
-        DB::beginTransaction();
-        try {
-            $updatedAddonCover = $this->addonCoverRepository->update($addonCover, $data);
-            DB::commit();
-            return $updatedAddonCover;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        return $this->updateInTransaction(
+            fn() => $this->addonCoverRepository->update($addonCover, $data)
+        );
     }
-    
+
     public function deleteAddonCover(AddonCover $addonCover): bool
     {
-        DB::beginTransaction();
-        try {
-            $result = $this->addonCoverRepository->delete($addonCover);
-            DB::commit();
-            return $result;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        return $this->deleteInTransaction(
+            fn() => $this->addonCoverRepository->delete($addonCover)
+        );
     }
-    
+
     public function updateStatus(int $addonCoverId, int $status): bool
     {
-        DB::beginTransaction();
-        try {
-            $result = $this->addonCoverRepository->updateStatus($addonCoverId, $status);
-            DB::commit();
-            return $result;
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            throw $th;
-        }
+        return $this->executeInTransaction(
+            fn() => $this->addonCoverRepository->updateStatus($addonCoverId, $status)
+        );
     }
     
     public function exportAddonCovers(): \Symfony\Component\HttpFoundation\BinaryFileResponse

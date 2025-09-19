@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\PermissionRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Permission;
 
 /**
  * Permissions Controller
@@ -14,8 +14,14 @@ use Spatie\Permission\Models\Permission;
  */
 class PermissionsController extends AbstractBaseCrudController
 {
-    public function __construct()
+    /**
+     * Permission Repository instance
+     */
+    private PermissionRepositoryInterface $permissionRepository;
+
+    public function __construct(PermissionRepositoryInterface $permissionRepository)
     {
+        $this->permissionRepository = $permissionRepository;
         $this->setupCustomPermissionMiddleware([
             ['permission' => 'permission-list|permission-create|permission-edit|permission-delete', 'only' => ['index']],
             ['permission' => 'permission-create', 'only' => ['create', 'store']],
@@ -29,9 +35,9 @@ class PermissionsController extends AbstractBaseCrudController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $permissions = Permission::paginate(10);
+        $permissions = $this->permissionRepository->getPermissionsWithFilters($request, 10);
 
         return view('permissions.index', [
             'permissions' => $permissions
@@ -63,10 +69,10 @@ class PermissionsController extends AbstractBaseCrudController
             ]);
 
             DB::beginTransaction();
-            Permission::create($request->all());
+            $this->permissionRepository->create($request->all());
             DB::commit();
 
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('permissions.index',
                 $this->getSuccessMessage('Permission', 'created'));
         } catch (\Throwable $th) {
             DB::rollback();
@@ -83,7 +89,14 @@ class PermissionsController extends AbstractBaseCrudController
      */
     public function show($id)
     {
-        //
+        $permission = $this->permissionRepository->getPermissionWithRoles($id);
+
+        if (!$permission) {
+            return $this->redirectWithError(
+                $this->getErrorMessage('Permission', 'find'));
+        }
+
+        return view('permissions.show', ['permission' => $permission]);
     }
 
     /**
@@ -94,7 +107,12 @@ class PermissionsController extends AbstractBaseCrudController
      */
     public function edit($id)
     {
-        $permission = Permission::whereId($id)->first();
+        $permission = $this->permissionRepository->findById($id);
+
+        if (!$permission) {
+            return $this->redirectWithError(
+                $this->getErrorMessage('Permission', 'find'));
+        }
 
         return view('permissions.edit', ['permission' => $permission]);
     }
@@ -114,14 +132,17 @@ class PermissionsController extends AbstractBaseCrudController
                 'guard_name' => 'required'
             ]);
 
+            $permission = $this->permissionRepository->findById($id);
+            if (!$permission) {
+                return $this->redirectWithError(
+                    $this->getErrorMessage('Permission', 'find'));
+            }
+
             DB::beginTransaction();
-            $permission = Permission::whereId($id)->first();
-            $permission->name = $request->name;
-            $permission->guard_name = $request->guard_name;
-            $permission->save();
+            $this->permissionRepository->update($permission, $request->only(['name', 'guard_name']));
             DB::commit();
 
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('permissions.index',
                 $this->getSuccessMessage('Permission', 'updated'));
         } catch (\Throwable $th) {
             DB::rollback();
@@ -139,11 +160,17 @@ class PermissionsController extends AbstractBaseCrudController
     public function destroy($id)
     {
         try {
+            $permission = $this->permissionRepository->findById($id);
+            if (!$permission) {
+                return $this->redirectWithError(
+                    $this->getErrorMessage('Permission', 'find'));
+            }
+
             DB::beginTransaction();
-            Permission::whereId($id)->delete();
+            $this->permissionRepository->delete($permission);
             DB::commit();
 
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('permissions.index',
                 $this->getSuccessMessage('Permission', 'deleted'));
         } catch (\Throwable $th) {
             DB::rollback();

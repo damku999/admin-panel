@@ -95,7 +95,7 @@ class AddonCoverController extends AbstractBaseCrudController
 
         try {
             $this->addonCoverService->updateStatus($addon_cover_id, $status);
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('addon-covers.index',
                 $this->getSuccessMessage('Add-on Cover status', 'updated'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(
@@ -155,7 +155,7 @@ class AddonCoverController extends AbstractBaseCrudController
     {
         try {
             $this->addonCoverService->deleteAddonCover($addon_cover);
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('addon-covers.index',
                 $this->getSuccessMessage('Add-on Cover', 'deleted'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(

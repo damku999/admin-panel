@@ -108,4 +108,14 @@ class CustomerInsuranceRepository extends AbstractBaseRepository implements Cust
             ->orderBy('expired_date', 'asc')
             ->get();
     }
+
+    /**
+     * Get active customer insurances.
+     */
+    public function getActiveCustomerInsurances(): Collection
+    {
+        return CustomerInsurance::where('status', true)
+            ->orderBy('id', 'desc')
+            ->get();
+    }
 }

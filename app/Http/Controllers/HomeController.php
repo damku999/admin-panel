@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-class HomeController extends Controller
+class HomeController extends AbstractBaseCrudController
 {
     /**
      * Create a new controller instance.
@@ -377,11 +377,11 @@ class HomeController extends Controller
 
             DB::commit();
 
-            return back()->with('success', 'Profile updated successfully.');
+            return $this->redirectWithSuccess(null, 'Profile updated successfully.');
         } catch (\Throwable $exception) {
             DB::rollBack();
 
-            return back()->with('error', 'Failed to update profile: ' . $exception->getMessage());
+            return $this->redirectWithError('Failed to update profile: ' . $exception->getMessage());
         }
     }
 
@@ -415,11 +415,11 @@ class HomeController extends Controller
 
             DB::commit();
 
-            return back()->with('success', 'Password changed successfully.');
+            return $this->redirectWithSuccess(null, 'Password changed successfully.');
         } catch (\Throwable $exception) {
             DB::rollBack();
 
-            return back()->with('error', 'Failed to change password: ' . $exception->getMessage());
+            return $this->redirectWithError('Failed to change password: ' . $exception->getMessage());
         }
     }
 

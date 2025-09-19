@@ -53,13 +53,11 @@ class QuotationController extends AbstractBaseCrudController
 
             DB::commit();
 
-            return redirect()->route('quotations.show', $quotation)
-                ->with('success', 'Quotation created successfully. Generating quotes from multiple companies...');
+            return $this->redirectWithSuccess('quotations.show', 'Quotation created successfully. Generating quotes from multiple companies...', ['quotation' => $quotation]);
         } catch (\Throwable $th) {
             DB::rollBack();
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Failed to create quotation: ' . $th->getMessage());
+            return $this->redirectWithError('Failed to create quotation: ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -90,13 +88,11 @@ class QuotationController extends AbstractBaseCrudController
 
             DB::commit();
 
-            return redirect()->route('quotations.show', $quotation)
-                ->with('success', 'Quotation updated successfully!');
+            return $this->redirectWithSuccess('quotations.show', 'Quotation updated successfully!', ['quotation' => $quotation]);
         } catch (\Throwable $th) {
             DB::rollBack();
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Failed to update quotation: ' . $th->getMessage());
+            return $this->redirectWithError('Failed to update quotation: ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -106,11 +102,9 @@ class QuotationController extends AbstractBaseCrudController
         try {
             $this->quotationService->generateCompanyQuotes($quotation);
 
-            return redirect()->back()
-                ->with('success', 'Quotes generated successfully from all companies!');
+            return $this->redirectWithSuccess(null, 'Quotes generated successfully from all companies!');
         } catch (\Throwable $th) {
-            return redirect()->back()
-                ->with('error', 'Failed to generate quotes: ' . $th->getMessage());
+            return $this->redirectWithError('Failed to generate quotes: ' . $th->getMessage());
         }
     }
 
@@ -119,11 +113,9 @@ class QuotationController extends AbstractBaseCrudController
         try {
             $this->quotationService->sendQuotationViaWhatsApp($quotation);
 
-            return redirect()->back()
-                ->with('success', 'Quotation sent via WhatsApp successfully!');
+            return $this->redirectWithSuccess(null, 'Quotation sent via WhatsApp successfully!');
         } catch (\Throwable $th) {
-            return redirect()->back()
-                ->with('error', 'Failed to send quotation: ' . $th->getMessage());
+            return $this->redirectWithError('Failed to send quotation: ' . $th->getMessage());
         }
     }
 
@@ -132,8 +124,7 @@ class QuotationController extends AbstractBaseCrudController
         try {
             return $this->quotationService->generatePdf($quotation);
         } catch (\Throwable $th) {
-            return redirect()->back()
-                ->with('error', 'Failed to generate PDF: ' . $th->getMessage());
+            return $this->redirectWithError('Failed to generate PDF: ' . $th->getMessage());
         }
     }
 

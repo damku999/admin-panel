@@ -2,12 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
-use App\Services\FileUploadService;
-use App\Traits\WhatsAppApiTrait;
+use App\Contracts\Services\MarketingWhatsAppServiceInterface;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -18,10 +14,14 @@ use Illuminate\Support\Facades\Validator;
  */
 class MarketingWhatsAppController extends AbstractBaseCrudController
 {
-    use WhatsAppApiTrait;
+    /**
+     * Marketing WhatsApp Service instance
+     */
+    private MarketingWhatsAppServiceInterface $marketingWhatsAppService;
 
-    public function __construct(private FileUploadService $fileUploadService)
+    public function __construct(MarketingWhatsAppServiceInterface $marketingWhatsAppService)
     {
+        $this->marketingWhatsAppService = $marketingWhatsAppService;
         $this->setupCustomPermissionMiddleware([
             ['permission' => 'customer-list|customer-edit', 'only' => ['index', 'show']],
             ['permission' => 'customer-edit', 'only' => ['send']]
@@ -33,10 +33,7 @@ class MarketingWhatsAppController extends AbstractBaseCrudController
      */
     public function index()
     {
-        $customers = Customer::select('id', 'name', 'mobile_number', 'email', 'status')
-            ->where('status', 1) // Only active customers
-            ->orderBy('name')
-            ->get();
+        $customers = $this->marketingWhatsAppService->getActiveCustomers();
 
         return view('marketing.whatsapp.index', compact('customers'));
     }
@@ -46,6 +43,7 @@ class MarketingWhatsAppController extends AbstractBaseCrudController
      */
     public function send(Request $request)
     {
+        // Validate the request
         $validator = Validator::make($request->all(), [
             'message_type' => 'required|in:text,image',
             'message_text' => 'required|string|max:1000',
@@ -56,124 +54,36 @@ class MarketingWhatsAppController extends AbstractBaseCrudController
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+            return $this->redirectWithValidationErrors($validator);
         }
 
-        DB::beginTransaction();
-
         try {
-            // Get recipients
-            if ($request->recipients === 'all') {
-                $customers = Customer::where('status', 1)
-                    ->whereNotNull('mobile_number')
-                    ->where('mobile_number', '!=', '')
-                    ->get();
-            } else {
-                $customers = Customer::whereIn('id', $request->selected_customers)
-                    ->where('status', 1)
-                    ->whereNotNull('mobile_number')
-                    ->where('mobile_number', '!=', '')
-                    ->get();
-            }
-
-            if ($customers->isEmpty()) {
-                return redirect()->back()
-                    ->with('error', 'No valid customers found with mobile numbers.');
-            }
-
-            $successCount = 0;
-            $failedCount = 0;
-            $failedCustomers = [];
-            $imagePath = null;
-
-            // Handle image upload if message type is image
-            if ($request->message_type === 'image' && $request->hasFile('image')) {
-                $uploadResult = $this->fileUploadService->uploadFile(
-                    $request->file('image'),
-                    'marketing/images'
-                );
-
-                if ($uploadResult['status']) {
-                    $imagePath = storage_path('app/public/' . $uploadResult['file_path']);
-                } else {
-                    throw new \Exception('Failed to upload image: ' . $uploadResult['message']);
-                }
-            }
-
-            // Send messages to each customer
-            foreach ($customers as $customer) {
-                try {
-                    if ($request->message_type === 'text') {
-                        $response = $this->whatsAppSendMessage(
-                            $request->message_text,
-                            $customer->mobile_number
-                        );
-                    } else {
-                        $response = $this->whatsAppSendMessageWithAttachment(
-                            $request->message_text,
-                            $customer->mobile_number,
-                            $imagePath
-                        );
-                    }
-
-                    // Log the attempt
-                    \Log::info('Marketing WhatsApp sent', [
-                        'customer_id' => $customer->id,
-                        'customer_name' => $customer->name,
-                        'mobile_number' => $customer->mobile_number,
-                        'message_type' => $request->message_type,
-                        'response' => $response,
-                        'sent_by' => auth()->user()->id
-                    ]);
-
-                    $successCount++;
-                } catch (\Exception $e) {
-                    $failedCount++;
-                    $failedCustomers[] = $customer->name . ' (' . $customer->mobile_number . ')';
-                    
-                    \Log::error('Marketing WhatsApp failed', [
-                        'customer_id' => $customer->id,
-                        'customer_name' => $customer->name,
-                        'mobile_number' => $customer->mobile_number,
-                        'error' => $e->getMessage(),
-                        'sent_by' => auth()->user()->id
-                    ]);
-                }
-            }
-
-            DB::commit();
-
-            // Prepare response data for better UI display
-            $responseData = [
-                'total_customers' => $customers->count(),
-                'success_count' => $successCount,
-                'failed_count' => $failedCount,
-                'failed_customers' => $failedCustomers
+            // Prepare campaign data
+            $campaignData = [
+                'message_type' => $request->message_type,
+                'message_text' => $request->message_text,
+                'recipients' => $request->recipients,
+                'selected_customers' => $request->selected_customers,
+                'image' => $request->file('image'),
+                'sent_by' => auth()->user()->id
             ];
 
-            if ($failedCount > 0) {
-                return redirect()->route('marketing.whatsapp.index')
-                    ->with('marketing_result', $responseData)
-                    ->with('success', "Messages sent with some issues. Please check the details below.");
+            // Call the service to send the marketing campaign
+            $result = $this->marketingWhatsAppService->sendMarketingCampaign($campaignData);
+
+            // Generate appropriate success/error messages based on the result
+            if ($result['failed_count'] > 0) {
+                $message = "Messages sent with some issues. Successfully sent to {$result['success_count']} out of {$result['total_customers']} customers.";
+                return $this->redirectWithSuccess('marketing.whatsapp.index', $message)
+                    ->with('marketing_result', $result);
             } else {
-                return redirect()->route('marketing.whatsapp.index')
-                    ->with('marketing_result', $responseData)
-                    ->with('success', "All marketing messages sent successfully!");
+                $message = "All marketing messages sent successfully! Sent to {$result['success_count']} customers.";
+                return $this->redirectWithSuccess('marketing.whatsapp.index', $message)
+                    ->with('marketing_result', $result);
             }
 
         } catch (\Exception $e) {
-            DB::rollback();
-            
-            \Log::error('Marketing WhatsApp bulk send failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'sent_by' => auth()->user()->id
-            ]);
-
-            return redirect()->back()
-                ->with('error', 'Failed to send marketing messages: ' . $e->getMessage())
+            return $this->redirectWithError('Failed to send marketing messages: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -183,28 +93,11 @@ class MarketingWhatsAppController extends AbstractBaseCrudController
      */
     public function preview(Request $request)
     {
-        if ($request->recipients === 'all') {
-            $customers = Customer::select('name', 'mobile_number')
-                ->where('status', 1)
-                ->whereNotNull('mobile_number')
-                ->where('mobile_number', '!=', '')
-                ->orderBy('name')
-                ->get();
-        } else {
-            $customerIds = $request->selected_customers ?? [];
-            $customers = Customer::select('name', 'mobile_number')
-                ->whereIn('id', $customerIds)
-                ->where('status', 1)
-                ->whereNotNull('mobile_number')
-                ->where('mobile_number', '!=', '')
-                ->orderBy('name')
-                ->get();
-        }
+        $result = $this->marketingWhatsAppService->previewCustomerList(
+            $request->recipients,
+            $request->selected_customers ?? []
+        );
 
-        return response()->json([
-            'status' => 'success',
-            'customers' => $customers,
-            'count' => $customers->count()
-        ]);
+        return response()->json($result);
     }
 }

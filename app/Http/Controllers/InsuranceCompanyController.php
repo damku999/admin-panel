@@ -81,7 +81,7 @@ class InsuranceCompanyController extends AbstractBaseCrudController
     {
         try {
             $this->insuranceCompanyService->updateStatus($insurance_company_id, $status);
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('insurance_companies.index',
                 $this->getSuccessMessage('Insurance Company status', 'updated'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(
@@ -121,7 +121,7 @@ class InsuranceCompanyController extends AbstractBaseCrudController
                 'mobile_number' => $request->mobile_number,
             ]);
 
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('insurance_companies.index',
                 $this->getSuccessMessage('Insurance Company', 'updated'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(
@@ -140,7 +140,7 @@ class InsuranceCompanyController extends AbstractBaseCrudController
     {
         try {
             $this->insuranceCompanyService->deleteInsuranceCompany($insurance_company);
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('insurance_companies.index',
                 $this->getSuccessMessage('Insurance Company', 'deleted'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Repositories\RoleRepositoryInterface;
+use App\Contracts\Repositories\PermissionRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 /**
  * Roles Controller
@@ -15,8 +15,22 @@ use Spatie\Permission\Models\Role;
  */
 class RolesController extends AbstractBaseCrudController
 {
-    public function __construct()
-    {
+    /**
+     * Role Repository instance
+     */
+    private RoleRepositoryInterface $roleRepository;
+
+    /**
+     * Permission Repository instance
+     */
+    private PermissionRepositoryInterface $permissionRepository;
+
+    public function __construct(
+        RoleRepositoryInterface $roleRepository,
+        PermissionRepositoryInterface $permissionRepository
+    ) {
+        $this->roleRepository = $roleRepository;
+        $this->permissionRepository = $permissionRepository;
         $this->setupCustomPermissionMiddleware([
             ['permission' => 'role-list|role-create|role-edit|role-delete', 'only' => ['index']],
             ['permission' => 'role-create', 'only' => ['create','store']],
@@ -30,9 +44,9 @@ class RolesController extends AbstractBaseCrudController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $roles = Role::paginate(10);
+        $roles = $this->roleRepository->getRolesWithFilters($request, 10);
 
         return view('roles.index', [
             'roles' => $roles
@@ -46,7 +60,7 @@ class RolesController extends AbstractBaseCrudController
      */
     public function create()
     {
-        $permissions = Permission::all();
+        $permissions = $this->permissionRepository->getPermissionsByGuard();
 
         return view('roles.add', ['permissions' => $permissions]);
     }
@@ -66,10 +80,10 @@ class RolesController extends AbstractBaseCrudController
             ]);
 
             DB::beginTransaction();
-            Role::create($request->all());
+            $this->roleRepository->create($request->all());
             DB::commit();
 
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('roles.index',
                 $this->getSuccessMessage('Role', 'created'));
         } catch (\Throwable $th) {
             DB::rollback();
@@ -86,7 +100,13 @@ class RolesController extends AbstractBaseCrudController
      */
     public function show($id)
     {
-        //
+        $role = $this->roleRepository->getRoleWithPermissions($id);
+
+        if (!$role) {
+            return $this->redirectWithError('Role not found.');
+        }
+
+        return view('roles.show', ['role' => $role]);
     }
 
     /**
@@ -97,9 +117,13 @@ class RolesController extends AbstractBaseCrudController
      */
     public function edit($id)
     {
-        $role = Role::whereId($id)->with('permissions')->first();
+        $role = $this->roleRepository->getRoleWithPermissions($id);
 
-        $permissions = Permission::all();
+        if (!$role) {
+            return $this->redirectWithError('Role not found.');
+        }
+
+        $permissions = $this->permissionRepository->getPermissionsByGuard($role->guard_name);
 
         return view('roles.edit', ['role' => $role, 'permissions' => $permissions]);
     }
@@ -120,17 +144,26 @@ class RolesController extends AbstractBaseCrudController
             ]);
 
             DB::beginTransaction();
-            $role = Role::whereId($id)->first();
-            $role->name = $request->name;
-            $role->guard_name = $request->guard_name;
-            $role->save();
+            $role = $this->roleRepository->findById($id);
 
-            // Sync Permissions
-            $permissions = $request->permissions;
+            if (!$role) {
+                DB::rollback();
+                return $this->redirectWithError('Role not found.');
+            }
+
+            // Update role data
+            $roleData = [
+                'name' => $request->name,
+                'guard_name' => $request->guard_name
+            ];
+            $this->roleRepository->update($role, $roleData);
+
+            // Sync Permissions - using the model's native method
+            $permissions = $request->permissions ?? [];
             $role->syncPermissions($permissions);
             DB::commit();
 
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('roles.index',
                 $this->getSuccessMessage('Role', 'updated'));
         } catch (\Throwable $th) {
             DB::rollback();
@@ -149,10 +182,17 @@ class RolesController extends AbstractBaseCrudController
     {
         try {
             DB::beginTransaction();
-            Role::whereId($id)->delete();
+            $role = $this->roleRepository->findById($id);
+
+            if (!$role) {
+                DB::rollback();
+                return $this->redirectWithError('Role not found.');
+            }
+
+            $this->roleRepository->delete($role);
             DB::commit();
 
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('roles.index',
                 $this->getSuccessMessage('Role', 'deleted'));
         } catch (\Throwable $th) {
             DB::rollback();

@@ -102,12 +102,21 @@ abstract class AbstractBaseCrudController extends Controller
     /**
      * Get redirect response with success message
      *
-     * @param string $route The route to redirect to
+     * @param string|null $route The route to redirect to (null for back)
      * @param string $message The success message
+     * @param array $routeParameters Optional route parameters
      * @return \Illuminate\Http\RedirectResponse
      */
-    protected function redirectWithSuccess(string $route, string $message): \Illuminate\Http\RedirectResponse
+    protected function redirectWithSuccess(?string $route, string $message, array $routeParameters = []): \Illuminate\Http\RedirectResponse
     {
+        if ($route === null) {
+            return redirect()->back()->with('success', $message);
+        }
+
+        if (!empty($routeParameters)) {
+            return redirect()->route($route, $routeParameters)->with('success', $message);
+        }
+
         return redirect()->route($route)->with('success', $message);
     }
 
@@ -120,5 +129,16 @@ abstract class AbstractBaseCrudController extends Controller
     protected function redirectWithError(string $message): \Illuminate\Http\RedirectResponse
     {
         return redirect()->back()->with('error', $message);
+    }
+
+    /**
+     * Get redirect response with validation errors
+     *
+     * @param \Illuminate\Contracts\Validation\Validator $validator The validator instance
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    protected function redirectWithValidationErrors(\Illuminate\Contracts\Validation\Validator $validator): \Illuminate\Http\RedirectResponse
+    {
+        return redirect()->back()->withErrors($validator)->withInput();
     }
 }

@@ -80,7 +80,7 @@ class BrokerController extends AbstractBaseCrudController
     {
         try {
             $this->brokerService->updateStatus($broker_id, $status);
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('brokers.index',
                 $this->getSuccessMessage('Broker status', 'updated'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(
@@ -111,7 +111,7 @@ class BrokerController extends AbstractBaseCrudController
     {
         try {
             $this->brokerService->updateBroker($broker, $request->validated());
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('brokers.index',
                 $this->getSuccessMessage('Broker', 'updated'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(
@@ -130,7 +130,7 @@ class BrokerController extends AbstractBaseCrudController
     {
         try {
             $this->brokerService->deleteBroker($broker);
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('brokers.index',
                 $this->getSuccessMessage('Broker', 'deleted'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(

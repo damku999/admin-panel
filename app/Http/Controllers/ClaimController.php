@@ -6,6 +6,7 @@ use App\Http\Requests\StoreClaimRequest;
 use App\Http\Requests\UpdateClaimRequest;
 use App\Models\Claim;
 use App\Services\ClaimService;
+use App\Contracts\Repositories\CustomerInsuranceRepositoryInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,8 +22,10 @@ use App\Exports\ClaimsExport;
  */
 class ClaimController extends AbstractBaseCrudController
 {
-    public function __construct(private ClaimService $claimService)
-    {
+    public function __construct(
+        private ClaimService $claimService,
+        private CustomerInsuranceRepositoryInterface $customerInsuranceRepository
+    ) {
         $this->middleware('auth:web'); // Explicitly use web guard for admin
         $this->setupCustomPermissionMiddleware([
             ['permission' => 'claim-list|claim-create|claim-edit|claim-delete', 'only' => ['index']],
@@ -71,11 +74,8 @@ class ClaimController extends AbstractBaseCrudController
      */
     public function create(): View
     {
-        // Get customer insurances without eager loading to avoid auth conflicts
-        // The view will need to handle relationships individually if needed
-        $customerInsurances = \App\Models\CustomerInsurance::where('status', true)
-            ->orderBy('id', 'desc')
-            ->get();
+        // Get customer insurances using repository
+        $customerInsurances = $this->customerInsuranceRepository->getActiveCustomerInsurances();
 
         return view('claims.create', compact('customerInsurances'));
     }
@@ -87,12 +87,11 @@ class ClaimController extends AbstractBaseCrudController
     {
         try {
             $claim = $this->claimService->createClaim($request);
-            return redirect()->route('claims.index')
-                           ->with('success', 'Claim created successfully. Claim Number: ' . $claim->claim_number);
+            return $this->redirectWithSuccess('claims.index',
+                'Claim created successfully. Claim Number: ' . $claim->claim_number);
         } catch (\Throwable $th) {
-            return redirect()->back()
-                           ->withInput()
-                           ->with('error', 'Failed to create claim: ' . $th->getMessage());
+            return $this->redirectWithError('Failed to create claim: ' . $th->getMessage())
+                           ->withInput();
         }
     }
 
@@ -133,15 +132,14 @@ class ClaimController extends AbstractBaseCrudController
             $updated = $this->claimService->updateClaim($request, $claim);
 
             if ($updated) {
-                return redirect()->route('claims.index')
-                               ->with('success', 'Claim updated successfully.');
+                return $this->redirectWithSuccess('claims.index',
+                    $this->getSuccessMessage('Claim', 'updated'));
             }
 
             return $this->redirectWithError($this->getErrorMessage('Claim', 'update'));
         } catch (\Throwable $th) {
-            return redirect()->back()
-                           ->withInput()
-                           ->with('error', 'Failed to update claim: ' . $th->getMessage());
+            return $this->redirectWithError('Failed to update claim: ' . $th->getMessage())
+                           ->withInput();
         }
     }
 

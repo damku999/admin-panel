@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Contracts\Repositories\ClaimRepositoryInterface;
+use App\Contracts\Services\ClaimServiceInterface;
 use App\Http\Requests\StoreClaimRequest;
 use App\Http\Requests\UpdateClaimRequest;
 use App\Models\Claim;
@@ -17,75 +19,31 @@ use Illuminate\Support\Facades\Log;
  * Handles Claim business logic including document and stage management.
  * Inherits transaction management from BaseService.
  */
-class ClaimService extends BaseService
+class ClaimService extends BaseService implements ClaimServiceInterface
 {
+    /**
+     * Claim Repository instance
+     *
+     * @var ClaimRepositoryInterface
+     */
+    private ClaimRepositoryInterface $claimRepository;
+
+    /**
+     * Constructor
+     *
+     * @param ClaimRepositoryInterface $claimRepository
+     */
+    public function __construct(ClaimRepositoryInterface $claimRepository)
+    {
+        $this->claimRepository = $claimRepository;
+    }
+
     /**
      * Get paginated list of claims with filters and search.
      */
     public function getClaims(Request $request): LengthAwarePaginator
     {
-        $query = Claim::with([
-            'customer:id,name,email,mobile_number',
-            'customerInsurance:id,policy_no,registration_no,insurance_company_id',
-            'customerInsurance.insuranceCompany:id,name',
-            'currentStage:id,claim_id,stage_name'
-        ]);
-
-        // Apply search filters
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function (Builder $q) use ($search) {
-                $q->where('claim_number', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhereHas('customer', function (Builder $customerQuery) use ($search) {
-                      $customerQuery->where('name', 'like', "%{$search}%")
-                                   ->orWhere('email', 'like', "%{$search}%")
-                                   ->orWhere('mobile_number', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('customerInsurance', function (Builder $insuranceQuery) use ($search) {
-                      $insuranceQuery->where('policy_no', 'like', "%{$search}%")
-                                    ->orWhere('registration_no', 'like', "%{$search}%");
-                  });
-            });
-        }
-
-        // Filter by insurance type
-        if ($request->filled('insurance_type')) {
-            $query->where('insurance_type', $request->input('insurance_type'));
-        }
-
-        // Filter by status
-        if ($request->filled('status') && $request->input('status') !== '') {
-            $query->where('status', $request->input('status'));
-        }
-
-        // Filter by date range
-        if ($request->filled('date_from')) {
-            $query->whereDate('incident_date', '>=', formatDateForDatabase($request->input('date_from')));
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('incident_date', '<=', formatDateForDatabase($request->input('date_to')));
-        }
-
-        // Apply sorting
-        $sortField = $request->input('sort_field', 'created_at');
-        $sortOrder = $request->input('sort_order', 'desc');
-
-        // Validate sort field to prevent SQL injection
-        $allowedSortFields = [
-            'claim_number', 'insurance_type', 'incident_date', 'status', 'created_at', 'updated_at'
-        ];
-
-        if (in_array($sortField, $allowedSortFields)) {
-            $query->orderBy($sortField, $sortOrder);
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        // Get paginated results
-        $perPage = $request->input('per_page', 15);
-        return $query->paginate($perPage);
+        return $this->claimRepository->getClaimsWithFilters($request);
     }
 
     /**
@@ -184,8 +142,7 @@ class ClaimService extends BaseService
     public function updateClaimStatus(int $claimId, bool $status): bool
     {
         try {
-            $claim = Claim::findOrFail($claimId);
-            $updated = $claim->update(['status' => $status]);
+            $updated = $this->claimRepository->updateStatus($claimId, $status);
 
             if ($updated) {
                 Log::info('Claim status updated', [
@@ -345,22 +302,7 @@ class ClaimService extends BaseService
     public function getClaimStatistics(): array
     {
         try {
-            $stats = [
-                'total_claims' => Claim::count(),
-                'active_claims' => Claim::where('status', true)->count(),
-                'inactive_claims' => Claim::where('status', false)->count(),
-                'health_claims' => Claim::where('insurance_type', 'Health')->count(),
-                'vehicle_claims' => Claim::where('insurance_type', 'Vehicle')->count(),
-                'this_month_claims' => Claim::whereMonth('created_at', now()->month)
-                                          ->whereYear('created_at', now()->year)
-                                          ->count(),
-                'this_week_claims' => Claim::whereBetween('created_at', [
-                    now()->startOfWeek(),
-                    now()->endOfWeek()
-                ])->count(),
-            ];
-
-            return $stats;
+            return $this->claimRepository->getClaimStatistics();
 
         } catch (\Exception $e) {
             Log::error('Failed to get claim statistics', [

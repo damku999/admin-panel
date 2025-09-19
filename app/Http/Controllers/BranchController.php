@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Branch;
+use App\Contracts\Repositories\BranchRepositoryInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,8 +17,14 @@ use App\Exports\BranchesExport;
  */
 class BranchController extends AbstractBaseCrudController
 {
-    public function __construct()
+    /**
+     * Branch Repository instance
+     */
+    private BranchRepositoryInterface $branchRepository;
+
+    public function __construct(BranchRepositoryInterface $branchRepository)
     {
+        $this->branchRepository = $branchRepository;
         $this->setupPermissionMiddleware('branch');
     }
 
@@ -29,12 +35,7 @@ class BranchController extends AbstractBaseCrudController
      */
     public function index(Request $request): View
     {
-        $search = $request->get('search');
-        $branches = Branch::when($search, function ($query, $search) {
-                return $query->where('name', 'LIKE', "%{$search}%");
-            })
-            ->orderBy('name')
-            ->paginate(10);
+        $branches = $this->branchRepository->getBranchesWithFilters($request, 10);
             
         return view('branches.index', ['branches' => $branches, 'request' => $request->all()]);
     }
@@ -61,7 +62,7 @@ class BranchController extends AbstractBaseCrudController
             'mobile_number' => 'nullable|string|max:20',
         ]);
 
-        Branch::create([
+        $this->branchRepository->create([
             'name' => $request->name,
             'email' => $request->email,
             'mobile_number' => $request->mobile_number,
@@ -114,8 +115,13 @@ class BranchController extends AbstractBaseCrudController
      */
     public function updateStatus($branch_id, $status): RedirectResponse
     {
-        $branch = Branch::findOrFail($branch_id);
-        $branch->update([
+        $branch = $this->branchRepository->findById($branch_id);
+
+        if (!$branch) {
+            return $this->redirectWithError('Branch not found.');
+        }
+
+        $this->branchRepository->update($branch, [
             'status' => $status,
             'updated_by' => auth()->id(),
         ]);

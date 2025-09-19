@@ -27,4 +27,9 @@ interface CustomerInsuranceRepositoryInterface extends BaseRepositoryInterface
      * Find customer insurance with specific relations.
      */
     public function findWithRelations(int $id, array $relations = []): ?CustomerInsurance;
+
+    /**
+     * Get active customer insurances.
+     */
+    public function getActiveCustomerInsurances(): Collection;
 }

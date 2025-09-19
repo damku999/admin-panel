@@ -95,22 +95,16 @@ class CustomerRepository extends AbstractBaseRepository implements CustomerRepos
     /**
      * Override base update method to match interface signature
      */
-    public function update($entity, array $data)
+    public function update(\Illuminate\Database\Eloquent\Model $entity, array $data): \Illuminate\Database\Eloquent\Model
     {
-        if (is_int($entity)) {
-            return Customer::whereId($entity)->update($data);
-        }
         return parent::update($entity, $data);
     }
 
     /**
      * Override base delete method to match interface signature
      */
-    public function delete($entity): bool
+    public function delete(\Illuminate\Database\Eloquent\Model $entity): bool
     {
-        if (is_int($entity)) {
-            return Customer::whereId($entity)->delete();
-        }
         return parent::delete($entity);
     }
 
@@ -141,5 +135,38 @@ class CustomerRepository extends AbstractBaseRepository implements CustomerRepos
     public function count(): int
     {
         return Customer::count();
+    }
+
+    /**
+     * Get active customers
+     */
+    public function getActiveCustomers(): Collection
+    {
+        return Customer::select('id', 'name', 'mobile_number', 'email', 'status')
+            ->where('status', true)
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Get customers with valid mobile numbers
+     */
+    public function getCustomersWithValidMobileNumbers(): Collection
+    {
+        return Customer::where('status', true)
+            ->whereNotNull('mobile_number')
+            ->where('mobile_number', '!=', '')
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Get customers by array of IDs
+     */
+    public function getCustomersByIds(array $ids): Collection
+    {
+        return Customer::whereIn('id', $ids)
+            ->orderBy('name')
+            ->get();
     }
 }

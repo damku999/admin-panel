@@ -105,7 +105,7 @@ class CustomerController extends AbstractBaseCrudController
             $updated = $this->customerService->updateCustomerStatus($customer_id, $status);
             
             if ($updated) {
-                return redirect()->back()->with('success',
+                return $this->redirectWithSuccess('customers.index',
                     $this->getSuccessMessage('Customer status', 'updated'));
             }
 
@@ -142,7 +142,7 @@ class CustomerController extends AbstractBaseCrudController
             $updated = $this->customerService->updateCustomer($request, $customer);
             
             if ($updated) {
-                return redirect()->back()->with('success',
+                return $this->redirectWithSuccess('customers.index',
                     $this->getSuccessMessage('Customer', 'updated'));
             }
 
@@ -166,7 +166,7 @@ class CustomerController extends AbstractBaseCrudController
             $deleted = $this->customerService->deleteCustomer($customer);
             
             if ($deleted) {
-                return redirect()->back()->with('success',
+                return $this->redirectWithSuccess('customers.index',
                     $this->getSuccessMessage('Customer', 'deleted'));
             }
 
@@ -197,7 +197,7 @@ class CustomerController extends AbstractBaseCrudController
         $sent = $this->customerService->sendOnboardingMessage($customer);
         
         if ($sent) {
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('customers.index',
                 $this->getSuccessMessage('Onboarding message', 'sent'));
         }
 

@@ -103,7 +103,7 @@ class UserController extends AbstractBaseCrudController
             // Update status through service
             $this->userService->updateStatus($user_id, $status);
 
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('users.index',
                 $this->getSuccessMessage('User status', 'updated'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(
@@ -151,7 +151,7 @@ class UserController extends AbstractBaseCrudController
 
             // Check if validation fails
             if ($validator->fails()) {
-                return redirect()->back()->withErrors($validator)->withInput();
+                return $this->redirectWithError($validator->errors()->first())->withInput();
             }
         }
 
@@ -167,7 +167,7 @@ class UserController extends AbstractBaseCrudController
                 $this->userService->changePassword($user, $request->new_password);
             }
 
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('users.index',
                 $this->getSuccessMessage('User', 'updated'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(
@@ -188,7 +188,7 @@ class UserController extends AbstractBaseCrudController
             // Delete user through service
             $this->userService->deleteUser($user);
 
-            return redirect()->back()->with('success',
+            return $this->redirectWithSuccess('users.index',
                 $this->getSuccessMessage('User', 'deleted'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(

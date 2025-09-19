@@ -14,16 +14,18 @@ use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\BrokersExport;
 
-class BrokerController extends Controller
+/**
+ * Broker Controller
+ *
+ * Handles Broker CRUD operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class BrokerController extends AbstractBaseCrudController
 {
     public function __construct(
         private BrokerServiceInterface $brokerService
     ) {
-        $this->middleware('auth');
-        $this->middleware('permission:broker-list|broker-create|broker-edit|broker-delete', ['only' => ['index']]);
-        $this->middleware('permission:broker-create', ['only' => ['create', 'store', 'updateStatus']]);
-        $this->middleware('permission:broker-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:broker-delete', ['only' => ['delete']]);
+        $this->setupPermissionMiddleware('broker');
     }
 
     /**

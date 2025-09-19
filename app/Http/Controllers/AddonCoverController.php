@@ -7,19 +7,18 @@ use App\Models\AddonCover;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class AddonCoverController extends Controller
+/**
+ * Addon Cover Controller
+ *
+ * Handles AddonCover CRUD operations.
+ * Inherits middleware setup and common utilities from AbstractBaseCrudController.
+ */
+class AddonCoverController extends AbstractBaseCrudController
 {
-    /**
-     * Create a new controller instance.
-     */
     public function __construct(
         private AddonCoverServiceInterface $addonCoverService
     ) {
-        $this->middleware('auth');
-        $this->middleware('permission:addon-cover-list|addon-cover-create|addon-cover-edit|addon-cover-delete', ['only' => ['index']]);
-        $this->middleware('permission:addon-cover-create', ['only' => ['create', 'store', 'updateStatus']]);
-        $this->middleware('permission:addon-cover-edit', ['only' => ['edit', 'update']]);
-        $this->middleware('permission:addon-cover-delete', ['only' => ['delete']]);
+        $this->setupPermissionMiddleware('addon-cover');
     }
 
     /**

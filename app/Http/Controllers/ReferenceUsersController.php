@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ReferenceUser;
-use Illuminate\Support\Facades\DB;
+use App\Services\ReferenceUserService;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ReferenceUsersExport;
 use Illuminate\Support\Facades\Validator;
@@ -18,8 +18,9 @@ use Throwable;
  */
 class ReferenceUsersController extends AbstractBaseCrudController
 {
-    public function __construct()
-    {
+    public function __construct(
+        private ReferenceUserService $referenceUserService
+    ) {
         $this->setupPermissionMiddleware('reference-user');
     }
 
@@ -67,25 +68,14 @@ class ReferenceUsersController extends AbstractBaseCrudController
             'name' => 'required',
         ];
 
-        $request->validate($validationRules);
+        $validated = $request->validate($validationRules);
 
         try {
-            DB::beginTransaction();
-
-            // Store Data
-            ReferenceUser::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'mobile_number' => $request->mobile_number,
-            ]);
-
-            // Commit And Redirected To Listing
-            DB::commit();
+            $this->referenceUserService->createReferenceUser($validated);
             return $this->redirectWithSuccess('reference_users.index', $this->getSuccessMessage('Reference User', 'created'));
         } catch (Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
-            return $this->redirectWithError($this->getErrorMessage('Reference User', 'create') . ': ' . $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Reference User', 'create') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -113,17 +103,9 @@ class ReferenceUsersController extends AbstractBaseCrudController
         }
 
         try {
-            DB::beginTransaction();
-
-            // Update Status
-            ReferenceUser::whereId($reference_user_id)->update(['status' => $status]);
-
-            // Commit And Redirect on index with Success Message
-            DB::commit();
+            $this->referenceUserService->updateStatus($reference_user_id, $status);
             return $this->redirectWithSuccess('reference_users.index', $this->getSuccessMessage('Reference User Status', 'updated'));
         } catch (Throwable $th) {
-            // Rollback & Return Error Message
-            DB::rollBack();
             return $this->redirectWithError($this->getErrorMessage('Reference User Status', 'update') . ': ' . $th->getMessage());
         }
     }
@@ -152,25 +134,14 @@ class ReferenceUsersController extends AbstractBaseCrudController
             'name' => 'required',
         ];
 
-        $request->validate($validationRules);
+        $validated = $request->validate($validationRules);
 
         try {
-            DB::beginTransaction();
-
-            // Update Data
-            $reference_user->update([
-                'name' => $request->name,
-                'email' => $request->email,
-                'mobile_number' => $request->mobile_number,
-            ]);
-
-            // Commit And Redirected To Listing
-            DB::commit();
+            $this->referenceUserService->updateReferenceUser($reference_user, $validated);
             return $this->redirectWithSuccess('reference_users.index', $this->getSuccessMessage('Reference User', 'updated'));
         } catch (Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
-            return $this->redirectWithError($this->getErrorMessage('Reference User', 'update') . ': ' . $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Reference User', 'update') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -183,15 +154,9 @@ class ReferenceUsersController extends AbstractBaseCrudController
     public function delete(ReferenceUser $reference_user)
     {
         try {
-            DB::beginTransaction();
-
-            // Delete ReferenceUser
-            $reference_user->delete();
-
-            DB::commit();
+            $this->referenceUserService->deleteReferenceUser($reference_user);
             return $this->redirectWithSuccess('reference_users.index', $this->getSuccessMessage('Reference User', 'deleted'));
         } catch (Throwable $th) {
-            DB::rollBack();
             return $this->redirectWithError($this->getErrorMessage('Reference User', 'delete') . ': ' . $th->getMessage());
         }
     }

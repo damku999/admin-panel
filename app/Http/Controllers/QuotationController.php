@@ -159,12 +159,12 @@ class QuotationController extends AbstractBaseCrudController
                     $message .= " ({$companiesCount} company quote(s) also removed)";
                 }
                 
-                return redirect()->route('quotations.index')->with('success', $message);
+                return $this->redirectWithSuccess('quotations.index', $message);
             }
             
-            return redirect()->back()->with('error', 'Failed to delete quotation.');
+            return $this->redirectWithError('Failed to delete quotation.');
         } catch (\Throwable $th) {
-            return redirect()->back()->with('error', 'Failed to delete quotation: ' . $th->getMessage());
+            return $this->redirectWithError('Failed to delete quotation: ' . $th->getMessage());
         }
     }
 }

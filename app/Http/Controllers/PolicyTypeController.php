@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\PolicyType;
+use App\Services\PolicyTypeService;
 use Illuminate\Http\Request;
 use App\Exports\PolicyTypesExport;
-use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,8 +17,9 @@ use Illuminate\Support\Facades\Validator;
  */
 class PolicyTypeController extends AbstractBaseCrudController
 {
-    public function __construct()
-    {
+    public function __construct(
+        private PolicyTypeService $policyTypeService
+    ) {
         $this->setupPermissionMiddleware('policy-type');
     }
 
@@ -64,22 +65,14 @@ class PolicyTypeController extends AbstractBaseCrudController
             'name' => 'required',
         ];
 
-        $request->validate($validation_array);
-        DB::beginTransaction();
+        $validated = $request->validate($validation_array);
 
         try {
-            // Store Data
-            PolicyType::create([
-                'name' => $request->name,
-            ]);
-
-            // Commit And Redirected To Listing
-            DB::commit();
+            $this->policyTypeService->createPolicyType($validated);
             return $this->redirectWithSuccess('policy_type.index', $this->getSuccessMessage('Policy Type', 'created'));
         } catch (\Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
-            return $this->redirectWithError($this->getErrorMessage('Policy Type', 'create') . ': ' . $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Policy Type', 'create') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -106,18 +99,9 @@ class PolicyTypeController extends AbstractBaseCrudController
         }
 
         try {
-            DB::beginTransaction();
-
-            // Update Status
-            PolicyType::whereId($policy_type_id)->update(['status' => $status]);
-
-            // Commit And Redirect on index with Success Message
-            DB::commit();
+            $this->policyTypeService->updateStatus($policy_type_id, $status);
             return $this->redirectWithSuccess('policy_type.index', $this->getSuccessMessage('Policy Type Status', 'updated'));
         } catch (\Throwable $th) {
-
-            // Rollback & Return Error Message
-            DB::rollBack();
             return $this->redirectWithError($this->getErrorMessage('Policy Type Status', 'update') . ': ' . $th->getMessage());
         }
     }
@@ -148,21 +132,14 @@ class PolicyTypeController extends AbstractBaseCrudController
             'name' => 'required',
         ];
 
-        $request->validate($validation_array);
+        $validated = $request->validate($validation_array);
 
-        DB::beginTransaction();
         try {
-            // Store Data
-            PolicyType::whereId($policy_type->id)->update([
-                'name' => $request->name,
-            ]);
-            // Commit And Redirected To Listing
-            DB::commit();
+            $this->policyTypeService->updatePolicyType($policy_type, $validated);
             return $this->redirectWithSuccess('policy_type.index', $this->getSuccessMessage('Policy Type', 'updated'));
         } catch (\Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
-            return $this->redirectWithError($this->getErrorMessage('Policy Type', 'update') . ': ' . $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Policy Type', 'update') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -174,15 +151,10 @@ class PolicyTypeController extends AbstractBaseCrudController
      */
     public function delete(PolicyType $policy_type)
     {
-        DB::beginTransaction();
         try {
-            // Delete PolicyType
-            PolicyType::whereId($policy_type->id)->delete();
-
-            DB::commit();
+            $this->policyTypeService->deletePolicyType($policy_type);
             return $this->redirectWithSuccess('policy_type.index', $this->getSuccessMessage('Policy Type', 'deleted'));
         } catch (\Throwable $th) {
-            DB::rollBack();
             return $this->redirectWithError($this->getErrorMessage('Policy Type', 'delete') . ': ' . $th->getMessage());
         }
     }

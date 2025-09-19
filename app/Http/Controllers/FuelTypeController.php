@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Exports\FuelTypesExport;
 use App\Models\FuelType;
+use App\Services\FuelTypeService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -17,8 +17,9 @@ use Maatwebsite\Excel\Facades\Excel;
  */
 class FuelTypeController extends AbstractBaseCrudController
 {
-    public function __construct()
-    {
+    public function __construct(
+        private FuelTypeService $fuelTypeService
+    ) {
         $this->setupPermissionMiddleware('fuel-type');
     }
 
@@ -63,22 +64,14 @@ class FuelTypeController extends AbstractBaseCrudController
             'name' => 'required',
         ];
 
-        $request->validate($validation_array);
-        DB::beginTransaction();
+        $validated = $request->validate($validation_array);
 
         try {
-            // Store Data
-            FuelType::create([
-                'name' => $request->name,
-            ]);
-
-            // Commit And Redirected To Listing
-            DB::commit();
+            $this->fuelTypeService->createFuelType($validated);
             return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type', 'created'));
         } catch (\Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
-            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'create') . ': ' . $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'create') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -105,12 +98,9 @@ class FuelTypeController extends AbstractBaseCrudController
         }
 
         try {
-            DB::beginTransaction();
-            FuelType::whereId($fuel_type_id)->update(['status' => $status]);
-            DB::commit();
+            $this->fuelTypeService->updateStatus($fuel_type_id, $status);
             return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type Status', 'updated'));
         } catch (\Throwable $th) {
-            DB::rollBack();
             return $this->redirectWithError($this->getErrorMessage('Fuel Type Status', 'update') . ': ' . $th->getMessage());
         }
     }
@@ -140,18 +130,14 @@ class FuelTypeController extends AbstractBaseCrudController
             'name' => 'required',
         ];
 
-        $request->validate($validation_array);
+        $validated = $request->validate($validation_array);
 
-        DB::beginTransaction();
         try {
-            FuelType::whereId($fuel_type->id)->update([
-                'name' => $request->name,
-            ]);
-            DB::commit();
+            $this->fuelTypeService->updateFuelType($fuel_type, $validated);
             return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type', 'updated'));
         } catch (\Throwable $th) {
-            DB::rollBack();
-            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'update') . ': ' . $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'update') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -163,13 +149,10 @@ class FuelTypeController extends AbstractBaseCrudController
      */
     public function delete(FuelType $fuel_type)
     {
-        DB::beginTransaction();
         try {
-            FuelType::whereId($fuel_type->id)->delete();
-            DB::commit();
+            $this->fuelTypeService->deleteFuelType($fuel_type);
             return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type', 'deleted'));
         } catch (\Throwable $th) {
-            DB::rollBack();
             return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'delete') . ': ' . $th->getMessage());
         }
     }

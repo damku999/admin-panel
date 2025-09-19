@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\RelationshipManager;
+use App\Services\RelationshipManagerService;
 use Illuminate\Http\Request;
 use App\Exports\RelationshipManagersExport;
-use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,8 +17,9 @@ use Illuminate\Support\Facades\Validator;
  */
 class RelationshipManagerController extends AbstractBaseCrudController
 {
-    public function __construct()
-    {
+    public function __construct(
+        private RelationshipManagerService $relationshipManagerService
+    ) {
         $this->setupPermissionMiddleware('relationship_manager');
     }
 
@@ -64,25 +65,14 @@ class RelationshipManagerController extends AbstractBaseCrudController
             'name' => 'required',
         ];
 
-
-        $request->validate($validation_array);
-        DB::beginTransaction();
+        $validated = $request->validate($validation_array);
 
         try {
-            // Store Data
-            $relationship_manager = RelationshipManager::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'mobile_number' => $request->mobile_number,
-            ]);
-
-            // Commit And Redirected To Listing
-            DB::commit();
+            $this->relationshipManagerService->createRelationshipManager($validated);
             return $this->redirectWithSuccess('relationship_managers.index', $this->getSuccessMessage('Relationship Manager', 'created'));
         } catch (\Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
-            return $this->redirectWithError($this->getErrorMessage('Relationship Manager', 'create') . ': ' . $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Relationship Manager', 'create') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -109,18 +99,9 @@ class RelationshipManagerController extends AbstractBaseCrudController
         }
 
         try {
-            DB::beginTransaction();
-
-            // Update Status
-            RelationshipManager::whereId($relationship_manager_id)->update(['status' => $status]);
-
-            // Commit And Redirect on index with Success Message
-            DB::commit();
+            $this->relationshipManagerService->updateStatus($relationship_manager_id, $status);
             return $this->redirectWithSuccess('relationship_managers.index', $this->getSuccessMessage('Relationship Manager Status', 'updated'));
         } catch (\Throwable $th) {
-
-            // Rollback & Return Error Message
-            DB::rollBack();
             return $this->redirectWithError($this->getErrorMessage('Relationship Manager Status', 'update') . ': ' . $th->getMessage());
         }
     }
@@ -151,23 +132,14 @@ class RelationshipManagerController extends AbstractBaseCrudController
             'name' => 'required',
         ];
 
-        $request->validate($validation_array);
+        $validated = $request->validate($validation_array);
 
-        DB::beginTransaction();
         try {
-            // Store Data
-            $relationship_manager_updated = RelationshipManager::whereId($relationship_manager->id)->update([
-                'name' => $request->name,
-                'email' => $request->email,
-                'mobile_number' => $request->mobile_number,
-            ]);
-            // Commit And Redirected To Listing
-            DB::commit();
+            $this->relationshipManagerService->updateRelationshipManager($relationship_manager, $validated);
             return $this->redirectWithSuccess('relationship_managers.index', $this->getSuccessMessage('Relationship Manager', 'updated'));
         } catch (\Throwable $th) {
-            // Rollback and return with Error
-            DB::rollBack();
-            return $this->redirectWithError($this->getErrorMessage('Relationship Manager', 'update') . ': ' . $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Relationship Manager', 'update') . ': ' . $th->getMessage())
+                ->withInput();
         }
     }
 
@@ -179,15 +151,10 @@ class RelationshipManagerController extends AbstractBaseCrudController
      */
     public function delete(RelationshipManager $relationship_manager)
     {
-        DB::beginTransaction();
         try {
-            // Delete RelationshipManager
-            RelationshipManager::whereId($relationship_manager->id)->delete();
-
-            DB::commit();
+            $this->relationshipManagerService->deleteRelationshipManager($relationship_manager);
             return $this->redirectWithSuccess('relationship_managers.index', $this->getSuccessMessage('Relationship Manager', 'deleted'));
         } catch (\Throwable $th) {
-            DB::rollBack();
             return $this->redirectWithError($this->getErrorMessage('Relationship Manager', 'delete') . ': ' . $th->getMessage());
         }
     }

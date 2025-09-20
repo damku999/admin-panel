@@ -9,8 +9,9 @@
             }
 
             const script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js';
-            script.integrity = 'sha512-7U4rRB8aGAHGVad3u2jiC7GA5/1YhQcQjxKeaVms/bT66i3LVBMRcBI9KwABNWnxOSwulkuSXxZLGuyfvo7V1A==';
+            // Use Chart.js v3.9.1 which is compatible with regular script loading
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
+            script.integrity = 'sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==';
             script.crossOrigin = 'anonymous';
             script.referrerPolicy = 'no-referrer';
             script.async = true;
@@ -18,7 +19,7 @@
             script.onerror = function() {
                 console.log('Primary Chart.js CDN failed, trying backup...');
                 const backupScript = document.createElement('script');
-                backupScript.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js';
+                backupScript.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js';
                 backupScript.async = true;
                 backupScript.onerror = function() {
                     console.log('Chart.js failed to load from both CDNs, using fallback charts');

@@ -35,7 +35,7 @@ class UserRepository extends AbstractBaseRepository implements UserRepositoryInt
     /**
      * Override getAllForExport to include roles relationship.
      */
-    public function getAllForExport()
+    public function getAllForExport(): \Illuminate\Database\Eloquent\Collection
     {
         return User::with('roles')->get();
     }

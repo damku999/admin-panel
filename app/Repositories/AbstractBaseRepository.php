@@ -132,4 +132,14 @@ abstract class AbstractBaseRepository implements BaseRepositoryInterface
     {
         return $this->modelClass::all();
     }
+
+    /**
+     * Get total count of entities
+     *
+     * @return int
+     */
+    public function getCount(): int
+    {
+        return $this->modelClass::count();
+    }
 }

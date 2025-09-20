@@ -7,6 +7,7 @@ use App\Models\CustomerInsurance;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 /**
@@ -117,5 +118,158 @@ class CustomerInsuranceRepository extends AbstractBaseRepository implements Cust
         return CustomerInsurance::where('status', true)
             ->orderBy('id', 'desc')
             ->get();
+    }
+
+    /**
+     * Get count of customer insurances within date range.
+     */
+    public function getCountByDateRange($startDate, $endDate): int
+    {
+        return CustomerInsurance::whereBetween('created_at', [$startDate, $endDate])->count();
+    }
+
+    /**
+     * Get sum of a column within date range.
+     */
+    public function getSumByDateRange(string $column, $startDate, $endDate): float
+    {
+        return (float) CustomerInsurance::whereBetween('created_at', [$startDate, $endDate])
+            ->sum($column) ?? 0;
+    }
+
+    /**
+     * Get recent customer insurances.
+     */
+    public function getRecent(int $limit = 10): Collection
+    {
+        return CustomerInsurance::with(['customer', 'insuranceCompany'])
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Get active policies count.
+     */
+    public function getActiveCount(): int
+    {
+        return CustomerInsurance::where('status', 1)->count();
+    }
+
+    /**
+     * Get count of policies.
+     */
+    public function getCount(): int
+    {
+        return CustomerInsurance::count();
+    }
+
+    /**
+     * Get policies by status.
+     */
+    public function getByStatus(string $status): Collection
+    {
+        return CustomerInsurance::where('status', $status)
+            ->with(['customer', 'insuranceCompany'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Get policies expiring within specified days.
+     */
+    public function getExpiringWithinDays(int $days): int
+    {
+        $expiryDate = Carbon::now()->addDays($days);
+        return CustomerInsurance::where('status', 1)
+            ->where('expired_date', '<=', $expiryDate)
+            ->where('expired_date', '>', Carbon::now())
+            ->count();
+    }
+
+    /**
+     * Get new policies created this month.
+     */
+    public function getNewThisMonth(): int
+    {
+        return CustomerInsurance::whereBetween('created_at', [
+            Carbon::now()->startOfMonth(),
+            Carbon::now()
+        ])->count();
+    }
+
+    /**
+     * Get revenue by date range.
+     */
+    public function getRevenueByDateRange($startDate, $endDate): float
+    {
+        return (float) CustomerInsurance::whereBetween('created_at', [$startDate, $endDate])
+            ->sum('final_premium_with_gst') ?? 0;
+    }
+
+    /**
+     * Get policies by policy type.
+     */
+    public function getByPolicyType(int $policyTypeId): Collection
+    {
+        return CustomerInsurance::where('premium_type_id', $policyTypeId)
+            ->with(['customer', 'insuranceCompany'])
+            ->get();
+    }
+
+    /**
+     * Get policies by branch.
+     */
+    public function getByBranch(int $branchId): Collection
+    {
+        return CustomerInsurance::where('branch_id', $branchId)
+            ->with(['customer', 'insuranceCompany'])
+            ->get();
+    }
+
+    /**
+     * Get monthly revenue trends.
+     */
+    public function getMonthlyRevenueTrends(int $months = 12): array
+    {
+        $trends = [];
+        for ($i = $months - 1; $i >= 0; $i--) {
+            $startDate = Carbon::now()->subMonths($i)->startOfMonth();
+            $endDate = Carbon::now()->subMonths($i)->endOfMonth();
+
+            $revenue = $this->getRevenueByDateRange($startDate, $endDate);
+            $count = $this->getCountByDateRange($startDate, $endDate);
+
+            $trends[] = [
+                'month' => $startDate->format('Y-m'),
+                'month_name' => $startDate->format('M Y'),
+                'revenue' => $revenue,
+                'policies_count' => $count,
+                'average_premium' => $count > 0 ? $revenue / $count : 0
+            ];
+        }
+
+        return $trends;
+    }
+
+    /**
+     * Get top performing insurance companies.
+     */
+    public function getTopInsuranceCompanies(int $limit = 10): array
+    {
+        return DB::table('customer_insurances')
+            ->join('insurance_companies', 'customer_insurances.insurance_company_id', '=', 'insurance_companies.id')
+            ->select(
+                'insurance_companies.name',
+                DB::raw('COUNT(*) as policies_count'),
+                DB::raw('SUM(final_premium_with_gst) as total_revenue'),
+                DB::raw('AVG(final_premium_with_gst) as average_premium')
+            )
+            ->where('customer_insurances.status', 1)
+            ->groupBy('insurance_companies.id', 'insurance_companies.name')
+            ->orderBy('total_revenue', 'desc')
+            ->limit($limit)
+            ->get()
+            ->toArray();
     }
 }

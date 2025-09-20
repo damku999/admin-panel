@@ -112,6 +112,14 @@ return [
             'tap' => [\App\Logging\BusinessLogFormatter::class],
         ],
 
+        // Browser logs for JavaScript errors and debugging
+        'browser' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/browser.log'),
+            'level' => 'debug',
+            'days' => 7,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),

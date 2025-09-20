@@ -1,11 +1,39 @@
 @extends('layouts.app')
 
 @push('scripts')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js" integrity="sha512-7U4rRB8aGAHGVad3u2jiC7GA5/1YhQcQjxKeaVms/bT66i3LVBMRcBI9KwABNWnxOSwulkuSXxZLGuyfvo7V1A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
-        // Backup CDN if first one fails
-        if (typeof Chart === 'undefined') {
-            document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"><\/script>');
+        // Load Chart.js asynchronously to avoid blocking and module errors
+        function loadChartJS() {
+            if (typeof Chart !== 'undefined') {
+                return; // Already loaded
+            }
+
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js';
+            script.integrity = 'sha512-7U4rRB8aGAHGVad3u2jiC7GA5/1YhQcQjxKeaVms/bT66i3LVBMRcBI9KwABNWnxOSwulkuSXxZLGuyfvo7V1A==';
+            script.crossOrigin = 'anonymous';
+            script.referrerPolicy = 'no-referrer';
+            script.async = true;
+
+            script.onerror = function() {
+                console.log('Primary Chart.js CDN failed, trying backup...');
+                const backupScript = document.createElement('script');
+                backupScript.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js';
+                backupScript.async = true;
+                backupScript.onerror = function() {
+                    console.log('Chart.js failed to load from both CDNs, using fallback charts');
+                };
+                document.head.appendChild(backupScript);
+            };
+
+            document.head.appendChild(script);
+        }
+
+        // Load Chart.js when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadChartJS);
+        } else {
+            loadChartJS();
         }
     </script>
 @endpush

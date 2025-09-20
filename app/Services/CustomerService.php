@@ -29,17 +29,7 @@ class CustomerService extends BaseService implements CustomerServiceInterface
 
     public function getCustomers(Request $request): LengthAwarePaginator
     {
-        $filters = [
-            'search' => $request->input('search'),
-            'type' => $request->input('type'),
-            'status' => $request->input('status'),
-            'from_date' => $request->input('from_date'),
-            'to_date' => $request->input('to_date'),
-            'sort_field' => $request->input('sort_field', 'name'),
-            'sort_order' => $request->input('sort_order', 'asc'),
-        ];
-
-        return $this->customerRepository->getPaginated($filters, 10);
+        return $this->customerRepository->getPaginated($request, 10);
     }
 
     public function createCustomer(StoreCustomerRequest $request): Customer

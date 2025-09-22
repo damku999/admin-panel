@@ -523,13 +523,7 @@ class QuotationService extends BaseService implements QuotationServiceInterface
 
     public function getQuotations(Request $request): LengthAwarePaginator
     {
-        $filters = [
-            'search' => $request->input('search'),
-            'status' => $request->input('status'),
-            'customer_id' => $request->input('customer_id'),
-        ];
-
-        return $this->quotationRepository->getPaginated($filters, 15);
+        return $this->quotationRepository->getPaginated($request, 15);
     }
 
     public function deleteQuotation(Quotation $quotation): bool

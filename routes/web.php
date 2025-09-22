@@ -340,7 +340,4 @@ Route::middleware('auth')->prefix('security')->name('security.')->group(function
 
 // API routes removed - web application only
 
-    // Add your actual API endpoints here
-    // Route::get('/customers', [App\Http\Controllers\Api\CustomerController::class, 'index']);
-    // Route::post('/quotations', [App\Http\Controllers\Api\QuotationController::class, 'store']);
-});
+// Additional routes can be added here

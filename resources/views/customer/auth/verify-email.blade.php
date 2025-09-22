@@ -1,4 +1,4 @@
-@extends('layouts.customer')
+@extends('layouts.customer-auth')
 
 @section('title', 'Verify Email')
 
@@ -61,6 +61,9 @@
                 </div>
             </div>
         </div>
+
+        <!-- Midastech Credit -->
+        @include('common.midastech-credit')
     </div>
 
     <style>

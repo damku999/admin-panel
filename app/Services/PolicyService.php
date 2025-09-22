@@ -47,7 +47,7 @@ class PolicyService extends BaseService implements PolicyServiceInterface
     public function updatePolicy(CustomerInsurance $policy, array $data): bool
     {
         return $this->updateInTransaction(
-            fn() => $this->policyRepository->update($policy->id, $data)
+            fn() => $this->policyRepository->update($policy, $data)
         );
     }
 
@@ -169,16 +169,18 @@ class PolicyService extends BaseService implements PolicyServiceInterface
     public function deletePolicy(CustomerInsurance $policy): bool
     {
         return $this->deleteInTransaction(
-            fn() => $this->policyRepository->delete($policy->id)
+            fn() => $this->policyRepository->delete($policy)
         );
     }
 
     /**
      * Update policy status.
      */
-    public function updatePolicyStatus(int $policyId, int $status): bool
+    public function updatePolicyStatus(CustomerInsurance $policy, int $status): bool
     {
-        return $this->policyRepository->update($policyId, ['status' => $status]);
+        return $this->updateInTransaction(
+            fn() => $this->policyRepository->update($policy, ['status' => $status])
+        );
     }
 
     /**

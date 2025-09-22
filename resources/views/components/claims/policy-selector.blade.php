@@ -297,7 +297,7 @@
                 // Form validation function
                 window.validatePolicySelection = function() {
                     if (!$('#customer_insurance_id').val()) {
-                        alert('Please select a policy/insurance first.');
+                        show_notification('error', 'Please select a policy/insurance first.');
                         $('#customer_insurance_id').focus();
                         return false;
                     }

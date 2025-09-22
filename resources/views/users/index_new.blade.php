@@ -16,9 +16,6 @@
             addRoute="users.create"
             addPermission="user-create"
             exportRoute="users.export"
-            :extraButtons="'<a href=\"' . route('users.import') . '\" class=\"btn btn-info\">
-                <i class=\"fas fa-file-import\"></i> <span class=\"d-none d-sm-inline\">Import</span>
-            </a>'"
         />
 
         <div class="card-body">

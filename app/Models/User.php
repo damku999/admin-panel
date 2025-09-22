@@ -5,12 +5,17 @@ namespace App\Models;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use App\Traits\TableRecordObserver;
+use App\Traits\HasTwoFactorAuth;
+use App\Traits\HasSecuritySettings;
+use App\Traits\Auditable;
+use App\Traits\HasApiKeys;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * App\Models\User
@@ -73,7 +78,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity, HasTwoFactorAuth, HasSecuritySettings, Auditable, HasApiKeys;
 
     /**
      * The attributes that are mass assignable.
@@ -132,5 +137,13 @@ class User extends Authenticatable
     public function reports()
     {
         return $this->hasMany(Report::class);
+    }
+
+    /**
+     * Check if provided password matches current password
+     */
+    public function checkPassword(string $password): bool
+    {
+        return Hash::check($password, $this->password);
     }
 }

@@ -1,7 +1,11 @@
 <footer class="sticky-footer bg-white">
     <div class="container my-auto">
         <div class="copyright text-center my-auto">
-            <span>Copyright &copy; {{ config('app.name', 'Midas Tech') }} @ {{ date('Y') }}</span>
+            <span>Copyright &copy; Midas Tech @ {{ date('Y') }} | Developed by
+                <a href="https://midastech.in" target="_blank" class="text-decoration-none fw-medium" style="color: #2563eb;">
+                    <i class="fas fa-globe me-1"></i>Midastech
+                </a>
+            </span>
         </div>
     </div>
 </footer>

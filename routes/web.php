@@ -159,8 +159,6 @@ Route::middleware('auth')->prefix('users')->name('users.')->group(function () {
     Route::get('/update/status/{user_id}/{status}', [UserController::class, 'updateStatus'])->name('status');
 
 
-    Route::get('/import-users', [UserController::class, 'importUsers'])->name('import');
-    Route::post('/upload-users', [UserController::class, 'uploadUsers'])->name('upload');
 
     Route::get('export/', [UserController::class, 'export'])->name('export');
 });
@@ -305,4 +303,61 @@ Route::middleware('auth:web')->prefix('insurance-claims')->name('claims.')->grou
 
     // Liability details management
     Route::post('/liability/{claim}/update', [ClaimController::class, 'updateLiabilityDetails'])->name('liability.update');
+});
+
+// Two-Factor Authentication Routes
+Route::middleware('auth')->prefix('profile/two-factor')->name('profile.two-factor.')->group(function () {
+    Route::get('/', [App\Http\Controllers\TwoFactorAuthController::class, 'index'])->name('index');
+    Route::post('/enable', [App\Http\Controllers\TwoFactorAuthController::class, 'enable'])->name('enable');
+    Route::post('/confirm', [App\Http\Controllers\TwoFactorAuthController::class, 'confirm'])->name('confirm');
+    Route::post('/disable', [App\Http\Controllers\TwoFactorAuthController::class, 'disable'])->name('disable');
+    Route::post('/recovery-codes', [App\Http\Controllers\TwoFactorAuthController::class, 'generateRecoveryCodes'])->name('recovery-codes');
+    Route::post('/trust-device', [App\Http\Controllers\TwoFactorAuthController::class, 'trustDevice'])->name('trust-device');
+    Route::delete('/devices/{device}', [App\Http\Controllers\TwoFactorAuthController::class, 'revokeDevice'])->name('revoke-device');
+    Route::get('/status', [App\Http\Controllers\TwoFactorAuthController::class, 'status'])->name('status');
+});
+
+// 2FA Challenge Routes (during login)
+Route::get('/two-factor-challenge', [App\Http\Controllers\TwoFactorAuthController::class, 'showVerification'])->name('two-factor.challenge');
+Route::post('/two-factor-challenge', [App\Http\Controllers\TwoFactorAuthController::class, 'verify'])->name('two-factor.verify');
+
+// Security Monitoring Routes
+Route::middleware('auth')->prefix('security')->name('security.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\SecurityController::class, 'dashboard'])->name('dashboard');
+    Route::get('/audit-logs', [App\Http\Controllers\SecurityController::class, 'auditLogs'])->name('audit-logs');
+    Route::get('/export-logs', [App\Http\Controllers\SecurityController::class, 'exportLogs'])->name('export-logs');
+
+    // API endpoints for security analytics
+    Route::get('/api/analytics', [App\Http\Controllers\SecurityController::class, 'analytics'])->name('api.analytics');
+    Route::get('/api/suspicious-activity', [App\Http\Controllers\SecurityController::class, 'suspiciousActivity'])->name('api.suspicious-activity');
+    Route::get('/api/high-risk-activity', [App\Http\Controllers\SecurityController::class, 'highRiskActivity'])->name('api.high-risk-activity');
+    Route::get('/api/user/{userId}/activity', [App\Http\Controllers\SecurityController::class, 'userActivity'])->name('api.user-activity');
+    Route::get('/api/entity/{entityId}/activity', [App\Http\Controllers\SecurityController::class, 'entityActivity'])->name('api.entity-activity');
+    Route::get('/api/report', [App\Http\Controllers\SecurityController::class, 'generateReport'])->name('api.report');
+    Route::get('/api/alerts', [App\Http\Controllers\SecurityController::class, 'alerts'])->name('api.alerts');
+    Route::get('/api/metrics-widget', [App\Http\Controllers\SecurityController::class, 'metricsWidget'])->name('api.metrics-widget');
+});
+
+// API Key Management Routes
+Route::middleware('auth')->prefix('api-keys')->name('api-keys.')->group(function () {
+    Route::get('/', [App\Http\Controllers\ApiKeyController::class, 'index'])->name('index');
+    Route::post('/', [App\Http\Controllers\ApiKeyController::class, 'store'])->name('store');
+    Route::get('/{apiKey}', [App\Http\Controllers\ApiKeyController::class, 'show'])->name('show');
+    Route::put('/{apiKey}', [App\Http\Controllers\ApiKeyController::class, 'update'])->name('update');
+    Route::delete('/{apiKey}', [App\Http\Controllers\ApiKeyController::class, 'destroy'])->name('destroy');
+    Route::post('/{apiKey}/regenerate-secret', [App\Http\Controllers\ApiKeyController::class, 'regenerateSecret'])->name('regenerate-secret');
+    Route::get('/{apiKey}/analytics', [App\Http\Controllers\ApiKeyController::class, 'analytics'])->name('analytics');
+    Route::get('/system/stats', [App\Http\Controllers\ApiKeyController::class, 'systemStats'])->name('system-stats');
+});
+
+// API Documentation
+Route::get('/api/documentation', [App\Http\Controllers\ApiKeyController::class, 'documentation'])->name('api.documentation');
+
+// Protected API endpoints (example)
+Route::middleware(['api.key', 'rate.limit:100,1'])->prefix('api/v1')->group(function () {
+    Route::get('/test', [App\Http\Controllers\ApiKeyController::class, 'test'])->name('api.test');
+
+    // Add your actual API endpoints here
+    // Route::get('/customers', [App\Http\Controllers\Api\CustomerController::class, 'index']);
+    // Route::post('/quotations', [App\Http\Controllers\Api\QuotationController::class, 'store']);
 });

@@ -131,11 +131,64 @@ return [
     | Enhanced rate limiting configurations
     |
     */
-    
+
     'rate_limiting' => [
         'login_attempts' => env('RATE_LIMIT_LOGIN', 5),
         'login_window' => env('RATE_LIMIT_LOGIN_WINDOW', 900), // 15 minutes
         'api_requests' => env('RATE_LIMIT_API', 100),
         'api_window' => env('RATE_LIMIT_API_WINDOW', 60), // 1 minute
+        'max_requests' => env('RATE_LIMIT_MAX_REQUESTS', 1000),
+        'window' => env('RATE_LIMIT_WINDOW', 3600), // 1 hour
+        'suspicious_threshold' => env('RATE_LIMIT_SUSPICIOUS_THRESHOLD', 100),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Enhanced Security Features
+    |--------------------------------------------------------------------------
+    |
+    | Additional security configurations
+    |
+    */
+
+    'enhanced_features' => [
+        'ip_validation' => env('SECURITY_IP_VALIDATION', false),
+        'session_fingerprinting' => env('SECURITY_SESSION_FINGERPRINTING', true),
+        'user_agent_validation' => env('SECURITY_USER_AGENT_VALIDATION', true),
+        'suspicious_activity_detection' => env('SECURITY_SUSPICIOUS_ACTIVITY_DETECTION', true),
+        'automatic_account_lockout' => env('SECURITY_AUTO_LOCKOUT', false),
+        'security_event_retention_days' => env('SECURITY_EVENT_RETENTION_DAYS', 90),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Database Security
+    |--------------------------------------------------------------------------
+    |
+    | Database-level security configurations
+    |
+    */
+
+    'database_security' => [
+        'query_logging' => env('SECURITY_QUERY_LOGGING', false),
+        'slow_query_threshold' => env('SECURITY_SLOW_QUERY_THRESHOLD', 2000), // milliseconds
+        'max_query_results' => env('SECURITY_MAX_QUERY_RESULTS', 10000),
+        'validate_field_names' => env('SECURITY_VALIDATE_FIELD_NAMES', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Content Security
+    |--------------------------------------------------------------------------
+    |
+    | Content-related security settings
+    |
+    */
+
+    'content_security' => [
+        'allowed_iframe_domains' => env('SECURITY_ALLOWED_IFRAME_DOMAINS', ''),
+        'script_nonce_required' => env('SECURITY_SCRIPT_NONCE_REQUIRED', true),
+        'style_nonce_required' => env('SECURITY_STYLE_NONCE_REQUIRED', false),
+        'report_violations' => env('SECURITY_REPORT_VIOLATIONS', true),
     ],
 ];

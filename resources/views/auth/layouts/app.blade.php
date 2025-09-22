@@ -4,14 +4,10 @@
 {{-- Head Before AUTH--}}
 @include('auth.includes.head')
 
-<body class="bg-gradient-primary">
+<body>
 
-    <div class="container" id="wrapper">
-
-        {{-- Content Goes Here FOR Before AUTH --}}
-        @yield('content')
-
-    </div>
+    {{-- Content Goes Here FOR Before AUTH --}}
+    @yield('content')
 
     {{-- Scripts Before AUTH --}}
     @include('auth.includes.scripts')

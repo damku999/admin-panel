@@ -1,4 +1,4 @@
-@extends('layouts.customer')
+@extends('layouts.customer-auth')
 
 @section('title', 'Reset Password')
 
@@ -70,6 +70,9 @@
                 </div>
             </div>
         </div>
+
+        <!-- Midastech Credit -->
+        @include('common.midastech-credit')
     </div>
 
     <style>

@@ -5,6 +5,10 @@ namespace App\Models;
 use App\Models\CustomerInsurance;
 use App\Models\Quotation;
 use App\Models\Claim;
+use App\Traits\HasTwoFactorAuth;
+use App\Traits\HasSecuritySettings;
+use App\Traits\Auditable;
+use App\Traits\HasApiKeys;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
@@ -92,7 +96,7 @@ use Illuminate\Support\Str;
  */
 class Customer extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, LogsActivity;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, LogsActivity, HasTwoFactorAuth, HasSecuritySettings, Auditable, HasApiKeys;
     protected static $logAttributes = ['*'];
     protected static $logOnlyDirty = true;
     /**
@@ -681,5 +685,13 @@ class Customer extends Authenticatable
     public function setEngagementAnniversaryDateAttribute($value)
     {
         $this->attributes['engagement_anniversary_date'] = formatDateForDatabase($value);
+    }
+
+    /**
+     * Check if provided password matches current password
+     */
+    public function checkPassword(string $password): bool
+    {
+        return Hash::check($password, $this->password);
     }
 }

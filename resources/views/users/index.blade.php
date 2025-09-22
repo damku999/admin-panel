@@ -10,16 +10,13 @@
 
         <!-- DataTales Example -->
         <div class="card shadow mt-3 mb-4">
-            <x-list-header 
+            <x-list-header
                 title="Users Management"
                 subtitle="Manage all system users"
                 addRoute="users.create"
                 addPermission="user-create"
                 exportRoute="users.export"
                 exportText="Export To Excel"
-                :extraButtons="'<a href=\"' . route('users.import') . '\" class=\"btn btn-info btn-sm\">
-                    <i class=\"fas fa-file-import\"></i> <span class=\"d-none d-sm-inline\">Import</span>
-                </a>'"
             />
             <div class="card-body">
                 <div class="table-responsive">

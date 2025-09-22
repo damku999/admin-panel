@@ -32,7 +32,7 @@ class CustomerAuth
             'customer.change-password',
             'customer.change-password.update',
             'customer.family-member.change-password',
-            'customer.family-member.update-password',
+            'customer.family-member.password',
             'customer.verify-email-notice',
             'customer.resend-verification',
             'customer.logout'

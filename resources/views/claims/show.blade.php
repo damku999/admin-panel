@@ -616,7 +616,7 @@
                     <h5 class="modal-title">
                         <i class="fab fa-whatsapp me-2"></i>WhatsApp Message Preview
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -654,7 +654,7 @@
                         <h5 class="modal-title">
                             <i class="fas fa-plus me-2"></i>Add New Stage
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
@@ -696,7 +696,7 @@
                         <h5 class="modal-title">
                             <i class="fas fa-edit me-2"></i>Edit Claim Number
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
@@ -731,7 +731,7 @@
                         <h5 class="modal-title">
                             <i class="fas fa-edit me-2"></i>Edit Liability Details
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">

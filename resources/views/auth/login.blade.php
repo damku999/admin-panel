@@ -1,83 +1,128 @@
 @extends('auth.layouts.app')
 
-@section('title', 'Login')
+@section('title', 'Admin Login')
 
 @section('content')
-    <div class="row justify-content-center">
-
-        <div class="text-center mt-5">
-            <img src=" {{ asset('images/parth_logo.png') }}" style="max-width: 50%;">
-        </div>
-
-        <div class="col-xl-10 col-lg-12 col-md-9">
-            <div class="card o-hidden border-0 shadow-lg my-5">
-                <div class="card-body p-0">
-                    <!-- Nested Row within Card Body -->
-                    <div class="row">
-                        <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
-                        <div class="col-lg-6">
-                            <div class="p-5">
-                                <div class="text-center">
-                                    <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
-                                </div>
-
-                                @if (session('error'))
-                                    <span class="text-danger"> {{ session('error') }}</span>
-                                @endif
-
-                                <form method="POST" action="{{ route('login') }}">
-                                    @csrf
-                                    <div class="form-group">
-                                        <input id="email" type="email"
-                                            class="form-control form-control-user @error('email') is-invalid @enderror"
-                                            name="email" value="{{ old('email') }}" required autocomplete="email"
-                                            autofocus placeholder="Enter Email Address.">
-
-                                        @error('email')
-                                            <span class="invalid-feedback" role="alert">
-                                                <strong>{{ $message }}</strong>
-                                            </span>
-                                        @enderror
-                                    </div>
-                                    <div class="form-group">
-                                        <input id="password" type="password"
-                                            class="form-control form-control-user @error('password') is-invalid @enderror"
-                                            name="password" required autocomplete="current-password" placeholder="Password">
-
-                                        @error('password')
-                                            <span class="invalid-feedback" role="alert">
-                                                <strong>{{ $message }}</strong>
-                                            </span>
-                                        @enderror
-                                    </div>
-                                    <div class="form-group">
-                                        <div class="custom-control custom-checkbox small">
-                                            <input class="custom-control-input" type="checkbox" name="remember"
-                                                id="customCheck" {{ old('remember') ? 'checked' : '' }}>
-
-                                            <label class="custom-control-label" for="customCheck">Remember
-                                                Me</label>
-                                        </div>
-                                    </div>
-                                    <button class="btn btn-primary btn-user btn-block">
-                                        Login
-                                    </button>
-                                </form>
-                                <hr>
-                                <div class="text-center">
-                                    <a class="small" href="{{ route('password.request') }}">Forgot Password?</a>
-                                </div>
-                            </div>
+<div class="auth-container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6 col-xl-5">
+                <div class="auth-card card shadow-lg fade-in-scale">
+                    <!-- Auth Header -->
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <img src="{{ asset('images/parth_logo.png') }}" alt="WebMonks" class="img-fluid mb-3" style="max-width: 120px;">
+                            <h4 class="text-dark fw-bold">Admin Portal</h4>
+                            <p class="text-muted">Sign in to access the admin dashboard</p>
                         </div>
+
+        <!-- Alerts -->
+        @if (session('error'))
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>{{ session('error') }}
+            </div>
+        @endif
+
+        @if (session('message'))
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>{{ session('message') }}
+            </div>
+        @endif
+
+        @if (session('info'))
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>{{ session('info') }}
+            </div>
+        @endif
+
+        <!-- Login Form -->
+        <form method="POST" action="{{ route('login') }}">
+            @csrf
+
+            <div class="form-group">
+                <label for="email">
+                    <i class="fas fa-envelope me-1"></i>Email Address
+                </label>
+                <input type="email"
+                       class="form-control @error('email') is-invalid @enderror"
+                       id="email"
+                       name="email"
+                       value="{{ old('email') }}"
+                       placeholder="Enter your email address"
+                       required
+                       autofocus>
+                @error('email')
+                    <div class="invalid-feedback">
+                        <i class="fas fa-exclamation-triangle me-1"></i>{{ $message }}
+                    </div>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="password">
+                    <i class="fas fa-lock me-1"></i>Password
+                </label>
+                <input type="password"
+                       class="form-control @error('password') is-invalid @enderror"
+                       id="password"
+                       name="password"
+                       placeholder="Enter your password"
+                       required>
+                @error('password')
+                    <div class="invalid-feedback">
+                        <i class="fas fa-exclamation-triangle me-1"></i>{{ $message }}
+                    </div>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="remember" name="remember" {{ old('remember') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="remember">
+                            Remember me
+                        </label>
+                    </div>
+                    <a href="{{ route('password.request') }}" class="text-decoration-none">
+                        <i class="fas fa-key me-1"></i>Forgot Password?
+                    </a>
+                </div>
+            </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-4">
+                            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                        </button>
+                    </form>
+
+                    <!-- Customer Link -->
+                    <div class="text-center">
+                        <p class="text-muted mb-0">
+                            <small>Need customer access?
+                                <a href="{{ route('customer.login') }}" class="text-decoration-none">
+                                    <i class="fas fa-user me-1"></i>Customer Login
+                                </a>
+                            </small>
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="text-center mt-5">
-            <h6 class="text-white">Developed By : <a class="text-white" href="https://midastech.in">Midastech
-                </a></h6>
-        </div>
-
+        <!-- Midastech Credit -->
+        @include('common.midastech-credit')
     </div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+    // Add focus state enhancement
+    $(document).ready(function() {
+        $('.form-control').on('focus', function() {
+            $(this).parent().addClass('focused');
+        }).on('blur', function() {
+            $(this).parent().removeClass('focused');
+        });
+    });
+</script>
+@endpush

@@ -107,7 +107,7 @@
 
         function validateForm(event) {
             if (vehicleYesInput.checked && lifeInsuranceYesInput.checked) {
-                alert("You cannot select 'Yes' for both options.");
+                show_notification('error', \"You cannot select 'Yes' for both options.\");
                 event.preventDefault();
             }
         }

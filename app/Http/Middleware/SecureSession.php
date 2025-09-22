@@ -43,16 +43,25 @@ class SecureSession
      */
     protected function enforceSecureSession(Request $request): void
     {
-        // Regenerate session ID periodically for security
+        // Regenerate session ID periodically for security (but NOT during 2FA challenge)
         if (!$request->session()->has('last_regenerated') ||
             now()->diffInMinutes($request->session()->get('last_regenerated')) > 30) {
-            $request->session()->regenerate();
-            $request->session()->put('last_regenerated', now());
 
-            Log::info('Customer session regenerated for security', [
-                'customer_id' => Auth::guard('customer')->id(),
-                'session_id' => $request->session()->getId()
-            ]);
+            // Don't regenerate session if we're in 2FA challenge state
+            if (!$request->session()->has('2fa_user_id')) {
+                $request->session()->regenerate();
+                $request->session()->put('last_regenerated', now());
+
+                Log::info('Customer session regenerated for security', [
+                    'customer_id' => Auth::guard('customer')->id(),
+                    'session_id' => $request->session()->getId()
+                ]);
+            } else {
+                Log::info('Skipping session regeneration during 2FA challenge', [
+                    '2fa_user_id' => $request->session()->get('2fa_user_id'),
+                    'session_id' => $request->session()->getId()
+                ]);
+            }
         }
     }
 

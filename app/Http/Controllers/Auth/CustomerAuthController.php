@@ -164,6 +164,26 @@ class CustomerAuthController extends Controller
                 ->with('info', 'Please verify your email address to continue.');
         }
 
+        // Check if customer has 2FA enabled and confirmed
+        if ($customer && method_exists($customer, 'hasTwoFactorEnabled') && $customer->hasTwoFactorEnabled()) {
+            // Check if device is already trusted
+            if (method_exists($customer, 'isDeviceTrusted') && !$customer->isDeviceTrusted($request)) {
+                // Store customer info in session for 2FA challenge
+                $request->session()->put([
+                    '2fa_user_id' => $customer->id,
+                    '2fa_guard' => 'customer',
+                    '2fa_remember' => $request->boolean('remember')
+                ]);
+
+                // Logout the customer temporarily (they'll be logged back in after 2FA)
+                Auth::guard('customer')->logout();
+
+                // Redirect to 2FA challenge
+                return redirect()->route('two-factor.challenge')
+                    ->with('info', 'Please enter your two-factor authentication code.');
+            }
+        }
+
         return redirect()->intended($this->redirectPath());
     }
 
@@ -562,12 +582,12 @@ class CustomerAuthController extends Controller
 
         // Security: Ensure both customers have family groups
         if (!$customer->hasFamily()) {
-            abort(403, 'You must be part of a family group to view family member profiles.');
+            return response()->view('errors.customer.403', [], 403);
         }
 
         // Security: Ensure the member is in the same family
         if (!$customer->isInSameFamilyAs($member)) {
-            abort(403, 'You can only view profiles of your family members.');
+            return response()->view('errors.customer.403', [], 403);
         }
 
         // Prevent viewing your own profile via this route
@@ -593,12 +613,12 @@ class CustomerAuthController extends Controller
 
         // Security: Ensure both customers have family groups
         if (!$customer->hasFamily()) {
-            abort(403, 'You must be part of a family group to change family member passwords.');
+            return response()->view('errors.customer.403', [], 403);
         }
 
         // Security: Ensure the member is in the same family
         if (!$customer->isInSameFamilyAs($member)) {
-            abort(403, 'You can only change passwords of your family members.');
+            return response()->view('errors.customer.403', [], 403);
         }
 
         // Security: Prevent changing your own password via this route
@@ -624,12 +644,12 @@ class CustomerAuthController extends Controller
 
         // Security: Ensure both customers have family groups
         if (!$customer->hasFamily()) {
-            abort(403, 'You must be part of a family group to change family member passwords.');
+            return response()->view('errors.customer.403', [], 403);
         }
 
         // Security: Ensure the member is in the same family
         if (!$customer->isInSameFamilyAs($member)) {
-            abort(403, 'You can only change passwords of your family members.');
+            return response()->view('errors.customer.403', [], 403);
         }
 
         // Security: Prevent changing your own password via this route

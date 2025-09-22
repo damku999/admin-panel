@@ -535,7 +535,7 @@ class QuotationService extends BaseService implements QuotationServiceInterface
     public function deleteQuotation(Quotation $quotation): bool
     {
         return $this->deleteInTransaction(
-            fn() => $this->quotationRepository->delete($quotation->id)
+            fn() => $this->quotationRepository->delete($quotation)
         );
     }
 

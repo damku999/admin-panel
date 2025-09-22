@@ -197,15 +197,6 @@ class UserController extends AbstractBaseCrudController
     }
 
     /**
-     * Import Users
-     * @return View
-     */
-    public function importUsers()
-    {
-        return view('users.import');
-    }
-
-    /**
      * Export Users
      * @return BinaryFileResponse
      */

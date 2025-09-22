@@ -124,7 +124,7 @@ class CustomerService extends BaseService implements CustomerServiceInterface
             ];
 
             // Update customer data
-            $updated = $this->customerRepository->update($customer->id, $newValues);
+            $updated = $this->customerRepository->update($customer, $newValues);
 
             if ($updated) {
                 // Handle document uploads
@@ -177,7 +177,7 @@ class CustomerService extends BaseService implements CustomerServiceInterface
     public function deleteCustomer(Customer $customer): bool
     {
         return $this->deleteInTransaction(
-            fn() => $this->customerRepository->delete($customer->id)
+            fn() => $this->customerRepository->delete($customer)
         );
     }
 

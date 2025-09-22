@@ -734,7 +734,7 @@
                     },
                     error: function(xhr, status, error) {
                         console.error('Error loading quote form:', error);
-                        alert('Error loading quote form. Please try again.');
+                        show_notification('error', 'Error loading quote form. Please try again.');
                     }
                 });
             }

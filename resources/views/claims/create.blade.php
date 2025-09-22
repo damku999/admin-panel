@@ -120,14 +120,14 @@
 
                 if (!$('#insurance_type').val()) {
                     e.preventDefault();
-                    alert('Please select insurance type.');
+                    show_notification('error', 'Please select insurance type.');
                     $('#insurance_type').focus();
                     return false;
                 }
 
                 if (!$('#incident_date').val()) {
                     e.preventDefault();
-                    alert('Please select incident date.');
+                    show_notification('error', 'Please select incident date.');
                     $('#incident_date').focus();
                     return false;
                 }

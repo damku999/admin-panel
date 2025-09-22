@@ -338,24 +338,7 @@ Route::middleware('auth')->prefix('security')->name('security.')->group(function
     Route::get('/api/metrics-widget', [App\Http\Controllers\SecurityController::class, 'metricsWidget'])->name('api.metrics-widget');
 });
 
-// API Key Management Routes
-Route::middleware('auth')->prefix('api-keys')->name('api-keys.')->group(function () {
-    Route::get('/', [App\Http\Controllers\ApiKeyController::class, 'index'])->name('index');
-    Route::post('/', [App\Http\Controllers\ApiKeyController::class, 'store'])->name('store');
-    Route::get('/{apiKey}', [App\Http\Controllers\ApiKeyController::class, 'show'])->name('show');
-    Route::put('/{apiKey}', [App\Http\Controllers\ApiKeyController::class, 'update'])->name('update');
-    Route::delete('/{apiKey}', [App\Http\Controllers\ApiKeyController::class, 'destroy'])->name('destroy');
-    Route::post('/{apiKey}/regenerate-secret', [App\Http\Controllers\ApiKeyController::class, 'regenerateSecret'])->name('regenerate-secret');
-    Route::get('/{apiKey}/analytics', [App\Http\Controllers\ApiKeyController::class, 'analytics'])->name('analytics');
-    Route::get('/system/stats', [App\Http\Controllers\ApiKeyController::class, 'systemStats'])->name('system-stats');
-});
-
-// API Documentation
-Route::get('/api/documentation', [App\Http\Controllers\ApiKeyController::class, 'documentation'])->name('api.documentation');
-
-// Protected API endpoints (example)
-Route::middleware(['api.key', 'rate.limit:100,1'])->prefix('api/v1')->group(function () {
-    Route::get('/test', [App\Http\Controllers\ApiKeyController::class, 'test'])->name('api.test');
+// API routes removed - web application only
 
     // Add your actual API endpoints here
     // Route::get('/customers', [App\Http\Controllers\Api\CustomerController::class, 'index']);

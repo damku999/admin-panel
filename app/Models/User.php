@@ -8,7 +8,6 @@ use App\Traits\TableRecordObserver;
 use App\Traits\HasTwoFactorAuth;
 use App\Traits\HasSecuritySettings;
 use App\Traits\Auditable;
-use App\Traits\HasApiKeys;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -78,7 +77,7 @@ use Illuminate\Support\Facades\Hash;
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity, HasTwoFactorAuth, HasSecuritySettings, Auditable, HasApiKeys;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity, HasTwoFactorAuth, HasSecuritySettings, Auditable;
 
     /**
      * The attributes that are mass assignable.

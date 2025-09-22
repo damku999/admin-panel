@@ -8,7 +8,6 @@ use App\Models\Claim;
 use App\Traits\HasTwoFactorAuth;
 use App\Traits\HasSecuritySettings;
 use App\Traits\Auditable;
-use App\Traits\HasApiKeys;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Permission\Traits\HasRoles;
@@ -96,7 +95,7 @@ use Illuminate\Support\Str;
  */
 class Customer extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, LogsActivity, HasTwoFactorAuth, HasSecuritySettings, Auditable, HasApiKeys;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, LogsActivity, HasTwoFactorAuth, HasSecuritySettings, Auditable;
     protected static $logAttributes = ['*'];
     protected static $logOnlyDirty = true;
     /**

@@ -565,11 +565,32 @@ class CustomerAuthController extends Controller
                 ->get();
         }
 
+        // Get policy and quotation counts for the overview section
+        $activePoliciesCount = 0;
+        $quotationsCount = 0;
+
+        if ($customer->isFamilyHead()) {
+            // Family head sees all family policies and quotations
+            $activePoliciesCount = \App\Models\CustomerInsurance::whereHas('customer', function ($query) use ($customer) {
+                $query->where('family_group_id', $customer->family_group_id);
+            })->where('status', 'active')->count();
+
+            $quotationsCount = \App\Models\Quotation::whereHas('customer', function ($query) use ($customer) {
+                $query->where('family_group_id', $customer->family_group_id);
+            })->count();
+        } else {
+            // Regular family member sees only their own
+            $activePoliciesCount = $customer->insurance()->where('status', 'active')->count();
+            $quotationsCount = $customer->quotations()->count();
+        }
+
         return view('customer.profile', [
             'customer' => $customer,
             'familyGroup' => $customer->familyGroup,
             'familyMembers' => $familyMembers,
             'isHead' => $customer->isFamilyHead(),
+            'activePoliciesCount' => $activePoliciesCount,
+            'quotationsCount' => $quotationsCount,
         ]);
     }
 

@@ -239,9 +239,7 @@
                                 <i class="fas fa-key me-2"></i>Change Password
                             </a>
 
-                            <button type="button" class="btn btn-success" data-bs-toggle="collapse" data-bs-target="#customerTwoFactorSection">
-                                <i class="fas fa-shield-alt me-2"></i>Two-Factor Authentication
-                            </button>
+                            <!-- Two-Factor Authentication removed (Admin only feature) -->
 
                             <a href="{{ route('customer.policies') }}" class="btn btn-info">
                                 <i class="fas fa-shield-alt me-2"></i>View My Policies
@@ -260,123 +258,28 @@
                     </div>
                 </div>
 
-                <!-- Two-Factor Authentication Section (Collapsible) -->
-                <div class="collapse" id="customerTwoFactorSection">
-                    <div class="card mb-4 bg-light fade-in-scale">
-                        <div class="card-header bg-success">
-                            <h5 class="mb-0 text-white fw-bold">
-                                <i class="fas fa-shield-alt me-2"></i>Two-Factor Authentication
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            @php
-                                $user = Auth::guard('customer')->user();
-                                $status = app(\App\Services\TwoFactorAuthService::class)->getTwoFactorStatus($user);
-                                $trustedDevices = app(\App\Services\TwoFactorAuthService::class)->getTrustedDevices($user);
-                            @endphp
-
-                            <h6 class="mb-3"><i class="fas fa-shield-alt me-2"></i>Two-Factor Authentication</h6>
-
-                            @if($status['enabled'])
-                                <!-- 2FA Enabled State -->
-                                <div class="alert alert-success">
-                                    <i class="fas fa-check-circle"></i>
-                                    <strong>Two-factor authentication is enabled</strong> for your account.
+                <!-- Account Security Status -->
+                <div class="card mb-4 fade-in-scale" style="animation-delay: 350ms">
+                    <div class="card-header bg-success">
+                        <h5 class="mb-0 text-white fw-bold">
+                            <i class="fas fa-shield-alt me-2"></i>Account Status
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="border-end">
+                                    <h6 class="text-muted">Account Status</h6>
+                                    <span class="badge bg-success">Active</span>
                                 </div>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <h6 class="card-title">Recovery Codes</h6>
-                                                <p class="card-text">You have <strong>{{ $status['recovery_codes_count'] }}</strong> recovery codes remaining.</p>
-                                                <button type="button" class="btn btn-warning btn-sm" id="generateRecoveryCodesBtn">
-                                                    <i class="fas fa-refresh"></i> Generate New Codes
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <div class="card">
-                                            <div class="card-body">
-                                                <h6 class="card-title">Disable 2FA</h6>
-                                                <p class="card-text">Remove the extra security layer from your account.</p>
-                                                <button type="button" class="btn btn-danger btn-sm" id="disableTwoFactorBtn">
-                                                    <i class="fas fa-times"></i> Disable 2FA
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            @elseif($status['pending_confirmation'])
-                                <!-- 2FA Setup Pending State -->
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-clock"></i>
-                                    <strong>Two-factor authentication setup is pending.</strong> Please complete the setup below.
-                                </div>
-
-                                <div id="setupPendingSection">
-                                    <h6>Complete Setup</h6>
-                                    <p>Scan the QR code with your authenticator app and enter the verification code.</p>
-                                    <button type="button" class="btn btn-primary" id="showSetupBtn">
-                                        <i class="fas fa-qrcode"></i> Show Setup Instructions
-                                    </button>
-                                </div>
-
-                            @else
-                                <!-- 2FA Disabled State -->
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    <strong>Two-factor authentication is not enabled</strong> for your account.
-                                </div>
-
-                                <div class="mb-4">
-                                    <h6>Enable Two-Factor Authentication</h6>
-                                    <p class="text-muted">
-                                        Two-factor authentication adds an extra layer of security to your account.
-                                        You'll need an authenticator app like Google Authenticator, Authy, or Microsoft Authenticator.
-                                    </p>
-                                    <button type="button" class="btn btn-success" id="enableTwoFactorBtn">
-                                        <i class="fas fa-shield-alt"></i> Enable Two-Factor Authentication
-                                    </button>
-                                </div>
-                            @endif
-
-                            <!-- Trusted Devices Section -->
-                            @if(count($trustedDevices) > 0)
-                                <div class="mt-4">
-                                    <h6>Trusted Devices</h6>
-                                    <div class="row">
-                                        @foreach($trustedDevices as $device)
-                                            <div class="col-md-6 mb-2">
-                                                <div class="card border-left-success" data-device-id="{{ $device['id'] }}">
-                                                    <div class="card-body py-2">
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <div>
-                                                                <strong>{{ $device['device_name'] }}</strong><br>
-                                                                <small class="text-muted">
-                                                                    {{ $device['browser'] }} on {{ $device['platform'] }}<br>
-                                                                    Last used: {{ \Carbon\Carbon::parse($device['last_used_at'])->diffForHumans() }}
-                                                                </small>
-                                                            </div>
-                                                            <button type="button" class="btn btn-sm btn-outline-danger revoke-device-btn"
-                                                                    data-device-id="{{ $device['id'] }}">
-                                                                <i class="fas fa-times"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-
-                            <div class="mt-3">
-                                <button type="button" class="btn btn-sm btn-outline-primary" id="trustCurrentDeviceBtn">
-                                    <i class="fas fa-plus"></i> Trust This Device
-                                </button>
+                            </div>
+                            <div class="col-6">
+                                <h6 class="text-muted">Email Status</h6>
+                                @if ($customer->hasVerifiedEmail())
+                                    <span class="badge bg-success">Verified</span>
+                                @else
+                                    <span class="badge bg-warning">Not Verified</span>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -412,7 +315,6 @@
 </div>
 @endsection
 
-@push('scripts')
 <!-- Setup Modal -->
 <div class="modal fade" id="twoFactorSetupModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -427,8 +329,6 @@
         </div>
     </div>
 </div>
-
-<!-- Disable Confirmation Modal -->
 <div class="modal fade" id="disableTwoFactorModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -480,6 +380,7 @@
     </div>
 </div>
 
+@push('scripts')
 <script>
     function resendVerification() {
         if (confirm('Send verification email to {{ $customer->email }}?')) {
@@ -514,263 +415,6 @@
         });
     });
 
-    // 2FA JavaScript functions
-    document.addEventListener('DOMContentLoaded', function() {
-        // Enable 2FA button
-        document.getElementById('enableTwoFactorBtn')?.addEventListener('click', function() {
-            enableTwoFactor();
-        });
-
-        // Show setup button (for pending state)
-        document.getElementById('showSetupBtn')?.addEventListener('click', function() {
-            enableTwoFactor();
-        });
-
-        // Disable 2FA button
-        document.getElementById('disableTwoFactorBtn')?.addEventListener('click', function() {
-            new bootstrap.Modal(document.getElementById('disableTwoFactorModal')).show();
-        });
-
-        // Confirm disable button
-        document.getElementById('confirmDisableBtn')?.addEventListener('click', function() {
-            disableTwoFactor();
-        });
-
-        // Generate recovery codes button
-        document.getElementById('generateRecoveryCodesBtn')?.addEventListener('click', function() {
-            generateRecoveryCodes();
-        });
-
-        // Trust current device button
-        document.getElementById('trustCurrentDeviceBtn')?.addEventListener('click', function() {
-            trustCurrentDevice();
-        });
-
-        // Revoke device buttons
-        document.querySelectorAll('.revoke-device-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const deviceId = this.dataset.deviceId;
-                revokeDevice(deviceId);
-            });
-        });
-    });
-
-    function enableTwoFactor() {
-        fetch('{{ route("customer.two-factor.enable") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showSetupModal(data.data);
-            } else {
-                show_notification('error', 'Error: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            show_notification('error', 'An error occurred while enabling two-factor authentication.');
-        });
-    }
-
-    function showSetupModal(setupData) {
-        const modalBody = document.getElementById('setupModalBody');
-        modalBody.innerHTML = `
-            <div class="text-center mb-4">
-                <h6>Step 1: Scan QR Code</h6>
-                <p class="text-muted">Scan this QR code with your authenticator app</p>
-                <div class="qr-code-container mb-3">
-                    ${setupData.qr_code_svg}
-                </div>
-            </div>
-
-            <div class="mb-4">
-                <h6>Step 2: Save Recovery Codes</h6>
-                <div class="alert alert-warning">
-                    <strong>Important:</strong> Save these recovery codes in a safe place.
-                </div>
-                <div class="recovery-codes bg-light p-3 rounded">
-                    ${setupData.recovery_codes.map(code => `<code class="d-block">${code}</code>`).join('')}
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <h6>Step 3: Verify Setup</h6>
-                <p class="text-muted">Enter the 6-digit code from your authenticator app</p>
-                <form id="confirmSetupForm">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="verificationCode" name="code"
-                               placeholder="000000" maxlength="6" pattern="[0-9]{6}" required>
-                        <button type="submit" class="btn btn-success">Verify & Enable</button>
-                    </div>
-                </form>
-            </div>
-        `;
-
-        // Show modal
-        new bootstrap.Modal(document.getElementById('twoFactorSetupModal')).show();
-
-        // Handle verification form
-        document.getElementById('confirmSetupForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const code = document.getElementById('verificationCode').value;
-            confirmTwoFactor(code);
-        });
-    }
-
-    function confirmTwoFactor(code) {
-        fetch('{{ route("customer.two-factor.confirm") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ code: code })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                show_notification('success', 'Two-factor authentication has been enabled successfully!');
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                show_notification('error', 'Error: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            show_notification('error', 'An error occurred while confirming the setup.');
-        });
-    }
-
-    function disableTwoFactor() {
-        const form = document.getElementById('disableTwoFactorForm');
-        const formData = new FormData(form);
-
-        fetch('{{ route("customer.two-factor.disable") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                current_password: formData.get('current_password'),
-                confirmation: formData.get('confirmation') ? 1 : 0
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                show_notification('success', 'Two-factor authentication has been disabled.');
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                show_notification('error', 'Error: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            show_notification('error', 'An error occurred while disabling two-factor authentication.');
-        });
-    }
-
-    function trustCurrentDevice() {
-        const deviceName = prompt('Enter a name for this device:', 'My Device');
-        if (!deviceName || !deviceName.trim()) {
-            show_notification('warning', 'Device name is required.');
-            return;
-        }
-
-        fetch('{{ route("customer.two-factor.trust-device") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ device_name: deviceName })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                show_notification('success', data.message);
-                if (!data.data.was_already_trusted) {
-                    setTimeout(() => location.reload(), 1500);
-                }
-            } else {
-                show_notification('error', 'Error: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            show_notification('error', 'An error occurred while trusting the device.');
-        });
-    }
-
-    function revokeDevice(deviceId) {
-        if (!confirm('Are you sure you want to remove this device from your trusted devices?')) {
-            return;
-        }
-
-        fetch(`{{ route("customer.two-factor.revoke-device", ":id") }}`.replace(':id', deviceId), {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.querySelector(`[data-device-id="${deviceId}"]`).remove();
-                show_notification('success', 'Device has been removed from your trusted devices.');
-            } else {
-                show_notification('error', 'Error: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            show_notification('error', 'An error occurred while revoking the device.');
-        });
-    }
-
-    function generateRecoveryCodes() {
-        const password = prompt('Enter your current password to generate new recovery codes:');
-        if (!password || !password.trim()) {
-            show_notification('warning', 'Password is required.');
-            return;
-        }
-
-        fetch('{{ route("customer.two-factor.recovery-codes") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ current_password: password })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const modalBody = document.getElementById('recoveryCodesBody');
-                modalBody.innerHTML = `
-                    <div class="alert alert-success">
-                        <strong>New recovery codes generated!</strong> Please save these in a safe place.
-                    </div>
-                    <div class="recovery-codes bg-light p-3 rounded">
-                        ${data.data.recovery_codes.map(code => `<code class="d-block">${code}</code>`).join('')}
-                    </div>
-                `;
-                new bootstrap.Modal(document.getElementById('recoveryCodesModal')).show();
-            } else {
-                show_notification('error', 'Error: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            show_notification('error', 'An error occurred while generating recovery codes.');
-        });
-    }
+    // 2FA functionality is handled by the dedicated /customer/two-factor page
 </script>
 @endpush

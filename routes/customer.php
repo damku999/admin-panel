@@ -75,16 +75,7 @@ Route::prefix('customer')->name('customer.')->group(function () {
             ->middleware(['throttle:10,1'])
             ->name('verification.send');
 
-        // Two-Factor Authentication Management
-        Route::prefix('two-factor')->name('two-factor.')->group(function () {
-            Route::get('/', [App\Http\Controllers\TwoFactorAuthController::class, 'index'])->name('index');
-            Route::post('/enable', [App\Http\Controllers\TwoFactorAuthController::class, 'enable'])->name('enable');
-            Route::post('/confirm', [App\Http\Controllers\TwoFactorAuthController::class, 'confirm'])->name('confirm');
-            Route::post('/disable', [App\Http\Controllers\TwoFactorAuthController::class, 'disable'])->name('disable');
-            Route::post('/recovery-codes', [App\Http\Controllers\TwoFactorAuthController::class, 'generateRecoveryCodes'])->name('recovery-codes');
-            Route::post('/trust-device', [App\Http\Controllers\TwoFactorAuthController::class, 'trustDevice'])->name('trust-device');
-            Route::delete('/devices/{device}', [App\Http\Controllers\TwoFactorAuthController::class, 'revokeDevice'])->name('revoke-device');
-        });
+        // Two-Factor Authentication - Removed (Admin only feature)
             
         // ==========================================
         // FAMILY MEMBER MANAGEMENT (Family Heads Only)

@@ -15,7 +15,30 @@ class TwoFactorAuthController extends Controller
     public function __construct(
         private TwoFactorAuthService $twoFactorService
     ) {
-        $this->middleware('auth')->except(['showVerification', 'verify']);
+        // Support both web and customer guards
+        $this->middleware(['auth:web,customer'])->except(['showVerification', 'verify']);
+    }
+
+    /**
+     * Get the authenticated user from the appropriate guard
+     */
+    public function getAuthenticatedUser()
+    {
+        // Check if customer guard is authenticated (customer portal)
+        if (Auth::guard('customer')->check()) {
+            return Auth::guard('customer')->user();
+        }
+
+        // Default to web guard (admin portal)
+        return Auth::guard('web')->user();
+    }
+
+    /**
+     * Get the appropriate guard name based on current authentication
+     */
+    public function getGuardName(): string
+    {
+        return Auth::guard('customer')->check() ? 'customer' : 'web';
     }
 
     /**
@@ -23,11 +46,21 @@ class TwoFactorAuthController extends Controller
      */
     public function index(): View
     {
-        $user = Auth::user();
+        $user = $this->getAuthenticatedUser();
         $status = $this->twoFactorService->getTwoFactorStatus($user);
         $trustedDevices = $this->twoFactorService->getTrustedDevices($user);
 
-        return view('profile.two-factor', compact('status', 'trustedDevices'));
+        // Use different views based on guard to ensure zero conflicts
+        $guardName = $this->getGuardName();
+        $viewData = compact('status', 'trustedDevices');
+
+        if ($guardName === 'customer') {
+            // Customer portal uses separate view with customer layout
+            return view('customer.two-factor', $viewData);
+        } else {
+            // Admin portal uses original view with admin layout
+            return view('profile.two-factor', $viewData);
+        }
     }
 
     /**
@@ -36,14 +69,16 @@ class TwoFactorAuthController extends Controller
     public function enable(Request $request): JsonResponse
     {
         try {
+            $user = $this->getAuthenticatedUser();
+            $guardName = $this->getGuardName();
+
             \Log::info('🔧 [2FA Enable Controller] Starting 2FA enable process', [
-                'user_id' => Auth::id(),
-                'user_type' => get_class(Auth::user()),
+                'user_id' => $user->id,
+                'user_type' => get_class($user),
+                'guard' => $guardName,
                 'request_ip' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
-
-            $user = Auth::user();
 
             \Log::info('🔧 [2FA Enable Controller] User loaded', [
                 'user_id' => $user->id,
@@ -70,8 +105,11 @@ class TwoFactorAuthController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
+            $user = $this->getAuthenticatedUser();
             \Log::error('🚨 [2FA Enable Controller] Exception occurred', [
-                'user_id' => Auth::id(),
+                'user_id' => $user ? $user->id : null,
+                'user_type' => $user ? get_class($user) : null,
+                'guard' => $this->getGuardName(),
                 'error_message' => $e->getMessage(),
                 'error_file' => $e->getFile(),
                 'error_line' => $e->getLine(),
@@ -103,7 +141,7 @@ class TwoFactorAuthController extends Controller
         }
 
         try {
-            $user = Auth::user();
+            $user = $this->getAuthenticatedUser();
             $this->twoFactorService->confirmTwoFactor($user, $request->code, $request);
 
             // Update security settings to reflect 2FA is enabled
@@ -140,7 +178,7 @@ class TwoFactorAuthController extends Controller
         }
 
         try {
-            $user = Auth::user();
+            $user = $this->getAuthenticatedUser();
             $this->twoFactorService->disableTwoFactor($user, $request->current_password);
 
             // Update security settings to reflect 2FA is disabled
@@ -176,7 +214,7 @@ class TwoFactorAuthController extends Controller
         }
 
         try {
-            $user = Auth::user();
+            $user = $this->getAuthenticatedUser();
 
             // Verify current password
             if (!$user->checkPassword($request->current_password)) {
@@ -221,7 +259,7 @@ class TwoFactorAuthController extends Controller
         }
 
         try {
-            $user = Auth::user();
+            $user = $this->getAuthenticatedUser();
             $result = $this->twoFactorService->trustDevice(
                 $user,
                 $request,
@@ -262,7 +300,7 @@ class TwoFactorAuthController extends Controller
     public function revokeDevice(Request $request, int $deviceId): JsonResponse
     {
         try {
-            $user = Auth::user();
+            $user = $this->getAuthenticatedUser();
             $success = $this->twoFactorService->revokeDeviceTrust($user, $deviceId);
 
             if (!$success) {
@@ -289,7 +327,7 @@ class TwoFactorAuthController extends Controller
      */
     public function status(): JsonResponse
     {
-        $user = Auth::user();
+        $user = $this->getAuthenticatedUser();
         $status = $this->twoFactorService->getTwoFactorStatus($user);
         $trustedDevices = $this->twoFactorService->getTrustedDevices($user);
 
@@ -322,7 +360,11 @@ class TwoFactorAuthController extends Controller
                 'session_id' => session()->getId(),
                 'all_session_keys' => array_keys(session()->all())
             ]);
-            return redirect()->route('login');
+
+            // Redirect to appropriate login based on guard
+            $guard = session('2fa_guard', 'web');
+            $loginRoute = $guard === 'customer' ? 'customer.login' : 'login';
+            return redirect()->route($loginRoute);
         }
 
         \Log::info('✅ [2FA Challenge] Showing 2FA challenge form', [
@@ -351,7 +393,8 @@ class TwoFactorAuthController extends Controller
             $guard = session('2fa_guard', 'web');
 
             if (!$userId) {
-                return redirect()->route('login')->withErrors([
+                $loginRoute = $guard === 'customer' ? 'customer.login' : 'login';
+                return redirect()->route($loginRoute)->withErrors([
                     'code' => 'Session expired. Please login again.'
                 ]);
             }
@@ -362,7 +405,8 @@ class TwoFactorAuthController extends Controller
                 : \App\Models\User::find($userId);
 
             if (!$user) {
-                return redirect()->route('login')->withErrors([
+                $loginRoute = $guard === 'customer' ? 'customer.login' : 'login';
+                return redirect()->route($loginRoute)->withErrors([
                     'code' => 'User not found. Please login again.'
                 ]);
             }
@@ -378,11 +422,11 @@ class TwoFactorAuthController extends Controller
             // Clear 2FA session data
             session()->forget(['2fa_user_id', '2fa_guard', '2fa_remember']);
 
-            // Complete login
+            // Complete login with the correct guard
             Auth::guard($guard)->login($user, session('2fa_remember', false));
 
-            // Trust device if requested
-            if ($request->has('trust_device') && $request->trust_device) {
+            // Trust device if requested (admin only)
+            if ($guard === 'web' && $request->has('trust_device') && $request->trust_device) {
                 $this->twoFactorService->trustDevice($user, $request);
             }
 

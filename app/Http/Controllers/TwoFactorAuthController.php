@@ -344,34 +344,110 @@ class TwoFactorAuthController extends Controller
     /**
      * Show verification form during login (for 2FA challenge)
      */
-    public function showVerification(): View
+    public function showVerification(Request $request): View
     {
         \Log::info('🔐 [2FA Challenge] showVerification accessed', [
             'session_id' => session()->getId(),
             'session_2fa_user_id' => session('2fa_user_id'),
             'session_2fa_guard' => session('2fa_guard'),
             'session_2fa_remember' => session('2fa_remember'),
-            'all_session_data' => session()->all()
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent()
         ]);
 
-        // This should only be accessible during 2FA challenge
-        if (!session('2fa_user_id')) {
+        // Enhanced security checks for 2FA challenge access
+        $userId = session('2fa_user_id');
+        $guard = session('2fa_guard', 'web');
+        $sessionStartTime = session('2fa_started_at');
+        $sessionIp = session('2fa_ip');
+
+        // Check if 2FA session exists
+        if (!$userId) {
             \Log::warning('🚨 [2FA Challenge] No 2FA user ID in session, redirecting to login', [
                 'session_id' => session()->getId(),
+                'ip_address' => $request->ip(),
                 'all_session_keys' => array_keys(session()->all())
             ]);
 
-            // Redirect to appropriate login based on guard
-            $guard = session('2fa_guard', 'web');
             $loginRoute = $guard === 'customer' ? 'customer.login' : 'login';
-            return redirect()->route($loginRoute);
+            return redirect()->route($loginRoute)->with('error', 'Session expired. Please login again.');
+        }
+
+        // Check session timeout (10 minutes for 2FA challenge)
+        if ($sessionStartTime && (now()->timestamp - $sessionStartTime) > 600) {
+            \Log::warning('🚨 [2FA Challenge] Session timeout exceeded', [
+                'user_id' => $userId,
+                'session_age' => now()->timestamp - $sessionStartTime,
+                'ip_address' => $request->ip()
+            ]);
+
+            // Clear 2FA session data
+            session()->forget(['2fa_user_id', '2fa_guard', '2fa_remember', '2fa_started_at', '2fa_ip']);
+
+            $loginRoute = $guard === 'customer' ? 'customer.login' : 'login';
+            return redirect()->route($loginRoute)->with('error', '2FA session expired. Please login again.');
+        }
+
+        // Security check: ensure IP address hasn't changed during 2FA process
+        if ($sessionIp && $sessionIp !== $request->ip()) {
+            \Log::error('🚨 [2FA Challenge] IP address changed during 2FA process', [
+                'user_id' => $userId,
+                'original_ip' => $sessionIp,
+                'current_ip' => $request->ip(),
+                'session_id' => session()->getId()
+            ]);
+
+            // Clear 2FA session data for security
+            session()->forget(['2fa_user_id', '2fa_guard', '2fa_remember', '2fa_started_at', '2fa_ip']);
+
+            $loginRoute = $guard === 'customer' ? 'customer.login' : 'login';
+            return redirect()->route($loginRoute)->with('error', 'Security violation detected. Please login again.');
+        }
+
+        // Verify the user still exists and is active
+        $user = $guard === 'customer'
+            ? \App\Models\Customer::find($userId)
+            : \App\Models\User::find($userId);
+
+        if (!$user) {
+            \Log::error('🚨 [2FA Challenge] User not found during challenge', [
+                'user_id' => $userId,
+                'guard' => $guard,
+                'ip_address' => $request->ip()
+            ]);
+
+            session()->forget(['2fa_user_id', '2fa_guard', '2fa_remember', '2fa_started_at', '2fa_ip']);
+
+            $loginRoute = $guard === 'customer' ? 'customer.login' : 'login';
+            return redirect()->route($loginRoute)->with('error', 'User account not found. Please login again.');
+        }
+
+        // Check if user is still active
+        if (method_exists($user, 'isActive') && !$user->isActive()) {
+            \Log::warning('🚨 [2FA Challenge] Inactive user attempting 2FA', [
+                'user_id' => $user->id,
+                'guard' => $guard,
+                'ip_address' => $request->ip()
+            ]);
+
+            session()->forget(['2fa_user_id', '2fa_guard', '2fa_remember', '2fa_started_at', '2fa_ip']);
+
+            $loginRoute = $guard === 'customer' ? 'customer.login' : 'login';
+            return redirect()->route($loginRoute)->with('error', 'Account is no longer active. Please contact support.');
         }
 
         \Log::info('✅ [2FA Challenge] Showing 2FA challenge form', [
-            'user_id' => session('2fa_user_id')
+            'user_id' => $userId,
+            'guard' => $guard,
+            'session_age' => $sessionStartTime ? (now()->timestamp - $sessionStartTime) : 0
         ]);
 
-        return view('auth.two-factor-challenge');
+        // Use different views based on guard
+        if ($guard === 'customer') {
+            return view('customer.auth.two-factor-challenge');
+        } else {
+            return view('auth.two-factor-challenge');
+        }
     }
 
     /**
@@ -379,12 +455,21 @@ class TwoFactorAuthController extends Controller
      */
     public function verify(Request $request): RedirectResponse
     {
+        // Enhanced validation with additional security checks
         $validator = Validator::make($request->all(), [
-            'code' => 'required|string',
+            'code' => 'required|string|min:6|max:8',
             'code_type' => 'required|in:totp,recovery',
         ]);
 
         if ($validator->fails()) {
+            // Log failed validation attempt
+            \Log::warning('2FA verification validation failed', [
+                'errors' => $validator->errors(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'session_id' => session()->getId()
+            ]);
+
             return back()->withErrors($validator)->withInput();
         }
 
@@ -392,26 +477,64 @@ class TwoFactorAuthController extends Controller
             $userId = session('2fa_user_id');
             $guard = session('2fa_guard', 'web');
 
-            if (!$userId) {
+            // Enhanced session validation
+            if (!$userId || !session()->has('2fa_user_id')) {
+                \Log::warning('2FA verification attempt without valid session', [
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'session_id' => session()->getId(),
+                    'has_user_id' => !is_null($userId),
+                    'session_keys' => array_keys(session()->all())
+                ]);
+
                 $loginRoute = $guard === 'customer' ? 'customer.login' : 'login';
                 return redirect()->route($loginRoute)->withErrors([
                     'code' => 'Session expired. Please login again.'
                 ]);
             }
 
-            // Get user from appropriate guard
+            // Get user from appropriate guard with additional validation
             $user = $guard === 'customer'
                 ? \App\Models\Customer::find($userId)
                 : \App\Models\User::find($userId);
 
             if (!$user) {
+                \Log::error('2FA verification: User not found', [
+                    'user_id' => $userId,
+                    'guard' => $guard,
+                    'ip_address' => $request->ip(),
+                    'session_id' => session()->getId()
+                ]);
+
                 $loginRoute = $guard === 'customer' ? 'customer.login' : 'login';
                 return redirect()->route($loginRoute)->withErrors([
                     'code' => 'User not found. Please login again.'
                 ]);
             }
 
-            // Verify 2FA code
+            // Additional security check: verify user is still active
+            if (method_exists($user, 'isActive') && !$user->isActive()) {
+                \Log::warning('2FA verification attempt for inactive user', [
+                    'user_id' => $user->id,
+                    'guard' => $guard,
+                    'ip_address' => $request->ip()
+                ]);
+
+                $loginRoute = $guard === 'customer' ? 'customer.login' : 'login';
+                return redirect()->route($loginRoute)->withErrors([
+                    'code' => 'Account is no longer active. Please contact support.'
+                ]);
+            }
+
+            // Verify 2FA code with enhanced logging
+            \Log::info('2FA verification attempt', [
+                'user_id' => $user->id,
+                'guard' => $guard,
+                'code_type' => $request->code_type,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+
             $this->twoFactorService->verifyTwoFactorLogin(
                 $user,
                 $request->code,
@@ -420,21 +543,41 @@ class TwoFactorAuthController extends Controller
             );
 
             // Clear 2FA session data
+            $rememberMe = session('2fa_remember', false);
             session()->forget(['2fa_user_id', '2fa_guard', '2fa_remember']);
 
             // Complete login with the correct guard
-            Auth::guard($guard)->login($user, session('2fa_remember', false));
+            Auth::guard($guard)->login($user, $rememberMe);
 
-            // Trust device if requested (admin only)
-            if ($guard === 'web' && $request->has('trust_device') && $request->trust_device) {
+            // Trust device if requested (both admin and customer)
+            if ($request->has('trust_device') && $request->trust_device) {
                 $this->twoFactorService->trustDevice($user, $request);
             }
+
+            // Log successful 2FA completion
+            \Log::info('2FA verification successful', [
+                'user_id' => $user->id,
+                'guard' => $guard,
+                'trusted_device' => $request->has('trust_device')
+            ]);
 
             // Redirect to intended location
             $redirectTo = $guard === 'customer' ? route('customer.dashboard') : route('home');
             return redirect()->intended($redirectTo);
 
         } catch (\Exception $e) {
+            // Enhanced error logging
+            \Log::error('2FA verification failed', [
+                'user_id' => $userId ?? null,
+                'guard' => $guard ?? 'unknown',
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'session_id' => session()->getId()
+            ]);
+
             return back()->withErrors([
                 'code' => $e->getMessage()
             ])->withInput();

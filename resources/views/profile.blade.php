@@ -643,12 +643,9 @@ function disableTwoFactor() {
 }
 
 function trustCurrentDevice() {
-    const deviceName = prompt('Enter a name for this device:', 'My Device');
-    if (!deviceName || !deviceName.trim()) {
-        show_notification('warning', 'Device name is required.');
-        return;
-    }
-    trustDeviceWithName(deviceName);
+    showDeviceNameModal('Trust This Device', 'My Device', function(deviceName) {
+        trustDeviceWithName(deviceName);
+    });
 }
 
 function trustDeviceWithName(deviceName) {
@@ -678,39 +675,39 @@ function trustDeviceWithName(deviceName) {
 }
 
 function revokeDevice(deviceId) {
-    if (!confirm('Are you sure you want to remove this device from your trusted devices?')) {
-        return;
-    }
-
-    fetch(`{{ route("profile.two-factor.revoke-device", ":id") }}`.replace(':id', deviceId), {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+    showConfirmationModal(
+        'Remove Trusted Device',
+        'Are you sure you want to remove this device from your trusted devices?',
+        'danger',
+        function() {
+            fetch(`{{ route("profile.two-factor.revoke-device", ":id") }}`.replace(':id', deviceId), {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelector(`[data-device-id="${deviceId}"]`).remove();
+                    show_notification('success', 'Device has been removed from your trusted devices.');
+                } else {
+                    show_notification('error', 'Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                show_notification('error', 'An error occurred while revoking the device.');
+            });
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.querySelector(`[data-device-id="${deviceId}"]`).remove();
-            show_notification('success', 'Device has been removed from your trusted devices.');
-        } else {
-            showError('Error: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        show_notification('error', 'An error occurred while revoking the device.');
-    });
+    );
 }
 
 function generateRecoveryCodes() {
-    const password = prompt('Enter your current password to generate new recovery codes:');
-    if (!password || !password.trim()) {
-        show_notification('warning', 'Password is required.');
-        return;
-    }
-    generateRecoveryCodesWithPassword(password);
+    showPasswordModal('Generate New Recovery Codes', 'Enter your current password to generate new recovery codes:', function(password) {
+        generateRecoveryCodesWithPassword(password);
+    });
 }
 
 function generateRecoveryCodesWithPassword(password) {
@@ -743,6 +740,138 @@ function generateRecoveryCodesWithPassword(password) {
         console.error('Error:', error);
         show_notification('error', 'An error occurred while generating recovery codes.');
     });
+}
+
+// Helper Functions for Modals and Toasts
+function showPasswordModal(title, message, onSubmit) {
+    const modalHtml = `
+        <div class="modal fade" id="passwordModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${title}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>${message}</p>
+                        <div class="mb-3">
+                            <input type="password" class="form-control" id="modalPassword" placeholder="Enter password">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="submitPassword()">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Remove existing modal if any
+    document.getElementById('passwordModal')?.remove();
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    window.passwordModalCallback = onSubmit;
+    new bootstrap.Modal(document.getElementById('passwordModal')).show();
+}
+
+function showDeviceNameModal(title, defaultName, onSubmit) {
+    const modalHtml = `
+        <div class="modal fade" id="deviceNameModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${title}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Device Name</label>
+                            <input type="text" class="form-control" id="modalDeviceName" value="${defaultName}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="submitDeviceName()">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Remove existing modal if any
+    document.getElementById('deviceNameModal')?.remove();
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    window.deviceNameModalCallback = onSubmit;
+    new bootstrap.Modal(document.getElementById('deviceNameModal')).show();
+}
+
+function showConfirmationModal(title, message, variant = 'primary', onConfirm = null) {
+    const modalHtml = `
+        <div class="modal fade" id="confirmModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${title}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>${message}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-${variant}" onclick="confirmAction()">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Remove existing modal if any
+    document.getElementById('confirmModal')?.remove();
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    window.confirmModalCallback = onConfirm;
+    new bootstrap.Modal(document.getElementById('confirmModal')).show();
+}
+
+function submitPassword() {
+    const password = document.getElementById('modalPassword').value;
+    if (password && window.passwordModalCallback) {
+        bootstrap.Modal.getInstance(document.getElementById('passwordModal')).hide();
+        window.passwordModalCallback(password);
+    } else {
+        show_notification('warning', 'Password is required');
+    }
+}
+
+function submitDeviceName() {
+    const deviceName = document.getElementById('modalDeviceName').value.trim();
+    if (deviceName && window.deviceNameModalCallback) {
+        bootstrap.Modal.getInstance(document.getElementById('deviceNameModal')).hide();
+        window.deviceNameModalCallback(deviceName);
+    } else {
+        show_notification('warning', 'Device name is required');
+    }
+}
+
+function confirmAction() {
+    if (window.confirmModalCallback) {
+        bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+        window.confirmModalCallback();
+    }
+}
+
+// Fallback notification function if ui-helpers.js is not loaded
+if (typeof show_notification === 'undefined') {
+    function show_notification(type, message) {
+        if (typeof toastr !== 'undefined') {
+            toastr[type] && toastr[type](message);
+        } else {
+            alert(`${type.toUpperCase()}: ${message}`);
+        }
+    }
 }
 </script>
 @endpush

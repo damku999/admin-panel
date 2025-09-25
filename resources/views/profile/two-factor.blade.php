@@ -257,12 +257,12 @@ function enableTwoFactor() {
         if (data.success) {
             showSetupModal(data.data);
         } else {
-            showToast('error', 'Error: ' + data.message);
+            show_notification('error', 'Error: ' + data.message);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showToast('error', 'An error occurred while enabling two-factor authentication.');
+        show_notification('error', 'An error occurred while enabling two-factor authentication.');
     });
 }
 
@@ -323,15 +323,15 @@ function confirmTwoFactor(code) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showToast('success', 'Two-factor authentication has been enabled successfully!');
+            show_notification('success', 'Two-factor authentication has been enabled successfully!');
             setTimeout(() => location.reload(), 1500);
         } else {
-            showToast('error', 'Error: ' + data.message);
+            show_notification('error', 'Error: ' + data.message);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showToast('error', 'An error occurred while confirming the setup.');
+        show_notification('error', 'An error occurred while confirming the setup.');
     });
 }
 
@@ -353,15 +353,16 @@ function disableTwoFactor() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showToast('success', 'Two-factor authentication has been disabled.');
-            setTimeout(() => location.reload(), 1500);
+            show_notification('success', 'Two-factor authentication has been disabled.');
+            hideModal('disableTwoFactorModal');
+            setTimeout(() => location.reload(), 2000);
         } else {
-            showToast('error', 'Error: ' + data.message);
+            show_notification('error', 'Error: ' + data.message);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showToast('error', 'An error occurred while disabling two-factor authentication.');
+        show_notification('error', 'An error occurred while disabling two-factor authentication.');
     });
 }
 
@@ -372,7 +373,7 @@ function trustCurrentDevice() {
         'My Device',
         function(deviceName) {
             if (!deviceName.trim()) {
-                showToast('warning', 'Device name is required.');
+                show_notification('warning', 'Device name is required.');
                 return;
             }
             trustDeviceWithName(deviceName);
@@ -393,43 +394,46 @@ function trustDeviceWithName(deviceName) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showToast('success', 'Device has been added to your trusted devices.');
+            show_notification('success', 'Device has been added to your trusted devices.');
             setTimeout(() => location.reload(), 1500);
         } else {
-            showToast('error', 'Error: ' + data.message);
+            show_notification('error', 'Error: ' + data.message);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showToast('error', 'An error occurred while trusting the device.');
+        show_notification('error', 'An error occurred while trusting the device.');
     });
 }
 
 function revokeDevice(deviceId) {
-    if (!confirm('Are you sure you want to remove this device from your trusted devices?')) {
-        return;
-    }
-
-    fetch(`{{ route("profile.two-factor.revoke-device", ":id") }}`.replace(':id', deviceId), {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+    showConfirmationModal(
+        'Remove Trusted Device',
+        'Are you sure you want to remove this device from your trusted devices?',
+        'danger',
+        function() {
+            fetch(`{{ route("profile.two-factor.revoke-device", ":id") }}`.replace(':id', deviceId), {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelector(`[data-device-id="${deviceId}"]`).remove();
+                    show_notification('success', 'Device has been removed from your trusted devices.');
+                } else {
+                    show_notification('error', 'Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                show_notification('error', 'An error occurred while revoking the device.');
+            });
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.querySelector(`[data-device-id="${deviceId}"]`).remove();
-            showToast('success', 'Device has been removed from your trusted devices.');
-        } else {
-            showToast('error', 'Error: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('error', 'An error occurred while revoking the device.');
-    });
+    );
 }
 
 function generateRecoveryCodes() {
@@ -445,12 +449,12 @@ function generateRecoveryCodes() {
         if (data.success) {
             showRecoveryCodesModal(data.recovery_codes);
         } else {
-            showToast('error', 'Error: ' + data.message);
+            show_notification('error', 'Error: ' + data.message);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showToast('error', 'An error occurred while generating recovery codes.');
+        show_notification('error', 'An error occurred while generating recovery codes.');
     });
 }
 
@@ -502,6 +506,54 @@ function printRecoveryCodes() {
     `);
     printWindow.document.close();
     printWindow.print();
+}
+
+// Helper Functions for Modals and Toasts
+function showConfirmationModal(title, message, variant = 'primary', onConfirm = null) {
+    const modalHtml = `
+        <div class="modal fade" id="confirmModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${title}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>${message}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-${variant}" onclick="confirmAction()">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Remove existing modal if any
+    document.getElementById('confirmModal')?.remove();
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    window.confirmModalCallback = onConfirm;
+    new bootstrap.Modal(document.getElementById('confirmModal')).show();
+}
+
+function confirmAction() {
+    if (window.confirmModalCallback) {
+        bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+        window.confirmModalCallback();
+    }
+}
+
+// Fallback notification function if ui-helpers.js is not loaded
+if (typeof show_notification === 'undefined') {
+    function show_notification(type, message) {
+        if (typeof toastr !== 'undefined') {
+            toastr[type] && toastr[type](message);
+        } else {
+            alert(`${type.toUpperCase()}: ${message}`);
+        }
+    }
 }
 </script>
 @endsection

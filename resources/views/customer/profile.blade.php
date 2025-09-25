@@ -239,7 +239,9 @@
                                 <i class="fas fa-key me-2"></i>Change Password
                             </a>
 
-                            <!-- Two-Factor Authentication removed (Admin only feature) -->
+                            <a href="{{ route('customer.two-factor.index') }}" class="btn btn-success">
+                                <i class="fas fa-shield-alt me-2"></i>Two-Factor Authentication
+                            </a>
 
                             <a href="{{ route('customer.policies') }}" class="btn btn-info">
                                 <i class="fas fa-shield-alt me-2"></i>View My Policies
@@ -383,26 +385,79 @@
 @push('scripts')
 <script>
     function resendVerification() {
-        if (confirm('Send verification email to {{ $customer->email }}?')) {
-            fetch('{{ route("customer.verification.send") }}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    show_notification('success', 'Verification email sent successfully!');
-                } else {
-                    show_notification('error', 'Failed to send verification email. Please try again.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                show_notification('error', 'An error occurred. Please try again.');
-            });
+        showConfirmationModal(
+            'Send Verification Email',
+            'Send verification email to {{ $customer->email }}?',
+            'primary',
+            function() {
+                fetch('{{ route("customer.verification.send") }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        show_notification('success', 'Verification email sent successfully!');
+                    } else {
+                        show_notification('error', 'Failed to send verification email. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    show_notification('error', 'An error occurred. Please try again.');
+                });
+            }
+        );
+    }
+
+    // Generic confirmation modal
+    function showConfirmationModal(title, message, variant = 'primary', onConfirm = null) {
+        const modalHtml = `
+            <div class="modal fade" id="confirmModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">${title}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>${message}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-${variant}" onclick="confirmAction()">Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Remove existing modal if any
+        document.getElementById('confirmModal')?.remove();
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        window.confirmModalCallback = onConfirm;
+        new bootstrap.Modal(document.getElementById('confirmModal')).show();
+    }
+
+    function confirmAction() {
+        if (window.confirmModalCallback) {
+            bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+            window.confirmModalCallback();
+        }
+    }
+
+    // Fallback notification function if ui-helpers.js is not loaded
+    if (typeof show_notification === 'undefined') {
+        function show_notification(type, message) {
+            if (typeof toastr !== 'undefined') {
+                toastr[type] && toastr[type](message);
+            } else {
+                alert(`${type.toUpperCase()}: ${message}`);
+            }
         }
     }
 

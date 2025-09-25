@@ -50,7 +50,8 @@ Route::prefix('customer')->name('customer.')->group(function () {
         ->name('logout');
 
     // Core Dashboard Routes (Protected with Session Timeout)
-    Route::middleware(['customer.auth', 'customer.timeout', 'throttle:60,1'])->group(function () {
+    // Increased rate limit since individual routes have their own more specific limits
+    Route::middleware(['customer.auth', 'customer.timeout', 'throttle:200,1'])->group(function () {
         
         // Main Dashboard
         Route::get('/dashboard', [CustomerAuthController::class, 'dashboard'])->name('dashboard');
@@ -75,8 +76,59 @@ Route::prefix('customer')->name('customer.')->group(function () {
             ->middleware(['throttle:10,1'])
             ->name('verification.send');
 
-        // Two-Factor Authentication - Removed (Admin only feature)
-            
+        // Two-Factor Authentication Routes with appropriate rate limits
+        Route::prefix('two-factor')->name('two-factor.')->group(function () {
+            // 2FA Management Page (can be accessed frequently)
+            Route::get('/', [\App\Http\Controllers\TwoFactorAuthController::class, 'index'])
+                ->middleware(['throttle:120,1']) // 120 requests per minute for page loads
+                ->name('index');
+
+            // Status endpoint (used by AJAX, needs higher limit)
+            Route::get('/status', [\App\Http\Controllers\TwoFactorAuthController::class, 'status'])
+                ->middleware(['throttle:120,1']) // 120 requests per minute for status checks
+                ->name('status');
+
+            // Setup and management actions (moderate rate limit)
+            Route::post('/enable', [\App\Http\Controllers\TwoFactorAuthController::class, 'enable'])
+                ->middleware(['throttle:10,1'])
+                ->name('enable');
+
+            Route::post('/confirm', [\App\Http\Controllers\TwoFactorAuthController::class, 'confirm'])
+                ->middleware(['throttle:10,1'])
+                ->name('confirm');
+
+            Route::post('/disable', [\App\Http\Controllers\TwoFactorAuthController::class, 'disable'])
+                ->middleware(['throttle:5,1']) // Lower limit for security
+                ->name('disable');
+
+            Route::post('/recovery-codes', [\App\Http\Controllers\TwoFactorAuthController::class, 'generateRecoveryCodes'])
+                ->middleware(['throttle:5,1']) // Lower limit for security
+                ->name('recovery-codes');
+
+            // Device management (moderate rate limit)
+            Route::post('/trust-device', [\App\Http\Controllers\TwoFactorAuthController::class, 'trustDevice'])
+                ->middleware(['throttle:20,1'])
+                ->name('trust-device');
+
+            Route::delete('/trusted-devices/{deviceId}', [\App\Http\Controllers\TwoFactorAuthController::class, 'revokeDevice'])
+                ->middleware(['throttle:20,1'])
+                ->name('revoke-device');
+        });
+
+    // ==========================================
+    // 2FA CHALLENGE ROUTES (Outside auth middleware)
+    // ==========================================
+
+    // 2FA Challenge Routes (for login process - must be accessible without full auth)
+    // Separate rate limits: viewing the form vs attempting verification
+    Route::get('/two-factor-challenge', [\App\Http\Controllers\TwoFactorAuthController::class, 'showVerification'])
+        ->middleware(['throttle:30,1']) // 30 form views per minute (reasonable for refreshes)
+        ->name('two-factor.challenge');
+
+    Route::post('/two-factor-challenge', [\App\Http\Controllers\TwoFactorAuthController::class, 'verify'])
+        ->middleware(['throttle:6,1']) // 6 verification attempts per minute (prevents brute force)
+        ->name('two-factor.verify');
+
         // ==========================================
         // FAMILY MEMBER MANAGEMENT (Family Heads Only)
         // ==========================================

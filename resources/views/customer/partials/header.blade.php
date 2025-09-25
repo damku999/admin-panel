@@ -46,6 +46,12 @@
                             <i class="fas fa-user me-2"></i> Profile
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('customer.two-factor*') ? 'active' : '' }}"
+                            href="{{ route('customer.two-factor.index') }}">
+                            <i class="fas fa-shield-alt me-2"></i> 2FA Security
+                        </a>
+                    </li>
                 </ul>
 
                 <!-- User Info & Actions -->

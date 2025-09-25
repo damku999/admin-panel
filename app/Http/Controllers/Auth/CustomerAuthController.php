@@ -167,20 +167,41 @@ class CustomerAuthController extends Controller
         // Check if customer has 2FA enabled and confirmed
         if ($customer && method_exists($customer, 'hasTwoFactorEnabled') && $customer->hasTwoFactorEnabled()) {
             // Check if device is already trusted
-            if (method_exists($customer, 'isDeviceTrusted') && !$customer->isDeviceTrusted($request)) {
+            $isDeviceTrusted = method_exists($customer, 'isDeviceTrusted') ? $customer->isDeviceTrusted($request) : false;
+
+            if (!$isDeviceTrusted) {
+                // Log 2FA challenge initiation
+                CustomerAuditLog::logAction('2fa_challenge_started', 'Customer required to complete 2FA challenge', [
+                    'device_trusted' => false,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent()
+                ]);
+
                 // Store customer info in session for 2FA challenge
                 $request->session()->put([
                     '2fa_user_id' => $customer->id,
                     '2fa_guard' => 'customer',
-                    '2fa_remember' => $request->boolean('remember')
+                    '2fa_remember' => $request->boolean('remember'),
+                    '2fa_started_at' => now()->timestamp, // For session timeout
+                    '2fa_ip' => $request->ip() // Security check
                 ]);
 
                 // Logout the customer temporarily (they'll be logged back in after 2FA)
                 Auth::guard('customer')->logout();
 
+                // Regenerate session ID for security
+                $request->session()->regenerate();
+
                 // Redirect to 2FA challenge
-                return redirect()->route('two-factor.challenge')
-                    ->with('info', 'Please enter your two-factor authentication code.');
+                return redirect()->route('customer.two-factor.challenge')
+                    ->with('info', 'Please enter your two-factor authentication code to complete login.');
+            } else {
+                // Device is trusted, log successful trusted login
+                CustomerAuditLog::logAction('trusted_device_login', 'Customer logged in using trusted device', [
+                    'device_trusted' => true,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent()
+                ]);
             }
         }
 

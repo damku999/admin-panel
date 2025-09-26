@@ -37,7 +37,7 @@
                         </p>
                     </div>
 
-                    <form method="POST" action="{{ route('customer.two-factor.verify') }}" id="twoFactorForm">
+                    <form method="POST" action="{{ route('two-factor.verify') }}" id="twoFactorForm">
                         @csrf
 
                         <div class="mb-4">
@@ -96,7 +96,7 @@
                                 <i class="fas fa-key me-1"></i>Use Recovery Code Instead
                             </summary>
                             <div class="mt-3">
-                                <form method="POST" action="{{ route('customer.two-factor.verify') }}" id="recoveryForm">
+                                <form method="POST" action="{{ route('two-factor.verify') }}" id="recoveryForm">
                                     @csrf
                                     <div class="mb-3">
                                         <label for="recovery_code" class="form-label">Recovery Code</label>

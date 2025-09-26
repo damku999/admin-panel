@@ -98,7 +98,7 @@ Route::prefix('customer')->name('customer.')->group(function () {
                 ->name('confirm');
 
             Route::post('/disable', [\App\Http\Controllers\TwoFactorAuthController::class, 'disable'])
-                ->middleware(['throttle:5,1']) // Lower limit for security
+                ->middleware(['throttle:15,1']) // Reasonable limit for disable attempts
                 ->name('disable');
 
             Route::post('/recovery-codes', [\App\Http\Controllers\TwoFactorAuthController::class, 'generateRecoveryCodes'])
@@ -119,15 +119,16 @@ Route::prefix('customer')->name('customer.')->group(function () {
     // 2FA CHALLENGE ROUTES (Outside auth middleware)
     // ==========================================
 
-    // 2FA Challenge Routes (for login process - must be accessible without full auth)
-    // Separate rate limits: viewing the form vs attempting verification
+    // 2FA Challenge Routes (for customer - keep separate route names)
     Route::get('/two-factor-challenge', [\App\Http\Controllers\TwoFactorAuthController::class, 'showVerification'])
-        ->middleware(['throttle:30,1']) // 30 form views per minute (reasonable for refreshes)
-        ->name('two-factor.challenge');
+        ->middleware(['throttle:30,1'])
+        ->name('customer.two-factor.challenge');
 
     Route::post('/two-factor-challenge', [\App\Http\Controllers\TwoFactorAuthController::class, 'verify'])
-        ->middleware(['throttle:6,1']) // 6 verification attempts per minute (prevents brute force)
-        ->name('two-factor.verify');
+        ->middleware(['throttle:6,1'])
+        ->name('customer.two-factor.verify');
+
+
 
         // ==========================================
         // FAMILY MEMBER MANAGEMENT (Family Heads Only)
@@ -143,6 +144,11 @@ Route::prefix('customer')->name('customer.')->group(function () {
         Route::put('/family-member/{member}/password', [CustomerAuthController::class, 'updateFamilyMemberPassword'])
             ->middleware(['throttle:10,1'])
             ->name('family-member.password');
+
+        // Family Member 2FA Management (only for family head)
+        Route::post('/family-member/{member}/disable-2fa', [CustomerAuthController::class, 'disableFamilyMember2FA'])
+            ->middleware(['throttle:5,1'])
+            ->name('family-member.disable-2fa');
     });
 
     // ==========================================

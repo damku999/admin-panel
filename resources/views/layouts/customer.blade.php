@@ -55,6 +55,7 @@
     <script src="{{ asset('admin/toastr/toastr.min.js') }}"></script>
 
     @yield('scripts')
+    @stack('scripts')
 
     <script>
         function show_notification(type, message) {

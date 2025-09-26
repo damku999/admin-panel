@@ -120,6 +120,51 @@
                             </div>
                         </div>
 
+                        <!-- Two-Factor Authentication Status -->
+                        <div class="row g-4 mt-2">
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <label class="form-label text-brand fw-bold">
+                                        <i class="fas fa-shield-alt me-2"></i>Two-Factor Authentication
+                                    </label>
+                                    <div class="info-value">
+                                        @if($member->hasCustomerTwoFactorEnabled())
+                                            <span class="badge bg-success px-3 py-2">
+                                                <i class="fas fa-check-circle me-1"></i>Enabled
+                                            </span>
+                                            <!-- Disable button for family head only -->
+                                            @if($customer->isFamilyHead())
+                                                <button type="button" class="btn btn-outline-danger btn-sm mt-2"
+                                                        onclick="disableFamilyMember2FA({{ $member->id }}, '{{ $member->name }}')"
+                                                        id="disable-2fa-btn-{{ $member->id }}">
+                                                    <i class="fas fa-times me-1"></i>Disable 2FA
+                                                </button>
+                                            @endif
+                                        @else
+                                            <span class="badge bg-secondary px-3 py-2">
+                                                <i class="fas fa-times-circle me-1"></i>Disabled
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <label class="form-label text-brand fw-bold">
+                                        <i class="fas fa-devices me-2"></i>Trusted Devices
+                                    </label>
+                                    <div class="info-value">
+                                        @php
+                                            $trustedDevicesCount = $member->getActiveCustomerTrustedDevices()->count();
+                                        @endphp
+                                        <span class="badge bg-info px-3 py-2">
+                                            <i class="fas fa-mobile-alt me-1"></i>{{ $trustedDevicesCount }} Device{{ $trustedDevicesCount !== 1 ? 's' : '' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row g-4 mt-2">
                             <div class="col-md-6">
                                 <div class="info-item">
@@ -273,3 +318,45 @@
         }
     </style>
 @endsection
+
+@push('scripts')
+<script>
+function disableFamilyMember2FA(memberId, memberName) {
+    if (confirm(`Are you sure you want to disable Two-Factor Authentication for ${memberName}?\n\nThis will remove all their 2FA settings and trusted devices. They will need to set it up again if they want to re-enable it.`)) {
+        const button = document.getElementById(`disable-2fa-btn-${memberId}`);
+        const originalText = button.innerHTML;
+
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Disabling...';
+
+        fetch(`/customer/family-member/${memberId}/disable-2fa`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                show_notification('success', data.message || `Two-Factor Authentication has been disabled for ${memberName}`);
+                // Reload page to update the UI
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                show_notification('error', data.message || 'Failed to disable Two-Factor Authentication');
+                button.disabled = false;
+                button.innerHTML = originalText;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            show_notification('error', 'An error occurred while disabling Two-Factor Authentication');
+            button.disabled = false;
+            button.innerHTML = originalText;
+        });
+    }
+}
+</script>
+@endpush

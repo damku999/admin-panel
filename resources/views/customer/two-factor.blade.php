@@ -275,15 +275,33 @@
 
 @push('scripts')
 <script>
-$(document).ready(function() {
-    console.log('🔧 [Customer 2FA] Document ready, about to load status');
-    console.log('🔧 [Customer 2FA] jQuery version:', $.fn.jquery);
+console.log('🔧 [Customer 2FA] Script block loaded and executing...');
+
+// Wait for both DOM and jQuery to be ready
+function initTwoFactor() {
+    console.log('🔧 [Customer 2FA] Initializing 2FA page');
+    console.log('🔧 [Customer 2FA] jQuery available:', typeof $ !== 'undefined');
     console.log('🔧 [Customer 2FA] CSRF token:', document.querySelector('meta[name="csrf-token"]')?.content);
+
+    if (typeof $ !== 'undefined') {
+        console.log('🔧 [Customer 2FA] jQuery version:', $.fn.jquery);
+    }
+
     loadTwoFactorStatus();
-});
+}
+
+// Multiple ways to ensure everything is loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(initTwoFactor, 100); // Small delay to ensure jQuery is loaded
+    });
+} else {
+    setTimeout(initTwoFactor, 100);
+}
 
 function loadTwoFactorStatus() {
     console.log('🔧 [Customer 2FA] Loading status from:', '{{ route("customer.two-factor.status") }}');
+    console.log('🔧 [Customer 2FA] CSRF token:', document.querySelector('meta[name="csrf-token"]')?.content);
 
     fetch('{{ route("customer.two-factor.status") }}', {
         method: 'GET',
@@ -306,30 +324,46 @@ function loadTwoFactorStatus() {
                 displayTwoFactorStatus(data.data);
             } else {
                 console.error('🚨 [Customer 2FA] API returned success: false', data);
-                $('#twoFactorStatus').html(`
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Failed to load 2FA status: ${data.message || 'Unknown error'}
-                    </div>
-                `);
-                $('#securityLevel').html(`
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>Error loading security level
-                    </div>
-                `);
+                const statusEl = document.getElementById('twoFactorStatus');
+                const levelEl = document.getElementById('securityLevel');
+
+                if (statusEl) {
+                    statusEl.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Failed to load 2FA status: ${data.message || 'Unknown error'}
+                        </div>
+                    `;
+                }
+
+                if (levelEl) {
+                    levelEl.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Error loading security level
+                        </div>
+                    `;
+                }
             }
         })
         .catch(error => {
             console.error('🚨 [Customer 2FA] Fetch error:', error);
-            $('#twoFactorStatus').html(`
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>Error loading 2FA status: ${error.message}
-                </div>
-            `);
-            $('#securityLevel').html(`
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>Network error
-                </div>
-            `);
+            const statusEl = document.getElementById('twoFactorStatus');
+            const levelEl = document.getElementById('securityLevel');
+
+            if (statusEl) {
+                statusEl.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Error loading 2FA status: ${error.message}
+                    </div>
+                `;
+            }
+
+            if (levelEl) {
+                levelEl.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Network error
+                    </div>
+                `;
+            }
         });
 }
 
@@ -432,15 +466,20 @@ function displayTwoFactorStatus(data) {
         `;
     }
 
-    $('#twoFactorStatus').html(statusHtml);
-    $('#securityLevel').html(securityLevel);
+    const statusEl = document.getElementById('twoFactorStatus');
+    const levelEl = document.getElementById('securityLevel');
+
+    if (statusEl) statusEl.innerHTML = statusHtml;
+    if (levelEl) levelEl.innerHTML = securityLevel;
 
     // Display trusted devices
     if (trustedDevices.length > 0) {
         displayTrustedDevices(trustedDevices);
-        $('#trustedDevicesCard').show();
+        const cardEl = document.getElementById('trustedDevicesCard');
+        if (cardEl) cardEl.style.display = 'block';
     } else {
-        $('#trustedDevicesCard').hide();
+        const cardEl = document.getElementById('trustedDevicesCard');
+        if (cardEl) cardEl.style.display = 'none';
     }
 }
 
@@ -476,7 +515,8 @@ function displayTrustedDevices(devices) {
         `).join('');
     }
 
-    $('#trustedDevicesList').html(devicesHtml);
+    const listEl = document.getElementById('trustedDevicesList');
+    if (listEl) listEl.innerHTML = devicesHtml;
 }
 
 function enableTwoFactor() {
@@ -507,7 +547,9 @@ function showSetupModal(setupData) {
             <div class="col-md-6">
                 <h6>1. Scan QR Code</h6>
                 <div class="text-center mb-3">
-                    ${setupData.qr_code_svg}
+                    <div class="qr-code-container mx-auto d-inline-block p-3 bg-white border rounded shadow-sm" style="max-width: 250px;">
+                        ${setupData.qr_code_svg}
+                    </div>
                 </div>
                 <p class="small text-muted text-center">Scan this QR code with your authenticator app</p>
             </div>
@@ -609,6 +651,11 @@ $('#confirmDisableBtn').on('click', function() {
         return;
     }
 
+    // Show loading state
+    const $btn = $(this);
+    const originalText = $btn.html();
+    $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Disabling...');
+
     fetch('{{ route("customer.two-factor.disable") }}', {
         method: 'POST',
         headers: {
@@ -622,17 +669,35 @@ $('#confirmDisableBtn').on('click', function() {
     })
     .then(response => response.json())
     .then(data => {
+        $('#disableTwoFactorModal').modal('hide');
+
         if (data.success) {
-            $('#disableTwoFactorModal').modal('hide');
-            show_notification('success', 'Two-factor authentication has been disabled');
-            loadTwoFactorStatus();
+            show_notification('success', data.message || 'Two-factor authentication has been disabled');
+            // Clear form
+            $('#currentPassword').val('');
+            $('#confirmDisable').prop('checked', false);
+            // Reload status after a short delay to ensure backend state is updated
+            setTimeout(() => loadTwoFactorStatus(), 500);
         } else {
             show_notification('error', data.message || 'Failed to disable 2FA');
+            if (data.message && data.message.includes('already disabled')) {
+                // If already disabled, refresh status
+                setTimeout(() => loadTwoFactorStatus(), 500);
+            }
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        show_notification('error', 'An error occurred');
+        $('#disableTwoFactorModal').modal('hide');
+        if (error.message.includes('Too Many Requests')) {
+            show_notification('error', 'Too many attempts. Please wait a moment and try again.');
+        } else {
+            show_notification('error', 'An error occurred while disabling 2FA');
+        }
+    })
+    .finally(() => {
+        // Reset button state
+        $btn.prop('disabled', false).html(originalText);
     });
 });
 
@@ -660,8 +725,29 @@ $('#confirmGenerateRecoveryBtn').on('click', function() {
         },
         body: JSON.stringify({ current_password: password })
     })
-    .then(response => response.json())
+    .then(async response => {
+        console.log('🔧 [Recovery Codes] Response status:', response.status);
+        console.log('🔧 [Recovery Codes] Content-Type:', response.headers.get('content-type'));
+
+        // Check if response is actually JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            // Response is HTML (likely an error page)
+            const htmlText = await response.text();
+            console.error('🚨 [Recovery Codes] Got HTML response instead of JSON:', htmlText.substring(0, 200));
+
+            // Extract error message from HTML if possible
+            const errorMatch = htmlText.match(/<title>(.*?)<\/title>/);
+            const errorTitle = errorMatch ? errorMatch[1] : 'Server Error';
+
+            throw new Error(`Server returned HTML instead of JSON: ${errorTitle}`);
+        }
+
+        return response.json();
+    })
     .then(data => {
+        console.log('🔧 [Recovery Codes] JSON response:', data);
+
         if (data.success) {
             $('#generateRecoveryCodesModal').modal('hide');
             showRecoveryCodesModal(data.data.recovery_codes);
@@ -672,8 +758,12 @@ $('#confirmGenerateRecoveryBtn').on('click', function() {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        show_notification('error', 'An error occurred while generating recovery codes');
+        console.error('🚨 [Recovery Codes] Error:', error);
+        if (error.message.includes('HTML instead of JSON')) {
+            show_notification('error', 'Server error occurred. Please refresh the page and try again.');
+        } else {
+            show_notification('error', 'An error occurred while generating recovery codes');
+        }
     })
     .finally(() => {
         // Reset button state
@@ -803,4 +893,75 @@ function showConfirmationModal(title, message, variant = 'primary', onConfirm = 
     $('#confirmationModal').modal('show');
 }
 </script>
+
+<style>
+/* QR Code Styling */
+.qr-code-container {
+    background: linear-gradient(45deg, #f8f9fa 25%, transparent 25%),
+                linear-gradient(-45deg, #f8f9fa 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #f8f9fa 75%),
+                linear-gradient(-45deg, transparent 75%, #f8f9fa 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    border: 2px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.qr-code-container:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.qr-code-container svg {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 220px;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Recovery codes styling */
+.recovery-codes-container {
+    max-height: 200px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.recovery-codes-container code {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+    font-size: 14px;
+    background: #ffffff !important;
+    border: 1px solid #e9ecef !important;
+    padding: 8px 12px !important;
+    margin-bottom: 8px !important;
+    border-radius: 6px;
+    letter-spacing: 1px;
+    color: #495057 !important;
+    transition: all 0.2s ease;
+}
+
+.recovery-codes-container code:hover {
+    background: #e9ecef !important;
+    transform: translateX(5px);
+}
+
+/* Modal improvements */
+.modal-lg {
+    max-width: 800px;
+}
+
+@media (max-width: 768px) {
+    .qr-code-container {
+        max-width: 200px !important;
+    }
+
+    .modal-lg {
+        max-width: 95%;
+        margin: 10px auto;
+    }
+}
+</style>
 @endpush

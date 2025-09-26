@@ -164,46 +164,59 @@ class CustomerAuthController extends Controller
                 ->with('info', 'Please verify your email address to continue.');
         }
 
-        // Check if customer has 2FA enabled and confirmed
-        if ($customer && method_exists($customer, 'hasTwoFactorEnabled') && $customer->hasTwoFactorEnabled()) {
+        // Check if customer has 2FA enabled and confirmed (SAME PATTERN AS ADMIN)
+        if ($customer && $customer->hasCustomerTwoFactorEnabled()) {
             // Check if device is already trusted
-            $isDeviceTrusted = method_exists($customer, 'isDeviceTrusted') ? $customer->isDeviceTrusted($request) : false;
-
-            if (!$isDeviceTrusted) {
-                // Log 2FA challenge initiation
-                CustomerAuditLog::logAction('2fa_challenge_started', 'Customer required to complete 2FA challenge', [
-                    'device_trusted' => false,
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent()
-                ]);
-
-                // Store customer info in session for 2FA challenge
+            if (!$customer->isCustomerDeviceTrusted($request)) {
+                // Store customer info in session for 2FA challenge (MINIMAL DATA LIKE ADMIN)
                 $request->session()->put([
                     '2fa_user_id' => $customer->id,
                     '2fa_guard' => 'customer',
-                    '2fa_remember' => $request->boolean('remember'),
-                    '2fa_started_at' => now()->timestamp, // For session timeout
-                    '2fa_ip' => $request->ip() // Security check
+                    '2fa_remember' => $request->boolean('remember')
                 ]);
 
-                // Logout the customer temporarily (they'll be logged back in after 2FA)
+                // Save session immediately
+                $request->session()->save();
+
+                // Logout the customer temporarily (they'll be logged back in after 2FA) - SAME AS ADMIN
                 Auth::guard('customer')->logout();
 
-                // Regenerate session ID for security
-                $request->session()->regenerate();
+                // Log 2FA challenge initiation (with error handling)
+                try {
+                    CustomerAuditLog::logAction('2fa_challenge_started', 'Customer required to complete 2FA challenge', [
+                        'device_trusted' => false,
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent()
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error('Failed to log 2FA challenge initiation', [
+                        'error' => $e->getMessage(),
+                        'customer_id' => $customer->id
+                    ]);
+                }
 
-                // Redirect to 2FA challenge
-                return redirect()->route('customer.two-factor.challenge')
-                    ->with('info', 'Please enter your two-factor authentication code to complete login.');
+                // TEMPORARY FIX: Use admin's working 2FA route
+                return redirect()->route('two-factor.challenge')
+                    ->with('info', 'Please enter your two-factor authentication code.');
             } else {
-                // Device is trusted, log successful trusted login
-                CustomerAuditLog::logAction('trusted_device_login', 'Customer logged in using trusted device', [
-                    'device_trusted' => true,
-                    'ip_address' => $request->ip(),
-                    'user_agent' => $request->userAgent()
-                ]);
+                // Device is trusted, log successful trusted login (with error handling)
+                try {
+                    CustomerAuditLog::logAction('trusted_device_login', 'Customer logged in using trusted device', [
+                        'device_trusted' => true,
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->userAgent()
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error('Failed to log trusted device login', [
+                        'error' => $e->getMessage(),
+                        'customer_id' => $customer->id
+                    ]);
+                }
             }
         }
+
+        // Default behavior - proceed with normal login (regenerate session for normal logins) - SAME AS ADMIN
+        $request->session()->regenerate();
 
         return redirect()->intended($this->redirectPath());
     }
@@ -743,6 +756,87 @@ class CustomerAuthController extends Controller
 
         return redirect()->route('customer.profile')
             ->with('success', 'Password successfully changed for ' . $member->name . '.');
+    }
+
+    /**
+     * Disable 2FA for a family member (only family head can do this)
+     */
+    public function disableFamilyMember2FA(Customer $member, Request $request)
+    {
+        $customer = Auth::guard('customer')->user();
+
+        try {
+            // Security checks
+            if (!$customer->hasFamily()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not part of a family group.'
+                ], 403);
+            }
+
+            if (!$customer->isFamilyHead()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Only the family head can manage family member 2FA settings.'
+                ], 403);
+            }
+
+            if (!$customer->isInSameFamilyAs($member)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This member is not in your family group.'
+                ], 403);
+            }
+
+            if ($customer->id === $member->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You cannot disable your own 2FA from here. Use your profile page.'
+                ], 403);
+            }
+
+            // Check if member has 2FA enabled
+            if (!$member->hasCustomerTwoFactorEnabled()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $member->name . ' does not have Two-Factor Authentication enabled.'
+                ], 400);
+            }
+
+            // Use the customer 2FA service
+            $customerTwoFactorService = app(\App\Services\CustomerTwoFactorAuthService::class);
+            $customerTwoFactorService->disableTwoFactor($member, '', true); // Skip password check for family head
+
+            // Also revoke all trusted devices
+            $member->revokeAllCustomerTrustedDevices();
+
+            // Log the action
+            Log::info('Family head disabled member 2FA', [
+                'family_head_id' => $customer->id,
+                'family_head_email' => $customer->email,
+                'member_id' => $member->id,
+                'member_email' => $member->email,
+                'ip_address' => $request->ip()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Two-Factor Authentication has been disabled for ' . $member->name . '.'
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to disable family member 2FA', [
+                'family_head_id' => $customer->id,
+                'member_id' => $member->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while disabling Two-Factor Authentication. Please try again.'
+            ], 500);
+        }
     }
 
     /**

@@ -5,8 +5,7 @@ namespace App\Models;
 use App\Models\CustomerInsurance;
 use App\Models\Quotation;
 use App\Models\Claim;
-use App\Traits\HasTwoFactorAuth;
-use App\Traits\HasSecuritySettings;
+use App\Traits\Customer\HasCustomerTwoFactorAuth;
 use App\Traits\Auditable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
@@ -95,7 +94,7 @@ use Illuminate\Support\Str;
  */
 class Customer extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, LogsActivity, HasTwoFactorAuth, HasSecuritySettings, Auditable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, LogsActivity, HasCustomerTwoFactorAuth, Auditable;
     protected static $logAttributes = ['*'];
     protected static $logOnlyDirty = true;
     /**

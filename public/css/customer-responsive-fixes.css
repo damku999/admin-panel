@@ -1,0 +1,31 @@
+/* Customer Portal Responsive Fixes - Minimal Fix for Horizontal Scroll */
+/* Only target the specific issue without breaking the original design */
+
+/* Fix only the problematic row margins that cause horizontal scroll on mobile */
+@media (max-width: 768px) {
+    .row {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+    }
+
+    /* Ensure content doesn't overflow on small screens */
+    .container-fluid {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+
+    /* Make tables responsive */
+    .table-responsive {
+        overflow-x: auto !important;
+    }
+
+    /* Ensure buttons and forms fit on mobile */
+    .btn {
+        white-space: nowrap;
+    }
+
+    /* Handle long text content */
+    .card-body {
+        word-wrap: break-word;
+    }
+}

@@ -27,7 +27,7 @@ class CustomerAuth
             return redirect()->route('customer.login')->with('error', 'Your account has been deactivated. Please contact support.');
         }
 
-        // Check if customer needs to change password (skip for password/email change routes and logout)
+        // Check if customer needs to change password (skip for password/email change routes, 2FA routes, and logout)
         $excludedRoutes = [
             'customer.change-password',
             'customer.change-password.update',
@@ -35,7 +35,10 @@ class CustomerAuth
             'customer.family-member.password',
             'customer.verify-email-notice',
             'customer.resend-verification',
-            'customer.logout'
+            'customer.logout',
+            // 2FA routes should not require password change check
+            'customer.two-factor.challenge',
+            'customer.two-factor.verify'
         ];
 
         if (!in_array($request->route()->getName(), $excludedRoutes) && $customer->needsPasswordChange()) {

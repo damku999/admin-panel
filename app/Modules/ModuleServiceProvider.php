@@ -149,7 +149,7 @@ class ModuleServiceProvider extends ServiceProvider
 
         $this->app['events']->listen(
             \App\Events\Quotation\QuotationGenerated::class,
-            [\App\Modules\Notification\Listeners\SendQuotationNotification::class, 'handle']
+            [\App\Listeners\Quotation\SendQuotationWhatsApp::class, 'handle']
         );
 
         $this->app['events']->listen(

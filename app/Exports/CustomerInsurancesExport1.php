@@ -286,9 +286,13 @@ class InsuranceDataSheet implements FromCollection, WithHeadings, ShouldAutoSize
                 }
                 
                 // Auto-fit all columns
-                foreach (range('A', $lastColumn) as $column) {
-                    $sheet->getColumnDimension($column)->setAutoSize(true);
+                $columnIndex = 'A';
+                while ($columnIndex !== $lastColumn) {
+                    $sheet->getColumnDimension($columnIndex)->setAutoSize(true);
+                    $columnIndex++;
                 }
+                // Don't forget the last column
+                $sheet->getColumnDimension($lastColumn)->setAutoSize(true);
                 
                 // Add auto-filter to header row
                 $sheet->setAutoFilter("A1:{$lastColumn}1");

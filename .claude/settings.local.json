@@ -14,7 +14,8 @@
       "Bash(git log:*)",
       "Bash(git add:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nEnhance 2FA security with encryption and multi-guard support\n\nSecurity Enhancements:\n- Encrypt 2FA secrets and recovery codes in database using Laravel Crypt\n- Add backwards compatibility for legacy unencrypted secrets\n- Hide sensitive fields (secret, recovery_codes) from API responses\n- Improve recovery code validation with detailed logging\n\nMulti-Guard Improvements:\n- Add session-based guard detection during 2FA challenges\n- Implement guard-aware service selection (admin vs customer)\n- Fix error redirect handling based on guard context\n- Support device trust revocation by both ID types (numeric/hash)\n\nUI/UX Updates:\n- Major redesign of 2FA profile view with enhanced user experience\n- Improve 2FA challenge views for both admin and customer portals\n- Better error messages for recovery code validation\n\nCode Quality:\n- Remove commented debug statements from ReportController and RedirectIfAuthenticated\n- Add comprehensive debug logging for troubleshooting\n- Clean up outdated documentation files\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "mcp__laravel-boost__browser-logs"
+      "mcp__laravel-boost__browser-logs",
+      "Bash(powershell:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

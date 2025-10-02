@@ -28,8 +28,18 @@ class ReportController extends AbstractBaseCrudController
         $response = $this->reportService->getInitialData();
 
         if (($request->has('view') || $request->isMethod('post')) && !empty($request->input('report_name'))) {
-            $request->validate([
-                'report_name' => 'required|in:cross_selling,insurance_detail,due_policy_detail'
+            // Validate based on report type
+            $rules = ['report_name' => 'required|in:cross_selling,insurance_detail,due_policy_detail'];
+
+            // Due policy report REQUIRES date range
+            if ($request['report_name'] === 'due_policy_detail') {
+                $rules['due_start_date'] = 'required';
+                $rules['due_end_date'] = 'required';
+            }
+
+            $request->validate($rules, [
+                'due_start_date.required' => 'Due Policy Period (From Month) is required for this report.',
+                'due_end_date.required' => 'Due Policy Period (To Month) is required for this report.',
             ]);
 
             \Log::info('Processing report request', [
@@ -46,8 +56,19 @@ class ReportController extends AbstractBaseCrudController
                 \Log::info('Insurance data received', ['count' => count($insuranceData)]);
                 $response['insurance_reports'] = $insuranceData;
             } elseif ($request['report_name'] == 'due_policy_detail') {
+                \Log::info('Due Policy Report - Request Data', [
+                    'due_start_date' => $request->input('due_start_date'),
+                    'due_end_date' => $request->input('due_end_date'),
+                    'all_filters' => $request->all()
+                ]);
+
                 $duePolicyData = $this->reportService->generateCustomerInsuranceReport($request->all());
-                \Log::info('Due policy data received', ['count' => count($duePolicyData)]);
+
+                \Log::info('Due policy data received', [
+                    'count' => count($duePolicyData),
+                    'first_record' => $duePolicyData[0] ?? 'no records'
+                ]);
+
                 $response['due_policy_reports'] = $duePolicyData;
             }
         }

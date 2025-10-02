@@ -165,42 +165,86 @@ class Report extends Authenticatable
             ->when(!empty($filters['due_start_date']), function ($query) use ($filters) {
                 // Due dates can be in m/Y or mm/Y format, handle both
                 try {
-                    $dateStr = $filters['due_start_date'];
-                    // Try different date formats
+                    $dateStr = trim($filters['due_start_date']);
                     $startDate = null;
-                    try {
-                        $startDate = Carbon::createFromFormat('m/Y', $dateStr);
-                    } catch (\Exception $e1) {
-                        $startDate = Carbon::createFromFormat('n/Y', $dateStr);
+                    $usedFormat = null;
+
+                    // Try parsing with different formats
+                    foreach (['m/Y', 'n/Y', 'Y-m', 'd/m/Y', 'M Y', 'F Y'] as $format) {
+                        try {
+                            $parsed = Carbon::createFromFormat($format, $dateStr);
+                            if ($parsed && $parsed->year > 2000 && $parsed->year < 2100) {
+                                $startDate = $parsed;
+                                $usedFormat = $format;
+                                break;
+                            }
+                        } catch (\Exception $e) {
+                            continue;
+                        }
                     }
-                    $formattedDate = $startDate->format('Y-m-01');
-                    
-                    error_log('Due start date filter: ' . $dateStr . ' -> ' . $formattedDate);
-                    
+
+                    if (!$startDate) {
+                        throw new \Exception("Unable to parse date: {$dateStr}");
+                    }
+
+                    $formattedDate = $startDate->startOfMonth()->format('Y-m-d');
+
+                    \Log::info('✅ Due start date filter applied', [
+                        'input' => $dateStr,
+                        'format_used' => $usedFormat,
+                        'parsed' => $formattedDate,
+                        'query' => "expired_date >= {$formattedDate}"
+                    ]);
+
                     return $query->where('expired_date', '>=', $formattedDate);
                 } catch (\Exception $e) {
-                    error_log('Due start date parsing failed: ' . $filters['due_start_date']);
+                    \Log::error('❌ Due start date parsing failed', [
+                        'input' => $filters['due_start_date'] ?? 'null',
+                        'error' => $e->getMessage()
+                    ]);
                     return $query;
                 }
             })
             ->when(!empty($filters['due_end_date']), function ($query) use ($filters) {
                 // Due dates can be in m/Y or mm/Y format, handle both
                 try {
-                    $dateStr = $filters['due_end_date'];
-                    // Try different date formats
+                    $dateStr = trim($filters['due_end_date']);
                     $endDate = null;
-                    try {
-                        $endDate = Carbon::createFromFormat('m/Y', $dateStr);
-                    } catch (\Exception $e1) {
-                        $endDate = Carbon::createFromFormat('n/Y', $dateStr);
+                    $usedFormat = null;
+
+                    // Try parsing with different formats
+                    foreach (['m/Y', 'n/Y', 'Y-m', 'd/m/Y', 'M Y', 'F Y'] as $format) {
+                        try {
+                            $parsed = Carbon::createFromFormat($format, $dateStr);
+                            if ($parsed && $parsed->year > 2000 && $parsed->year < 2100) {
+                                $endDate = $parsed;
+                                $usedFormat = $format;
+                                break;
+                            }
+                        } catch (\Exception $e) {
+                            continue;
+                        }
                     }
+
+                    if (!$endDate) {
+                        throw new \Exception("Unable to parse date: {$dateStr}");
+                    }
+
                     $formattedDate = $endDate->endOfMonth()->format('Y-m-d');
-                    
-                    error_log('Due end date filter: ' . $dateStr . ' -> ' . $formattedDate);
-                    
+
+                    \Log::info('✅ Due end date filter applied', [
+                        'input' => $dateStr,
+                        'format_used' => $usedFormat,
+                        'parsed' => $formattedDate,
+                        'query' => "expired_date <= {$formattedDate}"
+                    ]);
+
                     return $query->where('expired_date', '<=', $formattedDate);
                 } catch (\Exception $e) {
-                    error_log('Due end date parsing failed: ' . $filters['due_end_date']);
+                    \Log::error('❌ Due end date parsing failed', [
+                        'input' => $filters['due_end_date'] ?? 'null',
+                        'error' => $e->getMessage()
+                    ]);
                     return $query;
                 }
             })

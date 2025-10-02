@@ -25,17 +25,6 @@ class ReportController extends AbstractBaseCrudController
 
     public function index(Request $request)
     {
-        // dd('DEBUG: Index method called', [
-        //     'method' => $request->method(),
-        //     'all_data' => $request->all(),
-        //     'has_view' => $request->has('view'),
-        //     'view_value' => $request->input('view'),
-        //     'report_name' => $request->input('report_name'),
-        //     'url' => $request->url(),
-        //     'full_url' => $request->fullUrl(),
-        //     'raw_input' => $request->input()
-        // ]);
-
         $response = $this->reportService->getInitialData();
 
         if (($request->has('view') || $request->isMethod('post')) && !empty($request->input('report_name'))) {

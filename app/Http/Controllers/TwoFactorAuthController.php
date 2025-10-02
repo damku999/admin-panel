@@ -26,6 +26,15 @@ class TwoFactorAuthController extends Controller
      */
     private function getTwoFactorService()
     {
+        // During 2FA challenge, check session guard first
+        if (session()->has('2fa_guard')) {
+            $guard = session('2fa_guard', 'web');
+            if ($guard === 'customer') {
+                return $this->customerTwoFactorService;
+            }
+        }
+
+        // For authenticated requests, check current guard
         if (Auth::guard('customer')->check()) {
             return $this->customerTwoFactorService;
         }
@@ -568,9 +577,17 @@ class TwoFactorAuthController extends Controller
                 'session_id' => session()->getId()
             ]);
 
-            return back()->withErrors([
-                'code' => $e->getMessage()
-            ])->withInput();
+            // For customer errors, use back() to preserve session state
+            // For admin errors, redirect to the specific route
+            if ($guard === 'customer') {
+                return back()->withErrors([
+                    'code' => $e->getMessage()
+                ])->withInput();
+            } else {
+                return redirect(route('two-factor.challenge'))->withErrors([
+                    'code' => $e->getMessage()
+                ])->withInput();
+            }
         }
     }
 }

@@ -140,7 +140,11 @@ class TwoFactorAuthService extends BaseService
             );
 
             if (!$isValid) {
-                throw new \Exception('Invalid verification code.');
+                if ($codeType === 'recovery') {
+                    throw new \Exception('Invalid recovery code. This code may have already been used or is not valid.');
+                } else {
+                    throw new \Exception('Invalid verification code.');
+                }
             }
 
             Log::info('2FA login verification successful', [
@@ -247,6 +251,14 @@ class TwoFactorAuthService extends BaseService
             'recent_attempts' => $user->getRecentFailedTwoFactorAttempts(),
             'is_rate_limited' => $user->isTwoFactorRateLimited(),
         ];
+    }
+
+    /**
+     * Get status for user (alias for consistency with customer service)
+     */
+    public function getStatus($user): array
+    {
+        return $this->getTwoFactorStatus($user);
     }
 
     /**

@@ -102,7 +102,7 @@ Route::prefix('customer')->name('customer.')->group(function () {
                 ->name('disable');
 
             Route::post('/recovery-codes', [\App\Http\Controllers\TwoFactorAuthController::class, 'generateRecoveryCodes'])
-                ->middleware(['throttle:5,1']) // Lower limit for security
+                ->middleware(['throttle:10,1']) // Increased from 5 to 10 per minute
                 ->name('recovery-codes');
 
             // Device management (moderate rate limit)

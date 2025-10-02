@@ -279,9 +279,20 @@ trait HasCustomerTwoFactorAuth
      */
     public function revokeCustomerDeviceTrust(string $deviceId): bool
     {
-        $device = $this->customerTrustedDevices()
-                      ->where('device_id', $deviceId)
-                      ->first();
+        // Check if it's a numeric ID (database ID) or device_id hash
+        $device = null;
+
+        if (is_numeric($deviceId)) {
+            // Database ID lookup
+            $device = $this->customerTrustedDevices()
+                          ->where('id', $deviceId)
+                          ->first();
+        } else {
+            // Device ID hash lookup
+            $device = $this->customerTrustedDevices()
+                          ->where('device_id', $deviceId)
+                          ->first();
+        }
 
         if ($device) {
             $device->revoke();

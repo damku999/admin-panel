@@ -116,14 +116,35 @@ class TwoFactorAuth extends Model
     public function useRecoveryCode(string $code): bool
     {
         $codes = $this->recovery_codes;
-        if (!$codes || !in_array(strtoupper($code), $codes)) {
+        $upperCode = strtoupper($code);
+
+        // Debug logging
+        \Log::debug('Recovery code verification attempt', [
+            'input_code' => $code,
+            'upper_code' => $upperCode,
+            'stored_codes' => $codes,
+            'codes_exist' => !empty($codes),
+            'code_in_array' => $codes ? in_array($upperCode, $codes) : false
+        ]);
+
+        if (!$codes || !in_array($upperCode, $codes)) {
+            \Log::warning('Recovery code verification failed', [
+                'input_code' => $code,
+                'codes_exist' => !empty($codes),
+                'available_codes_count' => $codes ? count($codes) : 0
+            ]);
             return false;
         }
 
         // Remove the used code
-        $codes = array_filter($codes, fn($c) => $c !== strtoupper($code));
+        $codes = array_filter($codes, fn($c) => $c !== $upperCode);
         $this->recovery_codes = array_values($codes);
         $this->save();
+
+        \Log::info('Recovery code used successfully', [
+            'used_code' => $upperCode,
+            'remaining_codes' => count($this->recovery_codes)
+        ]);
 
         return true;
     }

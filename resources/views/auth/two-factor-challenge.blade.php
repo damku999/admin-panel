@@ -97,8 +97,9 @@
                                                class="form-control"
                                                id="recovery_code"
                                                name="code"
-                                               placeholder="XX-XXXXXX"
-                                               pattern="[0-9]{2}-[0-9]{6}">
+                                               placeholder="XXXXXXXX"
+                                               pattern="[A-Z0-9]{8}"
+                                               maxlength="8">
                                         <div class="form-text">Enter one of your backup recovery codes</div>
                                     </div>
                                     <input type="hidden" name="code_type" value="recovery">
@@ -142,11 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Format recovery code input
     if (recoveryInput) {
         recoveryInput.addEventListener('input', function() {
-            let value = this.value.replace(/[^0-9]/g, '');
-            if (value.length >= 2) {
-                value = value.substring(0, 2) + '-' + value.substring(2, 8);
-            }
-            this.value = value;
+            this.value = this.value.replace(/[^A-Z0-9]/g, '').substring(0, 8).toUpperCase();
         });
     }
 });

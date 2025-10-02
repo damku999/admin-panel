@@ -46,7 +46,7 @@ class SendRenewalReminders extends Command
             foreach ($chunkedInurances as $insurance) {
                 $messageText = $insurance->premiumType->is_vehicle == 1 ? $this->renewalReminderVehicle($insurance) : $this->renewalReminder($insurance);
                 $receiverId = $insurance->customer->mobile_number;
-                // $this->whatsAppSendMessage($messageText, $receiverId);
+                $this->whatsAppSendMessage($messageText, $receiverId);
                 // $this->whatsAppSendMessage($messageText, '+918000071413');
             }
         }

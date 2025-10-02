@@ -142,20 +142,24 @@ class ModuleServiceProvider extends ServiceProvider
     private function registerModuleEventListeners(): void
     {
         // Cross-module communication via events
-        $this->app['events']->listen(
-            \App\Events\Customer\CustomerRegistered::class,
-            [\App\Modules\Notification\Listeners\SendCustomerWelcomeNotification::class, 'handle']
-        );
 
+        // TODO: Create SendCustomerWelcomeNotification listener
+        // $this->app['events']->listen(
+        //     \App\Events\Customer\CustomerRegistered::class,
+        //     [\App\Modules\Notification\Listeners\SendCustomerWelcomeNotification::class, 'handle']
+        // );
+
+        // Quotation WhatsApp notification (active)
         $this->app['events']->listen(
             \App\Events\Quotation\QuotationGenerated::class,
             [\App\Listeners\Quotation\SendQuotationWhatsApp::class, 'handle']
         );
 
-        $this->app['events']->listen(
-            \App\Events\Insurance\PolicyExpiringWarning::class,
-            [\App\Modules\Notification\Listeners\SendPolicyRenewalNotification::class, 'handle']
-        );
+        // TODO: Create SendPolicyRenewalNotification listener
+        // $this->app['events']->listen(
+        //     \App\Events\Insurance\PolicyExpiringWarning::class,
+        //     [\App\Modules\Notification\Listeners\SendPolicyRenewalNotification::class, 'handle']
+        // );
     }
 
     /**

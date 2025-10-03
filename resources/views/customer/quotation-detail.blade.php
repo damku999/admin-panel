@@ -316,7 +316,7 @@
                     </div>
 
                     <!-- Company-wise Add-on Coverage Details -->
-                    @if ($quotation->quotationCompanies->count() > 0 && $quotation->quotationCompanies->some(function($company) { return $company->addon_covers || $company->total_addon_premium > 0; }))
+                    @if ($quotation->quotationCompanies->count() > 0 && $quotation->quotationCompanies->some(function($company) { return ($company->addon_covers_breakdown && count($company->addon_covers_breakdown) > 0) || $company->total_addon_premium > 0; }))
                         <div class="card mt-4 fade-in-scale" style="animation-delay: 400ms">
                             <div class="card-header bg-success">
                                 <h5 class="mb-0 text-white fw-bold">
@@ -326,7 +326,7 @@
                             <div class="card-body">
                                 <div class="row">
                                     @foreach ($quotation->quotationCompanies->sortBy('ranking') as $company)
-                                        @if ($company->addon_covers || $company->total_addon_premium > 0)
+                                        @if (($company->addon_covers_breakdown && count($company->addon_covers_breakdown) > 0) || $company->total_addon_premium > 0)
                                             <div class="col-lg-6 col-md-12 mb-4">
                                                 <div class="card border-{{ $company->is_recommended ? 'success' : 'light' }} h-100">
                                                     <div class="card-header bg-{{ $company->is_recommended ? 'success' : 'light' }} {{ $company->is_recommended ? 'text-white' : 'text-dark' }}">
@@ -342,14 +342,23 @@
                                                         </div>
                                                     </div>
                                                     <div class="card-body">
-                                                        @if ($company->addon_covers)
+                                                        @if ($company->addon_covers_breakdown && count($company->addon_covers_breakdown) > 0)
                                                             <div class="mb-3">
                                                                 <h6 class="text-muted mb-2">
                                                                     <i class="fas fa-shield-alt me-1"></i>Add-on Covers
                                                                 </h6>
                                                                 <div class="d-flex flex-wrap gap-1">
-                                                                    @foreach ($company->addon_covers as $addon)
-                                                                        <span class="badge bg-success text-white">{{ $addon }}</span>
+                                                                    @foreach ($company->addon_covers_breakdown as $addonName => $addonData)
+                                                                        @php
+                                                                            $price = is_array($addonData) ? ($addonData['price'] ?? 0) : $addonData;
+                                                                            $note = is_array($addonData) ? ($addonData['note'] ?? '') : '';
+                                                                        @endphp
+                                                                        <span class="badge bg-success text-white" title="{{ $note }}">
+                                                                            {{ $addonName }}
+                                                                            @if($price > 0)
+                                                                                (₹{{ number_format($price) }})
+                                                                            @endif
+                                                                        </span>
                                                                     @endforeach
                                                                 </div>
                                                             </div>

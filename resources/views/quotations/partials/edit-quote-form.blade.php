@@ -249,16 +249,20 @@
                                         @foreach ($columnCovers as $addonCover)
                                             @php
                                                 $slug = \Str::slug($addonCover->name, '_');
+                                                // Check if this addon exists in the breakdown (means it was selected)
+                                                $addonExists = isset($addonBreakdown[$addonCover->name]);
                                                 $addonData = $addonBreakdown[$addonCover->name] ?? ['price' => 0, 'note' => ''];
                                                 $price = is_array($addonData) ? ($addonData['price'] ?? 0) : $addonData;
                                                 $note = is_array($addonData) ? ($addonData['note'] ?? '') : '';
+                                                // Selected if it exists in breakdown OR has price OR has note
+                                                $isSelected = $addonExists || ($price > 0) || !empty($note);
                                             @endphp
                                             <div class="form-group mb-2 addon-field-container" data-addon="{{ $slug }}">
                                                 <div class="form-check">
                                                     <input class="form-check-input addon-checkbox" type="checkbox"
                                                         id="addon_{{ $slug }}_{{ $quoteIndex }}"
                                                         data-slug="{{ $slug }}"
-                                                        {{ ($price > 0) ? 'checked' : '' }}>
+                                                        {{ $isSelected ? 'checked' : '' }}>
                                                     <label class="form-check-label small" for="addon_{{ $slug }}_{{ $quoteIndex }}">
                                                         <strong>{{ $addonCover->name }}</strong>
                                                         @if ($addonCover->description)
@@ -266,12 +270,14 @@
                                                         @endif
                                                     </label>
                                                 </div>
+                                                <!-- Hidden input to track addon selection when checked -->
+                                                <input type="hidden" name="companies[{{ $quoteIndex }}][addon_{{ $slug }}_selected]" class="addon-selected-flag" value="{{ $isSelected ? '1' : '0' }}">
                                                 <div class="addon-fields" id="fields_{{ $slug }}_{{ $quoteIndex }}"
-                                                    style="{{ ($price > 0) ? 'display: block;' : 'display: none;' }}">
-                                                    <label class="small">{{ $addonCover->name }} (₹)</label>
+                                                    style="{{ $isSelected ? 'display: block;' : 'display: none;' }}">
+                                                    <label class="small">{{ $addonCover->name }} (₹) <small class="text-muted">(Optional)</small></label>
                                                     <input type="number" name="companies[{{ $quoteIndex }}][addon_{{ $slug }}]"
                                                         class="form-control form-control-sm addon-field @error("companies.{$quoteIndex}.addon_{$slug}") is-invalid @enderror"
-                                                        step="1" value="{{ $price }}" placeholder="Enter premium">
+                                                        step="1" value="{{ $price }}" placeholder="Enter premium (optional)">
                                                     @error("companies.{$quoteIndex}.addon_{$slug}")
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror

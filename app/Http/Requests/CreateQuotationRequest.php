@@ -75,7 +75,11 @@ class CreateQuotationRequest extends FormRequest
             $slug = \Str::slug($addonCover->name, '_');
             $rules["companies.*.addon_{$slug}"] = 'nullable|numeric|min:0';
             $rules["companies.*.addon_{$slug}_note"] = 'nullable|string|max:100';
+            $rules["companies.*.addon_{$slug}_selected"] = 'nullable|string|in:0,1';
         }
+
+        // Accept addon_covers_breakdown from frontend if present
+        $rules['companies.*.addon_covers_breakdown'] = 'nullable|array';
 
         return $rules;
     }
@@ -108,5 +112,46 @@ class CreateQuotationRequest extends FormRequest
             'whatsapp_number.regex' => 'Please enter a valid 10-digit mobile number.',
             'notes.max' => 'Notes cannot exceed 1000 characters.',
         ];
+    }
+
+    /**
+     * Prepare the data for validation by transforming addon fields into addon_covers_breakdown
+     */
+    protected function prepareForValidation(): void
+    {
+        $companies = $this->input('companies', []);
+        $addonCovers = \App\Models\AddonCover::getOrdered(1);
+
+        foreach ($companies as $index => $companyData) {
+            $addonBreakdown = [];
+
+            foreach ($addonCovers as $addonCover) {
+                $slug = \Str::slug($addonCover->name, '_');
+                $addonKey = "addon_{$slug}";
+                $noteKey = "{$addonKey}_note";
+                $selectedKey = "{$addonKey}_selected";
+
+                // Check if addon is selected (either has selected flag = 1 OR has value OR has note)
+                $isSelected = ($companyData[$selectedKey] ?? '0') === '1'
+                    || !empty($companyData[$addonKey])
+                    || !empty($companyData[$noteKey]);
+
+                if ($isSelected) {
+                    $addonBreakdown[$addonCover->name] = [
+                        'price' => $companyData[$addonKey] ?? 0,
+                        'note' => $companyData[$noteKey] ?? '',
+                    ];
+                }
+
+                // Remove individual addon fields from company data
+                unset($companies[$index][$addonKey]);
+                unset($companies[$index][$noteKey]);
+                unset($companies[$index][$selectedKey]);
+            }
+
+            $companies[$index]['addon_covers_breakdown'] = $addonBreakdown;
+        }
+
+        $this->merge(['companies' => $companies]);
     }
 }

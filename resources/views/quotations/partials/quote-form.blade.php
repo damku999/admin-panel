@@ -201,9 +201,11 @@
                                                     @endif
                                                 </label>
                                             </div>
+                                            <!-- Hidden input to track addon selection when checked -->
+                                            <input type="hidden" name="companies[{{ $currentIndex }}][addon_{{ $slug }}_selected]" class="addon-selected-flag" value="0">
                                             <div class="addon-fields" id="fields_{{ $slug }}_{{ $currentIndex }}" style="display: none;">
-                                                <label class="small">{{ $addonCover->name }} (₹)</label>
-                                                <input type="number" name="companies[{{ $currentIndex }}][addon_{{ $slug }}]" class="form-control form-control-sm addon-field @error("companies.{$currentIndex}.addon_{$slug}") is-invalid @enderror" step="1" placeholder="Enter premium">
+                                                <label class="small">{{ $addonCover->name }} (₹) <small class="text-muted">(Optional)</small></label>
+                                                <input type="number" name="companies[{{ $currentIndex }}][addon_{{ $slug }}]" class="form-control form-control-sm addon-field @error("companies.{$currentIndex}.addon_{$slug}") is-invalid @enderror" step="1" placeholder="Enter premium (optional)">
                                                 @error("companies.{$currentIndex}.addon_{$slug}")
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror

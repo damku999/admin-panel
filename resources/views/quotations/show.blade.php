@@ -286,13 +286,18 @@
                             </div>
 
                             <!-- Add-on Coverage Breakdown -->
-                            @if ($quotation->quotationCompanies->where('total_addon_premium', '>', 0)->count() > 0)
+                            @php
+                                $companiesWithAddons = $quotation->quotationCompanies->filter(function($company) {
+                                    return ($company->addon_covers_breakdown && count($company->addon_covers_breakdown) > 0) || $company->total_addon_premium > 0;
+                                });
+                            @endphp
+                            @if ($companiesWithAddons->count() > 0)
                                 <div class="mt-4">
                                     <h6 class="font-weight-bold text-success">
                                         <i class="fas fa-plus-circle"></i> Add-on Coverage Breakdown
                                     </h6>
                                     <div class="row">
-                                        @foreach ($quotation->quotationCompanies->where('total_addon_premium', '>', 0) as $company)
+                                        @foreach ($companiesWithAddons as $company)
                                             <div class="col-md-12 mb-4">
                                                 <div class="card border-left-success">
                                                     <div class="card-header bg-success text-white py-2">
@@ -311,17 +316,11 @@
                                                             <div class="row">
                                                                 @php
                                                                     $addonCount = 0;
-                                                                    $addonsWithPrice = collect(
-                                                                        $company->addon_covers_breakdown,
-                                                                    )->filter(function ($data) {
-                                                                        return (is_array($data) &&
-                                                                            isset($data['price']) &&
-                                                                            $data['price'] > 0) ||
-                                                                            (is_numeric($data) && $data > 0);
-                                                                    });
+                                                                    // Show ALL addons in breakdown, not just those with prices
+                                                                    $totalAddons = count($company->addon_covers_breakdown);
                                                                 @endphp
                                                                 @foreach ($company->addon_covers_breakdown as $addon => $data)
-                                                                    @if (is_array($data) && isset($data['price']) && $data['price'] > 0)
+                                                                    @if (is_array($data))
                                                                         @php $addonCount++; @endphp
                                                                         <div class="col-md-4">
                                                                             <div class="mb-2">
@@ -330,7 +329,13 @@
                                                                                     <strong
                                                                                         class="small text-primary">{{ $addon }}:</strong>
                                                                                     <strong
-                                                                                        class="small">₹{{ number_format($data['price']) }}</strong>
+                                                                                        class="small">
+                                                                                        @if(isset($data['price']) && $data['price'] > 0)
+                                                                                            ₹{{ number_format($data['price']) }}
+                                                                                        @else
+                                                                                            <span class="badge badge-success">Covered</span>
+                                                                                        @endif
+                                                                                    </strong>
                                                                                 </div>
                                                                                 @if (!empty($data['note']))
                                                                                     <div class="text-muted"
@@ -340,11 +345,11 @@
                                                                                 @endif
                                                                             </div>
                                                                         </div>
-                                                                        @if ($addonCount % 3 == 0 && $addonCount < $addonsWithPrice->count())
+                                                                        @if ($addonCount % 3 == 0 && $addonCount < $totalAddons)
                                                             </div>
                                                             <div class="row">
                                                         @endif
-                                                    @elseif(is_numeric($data) && $data > 0)
+                                                    @elseif(is_numeric($data))
                                                         @php $addonCount++; @endphp
                                                         <div class="col-md-4">
                                                             <div class="mb-2">
@@ -352,11 +357,17 @@
                                                                     <strong
                                                                         class="small text-primary">{{ $addon }}:</strong>
                                                                     <strong
-                                                                        class="small">₹{{ number_format($data) }}</strong>
+                                                                        class="small">
+                                                                        @if($data > 0)
+                                                                            ₹{{ number_format($data) }}
+                                                                        @else
+                                                                            <span class="badge badge-success">Covered</span>
+                                                                        @endif
+                                                                    </strong>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        @if ($addonCount % 3 == 0 && $addonCount < $addonsWithPrice->count())
+                                                        @if ($addonCount % 3 == 0 && $addonCount < $totalAddons)
                                                     </div>
                                                     <div class="row">
                                         @endif

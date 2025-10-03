@@ -431,29 +431,45 @@ class QuotationService extends BaseService implements QuotationServiceInterface
 
     private function createManualCompanyQuote(Quotation $quotation, array $data): QuotationCompany
     {
-        // Process individual addon fields into breakdown (dynamic based on addon_covers table)
-        $addonBreakdown = [];
-        $addonCovers = \App\Models\AddonCover::getOrdered(1);
-        
-        foreach ($addonCovers as $addonCover) {
-            $slug = \Str::slug($addonCover->name, '_');
-            $field = "addon_{$slug}";
-            
-            if (isset($data[$field]) && $data[$field] > 0) {
-                $noteField = $field . '_note';
-                $addonBreakdown[$addonCover->name] = [
-                    'price' => floatval($data[$field]),
-                    'field' => $field,
-                    'note' => $data[$noteField] ?? ''
-                ];
+        // Check if frontend already sent addon_covers_breakdown (from edit-quote-form calculation)
+        if (isset($data['addon_covers_breakdown']) && !empty($data['addon_covers_breakdown'])) {
+            // Use the breakdown as-is, just ensure proper structure
+            $addonBreakdown = [];
+            foreach ($data['addon_covers_breakdown'] as $addonName => $addonData) {
+                if (is_array($addonData)) {
+                    $addonBreakdown[$addonName] = [
+                        'price' => floatval($addonData['price'] ?? 0),
+                        'note' => $addonData['note'] ?? ''
+                    ];
+                }
             }
-        }
-
-        // Set the addon breakdown (always override with individual fields if they exist)
-        if (!empty($addonBreakdown)) {
             $data['addon_covers_breakdown'] = $addonBreakdown;
-        } elseif (!isset($data['addon_covers_breakdown'])) {
-            $data['addon_covers_breakdown'] = [];
+        } else {
+            // Fallback: Process individual addon fields into breakdown
+            $addonBreakdown = [];
+            $addonCovers = \App\Models\AddonCover::getOrdered(1);
+
+            foreach ($addonCovers as $addonCover) {
+                $slug = \Str::slug($addonCover->name, '_');
+                $field = "addon_{$slug}";
+                $noteField = $field . '_note';
+                $selectedField = $field . '_selected';
+
+                // Check if addon is selected (either has selected flag = 1 OR has value > 0 OR has note)
+                $isSelected = ($data[$selectedField] ?? '0') === '1'
+                    || (isset($data[$field]) && $data[$field] > 0)
+                    || !empty($data[$noteField]);
+
+                if ($isSelected) {
+                    $addonBreakdown[$addonCover->name] = [
+                        'price' => isset($data[$field]) && $data[$field] !== '' ? floatval($data[$field]) : 0,
+                        'field' => $field,
+                        'note' => $data[$noteField] ?? ''
+                    ];
+                }
+            }
+
+            $data['addon_covers_breakdown'] = $addonBreakdown;
         }
 
         return QuotationCompany::create([

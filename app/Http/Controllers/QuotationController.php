@@ -47,7 +47,6 @@ class QuotationController extends AbstractBaseCrudController
     public function store(CreateQuotationRequest $request): RedirectResponse
     {
         DB::beginTransaction();
-        info($request->validated());
         try {
             $quotation = $this->quotationService->createQuotation($request->validated());
 

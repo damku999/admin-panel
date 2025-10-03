@@ -820,7 +820,32 @@
             });
 
             // Form validation enhancement
-            $('#quotationForm').on('submit', function() {
+            $('#quotationForm').on('submit', function(e) {
+                // Debug: Log all form data before submission
+                let debugOutput = '=== FORM SUBMISSION DEBUG ===\n';
+                const formData = new FormData(this);
+
+                // Log all companies data
+                let companyIndex = 0;
+                while (formData.has(`companies[${companyIndex}][insurance_company_id]`)) {
+                    debugOutput += `\n--- Company ${companyIndex} ---\n`;
+
+                    // Check for addon fields
+                    const addonFields = [];
+                    for (let [key, value] of formData.entries()) {
+                        if (key.startsWith(`companies[${companyIndex}][addon_`)) {
+                            addonFields.push(`${key} = ${value}`);
+                        }
+                    }
+
+                    debugOutput += 'Addon fields:\n' + (addonFields.length > 0 ? addonFields.join('\n') : 'NONE FOUND') + '\n';
+                    companyIndex++;
+                }
+                debugOutput += '=== END FORM DEBUG ===';
+
+                console.log(debugOutput);
+                // alert(debugOutput); // Disabled - uncomment for debugging
+
                 $('#submitBtn').prop('disabled', true);
                 $('#submitBtn').html('<i class="fas fa-spinner fa-spin"></i> Creating...');
             });
@@ -1051,16 +1076,20 @@
             $(document).on('change', '.addon-checkbox', function() {
                 const slug = $(this).data('slug');
                 const isChecked = $(this).is(':checked');
-                const fieldsContainer = $(this).closest('.addon-field-container').find('.addon-fields');
+                const container = $(this).closest('.addon-field-container');
+                const fieldsContainer = container.find('.addon-fields');
+                const selectedFlag = container.find('.addon-selected-flag');
 
                 if (isChecked) {
                     fieldsContainer.show();
+                    selectedFlag.val('1'); // Mark addon as selected
                 } else {
                     fieldsContainer.hide();
+                    selectedFlag.val('0'); // Mark addon as not selected
                     // Clear values when unchecked - set to empty string (null) not 0
                     fieldsContainer.find('.addon-field, .addon-note').val('');
                 }
-                
+
                 // Recalculate addon total for the current quote entry
                 const quoteEntry = $(this).closest('.quote-entry');
                 if (quoteEntry.length) {
@@ -1072,12 +1101,16 @@
             function initializeAddonVisibility(shouldClearValues = false) {
                 $('.addon-checkbox').each(function() {
                     const isChecked = $(this).is(':checked');
-                    const fieldsContainer = $(this).closest('.addon-field-container').find('.addon-fields');
+                    const container = $(this).closest('.addon-field-container');
+                    const fieldsContainer = container.find('.addon-fields');
+                    const selectedFlag = container.find('.addon-selected-flag');
 
                     if (isChecked) {
                         fieldsContainer.show();
+                        selectedFlag.val('1');
                     } else {
                         fieldsContainer.hide();
+                        selectedFlag.val('0');
                         // Only reset values when explicitly requested (user action, not initialization)
                         if (shouldClearValues) {
                             fieldsContainer.find('.addon-field, .addon-note').val('');

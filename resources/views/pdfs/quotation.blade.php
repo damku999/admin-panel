@@ -369,7 +369,8 @@
                             : $company->addon_covers_breakdown;
                         if ($breakdown) {
                             foreach ($breakdown as $addonName => $addonData) {
-                                if ($addonName !== 'Others' && isset($addonData['price']) && $addonData['price'] > 0) {
+                                // Show ALL addons in breakdown, not just those with prices
+                                if ($addonName !== 'Others') {
                                     $allAddons[$addonName] = true;
                                 }
                             }
@@ -388,7 +389,13 @@
                                 : $company->addon_covers_breakdown;
                             $price = isset($breakdown[$addonName]['price']) ? $breakdown[$addonName]['price'] : 0;
                         @endphp
-                        <td class="currency">₹{{ number_format($price, 2) }}</td>
+                        <td class="currency">
+                            @if($price > 0)
+                                ₹{{ number_format($price, 2) }}
+                            @else
+                                <span style="color: green; font-weight: bold;">✓ Covered</span>
+                            @endif
+                        </td>
                     @endforeach
                 </tr>
             @endforeach

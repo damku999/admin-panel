@@ -253,6 +253,7 @@ Route::middleware('auth')->prefix('quotations')->name('quotations.')->group(func
     Route::post('/send-whatsapp/{quotation}', [QuotationController::class, 'sendToWhatsApp'])->name('send-whatsapp');
     Route::get('/download-pdf/{quotation}', [QuotationController::class, 'downloadPdf'])->name('download-pdf');
     Route::get('/get-quote-form', [QuotationController::class, 'getQuoteFormHtml'])->name('get-quote-form');
+    Route::get('/export', [QuotationController::class, 'export'])->name('export');
     Route::delete('/delete/{quotation}', [QuotationController::class, 'delete'])->name('delete');
 });
 

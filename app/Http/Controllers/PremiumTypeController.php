@@ -6,8 +6,6 @@ use App\Models\PremiumType;
 use App\Services\PremiumTypeService;
 use App\Traits\ExportableTrait;
 use Illuminate\Http\Request;
-use App\Exports\PremiumTypesExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -172,18 +170,13 @@ class PremiumTypeController extends AbstractBaseCrudController
     }
 
     /**
-     * Import PremiumTypes 
+     * Import PremiumTypes
      * @param Null
      * @return View File
      */
     public function importPremiumTypes()
     {
         return view('premium_type.import');
-    }
-
-    public function export()
-    {
-        return Excel::download(new PremiumTypesExport, 'premium_type.xlsx');
     }
 
     protected function getExportRelations(): array

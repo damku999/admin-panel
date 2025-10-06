@@ -12,8 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\BrokersExport;
 
 /**
  * Broker Controller
@@ -149,11 +147,6 @@ class BrokerController extends AbstractBaseCrudController
     public function importBrokers(): View
     {
         return view('brokers.import');
-    }
-
-    public function export()
-    {
-        return Excel::download(new BrokersExport, 'brokers.xlsx');
     }
 
     protected function getExportRelations(): array

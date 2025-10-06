@@ -7,8 +7,6 @@ use App\Traits\ExportableTrait;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\BranchesExport;
 
 /**
  * Branch Controller
@@ -61,14 +59,10 @@ class BranchController extends AbstractBaseCrudController
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:branches,name',
-            'email' => 'nullable|email|max:255',
-            'mobile_number' => 'nullable|string|max:20',
         ]);
 
         $this->branchRepository->create([
             'name' => $request->name,
-            'email' => $request->email,
-            'mobile_number' => $request->mobile_number,
             'status' => 1,
             'created_by' => auth()->id(),
         ]);
@@ -96,14 +90,10 @@ class BranchController extends AbstractBaseCrudController
     {
         $request->validate([
             'name' => 'required|string|max:255|unique:branches,name,' . $branch->id,
-            'email' => 'nullable|email|max:255',
-            'mobile_number' => 'nullable|string|max:20',
         ]);
 
         $branch->update([
             'name' => $request->name,
-            'email' => $request->email,
-            'mobile_number' => $request->mobile_number,
             'updated_by' => auth()->id(),
         ]);
 
@@ -133,15 +123,6 @@ class BranchController extends AbstractBaseCrudController
         return $this->redirectWithSuccess('branches.index', $message);
     }
 
-    /**
-     * Export Branches to Excel
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
-     */
-    public function export()
-    {
-        return Excel::download(new BranchesExport, 'branches.xlsx');
-    }
-
     protected function getExportRelations(): array
     {
         return [];
@@ -149,7 +130,7 @@ class BranchController extends AbstractBaseCrudController
 
     protected function getSearchableFields(): array
     {
-        return ['name', 'email', 'mobile_number'];
+        return ['name'];
     }
 
     protected function getExportConfig(Request $request): array
@@ -161,13 +142,11 @@ class BranchController extends AbstractBaseCrudController
             'auto_size' => true,
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
-            'headings' => ['ID', 'Name', 'Email', 'Mobile Number', 'Status', 'Created Date'],
+            'headings' => ['ID', 'Name', 'Status', 'Created Date'],
             'mapping' => function($model) {
                 return [
                     $model->id,
                     $model->name,
-                    $model->email ?? 'N/A',
-                    $model->mobile_number ?? 'N/A',
                     $model->status ? 'Active' : 'Inactive',
                     $model->created_at->format('Y-m-d H:i:s')
                 ];

@@ -5,11 +5,12 @@
     <div class="row">
         <div class="col-12">
             <div class="card shadow mt-3 mb-4">
-                <x-list-header 
+                <x-list-header
                         title="Quotations Management"
                         subtitle="Manage insurance quotations and quotes"
                         addRoute="quotations.create"
                         addPermission="quotation-create"
+                        exportRoute="quotations.export"
                 />
                 <div class="card-body">
                     <!-- Search and Filter Form -->

@@ -156,11 +156,6 @@ class InsuranceCompanyController extends AbstractBaseCrudController
         return view('insurance_companies.import');
     }
 
-    public function export()
-    {
-        return $this->insuranceCompanyService->exportInsuranceCompanies();
-    }
-
     protected function getExportRelations(): array
     {
         return [];

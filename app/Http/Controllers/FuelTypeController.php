@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\FuelTypesExport;
 use App\Models\FuelType;
 use App\Services\FuelTypeService;
 use App\Traits\ExportableTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Facades\Excel;
 
 /**
  * Fuel Type Controller
@@ -168,11 +166,6 @@ class FuelTypeController extends AbstractBaseCrudController
     public function importFuelTypes()
     {
         return view('fuel_type.import');
-    }
-
-    public function export()
-    {
-        return Excel::download(new FuelTypesExport, 'fuel_type.xlsx');
     }
 
     protected function getExportRelations(): array

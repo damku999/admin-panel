@@ -6,8 +6,6 @@ use Illuminate\Http\Request;
 use App\Models\ReferenceUser;
 use App\Services\ReferenceUserService;
 use App\Traits\ExportableTrait;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\ReferenceUsersExport;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
@@ -172,16 +170,6 @@ class ReferenceUsersController extends AbstractBaseCrudController
     public function importReferenceUsers()
     {
         return view('reference_users.import');
-    }
-
-    /**
-     * Export ReferenceUsers
-     *
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
-     */
-    public function export()
-    {
-        return Excel::download(new ReferenceUsersExport, 'reference_users.xlsx');
     }
 
     protected function getExportRelations(): array

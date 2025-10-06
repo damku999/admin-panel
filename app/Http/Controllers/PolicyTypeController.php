@@ -6,8 +6,6 @@ use App\Models\PolicyType;
 use App\Services\PolicyTypeService;
 use App\Traits\ExportableTrait;
 use Illuminate\Http\Request;
-use App\Exports\PolicyTypesExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -163,18 +161,13 @@ class PolicyTypeController extends AbstractBaseCrudController
     }
 
     /**
-     * Import PolicyTypes 
+     * Import PolicyTypes
      * @param Null
      * @return View File
      */
     public function importPolicyTypes()
     {
         return view('policy_type.import');
-    }
-
-    public function export()
-    {
-        return Excel::download(new PolicyTypesExport, 'policy_type.xlsx');
     }
 
     protected function getExportRelations(): array

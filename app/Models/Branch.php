@@ -69,8 +69,7 @@ class Branch extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'email',
-        'mobile_number',
+        'status',
     ];
 
     public function customerInsurances()

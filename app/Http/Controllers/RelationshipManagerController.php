@@ -6,8 +6,6 @@ use App\Models\RelationshipManager;
 use App\Services\RelationshipManagerService;
 use App\Traits\ExportableTrait;
 use Illuminate\Http\Request;
-use App\Exports\RelationshipManagersExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -170,12 +168,6 @@ class RelationshipManagerController extends AbstractBaseCrudController
     public function importRelationshipManagers()
     {
         return view('relationship_managers.import');
-    }
-
-
-    public function export()
-    {
-        return Excel::download(new RelationshipManagersExport(), 'relationship_managers.xlsx');
     }
 
     protected function getExportRelations(): array

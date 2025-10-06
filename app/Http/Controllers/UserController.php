@@ -199,15 +199,6 @@ class UserController extends AbstractBaseCrudController
         }
     }
 
-    /**
-     * Export Users
-     * @return BinaryFileResponse
-     */
-    public function export()
-    {
-        return $this->userService->exportUsers();
-    }
-
     protected function getExportRelations(): array
     {
         return ['roles'];

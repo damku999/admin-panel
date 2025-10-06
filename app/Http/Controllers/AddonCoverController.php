@@ -176,11 +176,6 @@ class AddonCoverController extends AbstractBaseCrudController
         return view('addon_covers.import');
     }
 
-    public function export()
-    {
-        return $this->addonCoverService->exportAddonCovers();
-    }
-
     protected function getExportRelations(): array
     {
         return [];

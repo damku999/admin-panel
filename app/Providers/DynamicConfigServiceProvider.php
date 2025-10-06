@@ -22,8 +22,8 @@ class DynamicConfigServiceProvider extends ServiceProvider
             // Load Mail Settings
             $this->loadMailSettings();
 
-            // Load Security Settings
-            $this->loadSecuritySettings();
+            // Load Notification Settings
+            $this->loadNotificationSettings();
 
         } catch (\Exception $e) {
             // Silently fail during migration/installation
@@ -47,8 +47,6 @@ class DynamicConfigServiceProvider extends ServiceProvider
                 'app.currency_symbol' => $settings['app_currency_symbol'] ?? '₹',
                 'app.date_format' => $settings['app_date_format'] ?? 'd/m/Y',
                 'app.time_format' => $settings['app_time_format'] ?? '12h',
-                'app.logo' => $settings['app_logo'] ?? '/admin/images/logo.png',
-                'app.favicon' => $settings['app_favicon'] ?? '/admin/images/favicon.ico',
                 'app.pagination_default' => (int)($settings['pagination_default'] ?? 15),
                 'session.lifetime' => (int)($settings['session_lifetime'] ?? config('session.lifetime')),
             ]);
@@ -67,9 +65,6 @@ class DynamicConfigServiceProvider extends ServiceProvider
                 'whatsapp.sender_id' => $settings['whatsapp_sender_id'] ?? config('whatsapp.sender_id'),
                 'whatsapp.base_url' => $settings['whatsapp_base_url'] ?? config('whatsapp.base_url'),
                 'whatsapp.auth_token' => $settings['whatsapp_auth_token'] ?? config('whatsapp.auth_token'),
-                'whatsapp.template_language' => $settings['whatsapp_template_language'] ?? 'en',
-                'whatsapp.max_retry' => (int)($settings['whatsapp_max_retry'] ?? 3),
-                'whatsapp.rate_limit' => (int)($settings['whatsapp_rate_limit'] ?? 60),
             ]);
         }
     }
@@ -91,28 +86,23 @@ class DynamicConfigServiceProvider extends ServiceProvider
                 'mail.mailers.smtp.encryption' => $settings['mail_smtp_encryption'] ?? config('mail.mailers.smtp.encryption'),
                 'mail.mailers.smtp.username' => $settings['mail_smtp_username'] ?? config('mail.mailers.smtp.username'),
                 'mail.mailers.smtp.password' => $settings['mail_smtp_password'] ?? config('mail.mailers.smtp.password'),
-                'mail.reply_to.address' => $settings['mail_reply_to_address'] ?? config('mail.from.address'),
             ]);
         }
     }
 
     /**
-     * Load Security Settings
+     * Load Notification Settings
      */
-    protected function loadSecuritySettings(): void
+    protected function loadNotificationSettings(): void
     {
-        $settings = AppSettingService::getByCategory('security');
+        $settings = AppSettingService::getByCategory('notifications');
 
         if (!empty($settings)) {
             config([
-                'auth.login_max_attempts' => (int)($settings['login_max_attempts'] ?? 5),
-                'auth.login_lockout_minutes' => (int)($settings['login_lockout_minutes'] ?? 15),
-                'auth.password_min_length' => (int)($settings['password_min_length'] ?? 8),
-                'auth.password_require_uppercase' => filter_var($settings['password_require_uppercase'] ?? true, FILTER_VALIDATE_BOOLEAN),
-                'auth.password_require_numbers' => filter_var($settings['password_require_numbers'] ?? true, FILTER_VALIDATE_BOOLEAN),
-                'auth.password_require_special' => filter_var($settings['password_require_special'] ?? false, FILTER_VALIDATE_BOOLEAN),
-                'session.lifetime' => (int)($settings['session_timeout_minutes'] ?? config('session.lifetime')),
-                'auth.enable_2fa' => filter_var($settings['enable_2fa'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                'notifications.email_enabled' => filter_var($settings['email_notifications_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'notifications.whatsapp_enabled' => filter_var($settings['whatsapp_notifications_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'notifications.renewal_reminder_days' => $settings['renewal_reminder_days'] ?? '30,15,7,1',
+                'notifications.birthday_wishes_enabled' => filter_var($settings['birthday_wishes_enabled'] ?? true, FILTER_VALIDATE_BOOLEAN),
             ]);
         }
     }

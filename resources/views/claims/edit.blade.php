@@ -139,11 +139,11 @@
                         </div>
                         <div class="mb-2">
                             <strong>Created:</strong>
-                            <span class="text-muted">{{ $claim->created_at ? $claim->created_at->format('d/m/Y H:i') : 'N/A' }}</span>
+                            <span class="text-muted">{{ $claim->created_at }}</span>
                         </div>
                         <div class="mb-2">
                             <strong>Last Updated:</strong>
-                            <span class="text-muted">{{ $claim->updated_at ? $claim->updated_at->format('d/m/Y H:i') : 'N/A' }}</span>
+                            <span class="text-muted">{{ $claim->updated_at }}</span>
                         </div>
                     </div>
                 </div>

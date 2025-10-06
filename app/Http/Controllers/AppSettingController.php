@@ -68,7 +68,7 @@ class AppSettingController extends AbstractBaseCrudController
                 $query->where('is_active', $request->status);
             }
 
-            $settings = $query->orderBy('category')->orderBy('key')->paginate(15);
+            $settings = $query->orderBy('category')->orderBy('key')->paginate(config('app.pagination_default', 15));
 
             return view('app_settings.index', [
                 'settings' => $settings,

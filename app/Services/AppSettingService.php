@@ -31,16 +31,23 @@ class AppSettingService
      */
     public static function set(string $key, $value, array $options = []): AppSetting
     {
-        $setting = AppSetting::updateOrCreate(
-            ['key' => $key],
-            array_merge([
-                'value' => $value,
-                'type' => self::detectType($value),
-                'category' => 'general',
-                'is_encrypted' => false,
-                'is_active' => true,
-            ], $options)
-        );
+        $isEncrypted = $options['is_encrypted'] ?? false;
+
+        // Find or create the setting
+        $setting = AppSetting::firstOrNew(['key' => $key]);
+
+        // Set metadata first (before value, so mutator can check is_encrypted)
+        $setting->type = $options['type'] ?? self::detectType($value);
+        $setting->category = $options['category'] ?? 'general';
+        $setting->description = $options['description'] ?? null;
+        $setting->is_encrypted = $isEncrypted;
+        $setting->is_active = $options['is_active'] ?? true;
+
+        // Now set value - mutator will encrypt if is_encrypted is true
+        $setting->value = $value;
+
+        // Save
+        $setting->save();
 
         Cache::forget(self::CACHE_PREFIX . $key);
 
@@ -64,10 +71,17 @@ class AppSettingService
         $cacheKey = self::CACHE_PREFIX . 'category_' . $category;
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($category) {
-            return AppSetting::where('category', $category)
+            $settings = AppSetting::where('category', $category)
                 ->where('is_active', true)
-                ->pluck('value', 'key')
-                ->toArray();
+                ->get();
+
+            $result = [];
+            foreach ($settings as $setting) {
+                // Access via model attribute to trigger getValueAttribute() for decryption
+                $result[$setting->key] = $setting->value;
+            }
+
+            return $result;
         });
     }
 

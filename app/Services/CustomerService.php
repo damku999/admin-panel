@@ -323,6 +323,13 @@ class CustomerService extends BaseService implements CustomerServiceInterface
     private function sendWelcomeEmailSync(Customer $customer): void
     {
         try {
+            // Check if email notifications are enabled
+            if (!is_email_notification_enabled()) {
+                \Log::info('Welcome email skipped (disabled in settings)', [
+                    'customer_id' => $customer->id,
+                ]);
+                return;
+            }
 
             // Use Mail facade to send email synchronously
             \Mail::send('emails.customer.welcome', [

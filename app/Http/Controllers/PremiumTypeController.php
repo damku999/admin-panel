@@ -38,7 +38,7 @@ class PremiumTypeController extends AbstractBaseCrudController
             $premium_type_obj->where('name', 'LIKE', '%' . trim($request->search) . '%');
         }
 
-        $premium_type = $premium_type_obj->paginate(10);
+        $premium_type = $premium_type_obj->paginate(config('app.pagination_default', 15));
         return view('premium_type.index', ['premium_type' => $premium_type]);
     }
 

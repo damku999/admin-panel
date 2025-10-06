@@ -12,12 +12,13 @@ class SendRenewalReminders extends Command
     use WhatsAppApiTrait;
 
     protected $signature = 'send:renewal-reminders';
-    protected $description = 'Send WhatsApp reminders for insurance renewals expiring today or within a month.';
+    protected $description = 'Send WhatsApp reminders for insurance renewals based on configured reminder days.';
 
     /**
      * Execute the console command.
      *
-     * Sends renewal reminders to customers whose insurances are expiring today or within a month.
+     * Sends renewal reminders to customers whose insurances are expiring on configured days.
+     * Days are configurable via App Settings (default: 30,15,7,1)
      *
      * @return void
      */
@@ -25,32 +26,41 @@ class SendRenewalReminders extends Command
     {
         $currentDate = Carbon::now();
 
-        $dates = [
-            '5_days' => $currentDate->copy()->addDays(5)->startOfDay(),
-            '10_days' => $currentDate->copy()->addDays(10)->startOfDay(),
-            '15_days' => $currentDate->copy()->addDays(15)->startOfDay(),
-            '30_days' => $currentDate->copy()->addDays(30)->startOfDay(),
-        ];
+        // Get reminder days from app settings (e.g., 30,15,7,1)
+        $reminderDays = get_renewal_reminder_days();
 
-        $insurances = CustomerInsurance::where(function ($query) use ($dates) {
-            $query->whereDate('expired_date', $dates['5_days'])
-                ->orWhereDate('expired_date', $dates['10_days'])
-                ->orWhereDate('expired_date', $dates['15_days'])
-                ->orWhereDate('expired_date', $dates['30_days']);
+        $this->info('Checking for renewals expiring in: ' . implode(', ', $reminderDays) . ' days');
+
+        // Build query dynamically based on configured days
+        $insurances = CustomerInsurance::where(function ($query) use ($currentDate, $reminderDays) {
+            foreach ($reminderDays as $days) {
+                $targetDate = $currentDate->copy()->addDays($days)->startOfDay();
+                $query->orWhereDate('expired_date', $targetDate);
+            }
         })
             ->where('is_renewed', 0)
             ->where('status', 1)
             ->get();
 
+        $sentCount = 0;
+        $skippedCount = 0;
+
         foreach ($insurances->chunk(100) as $chunkedInurances) {
             foreach ($chunkedInurances as $insurance) {
                 $messageText = $insurance->premiumType->is_vehicle == 1 ? $this->renewalReminderVehicle($insurance) : $this->renewalReminder($insurance);
                 $receiverId = $insurance->customer->mobile_number;
-                $this->whatsAppSendMessage($messageText, $receiverId);
-                // $this->whatsAppSendMessage($messageText, '+918000071413');
+
+                try {
+                    $this->whatsAppSendMessage($messageText, $receiverId);
+                    $sentCount++;
+                } catch (\Exception $e) {
+                    $this->error("Failed to send reminder for insurance #{$insurance->id}: " . $e->getMessage());
+                    $skippedCount++;
+                }
             }
         }
 
-        $this->info('Renewal reminders sent successfully.');
+        $this->info("Renewal reminders sent successfully!");
+        $this->info("Total found: {$insurances->count()}, Sent: {$sentCount}, Skipped: {$skippedCount}");
     }
 }

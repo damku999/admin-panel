@@ -74,7 +74,7 @@
                                             <small class="text-muted">
                                                 {{ $quotation->vehicle_number ?? 'To be registered' }} | 
                                                 {{ $quotation->fuel_type }} | 
-                                                IDV: ₹{{ number_format($quotation->total_idv) }}
+                                                IDV: {{ format_indian_currency($quotation->total_idv) }}
                                             </small>
                                         </td>
                                         <td>

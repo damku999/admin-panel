@@ -4,15 +4,49 @@ namespace App\Traits;
 
 trait WhatsAppApiTrait
 {
-    protected $senderId = '919727793123';
-    // protected $base_url = 'https://api.botmastersender.com/api/v2/';
-    // protected $authToken = '5cd77122-acbe-419d-a662-1300d3b20565';
-    protected $base_url = 'https://api.botmastersender.com/api/v1/';
-    protected $authToken = '53eb1f03-90be-49ce-9dbe-b23fe982b31f';
+    /**
+     * Get WhatsApp sender ID from config
+     */
+    protected function getSenderId(): string
+    {
+        return config('whatsapp.sender_id', '919727793123');
+    }
+
+    /**
+     * Get WhatsApp API base URL from config
+     */
+    protected function getBaseUrl(): string
+    {
+        return config('whatsapp.base_url', 'https://api.botmastersender.com/api/v1/');
+    }
+
+    /**
+     * Get WhatsApp auth token from config
+     */
+    protected function getAuthToken(): string
+    {
+        return config('whatsapp.auth_token', '53eb1f03-90be-49ce-9dbe-b23fe982b31f');
+    }
+
+    /**
+     * Check if WhatsApp notifications are enabled
+     */
+    protected function isWhatsAppNotificationEnabled(): bool
+    {
+        return config('notifications.whatsapp_enabled', true);
+    }
 
     // mediaurl
     protected function whatsAppSendMessage($messageText, $receiverId)
     {
+        // Check if WhatsApp notifications are enabled
+        if (!$this->isWhatsAppNotificationEnabled()) {
+            \Log::info('WhatsApp notification skipped (disabled in settings)', [
+                'receiver' => $receiverId,
+            ]);
+            return json_encode(['success' => false, 'message' => 'WhatsApp notifications disabled']);
+        }
+
         $formattedNumber = $this->validateAndFormatMobileNumber($receiverId);
 
         if (!$formattedNumber) {
@@ -22,7 +56,7 @@ trait WhatsAppApiTrait
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => $this->base_url . '?action=send',
+            CURLOPT_URL => $this->getBaseUrl() . '?action=send',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
@@ -31,8 +65,8 @@ trait WhatsAppApiTrait
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => [
-                'senderId' => $this->senderId,
-                'authToken' => $this->authToken,
+                'senderId' => $this->getSenderId(),
+                'authToken' => $this->getAuthToken(),
                 'messageText' => $messageText,
                 'receiverId' => $formattedNumber,
             ],
@@ -82,6 +116,15 @@ trait WhatsAppApiTrait
     }
     protected function whatsAppSendMessageWithAttachment($messageText, $receiverId, $filePath)
     {
+        // Check if WhatsApp notifications are enabled
+        if (!$this->isWhatsAppNotificationEnabled()) {
+            \Log::info('WhatsApp notification with attachment skipped (disabled in settings)', [
+                'receiver' => $receiverId,
+                'file' => $filePath,
+            ]);
+            return json_encode(['success' => false, 'message' => 'WhatsApp notifications disabled']);
+        }
+
         $formattedNumber = $this->validateAndFormatMobileNumber($receiverId);
 
         if (!$formattedNumber) {
@@ -101,7 +144,7 @@ trait WhatsAppApiTrait
             $fileHandle = fopen($filePath, 'r');
 
             curl_setopt_array($curl, [
-                CURLOPT_URL => $this->base_url . '?action=send',
+                CURLOPT_URL => $this->getBaseUrl() . '?action=send',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
@@ -110,8 +153,8 @@ trait WhatsAppApiTrait
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => 'POST',
                 CURLOPT_POSTFIELDS => [
-                    'senderId' => $this->senderId,
-                    'authToken' => $this->authToken,
+                    'senderId' => $this->getSenderId(),
+                    'authToken' => $this->getAuthToken(),
                     'messageText' => $messageText,
                     'receiverId' => $formattedNumber,
                     'uploadFile' => curl_file_create($filePath, mime_content_type($filePath), basename($filePath)),

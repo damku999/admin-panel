@@ -55,60 +55,60 @@
                                         <td><strong>Final Premium</strong></td>
                                         <td class="text-center">
                                             {!! getArrows($data['today_data']['sum_final_premium'], $data['yesterday_data']['sum_final_premium']) !!}
-                                            <span class="fw-bold">₹{{ number_format($data['today_data']['sum_final_premium'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['today_data']['sum_final_premium']) }}</span>
                                             <br><small>{!! getChangePercentage($data['today_data']['sum_final_premium'], $data['yesterday_data']['sum_final_premium']) !!}</small>
                                         </td>
                                         <td class="text-center">
                                             {!! getArrows($data['yesterday_data']['sum_final_premium'], $data['day_before_yesterday_data']['sum_final_premium']) !!}
-                                            <span class="fw-bold">₹{{ number_format($data['yesterday_data']['sum_final_premium'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['yesterday_data']['sum_final_premium']) }}</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="fw-bold">₹{{ number_format($data['day_before_yesterday_data']['sum_final_premium'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['day_before_yesterday_data']['sum_final_premium']) }}</span>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td><strong>My Commission</strong></td>
                                         <td class="text-center">
                                             {!! getArrows($data['today_data']['sum_my_commission'], $data['yesterday_data']['sum_my_commission']) !!}
-                                            <span class="fw-bold">₹{{ number_format($data['today_data']['sum_my_commission'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['today_data']['sum_my_commission']) }}</span>
                                             <br><small>{!! getChangePercentage($data['today_data']['sum_my_commission'], $data['yesterday_data']['sum_my_commission']) !!}</small>
                                         </td>
                                         <td class="text-center">
                                             {!! getArrows($data['yesterday_data']['sum_my_commission'], $data['day_before_yesterday_data']['sum_my_commission']) !!}
-                                            <span class="fw-bold">₹{{ number_format($data['yesterday_data']['sum_my_commission'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['yesterday_data']['sum_my_commission']) }}</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="fw-bold">₹{{ number_format($data['day_before_yesterday_data']['sum_my_commission'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['day_before_yesterday_data']['sum_my_commission']) }}</span>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td><strong>Commission Given</strong></td>
                                         <td class="text-center">
                                             {!! getArrows($data['today_data']['sum_transfer_commission'], $data['yesterday_data']['sum_transfer_commission']) !!}
-                                            <span class="fw-bold">₹{{ number_format($data['today_data']['sum_transfer_commission'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['today_data']['sum_transfer_commission']) }}</span>
                                             <br><small>{!! getChangePercentage($data['today_data']['sum_transfer_commission'], $data['yesterday_data']['sum_transfer_commission']) !!}</small>
                                         </td>
                                         <td class="text-center">
                                             {!! getArrows($data['yesterday_data']['sum_transfer_commission'], $data['day_before_yesterday_data']['sum_transfer_commission']) !!}
-                                            <span class="fw-bold">₹{{ number_format($data['yesterday_data']['sum_transfer_commission'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['yesterday_data']['sum_transfer_commission']) }}</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="fw-bold">₹{{ number_format($data['day_before_yesterday_data']['sum_transfer_commission'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['day_before_yesterday_data']['sum_transfer_commission']) }}</span>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td><strong>My Earning</strong></td>
                                         <td class="text-center">
                                             {!! getArrows($data['today_data']['sum_actual_earnings'], $data['yesterday_data']['sum_actual_earnings']) !!}
-                                            <span class="fw-bold">₹{{ number_format($data['today_data']['sum_actual_earnings'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['today_data']['sum_actual_earnings']) }}</span>
                                             <br><small>{!! getChangePercentage($data['today_data']['sum_actual_earnings'], $data['yesterday_data']['sum_actual_earnings']) !!}</small>
                                         </td>
                                         <td class="text-center">
                                             {!! getArrows($data['yesterday_data']['sum_actual_earnings'], $data['day_before_yesterday_data']['sum_actual_earnings']) !!}
-                                            <span class="fw-bold">₹{{ number_format($data['yesterday_data']['sum_actual_earnings'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['yesterday_data']['sum_actual_earnings']) }}</span>
                                         </td>
                                         <td class="text-center">
-                                            <span class="fw-bold">₹{{ number_format($data['day_before_yesterday_data']['sum_actual_earnings'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['day_before_yesterday_data']['sum_actual_earnings']) }}</span>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -138,44 +138,44 @@
                                         <td><strong>Final Premium</strong></td>
                                         <td class="text-center">
                                             {!! getArrows($data['current_year_data']['sum_final_premium'], $data['last_year_data']['sum_final_premium']) !!}
-                                            <span class="fw-bold">₹{{ number_format($data['current_year_data']['sum_final_premium'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['current_year_data']['sum_final_premium']) }}</span>
                                             <br><small>{!! getChangePercentage($data['current_year_data']['sum_final_premium'], $data['last_year_data']['sum_final_premium']) !!}</small>
                                         </td>
                                         <td class="text-center">
-                                            <span class="fw-bold">₹{{ number_format($data['last_year_data']['sum_final_premium'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['last_year_data']['sum_final_premium']) }}</span>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td><strong>My Commission</strong></td>
                                         <td class="text-center">
                                             {!! getArrows($data['current_year_data']['sum_my_commission'], $data['last_year_data']['sum_my_commission']) !!}
-                                            <span class="fw-bold">₹{{ number_format($data['current_year_data']['sum_my_commission'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['current_year_data']['sum_my_commission']) }}</span>
                                             <br><small>{!! getChangePercentage($data['current_year_data']['sum_my_commission'], $data['last_year_data']['sum_my_commission']) !!}</small>
                                         </td>
                                         <td class="text-center">
-                                            <span class="fw-bold">₹{{ number_format($data['last_year_data']['sum_my_commission'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['last_year_data']['sum_my_commission']) }}</span>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td><strong>Commission Given</strong></td>
                                         <td class="text-center">
                                             {!! getArrows($data['current_year_data']['sum_transfer_commission'], $data['last_year_data']['sum_transfer_commission']) !!}
-                                            <span class="fw-bold">₹{{ number_format($data['current_year_data']['sum_transfer_commission'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['current_year_data']['sum_transfer_commission']) }}</span>
                                             <br><small>{!! getChangePercentage($data['current_year_data']['sum_transfer_commission'], $data['last_year_data']['sum_transfer_commission']) !!}</small>
                                         </td>
                                         <td class="text-center">
-                                            <span class="fw-bold">₹{{ number_format($data['last_year_data']['sum_transfer_commission'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['last_year_data']['sum_transfer_commission']) }}</span>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td><strong>My Earning</strong></td>
                                         <td class="text-center">
                                             {!! getArrows($data['current_year_data']['sum_actual_earnings'], $data['last_year_data']['sum_actual_earnings']) !!}
-                                            <span class="fw-bold">₹{{ number_format($data['current_year_data']['sum_actual_earnings'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['current_year_data']['sum_actual_earnings']) }}</span>
                                             <br><small>{!! getChangePercentage($data['current_year_data']['sum_actual_earnings'], $data['last_year_data']['sum_actual_earnings']) !!}</small>
                                         </td>
                                         <td class="text-center">
-                                            <span class="fw-bold">₹{{ number_format($data['last_year_data']['sum_actual_earnings'], 0) }}</span>
+                                            <span class="fw-bold">{{ format_indian_currency($data['last_year_data']['sum_actual_earnings']) }}</span>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -219,7 +219,7 @@
                                                     @if ($index > 0)
                                                         {!! getArrows($quarter[$metricKey], $data['quarters_data'][$index - 1][$metricKey]) !!}
                                                     @endif
-                                                    <span class="fw-bold">₹{{ number_format($quarter[$metricKey], 0) }}</span>
+                                                    <span class="fw-bold">{{ format_indian_currency($quarter[$metricKey]) }}</span>
                                                     @if ($index > 0)
                                                         <br><small>{!! getChangePercentage($quarter[$metricKey], $data['quarters_data'][$index - 1][$metricKey]) !!}</small>
                                                     @endif
@@ -298,7 +298,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="metric-label">Turn Over (with GST)</div>
-                                <div class="metric-value">₹{{ number_format($current_month_final_premium_with_gst, 0) }}</div>
+                                <div class="metric-value">{{ format_indian_currency($current_month_final_premium_with_gst) }}</div>
                             </div>
                             <div>
                                 <i class="fas fa-chart-line fa-2x text-primary opacity-25"></i>
@@ -313,7 +313,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="metric-label">Commission Received</div>
-                                <div class="metric-value">₹{{ number_format($current_month_my_commission_amount, 0) }}</div>
+                                <div class="metric-value">{{ format_indian_currency($current_month_my_commission_amount) }}</div>
                             </div>
                             <div>
                                 <i class="fas fa-hand-holding-usd fa-2x text-success opacity-25"></i>
@@ -328,7 +328,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="metric-label">Commission Transferred</div>
-                                <div class="metric-value">₹{{ number_format($current_month_transfer_commission_amount, 0) }}</div>
+                                <div class="metric-value">{{ format_indian_currency($current_month_transfer_commission_amount) }}</div>
                             </div>
                             <div>
                                 <i class="fas fa-exchange-alt fa-2x text-warning opacity-25"></i>
@@ -343,7 +343,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <div class="metric-label">Actual Earning</div>
-                                <div class="metric-value">₹{{ number_format($current_month_actual_earnings, 0) }}</div>
+                                <div class="metric-value">{{ format_indian_currency($current_month_actual_earnings) }}</div>
                             </div>
                             <div>
                                 <i class="fas fa-wallet fa-2x text-info opacity-25"></i>
@@ -366,25 +366,25 @@
                             <div class="col-6 mb-3">
                                 <div class="text-center">
                                     <div class="metric-label">Turn Over (GST)</div>
-                                    <div class="metric-value" style="font-size: 1.5rem;">₹{{ number_format($last_month_final_premium_with_gst, 0) }}</div>
+                                    <div class="metric-value" style="font-size: 1.5rem;">{{ format_indian_currency($last_month_final_premium_with_gst) }}</div>
                                 </div>
                             </div>
                             <div class="col-6 mb-3">
                                 <div class="text-center">
                                     <div class="metric-label">Commission Received</div>
-                                    <div class="metric-value" style="font-size: 1.5rem;">₹{{ number_format($last_month_my_commission_amount, 0) }}</div>
+                                    <div class="metric-value" style="font-size: 1.5rem;">{{ format_indian_currency($last_month_my_commission_amount) }}</div>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="text-center">
                                     <div class="metric-label">Commission Transferred</div>
-                                    <div class="metric-value" style="font-size: 1.5rem;">₹{{ number_format($last_month_transfer_commission_amount, 0) }}</div>
+                                    <div class="metric-value" style="font-size: 1.5rem;">{{ format_indian_currency($last_month_transfer_commission_amount) }}</div>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="text-center">
                                     <div class="metric-label">Actual Earning</div>
-                                    <div class="metric-value" style="font-size: 1.5rem;">₹{{ number_format($last_month_actual_earnings, 0) }}</div>
+                                    <div class="metric-value" style="font-size: 1.5rem;">{{ format_indian_currency($last_month_actual_earnings) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -401,25 +401,25 @@
                             <div class="col-6 mb-3">
                                 <div class="text-center">
                                     <div class="metric-label">Turn Over (GST)</div>
-                                    <div class="metric-value" style="font-size: 1.5rem;">₹{{ number_format($life_time_final_premium_with_gst, 0) }}</div>
+                                    <div class="metric-value" style="font-size: 1.5rem;">{{ format_indian_currency($life_time_final_premium_with_gst) }}</div>
                                 </div>
                             </div>
                             <div class="col-6 mb-3">
                                 <div class="text-center">
                                     <div class="metric-label">Commission Received</div>
-                                    <div class="metric-value" style="font-size: 1.5rem;">₹{{ number_format($life_time_my_commission_amount, 0) }}</div>
+                                    <div class="metric-value" style="font-size: 1.5rem;">{{ format_indian_currency($life_time_my_commission_amount) }}</div>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="text-center">
                                     <div class="metric-label">Commission Transferred</div>
-                                    <div class="metric-value" style="font-size: 1.5rem;">₹{{ number_format($life_time_transfer_commission_amount, 0) }}</div>
+                                    <div class="metric-value" style="font-size: 1.5rem;">{{ format_indian_currency($life_time_transfer_commission_amount) }}</div>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="text-center">
                                     <div class="metric-label">Actual Earning</div>
-                                    <div class="metric-value" style="font-size: 1.5rem;">₹{{ number_format($life_time_actual_earnings, 0) }}</div>
+                                    <div class="metric-value" style="font-size: 1.5rem;">{{ format_indian_currency($life_time_actual_earnings) }}</div>
                                 </div>
                             </div>
                         </div>

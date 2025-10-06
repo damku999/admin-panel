@@ -301,11 +301,11 @@
                                     </tr>
                                     <tr>
                                         <td class="fw-semibold">Created Date:</td>
-                                        <td>{{ $claim->created_at ? $claim->created_at->format('d/m/Y H:i') : 'N/A' }}</td>
+                                        <td>{{ format_app_datetime($claim->created_at) }}</td>
                                     </tr>
                                     <tr>
                                         <td class="fw-semibold">Last Updated:</td>
-                                        <td>{{ $claim->updated_at ? $claim->updated_at->format('d/m/Y H:i') : 'N/A' }}</td>
+                                        <td>{{ format_app_datetime($claim->updated_at) }}</td>
                                     </tr>
                                 </table>
                             </div>
@@ -405,7 +405,7 @@
                                             @if($stage->stage_date)
                                                 <small class="text-muted">
                                                     <i class="fas fa-calendar me-1"></i>
-                                                    {{ $stage->stage_date->format('d/m/Y H:i') }}
+                                                    {{ format_app_datetime($stage->stage_date) }}
                                                 </small>
                                             @endif
                                             @if($stage->notes)
@@ -498,7 +498,7 @@
                                         @if($document->submitted_date)
                                             <small class="text-muted d-block submitted-date-info">
                                                 <i class="fas fa-check me-1"></i>
-                                                Submitted: {{ $document->submitted_date->format('d/m/Y H:i') }}
+                                                Submitted: {{ format_app_datetime($document->submitted_date) }}
                                             </small>
                                         @endif
                                     </div>

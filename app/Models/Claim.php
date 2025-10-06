@@ -530,6 +530,19 @@ Your Trusted Insurance Advisor
                 ];
             }
 
+            // Check if email notifications are enabled
+            if (!is_email_notification_enabled()) {
+                \Log::info('Email notification skipped (disabled in settings)', [
+                    'claim_id' => $this->id,
+                    'type' => $type,
+                ]);
+                return [
+                    'success' => false,
+                    'message' => 'Email notifications are disabled',
+                    'sent' => false
+                ];
+            }
+
             Mail::send(new ClaimNotificationMail($this, $type, $additionalData));
 
             return [

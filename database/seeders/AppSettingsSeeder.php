@@ -38,6 +38,12 @@ class AppSettingsSeeder extends Seeder
                 'is_encrypted' => false,
             ],
             'app_currency' => [
+                'value' => 'INR',
+                'type' => 'string',
+                'description' => 'Default Currency Code (INR, USD, EUR, GBP)',
+                'is_encrypted' => false,
+            ],
+            'app_currency_symbol' => [
                 'value' => '₹',
                 'type' => 'string',
                 'description' => 'Default Currency Symbol',

@@ -192,7 +192,7 @@
                 var $this = $(this);
                 var target = $this.attr('data-target');
                 var $target = $(target);
-                
+
                 // Toggle the target element
                 if ($target.hasClass('show')) {
                     // Hide the collapse
@@ -203,7 +203,7 @@
                     $target.addClass('show').slideDown(300);
                     $this.removeClass('collapsed').attr('aria-expanded', 'true');
                 }
-                
+
                 // Close other open dropdowns (accordion behavior)
                 $('[data-toggle="collapse"]').not($this).each(function() {
                     var otherTarget = $(this).attr('data-target');
@@ -213,6 +213,26 @@
                         $(this).addClass('collapsed').attr('aria-expanded', 'false');
                     }
                 });
+            });
+
+            // Bootstrap 5 collapse fix (for data-bs-toggle)
+            $('[data-bs-toggle="collapse"]').on('click', function(e) {
+                e.preventDefault();
+                var $this = $(this);
+                var target = $this.attr('href') || $this.attr('data-bs-target');
+                var $target = $(target);
+                var $chevron = $this.find('.fa-chevron-down, .fa-chevron-up');
+
+                // Toggle the target element
+                if ($target.hasClass('show')) {
+                    $target.removeClass('show').slideUp(300);
+                    $this.attr('aria-expanded', 'false');
+                    $chevron.removeClass('fa-chevron-up').addClass('fa-chevron-down');
+                } else {
+                    $target.addClass('show').slideDown(300);
+                    $this.attr('aria-expanded', 'true');
+                    $chevron.removeClass('fa-chevron-down').addClass('fa-chevron-up');
+                }
             });
 
             // =======================================================

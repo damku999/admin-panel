@@ -69,6 +69,19 @@ Route::resource('roles', App\Http\Controllers\RolesController::class);
 // Permissions
 Route::resource('permissions', App\Http\Controllers\PermissionsController::class);
 
+// App Settings
+Route::middleware('auth')->prefix('app-settings')->name('app-settings.')->group(function () {
+    Route::get('/', [App\Http\Controllers\AppSettingController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\AppSettingController::class, 'create'])->name('create');
+    Route::post('/store', [App\Http\Controllers\AppSettingController::class, 'store'])->name('store');
+    Route::get('/show/{id}', [App\Http\Controllers\AppSettingController::class, 'show'])->name('show');
+    Route::get('/edit/{id}', [App\Http\Controllers\AppSettingController::class, 'edit'])->name('edit');
+    Route::put('/update/{id}', [App\Http\Controllers\AppSettingController::class, 'update'])->name('update');
+    Route::get('/update/status/{id}/{status}', [App\Http\Controllers\AppSettingController::class, 'updateStatus'])->name('status');
+    Route::delete('/delete/{id}', [App\Http\Controllers\AppSettingController::class, 'destroy'])->name('destroy');
+    Route::get('/{id}/decrypt', [App\Http\Controllers\AppSettingController::class, 'getDecryptedValue'])->name('decrypt');
+});
+
 
 // Customer
 Route::middleware('auth')->prefix('customers')->name('customers.')->group(function () {

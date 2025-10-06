@@ -3,14 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Contracts\Services\CustomerServiceInterface;
-use App\Exports\CustomersExport;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
+use App\Traits\ExportableTrait;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Maatwebsite\Excel\Facades\Excel;
 
 /**
  * Customer Controller
@@ -20,6 +19,8 @@ use Maatwebsite\Excel\Facades\Excel;
  */
 class CustomerController extends AbstractBaseCrudController
 {
+    use ExportableTrait;
+
     public function __construct(private CustomerServiceInterface $customerService)
     {
         $this->setupPermissionMiddleware('customer');
@@ -187,9 +188,35 @@ class CustomerController extends AbstractBaseCrudController
         return view('customers.import');
     }
 
-    public function export()
+    protected function getExportRelations(): array
     {
-        return Excel::download(new CustomersExport, 'customers.xlsx');
+        return ['familyGroup'];
+    }
+
+    protected function getSearchableFields(): array
+    {
+        return ['name', 'email', 'mobile_number'];
+    }
+
+    protected function getExportConfig(Request $request): array
+    {
+        $config = parent::getExportConfig($request);
+
+        return array_merge($config, [
+            'headings' => ['ID', 'Name', 'Email', 'Mobile', 'Status', 'Family Group', 'Created Date'],
+            'mapping' => function($customer) {
+                return [
+                    $customer->id,
+                    $customer->name,
+                    $customer->email,
+                    $customer->mobile_number,
+                    ucfirst($customer->status),
+                    $customer->familyGroup ? $customer->familyGroup->name : 'Individual',
+                    $customer->created_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ]);
     }
 
     public function resendOnBoardingWA(Customer $customer): RedirectResponse

@@ -82,16 +82,17 @@
     @endphp
     <div class="nav-item">
         <a class="nav-link d-flex align-items-center justify-content-between py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ $isMasterActive ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}"
-           href="#"
+           href="#masterSubmenu"
            data-bs-toggle="collapse"
-           data-bs-target="#masterSubmenu"
+           role="button"
            data-tooltip="Master Data"
-           aria-expanded="{{ $isMasterActive ? 'true' : 'false' }}">
+           aria-expanded="{{ $isMasterActive ? 'true' : 'false' }}"
+           aria-controls="masterSubmenu">
             <div class="d-flex align-items-center">
                 <i class="fas fa-database me-3"></i>
                 <span>Master Data</span>
             </div>
-            <i class="fas fa-chevron-down"></i>
+            <i class="fas fa-chevron-{{ $isMasterActive ? 'up' : 'down' }}"></i>
         </a>
         <div class="collapse {{ $isMasterActive ? 'show' : '' }}" id="masterSubmenu">
             <div class="ms-4">
@@ -140,21 +141,22 @@
 
     <!-- USERS & ADMINISTRATION SUBMENU -->
     @php
-        $adminRoutes = ['users.*', 'roles.*', 'permissions.*'];
+        $adminRoutes = ['users.*', 'roles.*', 'permissions.*', 'app-settings.*'];
         $isAdminActive = collect($adminRoutes)->contains(fn($route) => request()->routeIs($route));
     @endphp
     <div class="nav-item">
         <a class="nav-link d-flex align-items-center justify-content-between py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ $isAdminActive ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}"
-           href="#"
+           href="#adminSubmenu"
            data-bs-toggle="collapse"
-           data-bs-target="#adminSubmenu"
+           role="button"
            data-tooltip="Users & Administration"
-           aria-expanded="{{ $isAdminActive ? 'true' : 'false' }}">
+           aria-expanded="{{ $isAdminActive ? 'true' : 'false' }}"
+           aria-controls="adminSubmenu">
             <div class="d-flex align-items-center">
                 <i class="fas fa-users-cog me-3"></i>
                 <span>Users & Administration</span>
             </div>
-            <i class="fas fa-chevron-down"></i>
+            <i class="fas fa-chevron-{{ $isAdminActive ? 'up' : 'down' }}"></i>
         </a>
         <div class="collapse {{ $isAdminActive ? 'show' : '' }}" id="adminSubmenu">
             <div class="ms-4">
@@ -169,6 +171,10 @@
                 <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('permissions.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('permissions.index') }}">
                     <i class="fas fa-key me-3 fs-6"></i>
                     <span>Permissions</span>
+                </a>
+                <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('app-settings.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('app-settings.index') }}">
+                    <i class="fas fa-cog me-3 fs-6"></i>
+                    <span>App Settings</span>
                 </a>
             </div>
         </div>

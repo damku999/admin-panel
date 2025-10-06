@@ -2,24 +2,28 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class PremiumTypesSeeder extends Seeder
+class ReferenceUsersSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     *
+     * @return void
      */
-    public function run(): void
+    public function run()
     {
         // Clear existing data
-        DB::table('premium_types')->truncate();
+        DB::table('reference_users')->truncate();
 
-        // Insert premium types data (transaction types: FRESH, ROLLOVER, RENEWAL)
-        DB::table('premium_types')->insert([
+        // Insert reference user/source data (production data)
+        DB::table('reference_users')->insert([
             [
-                'name' => 'FRESH',
+                'id' => 1,
+                'name' => 'NARENDRA JAIN / NITESH JAIN',
+                'email' => null,
+                'mobile_number' => null,
                 'status' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -29,17 +33,10 @@ class PremiumTypesSeeder extends Seeder
                 'deleted_by' => null
             ],
             [
-                'name' => 'ROLLOVER',
-                'status' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-                'deleted_at' => null,
-                'created_by' => 1,
-                'updated_by' => 1,
-                'deleted_by' => null
-            ],
-            [
-                'name' => 'RENEWAL',
+                'id' => 2,
+                'name' => 'DHAVAL PANCHAL',
+                'email' => null,
+                'mobile_number' => null,
                 'status' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -49,5 +46,7 @@ class PremiumTypesSeeder extends Seeder
                 'deleted_by' => null
             ]
         ]);
+
+        $this->command->info('Reference users seeded successfully!');
     }
 }

@@ -29,6 +29,12 @@ class DatabaseSeeder extends Seeder
             FuelTypesSeeder::class,
             InsuranceCompaniesSeeder::class,
 
+            // Master data seeders for business operations
+            BranchesSeeder::class,
+            BrokersSeeder::class,
+            RelationshipManagersSeeder::class,
+            ReferenceUsersSeeder::class,
+
             // Data migration seeders (must run at the end)
             EmailCleanupSeeder::class,
             DataMigrationSeeder::class,

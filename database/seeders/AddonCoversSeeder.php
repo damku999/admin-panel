@@ -117,6 +117,17 @@ class AddonCoversSeeder extends Seeder
                 'created_by' => 1,
                 'updated_by' => 1,
             ],
+            [
+                'id' => 10,
+                'name' => 'Other',
+                'description' => 'Other addon covers not categorized',
+                'order_no' => 10,
+                'status' => true,
+                'created_at' => $now,
+                'updated_at' => $now,
+                'created_by' => 1,
+                'updated_by' => 1,
+            ],
         ];
 
         // Truncate the table first to avoid conflicts

@@ -11,8 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\ClaimsExport;
+use App\Traits\ExportableTrait;
 
 /**
  * Claim Controller
@@ -22,6 +21,8 @@ use App\Exports\ClaimsExport;
  */
 class ClaimController extends AbstractBaseCrudController
 {
+    use ExportableTrait;
+
     public function __construct(
         private ClaimService $claimService,
         private CustomerInsuranceRepositoryInterface $customerInsuranceRepository
@@ -179,16 +180,40 @@ class ClaimController extends AbstractBaseCrudController
         }
     }
 
-    /**
-     * Export claims to Excel.
-     */
-    public function export(Request $request)
+    protected function getExportRelations(): array
     {
-        try {
-            return Excel::download(new ClaimsExport($request->all()), 'claims.xlsx');
-        } catch (\Throwable $th) {
-            return $this->redirectWithError('Failed to export claims: ' . $th->getMessage());
-        }
+        return ['customer', 'customerInsurance'];
+    }
+
+    protected function getSearchableFields(): array
+    {
+        return ['claim_number', 'customer.name', 'description'];
+    }
+
+    protected function getExportConfig(Request $request): array
+    {
+        return [
+            'format' => $request->get('format', 'xlsx'),
+            'filename' => 'claims',
+            'with_headings' => true,
+            'auto_size' => true,
+            'relations' => $this->getExportRelations(),
+            'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
+            'headings' => ['ID', 'Claim Number', 'Customer', 'Insurance Type', 'Claim Type', 'Status', 'Claim Date', 'Created Date'],
+            'mapping' => function($claim) {
+                return [
+                    $claim->id,
+                    $claim->claim_number ?? 'Pending',
+                    $claim->customer->name ?? 'N/A',
+                    $claim->insurance_type ?? 'N/A',
+                    $claim->claim_type ?? 'N/A',
+                    $claim->status ? 'Active' : 'Inactive',
+                    $claim->claim_date ? $claim->claim_date->format('Y-m-d') : 'N/A',
+                    $claim->created_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ];
     }
 
     /**

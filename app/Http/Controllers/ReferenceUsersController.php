@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ReferenceUser;
 use App\Services\ReferenceUserService;
+use App\Traits\ExportableTrait;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ReferenceUsersExport;
 use Illuminate\Support\Facades\Validator;
@@ -18,6 +19,8 @@ use Throwable;
  */
 class ReferenceUsersController extends AbstractBaseCrudController
 {
+    use ExportableTrait;
+
     public function __construct(
         private ReferenceUserService $referenceUserService
     ) {
@@ -179,5 +182,39 @@ class ReferenceUsersController extends AbstractBaseCrudController
     public function export()
     {
         return Excel::download(new ReferenceUsersExport, 'reference_users.xlsx');
+    }
+
+    protected function getExportRelations(): array
+    {
+        return [];
+    }
+
+    protected function getSearchableFields(): array
+    {
+        return ['name', 'email', 'mobile_number'];
+    }
+
+    protected function getExportConfig(Request $request): array
+    {
+        return [
+            'format' => $request->get('format', 'xlsx'),
+            'filename' => 'reference_users',
+            'with_headings' => true,
+            'auto_size' => true,
+            'relations' => $this->getExportRelations(),
+            'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
+            'headings' => ['ID', 'Name', 'Email', 'Mobile Number', 'Status', 'Created Date'],
+            'mapping' => function($model) {
+                return [
+                    $model->id,
+                    $model->name,
+                    $model->email ?? 'N/A',
+                    $model->mobile_number ?? 'N/A',
+                    $model->status ? 'Active' : 'Inactive',
+                    $model->created_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ];
     }
 }

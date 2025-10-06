@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PremiumType;
 use App\Services\PremiumTypeService;
+use App\Traits\ExportableTrait;
 use Illuminate\Http\Request;
 use App\Exports\PremiumTypesExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Validator;
  */
 class PremiumTypeController extends AbstractBaseCrudController
 {
+    use ExportableTrait;
+
     public function __construct(
         private PremiumTypeService $premiumTypeService
     ) {
@@ -181,5 +184,39 @@ class PremiumTypeController extends AbstractBaseCrudController
     public function export()
     {
         return Excel::download(new PremiumTypesExport, 'premium_type.xlsx');
+    }
+
+    protected function getExportRelations(): array
+    {
+        return [];
+    }
+
+    protected function getSearchableFields(): array
+    {
+        return ['name'];
+    }
+
+    protected function getExportConfig(Request $request): array
+    {
+        return [
+            'format' => $request->get('format', 'xlsx'),
+            'filename' => 'premium_types',
+            'with_headings' => true,
+            'auto_size' => true,
+            'relations' => $this->getExportRelations(),
+            'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
+            'headings' => ['ID', 'Name', 'Is Vehicle', 'Is Life Insurance', 'Status', 'Created Date'],
+            'mapping' => function($model) {
+                return [
+                    $model->id,
+                    $model->name ?? 'N/A',
+                    $model->is_vehicle ? 'Yes' : 'No',
+                    $model->is_life_insurance_policies ? 'Yes' : 'No',
+                    $model->status ? 'Active' : 'Inactive',
+                    $model->created_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ];
     }
 }

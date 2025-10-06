@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PolicyType;
 use App\Services\PolicyTypeService;
+use App\Traits\ExportableTrait;
 use Illuminate\Http\Request;
 use App\Exports\PolicyTypesExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Validator;
  */
 class PolicyTypeController extends AbstractBaseCrudController
 {
+    use ExportableTrait;
+
     public function __construct(
         private PolicyTypeService $policyTypeService
     ) {
@@ -172,5 +175,37 @@ class PolicyTypeController extends AbstractBaseCrudController
     public function export()
     {
         return Excel::download(new PolicyTypesExport, 'policy_type.xlsx');
+    }
+
+    protected function getExportRelations(): array
+    {
+        return [];
+    }
+
+    protected function getSearchableFields(): array
+    {
+        return ['name'];
+    }
+
+    protected function getExportConfig(Request $request): array
+    {
+        return [
+            'format' => $request->get('format', 'xlsx'),
+            'filename' => 'policy_types',
+            'with_headings' => true,
+            'auto_size' => true,
+            'relations' => $this->getExportRelations(),
+            'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
+            'headings' => ['ID', 'Name', 'Status', 'Created Date'],
+            'mapping' => function($model) {
+                return [
+                    $model->id,
+                    $model->name,
+                    $model->status ? 'Active' : 'Inactive',
+                    $model->created_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ];
     }
 }

@@ -200,9 +200,13 @@ class CustomerController extends AbstractBaseCrudController
 
     protected function getExportConfig(Request $request): array
     {
-        $config = parent::getExportConfig($request);
-
-        return array_merge($config, [
+        return [
+            'format' => $request->get('format', 'xlsx'),
+            'filename' => 'customers',
+            'with_headings' => true,
+            'auto_size' => true,
+            'relations' => $this->getExportRelations(),
+            'order_by' => $this->getExportOrderBy(),
             'headings' => ['ID', 'Name', 'Email', 'Mobile', 'Status', 'Family Group', 'Created Date'],
             'mapping' => function($customer) {
                 return [
@@ -216,7 +220,7 @@ class CustomerController extends AbstractBaseCrudController
                 ];
             },
             'with_mapping' => true
-        ]);
+        ];
     }
 
     public function resendOnBoardingWA(Customer $customer): RedirectResponse

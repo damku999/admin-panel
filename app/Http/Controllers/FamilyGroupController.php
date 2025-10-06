@@ -7,12 +7,15 @@ use App\Contracts\Repositories\CustomerRepositoryInterface;
 use App\Models\FamilyGroup;
 use App\Models\FamilyMember;
 use App\Models\Customer;
+use App\Traits\ExportableTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 
 class FamilyGroupController extends AbstractBaseCrudController
 {
+    use ExportableTrait;
+
     /**
      * Family Group Service instance
      */
@@ -303,5 +306,39 @@ class FamilyGroupController extends AbstractBaseCrudController
 
             return $this->redirectWithError('Error removing family member: ' . $e->getMessage());
         }
+    }
+
+    protected function getExportRelations(): array
+    {
+        return ['familyHead', 'familyMembers'];
+    }
+
+    protected function getSearchableFields(): array
+    {
+        return ['name'];
+    }
+
+    protected function getExportConfig(Request $request): array
+    {
+        return [
+            'format' => $request->get('format', 'xlsx'),
+            'filename' => 'family_groups',
+            'with_headings' => true,
+            'auto_size' => true,
+            'relations' => $this->getExportRelations(),
+            'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
+            'headings' => ['ID', 'Family Name', 'Family Head', 'Members Count', 'Status', 'Created Date'],
+            'mapping' => function($model) {
+                return [
+                    $model->id,
+                    $model->name,
+                    $model->familyHead->name ?? 'N/A',
+                    $model->familyMembers->count(),
+                    $model->status ? 'Active' : 'Inactive',
+                    $model->created_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ];
     }
 }

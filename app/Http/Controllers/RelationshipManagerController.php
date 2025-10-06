@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RelationshipManager;
 use App\Services\RelationshipManagerService;
+use App\Traits\ExportableTrait;
 use Illuminate\Http\Request;
 use App\Exports\RelationshipManagersExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Validator;
  */
 class RelationshipManagerController extends AbstractBaseCrudController
 {
+    use ExportableTrait;
+
     public function __construct(
         private RelationshipManagerService $relationshipManagerService
     ) {
@@ -173,5 +176,39 @@ class RelationshipManagerController extends AbstractBaseCrudController
     public function export()
     {
         return Excel::download(new RelationshipManagersExport(), 'relationship_managers.xlsx');
+    }
+
+    protected function getExportRelations(): array
+    {
+        return [];
+    }
+
+    protected function getSearchableFields(): array
+    {
+        return ['name', 'email', 'mobile_number'];
+    }
+
+    protected function getExportConfig(Request $request): array
+    {
+        return [
+            'format' => $request->get('format', 'xlsx'),
+            'filename' => 'relationship_managers',
+            'with_headings' => true,
+            'auto_size' => true,
+            'relations' => $this->getExportRelations(),
+            'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
+            'headings' => ['ID', 'Name', 'Email', 'Mobile Number', 'Status', 'Created Date'],
+            'mapping' => function($model) {
+                return [
+                    $model->id,
+                    $model->name,
+                    $model->email ?? 'N/A',
+                    $model->mobile_number ?? 'N/A',
+                    $model->status ? 'Active' : 'Inactive',
+                    $model->created_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ];
     }
 }

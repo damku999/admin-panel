@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use App\Traits\ExportableTrait;
 
 /**
  * Quotation Controller
@@ -19,6 +20,8 @@ use Illuminate\View\View;
  */
 class QuotationController extends AbstractBaseCrudController
 {
+    use ExportableTrait;
+
     public function __construct(private QuotationServiceInterface $quotationService)
     {
         $this->setupCustomPermissionMiddleware([
@@ -140,21 +143,55 @@ class QuotationController extends AbstractBaseCrudController
         try {
             $quoteReference = $quotation->getQuoteReference();
             $companiesCount = $quotation->quotationCompanies()->count();
-            
+
             $deleted = $this->quotationService->deleteQuotation($quotation);
-            
+
             if ($deleted) {
                 $message = "Quotation {$quoteReference} deleted successfully!";
                 if ($companiesCount > 0) {
                     $message .= " ({$companiesCount} company quote(s) also removed)";
                 }
-                
+
                 return $this->redirectWithSuccess('quotations.index', $message);
             }
-            
+
             return $this->redirectWithError('Failed to delete quotation.');
         } catch (\Throwable $th) {
             return $this->redirectWithError('Failed to delete quotation: ' . $th->getMessage());
         }
+    }
+
+    protected function getExportRelations(): array
+    {
+        return ['customer'];
+    }
+
+    protected function getSearchableFields(): array
+    {
+        return ['customer.name', 'insurance_type'];
+    }
+
+    protected function getExportConfig(Request $request): array
+    {
+        return [
+            'format' => $request->get('format', 'xlsx'),
+            'filename' => 'quotations',
+            'with_headings' => true,
+            'auto_size' => true,
+            'relations' => $this->getExportRelations(),
+            'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
+            'headings' => ['ID', 'Customer', 'Insurance Type', 'Status', 'Companies Count', 'Created Date'],
+            'mapping' => function($quotation) {
+                return [
+                    $quotation->id,
+                    $quotation->customer->name ?? 'N/A',
+                    $quotation->insurance_type ?? 'N/A',
+                    $quotation->status ? 'Active' : 'Inactive',
+                    $quotation->quotationCompanies()->count(),
+                    $quotation->created_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ];
     }
 }

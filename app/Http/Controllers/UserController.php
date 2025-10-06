@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Traits\ExportableTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
@@ -16,6 +17,8 @@ use App\Contracts\Services\UserServiceInterface;
  */
 class UserController extends AbstractBaseCrudController
 {
+    use ExportableTrait;
+
     public function __construct(
         private UserServiceInterface $userService
     ) {
@@ -203,5 +206,41 @@ class UserController extends AbstractBaseCrudController
     public function export()
     {
         return $this->userService->exportUsers();
+    }
+
+    protected function getExportRelations(): array
+    {
+        return ['roles'];
+    }
+
+    protected function getSearchableFields(): array
+    {
+        return ['first_name', 'last_name', 'email', 'mobile_number'];
+    }
+
+    protected function getExportConfig(Request $request): array
+    {
+        return [
+            'format' => $request->get('format', 'xlsx'),
+            'filename' => 'users',
+            'with_headings' => true,
+            'auto_size' => true,
+            'relations' => $this->getExportRelations(),
+            'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
+            'headings' => ['ID', 'First Name', 'Last Name', 'Email', 'Mobile Number', 'Role', 'Status', 'Created Date'],
+            'mapping' => function($model) {
+                return [
+                    $model->id,
+                    $model->first_name,
+                    $model->last_name ?? 'N/A',
+                    $model->email,
+                    $model->mobile_number ?? 'N/A',
+                    $model->roles->first()->name ?? 'N/A',
+                    $model->status ? 'Active' : 'Inactive',
+                    $model->created_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ];
     }
 }

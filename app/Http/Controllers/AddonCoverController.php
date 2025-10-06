@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Services\AddonCoverServiceInterface;
 use App\Models\AddonCover;
+use App\Traits\ExportableTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -15,6 +16,8 @@ use Illuminate\Support\Facades\Validator;
  */
 class AddonCoverController extends AbstractBaseCrudController
 {
+    use ExportableTrait;
+
     public function __construct(
         private AddonCoverServiceInterface $addonCoverService
     ) {
@@ -176,6 +179,40 @@ class AddonCoverController extends AbstractBaseCrudController
     public function export()
     {
         return $this->addonCoverService->exportAddonCovers();
+    }
+
+    protected function getExportRelations(): array
+    {
+        return [];
+    }
+
+    protected function getSearchableFields(): array
+    {
+        return ['name', 'description'];
+    }
+
+    protected function getExportConfig(Request $request): array
+    {
+        return [
+            'format' => $request->get('format', 'xlsx'),
+            'filename' => 'addon_covers',
+            'with_headings' => true,
+            'auto_size' => true,
+            'relations' => $this->getExportRelations(),
+            'order_by' => ['column' => 'order_no', 'direction' => 'asc'],
+            'headings' => ['ID', 'Name', 'Description', 'Order No', 'Status', 'Created Date'],
+            'mapping' => function($model) {
+                return [
+                    $model->id,
+                    $model->name,
+                    $model->description ?? 'N/A',
+                    $model->order_no,
+                    $model->status ? 'Active' : 'Inactive',
+                    $model->created_at->format('Y-m-d H:i:s')
+                ];
+            },
+            'with_mapping' => true
+        ];
     }
 
 }

@@ -2,25 +2,29 @@
 
 if (!function_exists('app_currency')) {
     function app_currency(): string {
-        return config('app.currency', 'INR');
+        return app(\App\Services\AppSettingService::class)
+            ->get('app_currency', 'application', 'INR');
     }
 }
 
 if (!function_exists('app_currency_symbol')) {
     function app_currency_symbol(): string {
-        return config('app.currency_symbol', '₹');
+        return app(\App\Services\AppSettingService::class)
+            ->get('app_currency_symbol', 'application', '₹');
     }
 }
 
 if (!function_exists('app_date_format')) {
     function app_date_format(): string {
-        return config('app.date_format', 'd/m/Y');
+        return app(\App\Services\AppSettingService::class)
+            ->get('app_date_format', 'application', 'd/m/Y');
     }
 }
 
 if (!function_exists('app_time_format')) {
     function app_time_format(): string {
-        return config('app.time_format', '12h');
+        return app(\App\Services\AppSettingService::class)
+            ->get('app_time_format', 'application', '12h');
     }
 }
 
@@ -56,25 +60,29 @@ if (!function_exists('format_app_datetime')) {
 
 if (!function_exists('is_email_notification_enabled')) {
     function is_email_notification_enabled(): bool {
-        return config('notifications.email_enabled', true);
+        return app(\App\Services\AppSettingService::class)
+            ->get('email_notifications_enabled', 'notifications', true) === 'true';
     }
 }
 
 if (!function_exists('is_whatsapp_notification_enabled')) {
     function is_whatsapp_notification_enabled(): bool {
-        return config('notifications.whatsapp_enabled', true);
+        return app(\App\Services\AppSettingService::class)
+            ->get('whatsapp_notifications_enabled', 'notifications', true) === 'true';
     }
 }
 
 if (!function_exists('is_birthday_wishes_enabled')) {
     function is_birthday_wishes_enabled(): bool {
-        return config('notifications.birthday_wishes_enabled', true);
+        return app(\App\Services\AppSettingService::class)
+            ->get('birthday_wishes_enabled', 'notifications', true) === 'true';
     }
 }
 
 if (!function_exists('get_renewal_reminder_days')) {
     function get_renewal_reminder_days(): array {
-        $days = config('notifications.renewal_reminder_days', '30,15,7,1');
+        $days = app(\App\Services\AppSettingService::class)
+            ->get('renewal_reminder_days', 'notifications', '30,15,7,1');
         return array_map('intval', explode(',', $days));
     }
 }

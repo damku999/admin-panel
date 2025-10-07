@@ -74,7 +74,7 @@ This is the master index for ALL project documentation. Use this guide to find e
 
 | Document | Purpose | Topics Covered |
 |----------|---------|----------------|
-| [**RUN_TESTS.md**](../RUN_TESTS.md) | Quick test commands | Running tests, coverage, troubleshooting |
+| [**RUN_TESTS.md**](RUN_TESTS.md) | Quick test commands | Running tests, coverage, troubleshooting |
 | [**UNIT_TESTS_IMPLEMENTATION.md**](UNIT_TESTS_IMPLEMENTATION.md) | Unit testing guide | Model tests, service tests, factories |
 | [**PEST_CONVERSION_SUMMARY.md**](PEST_CONVERSION_SUMMARY.md) | Pest PHP conversion summary | Conversion statistics, benefits |
 | [**PEST_CONVERSION_EXAMPLES.md**](PEST_CONVERSION_EXAMPLES.md) | Pest code examples | Before/after examples, best practices |

@@ -2,13 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\Crypt;
 
+/**
+ * App\Models\TwoFactorAuth
+ *
+ * @method static \Database\Factories\TwoFactorAuthFactory factory($count = null, $state = [])
+ */
 class TwoFactorAuth extends Model
 {
+    use HasFactory;
     protected $table = 'two_factor_auth';
 
     protected $fillable = [

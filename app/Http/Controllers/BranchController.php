@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\BranchRepositoryInterface;
+use App\Models\Branch;
 use App\Traits\ExportableTrait;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,7 +33,7 @@ class BranchController extends AbstractBaseCrudController
     /**
      * List Branches
      * @param Request $request
-     * @return View
+     * @return \Illuminate\View\View
      */
     public function index(Request $request): View
     {
@@ -43,7 +44,7 @@ class BranchController extends AbstractBaseCrudController
 
     /**
      * Create Branch
-     * @return View
+     * @return \Illuminate\View\View
      */
     public function create(): View
     {
@@ -63,6 +64,8 @@ class BranchController extends AbstractBaseCrudController
 
         $this->branchRepository->create([
             'name' => $request->name,
+            'email' => $request->email,
+            'mobile_number' => $request->mobile_number,
             'status' => 1,
             'created_by' => auth()->id(),
         ]);
@@ -73,7 +76,7 @@ class BranchController extends AbstractBaseCrudController
     /**
      * Edit Branch
      * @param Branch $branch
-     * @return View
+     * @return \Illuminate\View\View
      */
     public function edit(Branch $branch): View
     {
@@ -94,6 +97,8 @@ class BranchController extends AbstractBaseCrudController
 
         $branch->update([
             'name' => $request->name,
+            'email' => $request->email,
+            'mobile_number' => $request->mobile_number,
             'updated_by' => auth()->id(),
         ]);
 

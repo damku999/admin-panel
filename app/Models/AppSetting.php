@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Crypt;
 
+/**
+ * App\Models\AppSetting
+ *
+ * @method static \Database\Factories\AppSettingFactory factory($count = null, $state = [])
+ */
 class AppSetting extends Model
 {
     use HasFactory;

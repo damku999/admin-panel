@@ -66,7 +66,9 @@ class ReferenceUsersController extends AbstractBaseCrudController
     public function store(Request $request)
     {
         $validationRules = [
-            'name' => 'required',
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:100',
+            'mobile_number' => 'nullable|string|max:15',
         ];
 
         $validated = $request->validate($validationRules);
@@ -132,7 +134,9 @@ class ReferenceUsersController extends AbstractBaseCrudController
     public function update(Request $request, ReferenceUser $reference_user)
     {
         $validationRules = [
-            'name' => 'required',
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:100',
+            'mobile_number' => 'nullable|string|max:15',
         ];
 
         $validated = $request->validate($validationRules);

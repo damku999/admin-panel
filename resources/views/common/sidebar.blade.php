@@ -141,7 +141,7 @@
 
     <!-- USERS & ADMINISTRATION SUBMENU -->
     @php
-        $adminRoutes = ['users.*', 'roles.*', 'permissions.*', 'app-settings.*'];
+        $adminRoutes = ['users.*', 'roles.*', 'permissions.*', 'app-settings.*', 'notification-templates.*'];
         $isAdminActive = collect($adminRoutes)->contains(fn($route) => request()->routeIs($route));
     @endphp
     <div class="nav-item">
@@ -175,6 +175,10 @@
                 <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('app-settings.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('app-settings.index') }}">
                     <i class="fas fa-cog me-3 fs-6"></i>
                     <span>App Settings</span>
+                </a>
+                <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('notification-templates.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('notification-templates.index') }}">
+                    <i class="fas fa-envelope me-3 fs-6"></i>
+                    <span>Message Templates</span>
                 </a>
             </div>
         </div>

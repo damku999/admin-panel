@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Quotation extends Model
 {
-    use HasFactory, TableRecordObserver, LogsActivity;
+    use HasFactory, TableRecordObserver, LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'customer_id',
@@ -20,6 +21,7 @@ class Quotation extends Model
         'make_model_variant',
         'rto_location',
         'manufacturing_year',
+        'date_of_registration',
         'cubic_capacity_kw',
         'seating_capacity',
         'fuel_type',
@@ -40,6 +42,7 @@ class Quotation extends Model
     ];
 
     protected $casts = [
+        'date_of_registration' => 'date',
         'ncb_percentage' => 'decimal:2',
         'idv_vehicle' => 'decimal:2',
         'idv_trailer' => 'decimal:2',
@@ -49,6 +52,7 @@ class Quotation extends Model
         'total_idv' => 'decimal:2',
         'addon_covers' => 'array',
         'sent_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
     protected static $logAttributes = ['*'];

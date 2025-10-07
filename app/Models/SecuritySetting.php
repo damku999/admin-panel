@@ -2,11 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * App\Models\SecuritySetting
+ *
+ * @method static \Database\Factories\SecuritySettingFactory factory($count = null, $state = [])
+ */
 class SecuritySetting extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'settingable_type',
         'settingable_id',

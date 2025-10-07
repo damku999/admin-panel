@@ -52,8 +52,14 @@
     <!-- Logout Modal-->
     @include('common.logout-modal')
 
+    <!-- Confirmation Modal -->
+    @include('common.confirmation-modal')
+
     <!-- Modern Admin Portal JavaScript Bundle -->
     <script src="{{ url('js/admin.js') }}"></script>
+
+    <!-- Confirmation Modal Handler -->
+    <script src="{{ url('js/confirmation-modal.js') }}"></script>
     
     <!-- Form Validation Utility Library -->
     <script src="{{ url('js/form-validation.js') }}"></script>

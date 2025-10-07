@@ -52,7 +52,7 @@ class UserController extends AbstractBaseCrudController
     /**
      * Store User
      * @param Request $request
-     * @return View Users
+     * @return \Illuminate\View\View Users
      * @author Darshan Baraiya
      */
     public function store(Request $request)
@@ -81,9 +81,9 @@ class UserController extends AbstractBaseCrudController
 
     /**
      * Update Status Of User
-     * @param Integer $user_id
-     * @param Integer $status
-     * @return List Page With Success
+     * @param int $user_id
+     * @param int $status
+     * @return \Illuminate\Http\RedirectResponse Page With Success
      * @author Darshan Baraiya
      */
     public function updateStatus($user_id, $status)
@@ -133,7 +133,7 @@ class UserController extends AbstractBaseCrudController
      * Update User
      * @param Request $request
      * @param User $user
-     * @return View Users
+     * @return \Illuminate\View\View Users
      * @author Darshan Baraiya
      */
     public function update(Request $request, User $user)
@@ -182,7 +182,7 @@ class UserController extends AbstractBaseCrudController
     /**
      * Delete User
      * @param User $user
-     * @return Index Users
+     * @return \Illuminate\Http\RedirectResponse Users
      * @author Darshan Baraiya
      */
     public function delete(User $user)

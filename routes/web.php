@@ -19,6 +19,7 @@ use App\Http\Controllers\CustomerInsuranceController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RelationshipManagerController;
 use App\Http\Controllers\ClaimController;
+use App\Http\Controllers\NotificationTemplateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -82,6 +83,16 @@ Route::middleware('auth')->prefix('app-settings')->name('app-settings.')->group(
     Route::get('/{id}/decrypt', [App\Http\Controllers\AppSettingController::class, 'getDecryptedValue'])->name('decrypt');
 });
 
+// Notification Templates
+Route::middleware('auth')->prefix('notification-templates')->name('notification-templates.')->group(function () {
+    Route::get('/', [NotificationTemplateController::class, 'index'])->name('index');
+    Route::get('/create', [NotificationTemplateController::class, 'create'])->name('create');
+    Route::post('/store', [NotificationTemplateController::class, 'store'])->name('store');
+    Route::get('/edit/{template}', [NotificationTemplateController::class, 'edit'])->name('edit');
+    Route::put('/update/{template}', [NotificationTemplateController::class, 'update'])->name('update');
+    Route::delete('/delete/{template}', [NotificationTemplateController::class, 'delete'])->name('delete');
+    Route::post('/preview', [NotificationTemplateController::class, 'preview'])->name('preview');
+});
 
 // Customer
 Route::middleware('auth')->prefix('customers')->name('customers.')->group(function () {

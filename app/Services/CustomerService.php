@@ -313,7 +313,23 @@ class CustomerService extends BaseService implements CustomerServiceInterface
      */
     private function generateOnboardingMessage(Customer $customer): string
     {
-        return $this->newCustomerAdd($customer);
+        // Prepare template data
+        $templateData = [
+            'customer_name' => $customer->name,
+            'portal_url' => config('app.url') . '/customer',
+            'company_phone' => '+91 97277 93123',
+            'company_website' => 'https://parthrawal.in',
+            'advisor_name' => 'Parth Rawal',
+        ];
+
+        // Try template first, fallback to old method
+        $message = $this->getMessageFromTemplate('policy_created', $templateData);
+
+        if (!$message) {
+            return $this->newCustomerAdd($customer);
+        }
+
+        return $message;
     }
 
     /**

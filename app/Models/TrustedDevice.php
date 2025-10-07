@@ -2,12 +2,19 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Str;
 
+/**
+ * App\Models\TrustedDevice
+ *
+ * @method static \Database\Factories\TrustedDeviceFactory factory($count = null, $state = [])
+ */
 class TrustedDevice extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'authenticatable_type',
         'authenticatable_id',

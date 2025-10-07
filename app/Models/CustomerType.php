@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * App\Models\CustomerType
+ *
+ * @method static \Database\Factories\CustomerTypeFactory factory($count = null, $state = [])
+ */
 class CustomerType extends Model
 {
     use HasFactory, SoftDeletes;

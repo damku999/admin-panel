@@ -64,18 +64,52 @@ class PolicyService extends BaseService implements PolicyServiceInterface
     public function sendRenewalReminder(CustomerInsurance $policy): bool
     {
         try {
-            $message = $this->generateRenewalReminderMessage($policy);
+            // Determine notification type based on days remaining
+            $daysRemaining = now()->diffInDays($policy->policy_end_date);
+
+            if ($daysRemaining <= 0) {
+                $notificationTypeCode = 'renewal_expired';
+            } elseif ($daysRemaining <= 7) {
+                $notificationTypeCode = 'renewal_7_days';
+            } elseif ($daysRemaining <= 15) {
+                $notificationTypeCode = 'renewal_15_days';
+            } else {
+                $notificationTypeCode = 'renewal_30_days';
+            }
+
+            // Prepare template data
+            $templateData = [
+                'customer_name' => $policy->customer->name,
+                'policy_number' => $policy->policy_number ?? $policy->policy_no,
+                'policy_type' => $policy->policyType->name ?? 'Insurance',
+                'insurance_company' => $policy->insuranceCompany->name ?? 'Insurance Company',
+                'expiry_date' => $policy->policy_end_date ? $policy->policy_end_date->format('d-M-Y') : 'N/A',
+                'days_remaining' => (string)$daysRemaining,
+                'premium_amount' => '₹' . number_format($policy->premium_amount ?? 0, 0),
+                'vehicle_number' => $policy->registration_no ?? 'N/A',
+                'advisor_name' => 'Parth Rawal',
+                'company_website' => 'https://parthrawal.in',
+                'company_phone' => '+91 97277 93123',
+            ];
+
+            // Try template first, fallback to old method
+            $message = $this->getMessageFromTemplate($notificationTypeCode, $templateData);
+
+            if (!$message) {
+                $message = $this->generateRenewalReminderMessage($policy);
+            }
+
             $result = $this->whatsAppSendMessage($message, $policy->customer->mobile_number);
-            
+
             if ($result) {
-                // Log successful reminder
                 Log::info('Renewal reminder sent successfully', [
                     'policy_id' => $policy->id,
                     'customer_id' => $policy->customer_id,
-                    'policy_number' => $policy->policy_number
+                    'policy_number' => $policy->policy_number,
+                    'notification_type' => $notificationTypeCode
                 ]);
             }
-            
+
             return $result;
         } catch (\Throwable $th) {
             Log::error('Failed to send renewal reminder', [
@@ -83,7 +117,7 @@ class PolicyService extends BaseService implements PolicyServiceInterface
                 'customer_id' => $policy->customer_id,
                 'error' => $th->getMessage()
             ]);
-            
+
             return false;
         }
     }

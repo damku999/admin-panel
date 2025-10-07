@@ -51,6 +51,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @method static \Illuminate\Database\Eloquent\Builder|FuelType whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|FuelType withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|FuelType withoutTrashed()
+ * @method static \Database\Factories\FuelTypeFactory factory($count = null, $state = [])
  * @mixin \Eloquent
  */
 class FuelType extends Authenticatable

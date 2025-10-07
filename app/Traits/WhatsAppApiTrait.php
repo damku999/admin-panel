@@ -37,14 +37,29 @@ trait WhatsAppApiTrait
     }
 
     // mediaurl
-    protected function whatsAppSendMessage($messageText, $receiverId)
+    protected function whatsAppSendMessage($messageText, $receiverId, $customerId = null, $notificationTypeCode = null)
     {
-        // Check if WhatsApp notifications are enabled
+        // Check if WhatsApp notifications are enabled globally
         if (!$this->isWhatsAppNotificationEnabled()) {
             \Log::info('WhatsApp notification skipped (disabled in settings)', [
                 'receiver' => $receiverId,
             ]);
             return json_encode(['success' => false, 'message' => 'WhatsApp notifications disabled']);
+        }
+
+        // Check customer-specific notification preferences
+        if ($customerId && $notificationTypeCode) {
+            $preferenceService = app(\App\Services\NotificationPreferenceService::class);
+            $allowed = $preferenceService->getPreference($customerId, $notificationTypeCode, 'whatsapp');
+
+            if (!$allowed) {
+                \Log::info('WhatsApp notification skipped (customer preference disabled)', [
+                    'customer_id' => $customerId,
+                    'notification_type' => $notificationTypeCode,
+                    'receiver' => $receiverId,
+                ]);
+                return json_encode(['success' => false, 'message' => 'WhatsApp notifications disabled for this customer']);
+            }
         }
 
         $formattedNumber = $this->validateAndFormatMobileNumber($receiverId);
@@ -282,5 +297,18 @@ Parth Rawal
 https://parthrawal.in
 Your Trusted Insurance Advisor
 \"Think of Insurance, Think of Us.\"";
+    }
+
+    /**
+     * Get message from template database or fallback to hardcoded.
+     *
+     * @param string $notificationTypeCode
+     * @param array $data
+     * @return string|null
+     */
+    protected function getMessageFromTemplate(string $notificationTypeCode, array $data): ?string
+    {
+        $templateService = app(\App\Services\TemplateService::class);
+        return $templateService->render($notificationTypeCode, 'whatsapp', $data);
     }
 }

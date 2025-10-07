@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * App\Models\CommissionType
+ *
+ * @method static \Database\Factories\CommissionTypeFactory factory($count = null, $state = [])
+ */
 class CommissionType extends Model
 {
     use HasFactory, SoftDeletes;

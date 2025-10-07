@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * App\Models\QuotationStatus
+ *
+ * @method static \Database\Factories\QuotationStatusFactory factory($count = null, $state = [])
+ */
 class QuotationStatus extends Model
 {
     use HasFactory, SoftDeletes;

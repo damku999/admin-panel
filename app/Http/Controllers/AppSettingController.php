@@ -41,7 +41,7 @@ class AppSettingController extends AbstractBaseCrudController
      * Display a listing of the app settings
      *
      * @param Request $request
-     * @return \Illuminate\View\View
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function index(Request $request)
     {
@@ -149,7 +149,7 @@ class AppSettingController extends AbstractBaseCrudController
      * Display the specified app setting
      *
      * @param int $id
-     * @return \Illuminate\View\View
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function show($id)
     {
@@ -170,7 +170,7 @@ class AppSettingController extends AbstractBaseCrudController
      * Show the form for editing the specified app setting
      *
      * @param int $id
-     * @return \Illuminate\View\View
+     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function edit($id)
     {

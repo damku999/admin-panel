@@ -2,11 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * App\Models\TwoFactorAttempt
+ *
+ * @method static \Database\Factories\TwoFactorAttemptFactory factory($count = null, $state = [])
+ */
 class TwoFactorAttempt extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'authenticatable_type',
         'authenticatable_id',

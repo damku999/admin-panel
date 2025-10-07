@@ -18,6 +18,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  *
  * @property int $id
  * @property string $name
+ * @property string|null $email
+ * @property string|null $mobile_number
  * @property int $status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -69,6 +71,8 @@ class Branch extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'email',
+        'mobile_number',
         'status',
     ];
 

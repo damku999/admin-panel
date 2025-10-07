@@ -58,6 +58,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @method static \Illuminate\Database\Eloquent\Builder|RelationshipManager whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|RelationshipManager withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|RelationshipManager withoutTrashed()
+ * @method static \Database\Factories\RelationshipManagerFactory factory($count = null, $state = [])
  * @mixin \Eloquent
  */
 class RelationshipManager extends Authenticatable

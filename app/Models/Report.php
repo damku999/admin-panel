@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\CustomerInsurance;
 use App\Traits\TableRecordObserver;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Carbon;
@@ -49,11 +50,12 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static \Illuminate\Database\Eloquent\Builder|Report whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Report withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Report withoutTrashed()
+ * @method static \Database\Factories\ReportFactory factory($count = null, $state = [])
  * @mixin \Eloquent
  */
 class Report extends Authenticatable
 {
-    use HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
+    use HasFactory, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
 
     protected $guarded = [];
 

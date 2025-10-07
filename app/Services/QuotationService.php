@@ -245,6 +245,43 @@ class QuotationService extends BaseService implements QuotationServiceInterface
         $quotes = $quotation->quotationCompanies()->orderBy('final_premium')->get();
         $bestQuote = $quotes->first();
 
+        // Build comparison list
+        $comparisonList = '';
+        foreach ($quotes as $index => $quote) {
+            $icon = $quote->is_recommended ? '⭐' : ($index + 1);
+            $ranking = is_numeric($icon) ? "{$icon}." : $icon;
+            $comparisonList .= "{$ranking} *{$quote->insuranceCompany->name}*: {$quote->getFormattedPremium()}";
+            if ($quote->is_recommended) {
+                $comparisonList .= " _(Recommended)_";
+            }
+            $comparisonList .= "\n";
+        }
+
+        // Prepare template data
+        $templateData = [
+            'customer_name' => $customer->name,
+            'quotes_count' => (string)$quotes->count(),
+            'vehicle_make_model' => $quotation->make_model_variant,
+            'vehicle_number' => $quotation->vehicle_number,
+            'idv_amount' => number_format($quotation->total_idv),
+            'policy_type' => $quotation->policy_type,
+            'policy_tenure' => (string)$quotation->policy_tenure_years,
+            'best_company_name' => $bestQuote ? $bestQuote->insuranceCompany->name : 'N/A',
+            'best_premium' => $bestQuote ? $bestQuote->getFormattedPremium() : 'N/A',
+            'comparison_list' => rtrim($comparisonList),
+            'advisor_name' => 'Parth Rawal',
+            'company_phone' => '+91 97277 93123',
+            'company_website' => 'https://parthrawal.in',
+        ];
+
+        // Try template first, fallback to old method
+        $message = $this->getMessageFromTemplate('quotation_ready', $templateData);
+
+        if ($message) {
+            return $message;
+        }
+
+        // Fallback to original hardcoded message
         $message = "🚗 *Insurance Quotation*\n\n";
         $message .= "Dear *{$customer->name}*,\n\n";
         $message .= "Your insurance quotation is ready! We have compared *{$quotes->count()} insurance companies* for you.\n\n";
@@ -263,15 +300,7 @@ class QuotationService extends BaseService implements QuotationServiceInterface
         }
 
         $message .= "📊 *Premium Comparison:*\n";
-        foreach ($quotes as $index => $quote) {
-            $icon = $quote->is_recommended ? '⭐' : ($index + 1);
-            $ranking = is_numeric($icon) ? "{$icon}." : $icon;
-            $message .= "{$ranking} *{$quote->insuranceCompany->name}*: {$quote->getFormattedPremium()}";
-            if ($quote->is_recommended) {
-                $message .= " _(Recommended)_";
-            }
-            $message .= "\n";
-        }
+        $message .= $comparisonList;
 
         // Calculate savings if more than one quote
         if ($quotes->count() > 1) {

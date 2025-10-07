@@ -25,8 +25,8 @@ class InsuranceCompanyController extends AbstractBaseCrudController
 
     /**
      * List InsuranceCompany
-     * @param Nill
-     * @return Array $insurance_company
+     * @param void
+     * @return array
      * @author Darshan Baraiya
      */
     public function index(Request $request)
@@ -37,8 +37,8 @@ class InsuranceCompanyController extends AbstractBaseCrudController
 
     /**
      * Create InsuranceCompany
-     * @param Nill
-     * @return Array $insurance_company
+     * @param void
+     * @return array
      * @author Darshan Baraiya
      */
     public function create()
@@ -49,7 +49,7 @@ class InsuranceCompanyController extends AbstractBaseCrudController
     /**
      * Store InsuranceCompany
      * @param Request $request
-     * @return View InsuranceCompanys
+     * @return \Illuminate\View\View InsuranceCompanys
      * @author Darshan Baraiya
      */
     public function store(Request $request)
@@ -76,8 +76,8 @@ class InsuranceCompanyController extends AbstractBaseCrudController
 
     /**
      * Update Status Of InsuranceCompany
-     * @param Integer $status
-     * @return List Page With Success
+     * @param int $status
+     * @return \Illuminate\Http\RedirectResponse Page With Success
      * @author Darshan Baraiya
      */
     public function updateStatus($insurance_company_id, $status)
@@ -94,8 +94,8 @@ class InsuranceCompanyController extends AbstractBaseCrudController
 
     /**
      * Edit InsuranceCompany
-     * @param Integer $insurance_company
-     * @return Collection $insurance_company
+     * @param int $insurance_company
+     * @return \Illuminate\Support\Collection $insurance_company
      * @author Darshan Baraiya
      */
     public function edit(InsuranceCompany $insurance_company)
@@ -107,8 +107,9 @@ class InsuranceCompanyController extends AbstractBaseCrudController
 
     /**
      * Update InsuranceCompany
-     * @param Request $request, InsuranceCompany $insurance_company
-     * @return View InsuranceCompanys
+     * @param Request $request
+     * @param InsuranceCompany $insurance_company
+     * @return \Illuminate\View\View InsuranceCompanys
      * @author Darshan Baraiya
      */
     public function update(Request $request, InsuranceCompany $insurance_company)
@@ -136,7 +137,7 @@ class InsuranceCompanyController extends AbstractBaseCrudController
     /**
      * Delete InsuranceCompany
      * @param InsuranceCompany $insurance_company
-     * @return Index InsuranceCompanys
+     * @return \Illuminate\Http\RedirectResponse InsuranceCompanys
      * @author Darshan Baraiya
      */
     public function delete(InsuranceCompany $insurance_company)
@@ -149,11 +150,6 @@ class InsuranceCompanyController extends AbstractBaseCrudController
             return $this->redirectWithError(
                 $this->getErrorMessage('Insurance Company', 'delete') . ': ' . $th->getMessage());
         }
-    }
-
-    public function importInsuranceCompanys()
-    {
-        return view('insurance_companies.import');
     }
 
     protected function getExportRelations(): array

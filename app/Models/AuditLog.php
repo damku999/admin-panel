@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * App\Models\AuditLog
+ *
+ * @method static \Database\Factories\AuditLogFactory factory($count = null, $state = [])
+ */
 class AuditLog extends Model
 {
     use HasFactory;

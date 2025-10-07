@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * App\Models\DeviceTracking
+ *
+ * @method static \Database\Factories\DeviceTrackingFactory factory($count = null, $state = [])
+ */
 class DeviceTracking extends Model
 {
     use HasFactory;

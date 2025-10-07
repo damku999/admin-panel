@@ -52,8 +52,24 @@ class SendBirthdayWishes extends Command
 
         foreach ($customers as $customer) {
             try {
-                $message = $this->getBirthdayMessage($customer);
-                $this->whatsAppSendMessage($message, $customer->mobile_number);
+                // Prepare template data
+                $templateData = [
+                    'customer_name' => $customer->name,
+                    'advisor_name' => 'Parth Rawal',
+                    'company_website' => 'https://parthrawal.in',
+                    'company_phone' => '+91 97277 93123',
+                    'company_name' => 'Parth Rawal Insurance Advisor',
+                ];
+
+                // Try to get message from template, fallback to old method
+                $message = $this->getMessageFromTemplate('birthday_wish', $templateData);
+
+                if (!$message) {
+                    // Fallback to old hardcoded method
+                    $message = $this->getBirthdayMessage($customer);
+                }
+
+                $this->whatsAppSendMessage($message, $customer->mobile_number, $customer->id, 'birthday_wish');
 
                 $this->info("✓ Sent birthday wish to {$customer->name} ({$customer->mobile_number})");
                 $sentCount++;

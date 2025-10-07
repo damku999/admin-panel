@@ -191,15 +191,29 @@
                     <div>
                         @if (auth()->user()->hasPermissionTo('app-setting-delete'))
                             @if ($setting->is_active)
-                                <a href="{{ route('app-settings.status', ['id' => $setting->id, 'status' => 0]) }}"
+                                <a href="#"
                                     class="btn btn-warning btn-sm"
-                                    onclick="return confirm('Are you sure you want to deactivate this setting?')">
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#confirmationModal"
+                                    data-title="Confirm Deactivation"
+                                    data-message="Are you sure you want to deactivate <strong>{{ $setting->key }}</strong>?"
+                                    data-confirm-text="Yes, Deactivate"
+                                    data-confirm-class="btn-warning"
+                                    data-action-url="{{ route('app-settings.status', ['id' => $setting->id, 'status' => 0]) }}"
+                                    data-method="GET">
                                     <i class="fa fa-ban me-1"></i>Deactivate
                                 </a>
                             @else
-                                <a href="{{ route('app-settings.status', ['id' => $setting->id, 'status' => 1]) }}"
+                                <a href="#"
                                     class="btn btn-success btn-sm"
-                                    onclick="return confirm('Are you sure you want to activate this setting?')">
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#confirmationModal"
+                                    data-title="Confirm Activation"
+                                    data-message="Are you sure you want to activate <strong>{{ $setting->key }}</strong>?"
+                                    data-confirm-text="Yes, Activate"
+                                    data-confirm-class="btn-success"
+                                    data-action-url="{{ route('app-settings.status', ['id' => $setting->id, 'status' => 1]) }}"
+                                    data-method="GET">
                                     <i class="fa fa-check me-1"></i>Activate
                                 </a>
                             @endif

@@ -170,7 +170,67 @@ use Illuminate\Database\Eloquent\Model;
 class CustomerInsurance extends Model
 {
     use HasFactory, SoftDeletes, TableRecordObserver, LogsActivity;
-    protected $guarded = [];
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'issue_date',
+        'branch_id',
+        'broker_id',
+        'relationship_manager_id',
+        'customer_id',
+        'insurance_company_id',
+        'premium_type_id',
+        'policy_type_id',
+        'fuel_type_id',
+        'policy_no',
+        'registration_no',
+        'rto',
+        'make_model',
+        'commission_on',
+        'start_date',
+        'expired_date',
+        'tp_expiry_date',
+        'maturity_date',
+        'od_premium',
+        'tp_premium',
+        'net_premium',
+        'premium_amount',
+        'gst',
+        'final_premium_with_gst',
+        'sgst1',
+        'cgst1',
+        'cgst2',
+        'sgst2',
+        'my_commission_percentage',
+        'my_commission_amount',
+        'transfer_commission_percentage',
+        'transfer_commission_amount',
+        'reference_commission_percentage',
+        'reference_commission_amount',
+        'actual_earnings',
+        'ncb_percentage',
+        'mode_of_payment',
+        'cheque_no',
+        'insurance_status',
+        'policy_document_path',
+        'gross_vehicle_weight',
+        'mfg_year',
+        'reference_by',
+        'plan_name',
+        'premium_paying_term',
+        'policy_term',
+        'sum_insured',
+        'pension_amount_yearly',
+        'approx_maturity_amount',
+        'life_insurance_payment_mode',
+        'remarks',
+        'status',
+    ];
+
     protected static $logAttributes = ['*'];
     protected static $logOnlyDirty = true;
     // Define the relationships here

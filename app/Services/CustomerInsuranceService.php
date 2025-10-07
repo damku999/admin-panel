@@ -452,9 +452,42 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
         ]);
 
         try {
-            $messageText = $customerInsurance->premiumType->is_vehicle == 1
-                ? $this->renewalReminderVehicle($customerInsurance)
-                : $this->renewalReminder($customerInsurance);
+            // Determine notification type based on days until expiry
+            $daysUntilExpiry = now()->diffInDays($customerInsurance->expired_date, false);
+
+            if ($daysUntilExpiry <= 0) {
+                $notificationTypeCode = 'renewal_expired';
+            } elseif ($daysUntilExpiry <= 7) {
+                $notificationTypeCode = 'renewal_7_days';
+            } elseif ($daysUntilExpiry <= 15) {
+                $notificationTypeCode = 'renewal_15_days';
+            } else {
+                $notificationTypeCode = 'renewal_30_days';
+            }
+
+            // Prepare template data
+            $templateData = [
+                'customer_name' => $customerInsurance->customer->name,
+                'policy_number' => $customerInsurance->policy_no,
+                'policy_type' => $customerInsurance->policyType->name ?? 'Insurance',
+                'insurance_company' => $customerInsurance->insuranceCompany->name ?? 'Insurance Company',
+                'expiry_date' => \Carbon\Carbon::parse($customerInsurance->expired_date)->format('d-M-Y'),
+                'days_remaining' => (string)abs($daysUntilExpiry),
+                'premium_amount' => '₹' . number_format($customerInsurance->premium_amount ?? 0, 0),
+                'vehicle_number' => $customerInsurance->registration_no ?? 'N/A',
+                'advisor_name' => 'Parth Rawal',
+                'company_website' => 'https://parthrawal.in',
+                'company_phone' => '+91 97277 93123',
+            ];
+
+            // Try template first, fallback to old method
+            $messageText = $this->getMessageFromTemplate($notificationTypeCode, $templateData);
+
+            if (!$messageText) {
+                $messageText = $customerInsurance->premiumType->is_vehicle == 1
+                    ? $this->renewalReminderVehicle($customerInsurance)
+                    : $this->renewalReminder($customerInsurance);
+            }
 
             $receiverId = $customerInsurance->customer->mobile_number;
             $response = $this->whatsAppSendMessage($messageText, $receiverId);

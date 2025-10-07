@@ -163,11 +163,17 @@
                                                     $canDelete = str_ends_with($userEmail, '@webmonks.in') || str_ends_with($userEmail, '@midastech.in');
                                                 @endphp
                                                 @if($canDelete)
-                                                    <form action="{{ route('app-settings.destroy', $setting->id) }}" method="POST" style="display: inline;">
+                                                    <form action="{{ route('app-settings.destroy', $setting->id) }}"
+                                                          method="POST"
+                                                          style="display: inline;"
+                                                          data-confirm-submit="true"
+                                                          data-title="Confirm Deletion"
+                                                          data-message="Are you sure you want to delete <strong>{{ $setting->key }}</strong>? This action cannot be undone."
+                                                          data-confirm-text="Yes, Delete"
+                                                          data-confirm-class="btn-danger">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="button" class="btn btn-danger btn-sm" title="Delete Setting"
-                                                            onclick="if(confirm('Are you sure you want to delete this setting?')) { this.closest('form').submit(); }">
+                                                        <button type="submit" class="btn btn-danger btn-sm" title="Delete Setting">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </form>

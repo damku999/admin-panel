@@ -396,9 +396,25 @@ Your Trusted Insurance Advisor
     public function sendDocumentListWhatsApp(): array
     {
         try {
-            $message = $this->insurance_type === 'Health'
-                ? $this->getHealthInsuranceDocumentListMessage()
-                : $this->getVehicleInsuranceDocumentListMessage();
+            // Determine notification type based on insurance type
+            $notificationTypeCode = $this->insurance_type === 'Health'
+                ? 'document_request_health'
+                : 'document_request_vehicle';
+
+            // Prepare template data
+            $templateData = [
+                'advisor_name' => 'Parth Rawal',
+                'company_website' => 'https://parthrawal.in',
+            ];
+
+            // Try template first, fallback to old method
+            $message = $this->getMessageFromTemplate($notificationTypeCode, $templateData);
+
+            if (!$message) {
+                $message = $this->insurance_type === 'Health'
+                    ? $this->getHealthInsuranceDocumentListMessage()
+                    : $this->getVehicleInsuranceDocumentListMessage();
+            }
 
             $response = $this->whatsAppSendMessage($message, $this->getWhatsAppNumber());
 
@@ -422,7 +438,34 @@ Your Trusted Insurance Advisor
     public function sendPendingDocumentsWhatsApp(): array
     {
         try {
-            $message = $this->getPendingDocumentsMessage();
+            // Get pending documents list
+            $pendingDocuments = $this->documents()->where('is_submitted', false)->get();
+            $documentsList = '';
+
+            if ($pendingDocuments->isNotEmpty()) {
+                $counter = 1;
+                foreach ($pendingDocuments as $document) {
+                    $documentsList .= $counter . ". " . $document->document_name . "\n";
+                    $counter++;
+                }
+            } else {
+                $documentsList = "No pending documents";
+            }
+
+            // Prepare template data
+            $templateData = [
+                'pending_documents_list' => $documentsList,
+                'advisor_name' => 'Parth Rawal',
+                'company_website' => 'https://parthrawal.in',
+            ];
+
+            // Try template first, fallback to old method
+            $message = $this->getMessageFromTemplate('document_request_reminder', $templateData);
+
+            if (!$message) {
+                $message = $this->getPendingDocumentsMessage();
+            }
+
             $response = $this->whatsAppSendMessage($message, $this->getWhatsAppNumber());
 
             return [
@@ -453,7 +496,21 @@ Your Trusted Insurance Advisor
                 ];
             }
 
-            $message = $this->getClaimNumberNotificationMessage();
+            // Prepare template data
+            $templateData = [
+                'claim_number' => $this->claim_number,
+                'vehicle_number' => $this->customerInsurance->registration_no ?? 'N/A',
+                'advisor_name' => 'Parth Rawal',
+                'company_website' => 'https://parthrawal.in',
+            ];
+
+            // Try template first, fallback to old method
+            $message = $this->getMessageFromTemplate('claim_registered', $templateData);
+
+            if (!$message) {
+                $message = $this->getClaimNumberNotificationMessage();
+            }
+
             $response = $this->whatsAppSendMessage($message, $this->getWhatsAppNumber());
 
             return [

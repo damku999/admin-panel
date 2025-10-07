@@ -55,6 +55,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @method static \Illuminate\Database\Eloquent\Builder|PremiumType whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|PremiumType withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|PremiumType withoutTrashed()
+ * @method static \Database\Factories\PremiumTypeFactory factory($count = null, $state = [])
  * @mixin \Eloquent
  */
 class PremiumType extends Authenticatable

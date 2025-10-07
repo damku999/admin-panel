@@ -128,7 +128,7 @@ This is the master index for ALL project documentation. Use this guide to find e
 
 ## 📊 Documentation Statistics
 
-### Current Documentation: **24 Files** (23 in claudedocs + 1 in root)
+### Current Documentation: **27 Files** (all in claudedocs/)
 
 **Core Guides**: 4 files (System, Project, Modules, Background Jobs)
 **Database Docs**: 5 files (Schema, Seeders Guide, Seeders Analysis, 2x Quick Reference)
@@ -138,10 +138,12 @@ This is the master index for ALL project documentation. Use this guide to find e
 **Testing**: 4 files (Run Tests, Unit Tests, 3x Pest Docs)
 **UI Components**: 1 file (Confirmation Modal)
 **Audit**: 1 file (Audit Quick Reference)
+**Reports**: 3 files (Factory Files, Cleanup Analysis, Cleanup Complete)
 
 **Total Size**: ~435KB of documentation
 **Coverage**: 100% of system functionality
 **Status**: ✅ Cleaned & Optimized (18 temporary/redundant files removed)
+**Location**: 100% centralized in claudedocs/ directory
 
 ---
 

@@ -6,9 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Notification Template Test Log Model
- *
- * Tracks test sends of notification templates
+ * App\Models\NotificationTemplateTestLog
  *
  * @property int $id
  * @property int|null $template_id
@@ -22,6 +20,24 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $sent_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User|null $sender
+ * @property-read \App\Models\NotificationTemplate|null $template
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateTestLog newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateTestLog newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateTestLog query()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateTestLog whereChannel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateTestLog whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateTestLog whereErrorMessage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateTestLog whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateTestLog whereMessageContent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateTestLog whereRecipient($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateTestLog whereResponseData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateTestLog whereSentBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateTestLog whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateTestLog whereSubject($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateTestLog whereTemplateId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateTestLog whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class NotificationTemplateTestLog extends Model
 {

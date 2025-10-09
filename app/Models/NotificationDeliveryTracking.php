@@ -6,9 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Notification Delivery Tracking Model
- *
- * Tracks status updates for notification deliveries
+ * App\Models\NotificationDeliveryTracking
  *
  * @property int $id
  * @property int $notification_log_id
@@ -18,6 +16,19 @@ use Illuminate\Database\Eloquent\Model;
  * @property array|null $metadata
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\NotificationLog|null $notificationLog
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking query()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereMetadata($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereNotificationLogId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereProviderStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereTrackedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class NotificationDeliveryTracking extends Model
 {

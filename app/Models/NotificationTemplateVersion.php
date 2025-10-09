@@ -6,9 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Notification Template Version Model
- *
- * Tracks version history of notification templates
+ * App\Models\NotificationTemplateVersion
  *
  * @property int $id
  * @property int $template_id
@@ -24,6 +22,26 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon $changed_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\User|null $changer
+ * @property-read \App\Models\NotificationTemplate|null $template
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion query()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion whereAvailableVariables($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion whereChangeNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion whereChangeType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion whereChangedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion whereChangedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion whereChannel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion whereSubject($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion whereTemplateContent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion whereTemplateId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplateVersion whereVersionNumber($value)
+ * @mixin \Eloquent
  */
 class NotificationTemplateVersion extends Model
 {

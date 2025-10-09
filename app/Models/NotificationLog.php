@@ -7,9 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Notification Log Model
- *
- * Tracks all notifications sent through the system
+ * App\Models\NotificationLog
  *
  * @property int $id
  * @property string $notifiable_type
@@ -33,6 +31,49 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\NotificationDeliveryTracking> $deliveryTracking
+ * @property-read int|null $delivery_tracking_count
+ * @property-read string $channel_icon
+ * @property-read string $status_color
+ * @property-read Model|\Eloquent $notifiable
+ * @property-read \App\Models\NotificationType|null $notificationType
+ * @property-read \App\Models\User|null $sender
+ * @property-read \App\Models\NotificationTemplate|null $template
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog channel($channel)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog delivered()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog failed()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog pending()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog query()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog readyToRetry()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog sent()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereApiResponse($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereChannel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereDeliveredAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereErrorMessage($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereMessageContent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereNextRetryAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereNotifiableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereNotifiableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereNotificationTypeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereReadAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereRecipient($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereRetryCount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereSentAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereSentBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereSubject($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereTemplateId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereVariablesUsed($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog withoutTrashed()
+ * @mixin \Eloquent
  */
 class NotificationLog extends Model
 {

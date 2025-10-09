@@ -20,13 +20,32 @@ class TemplatedNotification extends Mailable
     use Queueable, SerializesModels;
 
     /**
+     * The email subject line.
+     */
+    protected string $emailSubject;
+
+    /**
+     * The HTML content for the email.
+     */
+    public string $htmlContent;
+
+    /**
+     * File attachments for the email.
+     */
+    protected array $emailAttachments;
+
+    /**
      * Create a new message instance.
      */
     public function __construct(
-        public string $subject,
-        public string $htmlContent,
-        public array $attachments = []
-    ) {}
+        string $subject,
+        string $htmlContent,
+        array $attachments = []
+    ) {
+        $this->emailSubject = $subject;
+        $this->htmlContent = $htmlContent;
+        $this->emailAttachments = $attachments;
+    }
 
     /**
      * Get the message envelope.
@@ -42,7 +61,7 @@ class TemplatedNotification extends Mailable
             replyTo: [
                 new \Illuminate\Mail\Mailables\Address($this->getEmailReplyTo(), $fromName),
             ],
-            subject: $this->subject,
+            subject: $this->emailSubject,
         );
     }
 
@@ -72,7 +91,7 @@ class TemplatedNotification extends Mailable
     {
         $attachmentObjects = [];
 
-        foreach ($this->attachments as $filePath) {
+        foreach ($this->emailAttachments as $filePath) {
             if (file_exists($filePath)) {
                 $attachmentObjects[] = Attachment::fromPath($filePath);
             }

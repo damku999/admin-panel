@@ -6,9 +6,39 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Customer Device Model
+ * App\Models\CustomerDevice
  *
- * Manages customer device tokens for push notifications
+ * @property int $id
+ * @property int $customer_id
+ * @property string $device_type
+ * @property string $device_token
+ * @property string|null $device_name
+ * @property string|null $device_model
+ * @property string|null $os_version
+ * @property string|null $app_version
+ * @property \Illuminate\Support\Carbon|null $last_active_at
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Customer|null $customer
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice active()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice ofType(string $type)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice query()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereAppVersion($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereCustomerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereDeviceModel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereDeviceName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereDeviceToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereDeviceType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereLastActiveAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereOsVersion($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class CustomerDevice extends Model
 {

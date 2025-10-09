@@ -15,3 +15,9 @@ yarn-error.log
 composer.lock
 database/migrations_backup_20251007
 /.phpunit.cache
+nul
+app/nul
+phpstan_report.json
+*.backup
+*.old
+database/sql/

@@ -11,6 +11,50 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * App\Models\AddonCover
+ *
+ * @property int $id
+ * @property string $name
+ * @property string|null $description
+ * @property int $order_no
+ * @property bool $status
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read int|null $notifications_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
+ * @property-read int|null $permissions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
+ * @property-read int|null $roles_count
+ * @method static \Database\Factories\AddonCoverFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover permission($permissions)
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover query()
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover role($roles, $guard = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover whereOrderNo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|AddonCover withoutTrashed()
+ * @mixin \Eloquent
+ */
 class AddonCover extends Authenticatable
 {
     use HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes, TableRecordObserver;

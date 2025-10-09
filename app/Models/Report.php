@@ -18,9 +18,9 @@ use Spatie\Permission\Traits\HasRoles;
  * @property int $user_id
  * @property string $name
  * @property array|null $selected_columns
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
@@ -31,7 +31,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
  * @property-read \App\Models\User|null $user
- *
+ * @method static \Database\Factories\ReportFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|Report newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Report newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Report onlyTrashed()
@@ -50,8 +50,6 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static \Illuminate\Database\Eloquent\Builder|Report whereUserId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Report withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Report withoutTrashed()
- * @method static \Database\Factories\ReportFactory factory($count = null, $state = [])
- *
  * @mixin \Eloquent
  */
 class Report extends Authenticatable

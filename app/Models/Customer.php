@@ -27,17 +27,27 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string $name
  * @property string|null $email
  * @property string|null $mobile_number
- * @property string|null $date_of_birth
- * @property string|null $wedding_anniversary_date
- * @property string|null $engagement_anniversary_date
+ * @property \Illuminate\Support\Carbon|null $date_of_birth
+ * @property \Illuminate\Support\Carbon|null $wedding_anniversary_date
+ * @property \Illuminate\Support\Carbon|null $engagement_anniversary_date
  * @property string|null $type
- * @property int|null $status
+ * @property bool|null $status
+ * @property array|null $notification_preferences
  * @property string|null $pan_card_number
  * @property string|null $aadhar_card_number
  * @property string|null $gst_number
- * @property string|null $pan_card_path
- * @property string|null $aadhar_card_path
- * @property string|null $gst_path
+ * @property-read string|null $pan_card_path
+ * @property-read string|null $aadhar_card_path
+ * @property-read string|null $gst_path
+ * @property int|null $family_group_id Family group this customer belongs to
+ * @property string|null $password Password for customer login
+ * @property \Illuminate\Support\Carbon|null $password_changed_at
+ * @property bool $must_change_password
+ * @property \Illuminate\Support\Carbon|null $email_verified_at Email verification timestamp
+ * @property string|null $email_verification_token
+ * @property \Illuminate\Support\Carbon|null $password_reset_sent_at
+ * @property string|null $password_reset_token
+ * @property \Illuminate\Support\Carbon|null $password_reset_expires_at
  * @property string|null $remember_token
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -45,19 +55,45 @@ use Spatie\Permission\Traits\HasRoles;
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomerDevice> $activeDevices
+ * @property-read int|null $active_devices_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
  * @property-read int|null $activities_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, CustomerInsurance> $insurance
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomerAuditLog> $auditLogs
+ * @property-read int|null $audit_logs_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Claim> $claims
+ * @property-read int|null $claims_count
+ * @property-read \App\Models\Customer\CustomerSecuritySettings|null $customerSecuritySettings
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Customer\CustomerTrustedDevice> $customerTrustedDevices
+ * @property-read int|null $customer_trusted_devices_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TwoFactorAttempt> $customerTwoFactorAttempts
+ * @property-read int|null $customer_two_factor_attempts_count
+ * @property-read \App\Models\Customer\CustomerTwoFactorAuth|null $customerTwoFactorAuth
+ * @property-read \App\Models\CustomerType|null $customerType
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomerDevice> $devices
+ * @property-read int|null $devices_count
+ * @property-read \App\Models\FamilyGroup|null $familyGroup
+ * @property-read \App\Models\FamilyMember|null $familyMember
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\FamilyMember> $familyMembers
+ * @property-read int|null $family_members_count
+ * @property-read mixed $date_of_birth_formatted
+ * @property-read mixed $engagement_anniversary_date_formatted
+ * @property-read mixed $wedding_anniversary_date_formatted
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomerInsurance> $insurance
  * @property-read int|null $insurance_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\NotificationLog> $notificationLogs
+ * @property-read int|null $notification_logs_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
  * @property-read int|null $permissions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Quotation> $quotations
+ * @property-read int|null $quotations_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
- *
+ * @method static \Database\Factories\CustomerFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|Customer newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer onlyTrashed()
@@ -72,14 +108,24 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereDeletedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereDeletedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereEmail($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Customer whereEmailVerificationToken($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Customer whereEmailVerifiedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereEngagementAnniversaryDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Customer whereFamilyGroupId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereGstNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereGstPath($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereMobileNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Customer whereMustChangePassword($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Customer whereNotificationPreferences($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer wherePanCardNumber($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer wherePanCardPath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Customer wherePassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Customer wherePasswordChangedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Customer wherePasswordResetExpiresAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Customer wherePasswordResetSentAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Customer wherePasswordResetToken($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereRememberToken($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereType($value)
@@ -88,7 +134,6 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereWeddingAnniversaryDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer withoutTrashed()
- *
  * @mixin \Eloquent
  */
 class Customer extends Authenticatable

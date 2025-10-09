@@ -7,8 +7,38 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
- * Customer-specific Security Settings Model
- * Separate from admin security settings to prevent conflicts
+ * App\Models\Customer\CustomerSecuritySettings
+ *
+ * @property int $id
+ * @property string $settingable_type
+ * @property int $settingable_id
+ * @property bool $two_factor_enabled
+ * @property bool $device_tracking_enabled
+ * @property bool $login_notifications
+ * @property bool $security_alerts
+ * @property int $session_timeout
+ * @property int $device_trust_duration
+ * @property array|null $notification_preferences
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read Model|\Eloquent $settingable
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings customersOnly()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings query()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereDeviceTrackingEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereDeviceTrustDuration($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereLoginNotifications($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereNotificationPreferences($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereSecurityAlerts($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereSessionTimeout($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereSettingableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereSettingableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereTwoFactorEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class CustomerSecuritySettings extends Model
 {

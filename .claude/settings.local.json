@@ -35,7 +35,11 @@
       "SlashCommand(/sc:analyze:*)",
       "Bash(Select-String -Pattern \"WARN|coverage|Total\")",
       "Bash(git push:*)",
-      "Bash(composer show:*)"
+      "Bash(composer show:*)",
+      "Bash(Select-String -Pattern \"Written|Skipping|Model|Error\")",
+      "Bash(Select-Object -First 50)",
+      "Bash(Select-String -Pattern \"errors|OK\")",
+      "Bash(Select-Object -First 5)"
     ],
     "deny": [],
     "ask": []

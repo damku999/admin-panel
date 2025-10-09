@@ -51,7 +51,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property float|null $ncb_percentage
  * @property string|null $mode_of_payment
  * @property string|null $cheque_no
- * @property string|null $insurance_status
  * @property string|null $policy_document_path
  * @property string|null $gross_vehicle_weight
  * @property string|null $mfg_year
@@ -65,6 +64,9 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property string|null $life_insurance_payment_mode
  * @property string|null $remarks
  * @property int $status
+ * @property int $is_renewed
+ * @property string|null $renewed_date
+ * @property int|null $new_insurance_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -73,29 +75,27 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int|null $deleted_by
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
  * @property-read int|null $activities_count
- * @property-read Branch|null $branch
- * @property-read Broker|null $broker
- * @property-read Customer|null $customer
- * @property-read FuelType|null $fuelType
- * @property-read InsuranceCompany|null $insuranceCompany
- * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
- * @property-read int|null $notifications_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
- * @property-read int|null $permissions_count
- * @property-read PolicyType|null $policyType
- * @property-read PremiumType|null $premiumType
- * @property-read RelationshipManager|null $relationshipManager
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
- * @property-read int|null $roles_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
- * @property-read int|null $tokens_count
- *
+ * @property-read \App\Models\Branch|null $branch
+ * @property-read \App\Models\Broker|null $broker
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Claim> $claims
+ * @property-read int|null $claims_count
+ * @property-read \App\Models\CommissionType|null $commissionType
+ * @property-read \App\Models\Customer|null $customer
+ * @property-read \App\Models\FuelType|null $fuelType
+ * @property-read mixed $expired_date_formatted
+ * @property-read mixed $issue_date_formatted
+ * @property-read mixed $maturity_date_formatted
+ * @property-read mixed $start_date_formatted
+ * @property-read mixed $tp_expiry_date_formatted
+ * @property-read \App\Models\InsuranceCompany|null $insuranceCompany
+ * @property-read \App\Models\PolicyType|null $policyType
+ * @property-read \App\Models\PremiumType|null $premiumType
+ * @property-read \App\Models\RelationshipManager|null $relationshipManager
+ * @method static \Database\Factories\CustomerInsuranceFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance permission($permissions)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance query()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance role($roles, $guard = null)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereActualEarnings($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereApproxMaturityAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereBranchId($value)
@@ -116,7 +116,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereGst($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereInsuranceCompanyId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereInsuranceStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereIsRenewed($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereIssueDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereLifeInsurancePaymentMode($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereMakeModel($value)
@@ -127,6 +127,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereMyCommissionPercentage($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereNcbPercentage($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereNetPremium($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereNewInsuranceId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereOdPremium($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance wherePensionAmountYearly($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance wherePlanName($value)
@@ -143,6 +144,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereRegistrationNo($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereRelationshipManagerId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereRemarks($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereRenewedDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereRto($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereSgst1($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereSgst2($value)
@@ -157,7 +159,6 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance withoutTrashed()
- *
  * @mixin \Eloquent
  */
 class CustomerInsurance extends Model

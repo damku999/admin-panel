@@ -30,7 +30,41 @@ use Spatie\Permission\Traits\HasRoles;
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
- * @property-read Claim $claim
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
+ * @property-read \App\Models\Claim|null $claim
+ * @property-read string|null $submitted_date_formatted
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
+ * @property-read int|null $permissions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
+ * @property-read int|null $roles_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ * @property-read int|null $tokens_count
+ * @method static \Database\Factories\ClaimDocumentFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument permission($permissions)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument role($roles, $guard = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereClaimId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereDocumentName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereDocumentPath($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereIsRequired($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereIsSubmitted($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereSubmittedDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument withoutTrashed()
+ * @mixin \Eloquent
  */
 class ClaimDocument extends Model
 {

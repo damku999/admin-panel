@@ -9,7 +9,33 @@ use Illuminate\Support\Facades\Crypt;
 /**
  * App\Models\AppSetting
  *
+ * @property int $id
+ * @property string $key
+ * @property string|null $value
+ * @property string $type
+ * @property string $category
+ * @property string|null $description
+ * @property bool $is_encrypted
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|AppSetting active()
+ * @method static \Illuminate\Database\Eloquent\Builder|AppSetting category($category)
  * @method static \Database\Factories\AppSettingFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|AppSetting newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AppSetting newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|AppSetting query()
+ * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereCategory($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereIsEncrypted($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereKey($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereValue($value)
+ * @mixin \Eloquent
  */
 class AppSetting extends Model
 {

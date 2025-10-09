@@ -9,7 +9,46 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 /**
  * App\Models\TrustedDevice
  *
+ * @property int $id
+ * @property string $authenticatable_type
+ * @property int $authenticatable_id
+ * @property string $device_id
+ * @property string $device_name
+ * @property string|null $device_type
+ * @property string|null $browser
+ * @property string|null $platform
+ * @property string $ip_address
+ * @property string $user_agent
+ * @property \Illuminate\Support\Carbon|null $last_used_at
+ * @property \Illuminate\Support\Carbon $trusted_at
+ * @property \Illuminate\Support\Carbon|null $expires_at
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read Model|\Eloquent $authenticatable
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice active()
  * @method static \Database\Factories\TrustedDeviceFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice query()
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice valid()
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice whereAuthenticatableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice whereAuthenticatableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice whereBrowser($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice whereDeviceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice whereDeviceName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice whereDeviceType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice whereExpiresAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice whereIpAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice whereLastUsedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice wherePlatform($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice whereTrustedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TrustedDevice whereUserAgent($value)
+ * @mixin \Eloquent
  */
 class TrustedDevice extends Model
 {

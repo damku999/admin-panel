@@ -10,7 +10,83 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 /**
  * App\Models\DeviceTracking
  *
+ * @property int $id
+ * @property string $trackable_type
+ * @property int $trackable_id
+ * @property string $device_id
+ * @property string|null $device_name
+ * @property string $device_type
+ * @property string $browser
+ * @property string|null $browser_version
+ * @property string $operating_system
+ * @property string|null $os_version
+ * @property string $platform
+ * @property array|null $screen_resolution
+ * @property array|null $hardware_info
+ * @property string $user_agent
+ * @property array $fingerprint_data
+ * @property int $trust_score
+ * @property bool $is_trusted
+ * @property \Illuminate\Support\Carbon $first_seen_at
+ * @property \Illuminate\Support\Carbon $last_seen_at
+ * @property \Illuminate\Support\Carbon|null $trusted_at
+ * @property \Illuminate\Support\Carbon|null $trust_expires_at
+ * @property array|null $location_history
+ * @property array|null $ip_history
+ * @property int $login_count
+ * @property int $failed_login_attempts
+ * @property \Illuminate\Support\Carbon|null $last_failed_login_at
+ * @property bool $is_blocked
+ * @property string|null $blocked_reason
+ * @property \Illuminate\Support\Carbon|null $blocked_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read string $display_name
+ * @property-read string|null $last_ip
+ * @property-read array|null $last_location
+ * @property-read Model|\Eloquent $trackable
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking active(int $days = 30)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking blocked()
  * @method static \Database\Factories\DeviceTrackingFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking highRisk(int $threshold = 70)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking query()
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking suspicious()
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking trusted()
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking untrusted()
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereBlockedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereBlockedReason($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereBrowser($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereBrowserVersion($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereDeviceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereDeviceName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereDeviceType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereFailedLoginAttempts($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereFingerprintData($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereFirstSeenAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereHardwareInfo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereIpHistory($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereIsBlocked($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereIsTrusted($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereLastFailedLoginAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereLastSeenAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereLocationHistory($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereLoginCount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereOperatingSystem($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereOsVersion($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking wherePlatform($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereScreenResolution($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereTrackableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereTrackableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereTrustExpiresAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereTrustScore($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereTrustedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereUserAgent($value)
+ * @mixin \Eloquent
  */
 class DeviceTracking extends Model
 {

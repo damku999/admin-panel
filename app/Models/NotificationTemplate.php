@@ -6,9 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Notification Template Model
- *
- * Manages WhatsApp and Email message templates for automated notifications
+ * App\Models\NotificationTemplate
  *
  * @property int $id
  * @property int $notification_type_id
@@ -21,12 +19,31 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $updated_by
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\NotificationType $notificationType
- * @property-read \App\Models\Admin|null $updater
+ * @property-read string $category
  * @property-read string $name
  * @property-read string $type
- *
+ * @property-read \App\Models\NotificationType|null $notificationType
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\NotificationTemplateTestLog> $testLogs
+ * @property-read int|null $test_logs_count
+ * @property-read \App\Models\User|null $updater
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\NotificationTemplateVersion> $versions
+ * @property-read int|null $versions_count
  * @method static \Database\Factories\NotificationTemplateFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate query()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereAvailableVariables($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereChannel($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereNotificationTypeId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereSampleOutput($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereSubject($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereTemplateContent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereUpdatedBy($value)
+ * @mixin \Eloquent
  */
 class NotificationTemplate extends Model
 {

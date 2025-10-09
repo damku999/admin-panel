@@ -29,7 +29,40 @@ use Spatie\Permission\Traits\HasRoles;
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
- * @property-read Claim $claim
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
+ * @property-read \App\Models\Claim|null $claim
+ * @property-read string|null $stage_date_formatted
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
+ * @property-read int|null $permissions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
+ * @property-read int|null $roles_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ * @property-read int|null $tokens_count
+ * @method static \Database\Factories\ClaimStageFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage permission($permissions)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage role($roles, $guard = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage whereClaimId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage whereIsCompleted($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage whereIsCurrent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage whereStageDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage whereStageName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimStage withoutTrashed()
+ * @mixin \Eloquent
  */
 class ClaimStage extends Model
 {

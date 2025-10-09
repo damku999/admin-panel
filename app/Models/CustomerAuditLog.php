@@ -6,6 +6,44 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * App\Models\CustomerAuditLog
+ *
+ * @property int $id
+ * @property int $customer_id
+ * @property string $action login, logout, view_policy, download_document, etc.
+ * @property string|null $resource_type policy, profile, family_data
+ * @property int|null $resource_id ID of the resource being accessed
+ * @property string|null $description Human readable description
+ * @property array|null $metadata Additional data (JSON-like string, IP, user agent, etc.)
+ * @property string|null $ip_address
+ * @property string|null $user_agent
+ * @property string|null $session_id
+ * @property bool $success
+ * @property string|null $failure_reason
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \App\Models\Customer|null $customer
+ * @method static \Database\Factories\CustomerAuditLogFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog query()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog whereAction($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog whereCustomerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog whereFailureReason($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog whereIpAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog whereMetadata($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog whereResourceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog whereResourceType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog whereSessionId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog whereSuccess($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerAuditLog whereUserAgent($value)
+ * @mixin \Eloquent
+ */
 class CustomerAuditLog extends Model
 {
     use HasFactory;

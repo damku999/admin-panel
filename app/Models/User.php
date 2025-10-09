@@ -37,6 +37,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property int|null $deleted_by
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
  * @property-read int|null $activities_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\AuditLog> $auditLogs
+ * @property-read int|null $audit_logs_count
  * @property-read string $full_name
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
@@ -46,9 +48,14 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read int|null $reports_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
+ * @property-read \App\Models\SecuritySetting|null $securitySettings
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
- *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TrustedDevice> $trustedDevices
+ * @property-read int|null $trusted_devices_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TwoFactorAttempt> $twoFactorAttempts
+ * @property-read int|null $two_factor_attempts_count
+ * @property-read \App\Models\TwoFactorAuth|null $twoFactorAuth
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|User newQuery()
@@ -74,7 +81,6 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|User withoutTrashed()
- *
  * @mixin \Eloquent
  */
 class User extends Authenticatable

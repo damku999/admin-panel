@@ -9,7 +9,38 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 /**
  * App\Models\TwoFactorAttempt
  *
+ * @property int $id
+ * @property string $authenticatable_type
+ * @property int $authenticatable_id
+ * @property string $code_type
+ * @property string|null $ip_address
+ * @property string|null $user_agent
+ * @property bool $successful
+ * @property string|null $failure_reason
+ * @property \Illuminate\Support\Carbon $attempted_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read Model|\Eloquent $authenticatable
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt codeType(string $codeType)
  * @method static \Database\Factories\TwoFactorAttemptFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt failed()
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt query()
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt recent(int $minutes = 15)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt successful()
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt whereAttemptedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt whereAuthenticatableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt whereAuthenticatableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt whereCodeType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt whereFailureReason($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt whereIpAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt whereSuccessful($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAttempt whereUserAgent($value)
+ * @mixin \Eloquent
  */
 class TwoFactorAttempt extends Model
 {

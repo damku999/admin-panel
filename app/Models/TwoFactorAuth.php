@@ -11,7 +11,36 @@ use Illuminate\Support\Facades\Crypt;
 /**
  * App\Models\TwoFactorAuth
  *
+ * @property int $id
+ * @property string $authenticatable_type
+ * @property int $authenticatable_id
+ * @property string|null $secret
+ * @property array|null $recovery_codes
+ * @property \Illuminate\Support\Carbon|null $enabled_at
+ * @property \Illuminate\Support\Carbon|null $confirmed_at
+ * @property bool $is_active
+ * @property string|null $backup_method
+ * @property string|null $backup_destination
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read Model|\Eloquent $authenticatable
  * @method static \Database\Factories\TwoFactorAuthFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAuth newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAuth newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAuth query()
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAuth whereAuthenticatableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAuth whereAuthenticatableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAuth whereBackupDestination($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAuth whereBackupMethod($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAuth whereConfirmedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAuth whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAuth whereEnabledAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAuth whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAuth whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAuth whereRecoveryCodes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAuth whereSecret($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|TwoFactorAuth whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class TwoFactorAuth extends Model
 {

@@ -7,9 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Notification Type Model
- *
- * Defines types of notifications that can be sent
+ * App\Models\NotificationType
  *
  * @property int $id
  * @property string $name
@@ -23,8 +21,28 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
- *
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\NotificationTemplate> $templates
+ * @property-read int|null $templates_count
  * @method static \Database\Factories\NotificationTypeFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType query()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType whereCategory($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType whereCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType whereDefaultEmailEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType whereDefaultWhatsappEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType whereOrderNo($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|NotificationType withoutTrashed()
+ * @mixin \Eloquent
  */
 class NotificationType extends Model
 {

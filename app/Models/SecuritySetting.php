@@ -9,7 +9,36 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 /**
  * App\Models\SecuritySetting
  *
+ * @property int $id
+ * @property string $settingable_type
+ * @property int $settingable_id
+ * @property bool $two_factor_enabled
+ * @property bool $device_tracking_enabled
+ * @property bool $login_notifications
+ * @property bool $security_alerts
+ * @property int $session_timeout
+ * @property int $device_trust_duration
+ * @property array|null $notification_preferences
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read Model|\Eloquent $settingable
  * @method static \Database\Factories\SecuritySettingFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting query()
+ * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereDeviceTrackingEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereDeviceTrustDuration($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereLoginNotifications($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereNotificationPreferences($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereSecurityAlerts($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereSessionTimeout($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereSettingableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereSettingableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereTwoFactorEnabled($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class SecuritySetting extends Model
 {

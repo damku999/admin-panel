@@ -9,8 +9,38 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Crypt;
 
 /**
- * Customer-specific Two Factor Authentication Model
- * Separate from admin 2FA to prevent conflicts
+ * App\Models\Customer\CustomerTwoFactorAuth
+ *
+ * @property int $id
+ * @property string $authenticatable_type
+ * @property int $authenticatable_id
+ * @property string|null $secret
+ * @property array|null $recovery_codes
+ * @property \Illuminate\Support\Carbon|null $enabled_at
+ * @property \Illuminate\Support\Carbon|null $confirmed_at
+ * @property bool $is_active
+ * @property string|null $backup_method
+ * @property string|null $backup_destination
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read Model|\Eloquent $authenticatable
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth customersOnly()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth query()
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereAuthenticatableId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereAuthenticatableType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereBackupDestination($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereBackupMethod($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereConfirmedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereEnabledAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereIsActive($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereRecoveryCodes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereSecret($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereUpdatedAt($value)
+ * @mixin \Eloquent
  */
 class CustomerTwoFactorAuth extends Model
 {

@@ -25,7 +25,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property int|null $deleted_by
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
  * @property-read int|null $activities_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, CustomerInsurance> $customerInsurances
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomerInsurance> $customerInsurances
  * @property-read int|null $customer_insurances_count
  * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
@@ -33,7 +33,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read int|null $permissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
- *
+ * @method static \Database\Factories\PolicyTypeFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|PolicyType newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|PolicyType newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|PolicyType onlyTrashed()
@@ -51,7 +51,6 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static \Illuminate\Database\Eloquent\Builder|PolicyType whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|PolicyType withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|PolicyType withoutTrashed()
- *
  * @mixin \Eloquent
  */
 class PolicyType extends Authenticatable

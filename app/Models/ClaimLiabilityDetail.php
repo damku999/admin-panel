@@ -18,13 +18,20 @@ use Spatie\Permission\Traits\HasRoles;
  * @property int $id
  * @property int $claim_id
  * @property string $claim_type
+ * @property string|null $claim_amount
+ * @property string|null $salvage_amount
+ * @property string|null $less_claim_charge
+ * @property string|null $amount_to_be_paid
+ * @property string|null $less_salvage_amount
+ * @property string|null $less_deductions
+ * @property string|null $claim_amount_received
  * @property string|null $hospital_name
  * @property string|null $hospital_address
  * @property string|null $garage_name
  * @property string|null $garage_address
- * @property float|null $estimated_amount
- * @property float|null $approved_amount
- * @property float|null $final_amount
+ * @property string|null $estimated_amount
+ * @property string|null $approved_amount
+ * @property string|null $final_amount
  * @property string|null $notes
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -32,7 +39,49 @@ use Spatie\Permission\Traits\HasRoles;
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
- * @property-read Claim $claim
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
+ * @property-read \App\Models\Claim|null $claim
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
+ * @property-read int|null $permissions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
+ * @property-read int|null $roles_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ * @property-read int|null $tokens_count
+ * @method static \Database\Factories\ClaimLiabilityDetailFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail permission($permissions)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail query()
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail role($roles, $guard = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereAmountToBePaid($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereApprovedAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereClaimAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereClaimAmountReceived($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereClaimId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereClaimType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereEstimatedAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereFinalAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereGarageAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereGarageName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereHospitalAddress($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereHospitalName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereLessClaimCharge($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereLessDeductions($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereLessSalvageAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereNotes($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereSalvageAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|ClaimLiabilityDetail withoutTrashed()
+ * @mixin \Eloquent
  */
 class ClaimLiabilityDetail extends Model
 {

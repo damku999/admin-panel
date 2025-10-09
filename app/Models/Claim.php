@@ -25,7 +25,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property int $customer_id
  * @property int $customer_insurance_id
  * @property string $insurance_type
- * @property string $incident_date
+ * @property \Illuminate\Support\Carbon $incident_date
  * @property string|null $description
  * @property string|null $whatsapp_number
  * @property bool $send_email_notifications
@@ -36,12 +36,49 @@ use Spatie\Permission\Traits\HasRoles;
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
- * @property-read Customer $customer
- * @property-read CustomerInsurance $customerInsurance
- * @property-read \Illuminate\Database\Eloquent\Collection<int, ClaimStage> $stages
- * @property-read \Illuminate\Database\Eloquent\Collection<int, ClaimDocument> $documents
- * @property-read ClaimLiabilityDetail|null $liabilityDetail
- * @property-read ClaimStage|null $currentStage
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read int|null $activities_count
+ * @property-read \App\Models\ClaimStage|null $currentStage
+ * @property-read \App\Models\Customer|null $customer
+ * @property-read \App\Models\CustomerInsurance|null $customerInsurance
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ClaimDocument> $documents
+ * @property-read int|null $documents_count
+ * @property-read string $incident_date_formatted
+ * @property-read \App\Models\ClaimLiabilityDetail|null $liabilityDetail
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
+ * @property-read int|null $permissions_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
+ * @property-read int|null $roles_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ClaimStage> $stages
+ * @property-read int|null $stages_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ * @property-read int|null $tokens_count
+ * @method static \Database\Factories\ClaimFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim onlyTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim permission($permissions)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim query()
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim role($roles, $guard = null)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereClaimNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereCreatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereCustomerId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereCustomerInsuranceId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereDeletedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereDeletedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereIncidentDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereInsuranceType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereSendEmailNotifications($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereStatus($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereUpdatedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim whereWhatsappNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim withTrashed()
+ * @method static \Illuminate\Database\Eloquent\Builder|Claim withoutTrashed()
+ * @mixin \Eloquent
  */
 class Claim extends Model
 {

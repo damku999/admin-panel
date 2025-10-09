@@ -41,14 +41,13 @@ class HomeController extends AbstractBaseCrudController
      */
     public function index(Request $request)
     {
-        if (!Auth::user()->hasRole('Admin')) {
+        if (! Auth::user()->hasRole('Admin')) {
             return redirect()->route('customers.index');
         }
         $dashboardData = $this->prepareDashboardData($request);
 
         return view('home', $dashboardData);
     }
-
 
     /**
      * Prepare all dashboard data
@@ -192,7 +191,7 @@ class HomeController extends AbstractBaseCrudController
     /**
      * Get financial year start and end dates
      */
-    private function getFinancialYearDates(Carbon $date = null): array
+    private function getFinancialYearDates(?Carbon $date = null): array
     {
         $date = $date ?? Carbon::now();
         $currentMonth = $date->month;
@@ -233,6 +232,7 @@ class HomeController extends AbstractBaseCrudController
         }
 
         ksort($result);
+
         return $result;
     }
 
@@ -272,7 +272,7 @@ class HomeController extends AbstractBaseCrudController
             'yesterday_data' => $this->getFinancialDataForDate($date->copy()->subDay(), $sumColumns),
             'day_before_yesterday_data' => $this->getFinancialDataForDate($date->copy()->subDays(2), $sumColumns),
             'quarters_data' => $this->getQuarterlyData($financialYearDates['start'], $sumColumns),
-            'quarter_date' => $this->getQuarterDates($financialYearDates['start']),]
+            'quarter_date' => $this->getQuarterDates($financialYearDates['start']), ],
         ];
     }
 
@@ -381,7 +381,7 @@ class HomeController extends AbstractBaseCrudController
         } catch (\Throwable $exception) {
             DB::rollBack();
 
-            return $this->redirectWithError('Failed to update profile: ' . $exception->getMessage());
+            return $this->redirectWithError('Failed to update profile: '.$exception->getMessage());
         }
     }
 
@@ -403,7 +403,7 @@ class HomeController extends AbstractBaseCrudController
     public function changePassword(Request $request)
     {
         $request->validate([
-            'current_password' => ['required', new MatchOldPassword()],
+            'current_password' => ['required', new MatchOldPassword],
             'new_password' => ['required', 'min:8', 'confirmed'],
             'new_password_confirmation' => ['required'],
         ]);
@@ -419,7 +419,7 @@ class HomeController extends AbstractBaseCrudController
         } catch (\Throwable $exception) {
             DB::rollBack();
 
-            return $this->redirectWithError('Failed to change password: ' . $exception->getMessage());
+            return $this->redirectWithError('Failed to change password: '.$exception->getMessage());
         }
     }
 
@@ -429,7 +429,7 @@ class HomeController extends AbstractBaseCrudController
     private function updateUserPassword(string $newPassword): void
     {
         User::find(auth()->id())->update([
-            'password' => Hash::make($newPassword)
+            'password' => Hash::make($newPassword),
         ]);
     }
 }

@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Contracts\Services\FamilyGroupServiceInterface;
 use App\Contracts\Repositories\CustomerRepositoryInterface;
+use App\Contracts\Services\FamilyGroupServiceInterface;
+use App\Models\Customer;
 use App\Models\FamilyGroup;
 use App\Models\FamilyMember;
-use App\Models\Customer;
 use App\Traits\ExportableTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
 
 class FamilyGroupController extends AbstractBaseCrudController
 {
@@ -85,7 +84,7 @@ class FamilyGroupController extends AbstractBaseCrudController
             return $this->redirectWithSuccess('family_groups.index', 'Family group created successfully. Login credentials sent to family head only. Family head will manage family member access.');
 
         } catch (\Exception $e) {
-            return $this->redirectWithError('Error creating family group: ' . $e->getMessage())
+            return $this->redirectWithError('Error creating family group: '.$e->getMessage())
                 ->withInput();
         }
     }
@@ -121,7 +120,7 @@ class FamilyGroupController extends AbstractBaseCrudController
     public function update(Request $request, FamilyGroup $familyGroup)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255|unique:family_groups,name,' . $familyGroup->id . ',id,deleted_at,NULL',
+            'name' => 'required|string|max:255|unique:family_groups,name,'.$familyGroup->id.',id,deleted_at,NULL',
             'family_head_id' => 'required|exists:customers,id',
             'member_ids' => 'sometimes|array',
             'member_ids.*' => 'exists:customers,id',
@@ -152,7 +151,7 @@ class FamilyGroupController extends AbstractBaseCrudController
             }
 
         } catch (\Exception $e) {
-            return $this->redirectWithError('Error updating family group: ' . $e->getMessage())
+            return $this->redirectWithError('Error updating family group: '.$e->getMessage())
                 ->withInput();
         }
     }
@@ -172,7 +171,7 @@ class FamilyGroupController extends AbstractBaseCrudController
                 if (request()->expectsJson()) {
                     return response()->json([
                         'status' => 'success',
-                        'message' => "Family group '{$familyName}' deleted successfully."
+                        'message' => "Family group '{$familyName}' deleted successfully.",
                     ]);
                 }
 
@@ -182,7 +181,7 @@ class FamilyGroupController extends AbstractBaseCrudController
                 if (request()->expectsJson()) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Failed to delete family group.'
+                        'message' => 'Failed to delete family group.',
                     ], 500);
                 }
 
@@ -194,11 +193,11 @@ class FamilyGroupController extends AbstractBaseCrudController
             if (request()->expectsJson()) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Error deleting family group: ' . $e->getMessage()
+                    'message' => 'Error deleting family group: '.$e->getMessage(),
                 ], 500);
             }
 
-            return $this->redirectWithError('Error deleting family group: ' . $e->getMessage());
+            return $this->redirectWithError('Error deleting family group: '.$e->getMessage());
         }
     }
 
@@ -212,13 +211,14 @@ class FamilyGroupController extends AbstractBaseCrudController
 
             if ($result) {
                 $message = $status ? 'Family group activated successfully.' : 'Family group deactivated successfully.';
+
                 return $this->redirectWithSuccess(null, $message);
             } else {
                 return $this->redirectWithError('Failed to update family group status.');
             }
 
         } catch (\Exception $e) {
-            return $this->redirectWithError('Error updating family group status: ' . $e->getMessage());
+            return $this->redirectWithError('Error updating family group status: '.$e->getMessage());
         }
     }
 
@@ -231,7 +231,7 @@ class FamilyGroupController extends AbstractBaseCrudController
             $familyGroups = $this->familyGroupService->getAllFamilyGroupsForExport();
 
             // Simple CSV export
-            $filename = 'family_groups_' . date('Y_m_d_H_i_s') . '.csv';
+            $filename = 'family_groups_'.date('Y_m_d_H_i_s').'.csv';
             $headers = [
                 'Content-Type' => 'text/csv',
                 'Content-Disposition' => "attachment; filename=\"$filename\"",
@@ -258,7 +258,7 @@ class FamilyGroupController extends AbstractBaseCrudController
             return response()->stream($callback, 200, $headers);
 
         } catch (\Exception $e) {
-            return $this->redirectWithError('Error exporting family groups: ' . $e->getMessage());
+            return $this->redirectWithError('Error exporting family groups: '.$e->getMessage());
         }
     }
 
@@ -278,7 +278,7 @@ class FamilyGroupController extends AbstractBaseCrudController
                 if (request()->expectsJson()) {
                     return response()->json([
                         'status' => 'success',
-                        'message' => "'{$customerName}' has been removed from '{$familyGroupName}' successfully."
+                        'message' => "'{$customerName}' has been removed from '{$familyGroupName}' successfully.",
                     ]);
                 }
 
@@ -288,7 +288,7 @@ class FamilyGroupController extends AbstractBaseCrudController
                 if (request()->expectsJson()) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Failed to remove family member.'
+                        'message' => 'Failed to remove family member.',
                     ], 500);
                 }
 
@@ -300,11 +300,11 @@ class FamilyGroupController extends AbstractBaseCrudController
             if (request()->expectsJson()) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Error removing family member: ' . $e->getMessage()
+                    'message' => 'Error removing family member: '.$e->getMessage(),
                 ], 500);
             }
 
-            return $this->redirectWithError('Error removing family member: ' . $e->getMessage());
+            return $this->redirectWithError('Error removing family member: '.$e->getMessage());
         }
     }
 
@@ -328,17 +328,17 @@ class FamilyGroupController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
             'headings' => ['ID', 'Family Name', 'Family Head', 'Members Count', 'Status', 'Created Date'],
-            'mapping' => function($model) {
+            'mapping' => function ($model) {
                 return [
                     $model->id,
                     $model->name,
                     $model->familyHead->name ?? 'N/A',
                     $model->familyMembers->count(),
                     $model->status ? 'Active' : 'Inactive',
-                    $model->created_at->format('Y-m-d H:i:s')
+                    $model->created_at->format('Y-m-d H:i:s'),
                 ];
             },
-            'with_mapping' => true
+            'with_mapping' => true,
         ];
     }
 }

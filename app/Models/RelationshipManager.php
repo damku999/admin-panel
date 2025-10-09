@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
-use App\Models\CustomerInsurance;
+use App\Traits\TableRecordObserver;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
-use App\Traits\TableRecordObserver;
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * App\Models\RelationshipManager
@@ -39,6 +38,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|RelationshipManager newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|RelationshipManager newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|RelationshipManager onlyTrashed()
@@ -59,13 +59,17 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @method static \Illuminate\Database\Eloquent\Builder|RelationshipManager withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|RelationshipManager withoutTrashed()
  * @method static \Database\Factories\RelationshipManagerFactory factory($count = null, $state = [])
+ *
  * @mixin \Eloquent
  */
 class RelationshipManager extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
+    use HasApiTokens, HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes, TableRecordObserver;
+
     protected static $logAttributes = ['*'];
+
     protected static $logOnlyDirty = true;
+
     /**
      * The attributes that are mass assignable.
      *

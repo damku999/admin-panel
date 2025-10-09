@@ -16,7 +16,7 @@ class NotificationTemplateFactory extends Factory
             'notification_type_id' => NotificationType::factory(),
             'channel' => $this->faker->randomElement(['whatsapp', 'email', 'sms']),
             'subject' => $this->faker->sentence(),
-            'template_content' => $this->faker->paragraph() . ' {customer_name} {policy_number}',
+            'template_content' => $this->faker->paragraph().' {customer_name} {policy_number}',
             'available_variables' => ['customer_name', 'policy_number', 'company_name', 'date'],
             'sample_output' => $this->faker->paragraph(),
             'is_active' => true,

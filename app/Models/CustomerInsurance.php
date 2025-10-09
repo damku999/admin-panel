@@ -2,21 +2,12 @@
 
 namespace App\Models;
 
-use App\Models\Branch;
-use App\Models\Broker;
-use App\Models\Customer;
-use App\Models\Claim;
-use App\Models\FuelType;
-use App\Models\PolicyType;
-use App\Models\PremiumType;
-use App\Models\InsuranceCompany;
-use Spatie\Activitylog\LogOptions;
-use App\Models\RelationshipManager;
 use App\Traits\TableRecordObserver;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * App\Models\CustomerInsurance
@@ -98,6 +89,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance onlyTrashed()
@@ -165,11 +157,12 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class CustomerInsurance extends Model
 {
-    use HasFactory, SoftDeletes, TableRecordObserver, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes, TableRecordObserver;
 
     /**
      * The attributes that are mass assignable.
@@ -232,7 +225,9 @@ class CustomerInsurance extends Model
     ];
 
     protected static $logAttributes = ['*'];
+
     protected static $logOnlyDirty = true;
+
     // Define the relationships here
     public function branch()
     {

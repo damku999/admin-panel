@@ -22,7 +22,7 @@ class AppSetting extends Model
         'category',
         'description',
         'is_encrypted',
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [

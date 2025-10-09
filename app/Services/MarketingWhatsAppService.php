@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Contracts\Repositories\CustomerRepositoryInterface;
 use App\Contracts\Services\MarketingWhatsAppServiceInterface;
-use App\Services\FileUploadService;
 use App\Traits\WhatsAppApiTrait;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
@@ -22,23 +21,16 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
 
     /**
      * Customer Repository instance
-     *
-     * @var CustomerRepositoryInterface
      */
     private CustomerRepositoryInterface $customerRepository;
 
     /**
      * File Upload Service instance
-     *
-     * @var FileUploadService
      */
     private FileUploadService $fileUploadService;
 
     /**
      * Constructor
-     *
-     * @param CustomerRepositoryInterface $customerRepository
-     * @param FileUploadService $fileUploadService
      */
     public function __construct(
         CustomerRepositoryInterface $customerRepository,
@@ -67,7 +59,7 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
 
         return $this->customerRepository->getCustomersByIds($selectedCustomerIds)
             ->filter(function ($customer) {
-                return $customer->status && !empty($customer->mobile_number);
+                return $customer->status && ! empty($customer->mobile_number);
             });
     }
 
@@ -99,9 +91,9 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
                 );
 
                 if ($uploadResult['status']) {
-                    $imagePath = storage_path('app/public/' . $uploadResult['file_path']);
+                    $imagePath = storage_path('app/public/'.$uploadResult['file_path']);
                 } else {
-                    throw new \Exception('Failed to upload image: ' . $uploadResult['message']);
+                    throw new \Exception('Failed to upload image: '.$uploadResult['message']);
                 }
             }
 
@@ -128,13 +120,13 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
                         $this->logMarketingAttempt($customer->id, $campaignData['message_type'], true);
                     } else {
                         $failedCount++;
-                        $failedCustomers[] = $customer->name . ' (' . $customer->mobile_number . ')';
+                        $failedCustomers[] = $customer->name.' ('.$customer->mobile_number.')';
                         $this->logMarketingAttempt($customer->id, $campaignData['message_type'], false, 'WhatsApp API failed');
                     }
 
                 } catch (\Exception $e) {
                     $failedCount++;
-                    $failedCustomers[] = $customer->name . ' (' . $customer->mobile_number . ')';
+                    $failedCustomers[] = $customer->name.' ('.$customer->mobile_number.')';
                     $this->logMarketingAttempt($customer->id, $campaignData['message_type'], false, $e->getMessage());
                 }
             }
@@ -143,7 +135,7 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
                 'total_customers' => $customers->count(),
                 'success_count' => $successCount,
                 'failed_count' => $failedCount,
-                'failed_customers' => $failedCustomers
+                'failed_customers' => $failedCustomers,
             ];
         });
     }
@@ -160,10 +152,10 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
             'customers' => $customers->map(function ($customer) {
                 return [
                     'name' => $customer->name,
-                    'mobile_number' => $customer->mobile_number
+                    'mobile_number' => $customer->mobile_number,
                 ];
             }),
-            'count' => $customers->count()
+            'count' => $customers->count(),
         ];
     }
 
@@ -180,7 +172,7 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
                 'mobile_number' => $mobileNumber,
                 'message_type' => 'text',
                 'response' => $response,
-                'sent_by' => auth()->id()
+                'sent_by' => auth()->id(),
             ]);
 
             return true;
@@ -189,7 +181,7 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
                 'customer_id' => $customerId,
                 'mobile_number' => $mobileNumber,
                 'error' => $e->getMessage(),
-                'sent_by' => auth()->id()
+                'sent_by' => auth()->id(),
             ]);
 
             return false;
@@ -210,7 +202,7 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
                 'message_type' => 'image',
                 'image_path' => $imagePath,
                 'response' => $response,
-                'sent_by' => auth()->id()
+                'sent_by' => auth()->id(),
             ]);
 
             return true;
@@ -220,7 +212,7 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
                 'mobile_number' => $mobileNumber,
                 'image_path' => $imagePath,
                 'error' => $e->getMessage(),
-                'sent_by' => auth()->id()
+                'sent_by' => auth()->id(),
             ]);
 
             return false;
@@ -250,6 +242,7 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
                 'error' => $e->getMessage(),
                 'user_id' => auth()->id(),
             ]);
+
             return [];
         }
     }
@@ -264,10 +257,10 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
             'message_type' => $messageType,
             'success' => $success,
             'sent_by' => auth()->id(),
-            'sent_at' => now()
+            'sent_at' => now(),
         ];
 
-        if (!$success && $error) {
+        if (! $success && $error) {
             $logData['error'] = $error;
         }
 
@@ -280,8 +273,6 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
 
     /**
      * Get last campaign date from logs
-     *
-     * @return string|null
      */
     private function getLastCampaignDate(): ?string
     {
@@ -292,8 +283,6 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
 
     /**
      * Get campaigns count for this month from logs
-     *
-     * @return int
      */
     private function getCampaignsThisMonth(): int
     {

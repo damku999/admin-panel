@@ -9,8 +9,6 @@ use App\Models\Broker;
 use App\Traits\ExportableTrait;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 
 /**
@@ -31,20 +29,25 @@ class BrokerController extends AbstractBaseCrudController
 
     /**
      * List Broker
+     *
      * @param Nill
-     * @return Array $broker
+     * @return array $broker
+     *
      * @author Darshan Baraiya
      */
     public function index(Request $request): View
     {
         $brokers = $this->brokerService->getBrokers($request);
+
         return view('brokers.index', ['brokers' => $brokers, 'request' => $request->all()]);
     }
 
     /**
      * Create Broker
+     *
      * @param Nill
-     * @return Array $broker
+     * @return array $broker
+     *
      * @author Darshan Baraiya
      */
     public function create(): View
@@ -54,45 +57,52 @@ class BrokerController extends AbstractBaseCrudController
 
     /**
      * Store Broker
-     * @param Request $request
+     *
+     * @param  Request  $request
      * @return View Brokers
+     *
      * @author Darshan Baraiya
      */
     public function store(StoreBrokerRequest $request): RedirectResponse
     {
         try {
             $broker = $this->brokerService->createBroker($request->validated());
+
             return $this->redirectWithSuccess('brokers.index',
                 $this->getSuccessMessage('Broker', 'created'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Broker', 'create') . ': ' . $th->getMessage())
+                $this->getErrorMessage('Broker', 'create').': '.$th->getMessage())
                 ->withInput();
         }
     }
 
     /**
      * Update Status Of Broker
-     * @param Integer $status
+     *
      * @return List Page With Success
+     *
      * @author Darshan Baraiya
      */
     public function updateStatus(int $broker_id, int $status): RedirectResponse
     {
         try {
             $this->brokerService->updateStatus($broker_id, $status);
+
             return $this->redirectWithSuccess('brokers.index',
                 $this->getSuccessMessage('Broker status', 'updated'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Broker status', 'update') . ': ' . $th->getMessage());
+                $this->getErrorMessage('Broker status', 'update').': '.$th->getMessage());
         }
     }
 
     /**
      * Edit Broker
-     * @param Integer $broker
+     *
+     * @param  int  $broker
      * @return Collection $broker
+     *
      * @author Darshan Baraiya
      */
     public function edit(Broker $broker): View
@@ -104,44 +114,50 @@ class BrokerController extends AbstractBaseCrudController
 
     /**
      * Update Broker
-     * @param Request $request, Broker $broker
+     *
+     * @param  Request  $request,  Broker $broker
      * @return View Brokers
+     *
      * @author Darshan Baraiya
      */
     public function update(UpdateBrokerRequest $request, Broker $broker): RedirectResponse
     {
         try {
             $this->brokerService->updateBroker($broker, $request->validated());
+
             return $this->redirectWithSuccess('brokers.index',
                 $this->getSuccessMessage('Broker', 'updated'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Broker', 'update') . ': ' . $th->getMessage())
+                $this->getErrorMessage('Broker', 'update').': '.$th->getMessage())
                 ->withInput();
         }
     }
 
     /**
      * Delete Broker
-     * @param Broker $broker
+     *
      * @return Index Brokers
+     *
      * @author Darshan Baraiya
      */
     public function delete(Broker $broker): RedirectResponse
     {
         try {
             $this->brokerService->deleteBroker($broker);
+
             return $this->redirectWithSuccess('brokers.index',
                 $this->getSuccessMessage('Broker', 'deleted'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Broker', 'delete') . ': ' . $th->getMessage());
+                $this->getErrorMessage('Broker', 'delete').': '.$th->getMessage());
         }
     }
 
     /**
      * Import Brokers
-     * @param Null
+     *
+     * @param null
      * @return View File
      */
     public function importBrokers(): View
@@ -169,17 +185,17 @@ class BrokerController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
             'headings' => ['ID', 'Name', 'Email', 'Mobile Number', 'Status', 'Created Date'],
-            'mapping' => function($model) {
+            'mapping' => function ($model) {
                 return [
                     $model->id,
                     $model->name,
                     $model->email ?? 'N/A',
                     $model->mobile_number ?? 'N/A',
                     $model->status ? 'Active' : 'Inactive',
-                    $model->created_at->format('Y-m-d H:i:s')
+                    $model->created_at->format('Y-m-d H:i:s'),
                 ];
             },
-            'with_mapping' => true
+            'with_mapping' => true,
         ];
     }
 }

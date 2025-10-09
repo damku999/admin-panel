@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Str;
 
 /**
  * App\Models\TrustedDevice
@@ -15,6 +14,7 @@ use Illuminate\Support\Str;
 class TrustedDevice extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'authenticatable_type',
         'authenticatable_id',
@@ -51,7 +51,8 @@ class TrustedDevice extends Model
      */
     public static function generateDeviceId(string $userAgent, string $ipAddress, ?string $additionalData = null): string
     {
-        $fingerprint = $userAgent . $ipAddress . ($additionalData ?? '');
+        $fingerprint = $userAgent.$ipAddress.($additionalData ?? '');
+
         return hash('sha256', $fingerprint);
     }
 
@@ -61,7 +62,7 @@ class TrustedDevice extends Model
     public static function createFromRequest(
         $authenticatable,
         \Illuminate\Http\Request $request,
-        string $deviceName = null
+        ?string $deviceName = null
     ): self {
         $userAgent = $request->userAgent() ?? '';
         $ipAddress = $request->ip();
@@ -75,7 +76,7 @@ class TrustedDevice extends Model
 
         if ($existingDevice) {
             // If device exists but is inactive, reactivate it
-            if (!$existingDevice->is_active) {
+            if (! $existingDevice->is_active) {
                 $existingDevice->update([
                     'device_name' => $deviceName ?? $existingDevice->device_name,
                     'last_used_at' => now(),
@@ -83,6 +84,7 @@ class TrustedDevice extends Model
                     'expires_at' => now()->addDays(config('security.device_trust_duration', 30)),
                     'is_active' => true,
                 ]);
+
                 return $existingDevice;
             }
 
@@ -91,6 +93,7 @@ class TrustedDevice extends Model
                 'device_name' => $deviceName ?? $existingDevice->device_name,
                 'last_used_at' => now(),
             ]);
+
             return $existingDevice;
         }
 
@@ -180,7 +183,7 @@ class TrustedDevice extends Model
     public function isValid(): bool
     {
         return $this->is_active &&
-               (!$this->expires_at || $this->expires_at->isFuture());
+               (! $this->expires_at || $this->expires_at->isFuture());
     }
 
     /**
@@ -202,7 +205,7 @@ class TrustedDevice extends Model
     /**
      * Extend trust period
      */
-    public function extendTrust(int $days = null): void
+    public function extendTrust(?int $days = null): void
     {
         $days = $days ?? config('security.device_trust_duration', 30);
         $this->update(['expires_at' => now()->addDays($days)]);
@@ -213,8 +216,8 @@ class TrustedDevice extends Model
      */
     public function getDisplayName(): string
     {
-        return $this->device_name .
-               ($this->browser ? " ({$this->browser})" : '') .
+        return $this->device_name.
+               ($this->browser ? " ({$this->browser})" : '').
                ($this->platform ? " - {$this->platform}" : '');
     }
 
@@ -232,9 +235,9 @@ class TrustedDevice extends Model
     public function scopeValid($query)
     {
         return $query->where('is_active', true)
-                    ->where(function($q) {
-                        $q->whereNull('expires_at')
-                          ->orWhere('expires_at', '>', now());
-                    });
+            ->where(function ($q) {
+                $q->whereNull('expires_at')
+                    ->orWhere('expires_at', '>', now());
+            });
     }
 }

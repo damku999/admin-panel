@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
-use App\Models\CustomerInsurance;
-use Spatie\Activitylog\LogOptions;
 use App\Traits\TableRecordObserver;
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Notifications\Notifiable;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * App\Models\FuelType
@@ -34,6 +33,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property-read int|null $permissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|FuelType newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|FuelType newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|FuelType onlyTrashed()
@@ -52,15 +52,20 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @method static \Illuminate\Database\Eloquent\Builder|FuelType withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|FuelType withoutTrashed()
  * @method static \Database\Factories\FuelTypeFactory factory($count = null, $state = [])
+ *
  * @mixin \Eloquent
  */
 class FuelType extends Authenticatable
 {
-    use  HasFactory, Notifiable, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
+    use HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes, TableRecordObserver;
+
     protected static $logAttributes = ['*'];
+
     protected static $logOnlyDirty = true;
+
     /**
      * The attributes that are mass assignable.
+     *
      * @var array<int, string>
      */
     protected $fillable = [
@@ -71,6 +76,7 @@ class FuelType extends Authenticatable
     {
         return $this->hasMany(CustomerInsurance::class, 'fuel_type_id');
     }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults();

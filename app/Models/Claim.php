@@ -45,7 +45,7 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class Claim extends Model
 {
-    use HasApiTokens, HasFactory, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity, WhatsAppApiTrait;
+    use HasApiTokens, HasFactory, HasRoles, LogsActivity, SoftDeletes, TableRecordObserver, WhatsAppApiTrait;
 
     protected $fillable = [
         'claim_number',
@@ -69,6 +69,7 @@ class Claim extends Model
     ];
 
     protected static $logAttributes = ['*'];
+
     protected static $logOnlyDirty = true;
 
     /**
@@ -133,7 +134,7 @@ class Claim extends Model
             ->first();
 
         if ($lastClaim) {
-            $lastNumber = (int)substr($lastClaim->claim_number, -4);
+            $lastNumber = (int) substr($lastClaim->claim_number, -4);
             $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         } else {
             $newNumber = '0001';
@@ -257,6 +258,7 @@ class Claim extends Model
         }
 
         $submittedDocs = $this->documents()->where('is_submitted', true)->count();
+
         return round(($submittedDocs / $totalDocs) * 100, 2);
     }
 
@@ -283,7 +285,7 @@ class Claim extends Model
      */
     public function getWhatsAppNumber(): string
     {
-        return !empty($this->whatsapp_number) ? $this->whatsapp_number : $this->customer->mobile_number;
+        return ! empty($this->whatsapp_number) ? $this->whatsapp_number : $this->customer->mobile_number;
     }
 
     /**
@@ -291,7 +293,7 @@ class Claim extends Model
      */
     public function getHealthInsuranceDocumentListMessage(): string
     {
-        return "For health Insurance - Kindly provide below mention details for Claim intimation
+        return 'For health Insurance - Kindly provide below mention details for Claim intimation
 
 1. Patient Name
 2. Policy No
@@ -305,10 +307,10 @@ class Claim extends Model
 10. Approx Cost
 
 Best regards,
-Parth Rawal
-https://parthrawal.in
-Your Trusted Insurance Advisor
-\"Think of Insurance, Think of Us.\"";
+'.company_advisor_name().'
+'.company_website().'
+'.company_title().'
+"'.company_tagline().'"';
     }
 
     /**
@@ -316,7 +318,7 @@ Your Trusted Insurance Advisor
      */
     public function getVehicleInsuranceDocumentListMessage(): string
     {
-        return "For Vehicle/Truck Insurance - Kindly provide below mention details for Claim intimation
+        return 'For Vehicle/Truck Insurance - Kindly provide below mention details for Claim intimation
 
 1. Claim form duly Signed
 2. Policy Copy
@@ -340,10 +342,10 @@ Your Trusted Insurance Advisor
 20. How accident Happened?
 
 Best regards,
-Parth Rawal
-https://parthrawal.in
-Your Trusted Insurance Advisor
-\"Think of Insurance, Think of Us.\"";
+'.company_advisor_name().'
+'.company_website().'
+'.company_title().'
+"'.company_tagline().'"';
     }
 
     /**
@@ -354,22 +356,22 @@ Your Trusted Insurance Advisor
         $pendingDocuments = $this->documents()->where('is_submitted', false)->get();
 
         if ($pendingDocuments->isEmpty()) {
-            return "All documents have been received for your claim. Thank you for your cooperation.";
+            return 'All documents have been received for your claim. Thank you for your cooperation.';
         }
 
         $message = "Below are the Documents pending from your side, Send it urgently for hassle free claim service\n\n";
 
         $counter = 1;
         foreach ($pendingDocuments as $document) {
-            $message .= $counter . ". " . $document->document_name . "\n";
+            $message .= $counter.'. '.$document->document_name."\n";
             $counter++;
         }
 
         $message .= "\nBest regards,
-Parth Rawal
-https://parthrawal.in
-Your Trusted Insurance Advisor
-\"Think of Insurance, Think of Us.\"";
+".company_advisor_name().'
+'.company_website().'
+'.company_title().'
+"'.company_tagline().'"';
 
         return $message;
     }
@@ -384,10 +386,10 @@ Your Trusted Insurance Advisor
         return "Dear customer your Claim Number {$this->claim_number} is generated against your vehicle number {$vehicleNumber}. For further assistance kindly contact me.
 
 Best regards,
-Parth Rawal
-https://parthrawal.in
-Your Trusted Insurance Advisor
-\"Think of Insurance, Think of Us.\"";
+".company_advisor_name().'
+'.company_website().'
+'.company_title().'
+"'.company_tagline().'"';
     }
 
     /**
@@ -401,16 +403,12 @@ Your Trusted Insurance Advisor
                 ? 'document_request_health'
                 : 'document_request_vehicle';
 
-            // Prepare template data
-            $templateData = [
-                'advisor_name' => 'Parth Rawal',
-                'company_website' => 'https://parthrawal.in',
-            ];
+            // Try to get message from template, fallback to hardcoded
+            $templateService = app(\App\Services\TemplateService::class);
+            $message = $templateService->renderFromClaim($notificationTypeCode, 'whatsapp', $this);
 
-            // Try template first, fallback to old method
-            $message = $this->getMessageFromTemplate($notificationTypeCode, $templateData);
-
-            if (!$message) {
+            if (! $message) {
+                // Fallback to old hardcoded message
                 $message = $this->insurance_type === 'Health'
                     ? $this->getHealthInsuranceDocumentListMessage()
                     : $this->getVehicleInsuranceDocumentListMessage();
@@ -421,13 +419,13 @@ Your Trusted Insurance Advisor
             return [
                 'success' => true,
                 'message' => 'Document list sent via WhatsApp successfully',
-                'response' => $response
+                'response' => $response,
             ];
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'message' => 'Failed to send WhatsApp message: ' . $e->getMessage(),
-                'response' => null
+                'message' => 'Failed to send WhatsApp message: '.$e->getMessage(),
+                'response' => null,
             ];
         }
     }
@@ -438,31 +436,12 @@ Your Trusted Insurance Advisor
     public function sendPendingDocumentsWhatsApp(): array
     {
         try {
-            // Get pending documents list
-            $pendingDocuments = $this->documents()->where('is_submitted', false)->get();
-            $documentsList = '';
+            // Try to get message from template, fallback to hardcoded
+            $templateService = app(\App\Services\TemplateService::class);
+            $message = $templateService->renderFromClaim('document_request_reminder', 'whatsapp', $this);
 
-            if ($pendingDocuments->isNotEmpty()) {
-                $counter = 1;
-                foreach ($pendingDocuments as $document) {
-                    $documentsList .= $counter . ". " . $document->document_name . "\n";
-                    $counter++;
-                }
-            } else {
-                $documentsList = "No pending documents";
-            }
-
-            // Prepare template data
-            $templateData = [
-                'pending_documents_list' => $documentsList,
-                'advisor_name' => 'Parth Rawal',
-                'company_website' => 'https://parthrawal.in',
-            ];
-
-            // Try template first, fallback to old method
-            $message = $this->getMessageFromTemplate('document_request_reminder', $templateData);
-
-            if (!$message) {
+            if (! $message) {
+                // Fallback to old hardcoded message
                 $message = $this->getPendingDocumentsMessage();
             }
 
@@ -471,13 +450,13 @@ Your Trusted Insurance Advisor
             return [
                 'success' => true,
                 'message' => 'Pending documents reminder sent via WhatsApp successfully',
-                'response' => $response
+                'response' => $response,
             ];
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'message' => 'Failed to send WhatsApp message: ' . $e->getMessage(),
-                'response' => null
+                'message' => 'Failed to send WhatsApp message: '.$e->getMessage(),
+                'response' => null,
             ];
         }
     }
@@ -492,22 +471,16 @@ Your Trusted Insurance Advisor
                 return [
                     'success' => false,
                     'message' => 'Cannot send claim number notification - claim number not set',
-                    'response' => null
+                    'response' => null,
                 ];
             }
 
-            // Prepare template data
-            $templateData = [
-                'claim_number' => $this->claim_number,
-                'vehicle_number' => $this->customerInsurance->registration_no ?? 'N/A',
-                'advisor_name' => 'Parth Rawal',
-                'company_website' => 'https://parthrawal.in',
-            ];
+            // Try to get message from template, fallback to hardcoded
+            $templateService = app(\App\Services\TemplateService::class);
+            $message = $templateService->renderFromClaim('claim_registered', 'whatsapp', $this);
 
-            // Try template first, fallback to old method
-            $message = $this->getMessageFromTemplate('claim_registered', $templateData);
-
-            if (!$message) {
+            if (! $message) {
+                // Fallback to old hardcoded message
                 $message = $this->getClaimNumberNotificationMessage();
             }
 
@@ -516,13 +489,13 @@ Your Trusted Insurance Advisor
             return [
                 'success' => true,
                 'message' => 'Claim number notification sent via WhatsApp successfully',
-                'response' => $response
+                'response' => $response,
             ];
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'message' => 'Failed to send WhatsApp message: ' . $e->getMessage(),
-                'response' => null
+                'message' => 'Failed to send WhatsApp message: '.$e->getMessage(),
+                'response' => null,
             ];
         }
     }
@@ -537,30 +510,30 @@ Your Trusted Insurance Advisor
 
 Your claim {$this->claim_number} status has been updated to: *{$stageName}*";
 
-            if (!empty($notes)) {
+            if (! empty($notes)) {
                 $message .= "\n\nNotes: {$notes}";
             }
 
             $message .= "\n\nFor further assistance, please contact us.
 
 Best regards,
-Parth Rawal
-https://parthrawal.in
-Your Trusted Insurance Advisor
-\"Think of Insurance, Think of Us.\"";
+".company_advisor_name().'
+'.company_website().'
+'.company_title().'
+"'.company_tagline().'"';
 
             $response = $this->whatsAppSendMessage($message, $this->getWhatsAppNumber());
 
             return [
                 'success' => true,
                 'message' => 'Stage update sent via WhatsApp successfully',
-                'response' => $response
+                'response' => $response,
             ];
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'message' => 'Failed to send WhatsApp message: ' . $e->getMessage(),
-                'response' => null
+                'message' => 'Failed to send WhatsApp message: '.$e->getMessage(),
+                'response' => null,
             ];
         }
     }
@@ -571,11 +544,11 @@ Your Trusted Insurance Advisor
     public function sendEmailNotification(string $type, array $additionalData = []): array
     {
         try {
-            if (!$this->send_email_notifications) {
+            if (! $this->send_email_notifications) {
                 return [
                     'success' => true,
                     'message' => 'Email notifications disabled for this claim',
-                    'sent' => false
+                    'sent' => false,
                 ];
             }
 
@@ -583,20 +556,21 @@ Your Trusted Insurance Advisor
                 return [
                     'success' => false,
                     'message' => 'No email address found for customer',
-                    'sent' => false
+                    'sent' => false,
                 ];
             }
 
             // Check if email notifications are enabled
-            if (!is_email_notification_enabled()) {
+            if (! is_email_notification_enabled()) {
                 \Log::info('Email notification skipped (disabled in settings)', [
                     'claim_id' => $this->id,
                     'type' => $type,
                 ]);
+
                 return [
                     'success' => false,
                     'message' => 'Email notifications are disabled',
-                    'sent' => false
+                    'sent' => false,
                 ];
             }
 
@@ -605,13 +579,13 @@ Your Trusted Insurance Advisor
             return [
                 'success' => true,
                 'message' => 'Email notification sent successfully',
-                'sent' => true
+                'sent' => true,
             ];
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'message' => 'Failed to send email notification: ' . $e->getMessage(),
-                'sent' => false
+                'message' => 'Failed to send email notification: '.$e->getMessage(),
+                'sent' => false,
             ];
         }
     }
@@ -663,7 +637,7 @@ Your Trusted Insurance Advisor
             ->toArray();
 
         $this->sendEmailNotification('document_request', [
-            'pending_documents' => $pendingDocuments
+            'pending_documents' => $pendingDocuments,
         ]);
     }
 
@@ -673,7 +647,7 @@ Your Trusted Insurance Advisor
     public function sendClaimClosureNotification(?string $reason = null): void
     {
         $this->sendEmailNotification('claim_closed', [
-            'closure_reason' => $reason
+            'closure_reason' => $reason,
         ]);
     }
 }

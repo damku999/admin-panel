@@ -34,7 +34,7 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class ClaimDocument extends Model
 {
-    use HasApiTokens, HasFactory, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
+    use HasApiTokens, HasFactory, HasRoles, LogsActivity, SoftDeletes, TableRecordObserver;
 
     protected $fillable = [
         'claim_id',
@@ -57,6 +57,7 @@ class ClaimDocument extends Model
     ];
 
     protected static $logAttributes = ['*'];
+
     protected static $logOnlyDirty = true;
 
     /**
@@ -136,7 +137,7 @@ class ClaimDocument extends Model
      */
     public function hasFile(): bool
     {
-        return !empty($this->document_path) && file_exists(storage_path('app/public/' . $this->document_path));
+        return ! empty($this->document_path) && file_exists(storage_path('app/public/'.$this->document_path));
     }
 
     /**
@@ -144,6 +145,6 @@ class ClaimDocument extends Model
      */
     public function getDocumentUrl(): ?string
     {
-        return $this->document_path ? asset('storage/' . $this->document_path) : null;
+        return $this->document_path ? asset('storage/'.$this->document_path) : null;
     }
 }

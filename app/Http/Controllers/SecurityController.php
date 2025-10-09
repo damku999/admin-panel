@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Services\AuditService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\View\View;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\View\View;
 
 class SecurityController extends Controller
 {
@@ -36,7 +36,7 @@ class SecurityController extends Controller
     {
         $filters = $request->only([
             'event', 'event_category', 'risk_level', 'is_suspicious',
-            'ip_address', 'actor_id', 'actor_type', 'date_from', 'date_to', 'search'
+            'ip_address', 'actor_id', 'actor_type', 'date_from', 'date_to', 'search',
         ]);
 
         $logs = $this->auditService->searchLogs($filters, 25);
@@ -54,7 +54,7 @@ class SecurityController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $metrics
+            'data' => $metrics,
         ]);
     }
 
@@ -70,7 +70,7 @@ class SecurityController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $activity
+            'data' => $activity,
         ]);
     }
 
@@ -86,7 +86,7 @@ class SecurityController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $activity
+            'data' => $activity,
         ]);
     }
 
@@ -102,7 +102,7 @@ class SecurityController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $activity
+            'data' => $activity,
         ]);
     }
 
@@ -114,10 +114,10 @@ class SecurityController extends Controller
         $entityType = $request->input('entity_type');
         $days = $request->input('days', 30);
 
-        if (!$entityType) {
+        if (! $entityType) {
             return response()->json([
                 'success' => false,
-                'message' => 'Entity type is required'
+                'message' => 'Entity type is required',
             ], 400);
         }
 
@@ -125,7 +125,7 @@ class SecurityController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $activity
+            'data' => $activity,
         ]);
     }
 
@@ -139,7 +139,7 @@ class SecurityController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $report
+            'data' => $report,
         ]);
     }
 
@@ -150,13 +150,13 @@ class SecurityController extends Controller
     {
         $filters = $request->only([
             'event', 'event_category', 'risk_level', 'is_suspicious',
-            'ip_address', 'actor_id', 'actor_type', 'date_from', 'date_to', 'search'
+            'ip_address', 'actor_id', 'actor_type', 'date_from', 'date_to', 'search',
         ]);
 
         $format = $request->input('format', 'csv');
         $data = $this->auditService->exportLogs($filters, $format);
 
-        $filename = 'audit-logs-' . now()->format('Y-m-d-H-i-s') . '.' . $format;
+        $filename = 'audit-logs-'.now()->format('Y-m-d-H-i-s').'.'.$format;
         $contentType = $format === 'json' ? 'application/json' : 'text/csv';
 
         return response($data, 200, [
@@ -182,7 +182,7 @@ class SecurityController extends Controller
         return response()->json([
             'success' => true,
             'data' => $alerts,
-            'timestamp' => now()->toISOString()
+            'timestamp' => now()->toISOString(),
         ]);
     }
 
@@ -194,7 +194,7 @@ class SecurityController extends Controller
         $period = $request->input('period', '24h');
 
         $days = match ($period) {
-            '1h' => 1/24,
+            '1h' => 1 / 24,
             '24h' => 1,
             '7d' => 7,
             '30d' => 30,
@@ -216,7 +216,7 @@ class SecurityController extends Controller
                     : 0,
             ],
             'period' => $period,
-            'timestamp' => now()->toISOString()
+            'timestamp' => now()->toISOString(),
         ]);
     }
 }

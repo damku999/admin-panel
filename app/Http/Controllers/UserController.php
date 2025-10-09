@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\Services\UserServiceInterface;
 use App\Models\User;
 use App\Traits\ExportableTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Contracts\Services\UserServiceInterface;
 
 /**
  * User Controller
@@ -25,34 +24,39 @@ class UserController extends AbstractBaseCrudController
         $this->setupPermissionMiddleware('user');
     }
 
-
     /**
      * List User
-     * @param Request $request
+     *
      * @return View
+     *
      * @author Darshan Baraiya
      */
     public function index(Request $request)
     {
         $users = $this->userService->getUsers($request);
+
         return view('users.index', ['users' => $users]);
     }
 
     /**
      * Create User
+     *
      * @return View
+     *
      * @author Darshan Baraiya
      */
     public function create()
     {
         $roles = $this->userService->getRoles();
+
         return view('users.add', ['roles' => $roles]);
     }
 
     /**
      * Store User
-     * @param Request $request
+     *
      * @return \Illuminate\View\View Users
+     *
      * @author Darshan Baraiya
      */
     public function store(Request $request)
@@ -74,27 +78,29 @@ class UserController extends AbstractBaseCrudController
                 $this->getSuccessMessage('User', 'created'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(
-                $this->getErrorMessage('User', 'create') . ': ' . $th->getMessage())
+                $this->getErrorMessage('User', 'create').': '.$th->getMessage())
                 ->withInput();
         }
     }
 
     /**
      * Update Status Of User
-     * @param int $user_id
-     * @param int $status
+     *
+     * @param  int  $user_id
+     * @param  int  $status
      * @return \Illuminate\Http\RedirectResponse Page With Success
+     *
      * @author Darshan Baraiya
      */
     public function updateStatus($user_id, $status)
     {
         // Validation
         $validate = Validator::make([
-            'user_id'   => $user_id,
-            'status'    => $status
+            'user_id' => $user_id,
+            'status' => $status,
         ], [
-            'user_id'   =>  'required|exists:users,id',
-            'status'    =>  'required|in:0,1',
+            'user_id' => 'required|exists:users,id',
+            'status' => 'required|in:0,1',
         ]);
 
         // If Validations Fails
@@ -110,30 +116,32 @@ class UserController extends AbstractBaseCrudController
                 $this->getSuccessMessage('User status', 'updated'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(
-                $this->getErrorMessage('User status', 'update') . ': ' . $th->getMessage());
+                $this->getErrorMessage('User status', 'update').': '.$th->getMessage());
         }
     }
 
     /**
      * Edit User
-     * @param User $user
+     *
      * @return View
+     *
      * @author Darshan Baraiya
      */
     public function edit(User $user)
     {
         $roles = $this->userService->getRoles();
+
         return view('users.edit')->with([
             'roles' => $roles,
-            'user'  => $user
+            'user' => $user,
         ]);
     }
 
     /**
      * Update User
-     * @param Request $request
-     * @param User $user
+     *
      * @return \Illuminate\View\View Users
+     *
      * @author Darshan Baraiya
      */
     public function update(Request $request, User $user)
@@ -143,7 +151,7 @@ class UserController extends AbstractBaseCrudController
         $request->validate($validationRules);
 
         // Check if new password is not empty in the request
-        if (!empty($request->input('new_password'))) {
+        if (! empty($request->input('new_password'))) {
             $passwordRules = $this->userService->getPasswordValidationRules();
             $customMessages = [
                 'new_password.regex' => 'The new password format is invalid. It must contain at least one number, one special character, one uppercase letter, one lowercase letter, and be between 8 and 16 characters long.',
@@ -166,7 +174,7 @@ class UserController extends AbstractBaseCrudController
             $this->userService->assignRoles($user, [$request->role_id]);
 
             // Handle password change if provided
-            if (!empty($request->input('new_password'))) {
+            if (! empty($request->input('new_password'))) {
                 $this->userService->changePassword($user, $request->new_password);
             }
 
@@ -174,15 +182,16 @@ class UserController extends AbstractBaseCrudController
                 $this->getSuccessMessage('User', 'updated'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(
-                $this->getErrorMessage('User', 'update') . ': ' . $th->getMessage())
+                $this->getErrorMessage('User', 'update').': '.$th->getMessage())
                 ->withInput();
         }
     }
 
     /**
      * Delete User
-     * @param User $user
+     *
      * @return \Illuminate\Http\RedirectResponse Users
+     *
      * @author Darshan Baraiya
      */
     public function delete(User $user)
@@ -195,7 +204,7 @@ class UserController extends AbstractBaseCrudController
                 $this->getSuccessMessage('User', 'deleted'));
         } catch (\Throwable $th) {
             return $this->redirectWithError(
-                $this->getErrorMessage('User', 'delete') . ': ' . $th->getMessage());
+                $this->getErrorMessage('User', 'delete').': '.$th->getMessage());
         }
     }
 
@@ -219,7 +228,7 @@ class UserController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
             'headings' => ['ID', 'First Name', 'Last Name', 'Email', 'Mobile Number', 'Role', 'Status', 'Created Date'],
-            'mapping' => function($model) {
+            'mapping' => function ($model) {
                 return [
                     $model->id,
                     $model->first_name,
@@ -228,10 +237,10 @@ class UserController extends AbstractBaseCrudController
                     $model->mobile_number ?? 'N/A',
                     $model->roles->first()->name ?? 'N/A',
                     $model->status ? 'Active' : 'Inactive',
-                    $model->created_at->format('Y-m-d H:i:s')
+                    $model->created_at->format('Y-m-d H:i:s'),
                 ];
             },
-            'with_mapping' => true
+            'with_mapping' => true,
         ];
     }
 }

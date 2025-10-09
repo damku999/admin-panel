@@ -13,7 +13,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Quotation extends Model
 {
-    use HasFactory, TableRecordObserver, LogsActivity, SoftDeletes;
+    use HasFactory, LogsActivity, SoftDeletes, TableRecordObserver;
 
     protected $fillable = [
         'customer_id',
@@ -56,6 +56,7 @@ class Quotation extends Model
     ];
 
     protected static $logAttributes = ['*'];
+
     protected static $logOnlyDirty = true;
 
     protected static function boot(): void
@@ -65,12 +66,12 @@ class Quotation extends Model
         static::deleting(function (Quotation $quotation) {
             // Delete all related quotation companies
             $quotation->quotationCompanies()->delete();
-            
+
             // Clean up activity logs for this quotation and its companies
             \Spatie\Activitylog\Models\Activity::where('subject_type', Quotation::class)
                 ->where('subject_id', $quotation->id)
                 ->delete();
-                
+
             \Spatie\Activitylog\Models\Activity::where('subject_type', \App\Models\QuotationCompany::class)
                 ->whereIn('subject_id', $quotation->quotationCompanies()->pluck('id'))
                 ->delete();
@@ -109,11 +110,11 @@ class Quotation extends Model
 
     public function isVehicleInsurance(): bool
     {
-        return !empty($this->vehicle_number);
+        return ! empty($this->vehicle_number);
     }
 
     public function getQuoteReference(): string
     {
-        return 'QT/' . date('y') . '/' . str_pad($this->id, 8, '0', STR_PAD_LEFT);
+        return 'QT/'.date('y').'/'.str_pad($this->id, 8, '0', STR_PAD_LEFT);
     }
 }

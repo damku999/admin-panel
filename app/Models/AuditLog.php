@@ -65,7 +65,7 @@ class AuditLog extends Model
     public function scopeHighRisk($query)
     {
         return $query->where('risk_level', 'high')
-                    ->orWhere('risk_level', 'critical');
+            ->orWhere('risk_level', 'critical');
     }
 
     public function scopeSuspicious($query)

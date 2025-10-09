@@ -2,14 +2,13 @@
 
 use App\Models\Customer;
 use App\Models\CustomerInsurance;
-use App\Models\FamilyGroup;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 
 uses(RefreshDatabase::class);
 
 it('has correct fillable attributes', function () {
-    $customer = new Customer();
+    $customer = new Customer;
     $expectedFillable = [
         'name',
         'email',
@@ -33,7 +32,7 @@ it('has correct fillable attributes', function () {
         'email_verification_token',
         'password_reset_sent_at',
         'password_reset_token',
-        'password_reset_expires_at'
+        'password_reset_expires_at',
     ];
 
     expect($customer->getFillable())->toBe($expectedFillable);

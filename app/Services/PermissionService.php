@@ -56,7 +56,7 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
     public function getPermissionsByRole(int $roleId): Collection
     {
         $role = $this->roleRepository->findById($roleId);
-        if (!$role) {
+        if (! $role) {
             return collect();
         }
 
@@ -77,7 +77,7 @@ class PermissionService extends BaseService implements PermissionServiceInterfac
     {
         return $this->updateInTransaction(function () use ($roleId, $permissionIds) {
             $role = $this->roleRepository->findById($roleId);
-            if (!$role) {
+            if (! $role) {
                 return false;
             }
 

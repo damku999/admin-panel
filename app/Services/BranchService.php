@@ -45,9 +45,10 @@ class BranchService extends BaseService implements BranchServiceInterface
     {
         return $this->updateInTransaction(function () use ($branchId, $status) {
             $branch = $this->branchRepository->findById($branchId);
-            if (!$branch) {
+            if (! $branch) {
                 return false;
             }
+
             return $this->branchRepository->update($branch, ['status' => $status]);
         });
     }

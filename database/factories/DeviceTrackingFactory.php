@@ -19,7 +19,7 @@ class DeviceTrackingFactory extends Factory
         return [
             'trackable_type' => 'App\\Models\\User',
             'trackable_id' => User::factory(),
-            'device_id' => 'device_' . $this->faker->uuid(),
+            'device_id' => 'device_'.$this->faker->uuid(),
             'device_name' => $this->faker->randomElement(['My Laptop', 'My Phone', 'Office PC', 'Home Desktop']),
             'device_type' => $this->faker->randomElement($deviceTypes),
             'browser' => $this->faker->randomElement($browsers),

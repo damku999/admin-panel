@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 it('has correct fillable attributes', function () {
-    $broker = new Broker();
+    $broker = new Broker;
     $fillable = ['name', 'email', 'mobile_number', 'status'];
 
     expect($broker->getFillable())->toBe($fillable);
@@ -57,6 +57,6 @@ it('can toggle status', function () {
 it('validates email uniqueness', function () {
     Broker::factory()->create(['email' => 'unique@broker.com']);
 
-    expect(fn() => Broker::factory()->create(['email' => 'unique@broker.com']))
+    expect(fn () => Broker::factory()->create(['email' => 'unique@broker.com']))
         ->toThrow(\Illuminate\Database\QueryException::class);
 });

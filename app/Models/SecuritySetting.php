@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class SecuritySetting extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'settingable_type',
         'settingable_id',

@@ -71,12 +71,52 @@
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th width="20%">Key</th>
+                                <th width="20%">
+                                    <a href="{{ route('app-settings.index', array_merge(request()->all(), ['sort_by' => 'key', 'sort_order' => (request('sort_by') == 'key' && request('sort_order') == 'asc') ? 'desc' : 'asc'])) }}"
+                                       class="text-decoration-none text-dark d-flex justify-content-between align-items-center">
+                                        <span>Key</span>
+                                        @if(request('sort_by') == 'key')
+                                            <i class="fas fa-sort-{{ request('sort_order') == 'asc' ? 'up' : 'down' }}"></i>
+                                        @else
+                                            <i class="fas fa-sort text-muted"></i>
+                                        @endif
+                                    </a>
+                                </th>
                                 <th width="20%">Value</th>
-                                <th width="10%">Category</th>
-                                <th width="10%">Type</th>
+                                <th width="10%">
+                                    <a href="{{ route('app-settings.index', array_merge(request()->all(), ['sort_by' => 'category', 'sort_order' => (request('sort_by') == 'category' && request('sort_order') == 'asc') ? 'desc' : 'asc'])) }}"
+                                       class="text-decoration-none text-dark d-flex justify-content-between align-items-center">
+                                        <span>Category</span>
+                                        @if(request('sort_by') == 'category')
+                                            <i class="fas fa-sort-{{ request('sort_order') == 'asc' ? 'up' : 'down' }}"></i>
+                                        @else
+                                            <i class="fas fa-sort text-muted"></i>
+                                        @endif
+                                    </a>
+                                </th>
+                                <th width="10%">
+                                    <a href="{{ route('app-settings.index', array_merge(request()->all(), ['sort_by' => 'type', 'sort_order' => (request('sort_by') == 'type' && request('sort_order') == 'asc') ? 'desc' : 'asc'])) }}"
+                                       class="text-decoration-none text-dark d-flex justify-content-between align-items-center">
+                                        <span>Type</span>
+                                        @if(request('sort_by') == 'type')
+                                            <i class="fas fa-sort-{{ request('sort_order') == 'asc' ? 'up' : 'down' }}"></i>
+                                        @else
+                                            <i class="fas fa-sort text-muted"></i>
+                                        @endif
+                                    </a>
+                                </th>
                                 <th width="20%">Description</th>
-                                <th width="8%">Status</th>
+                                <th width="8%">
+                                    <a href="{{ route('app-settings.index', array_merge(request()->all(), ['sort_by' => 'is_active', 'sort_order' => (request('sort_by') == 'is_active' && request('sort_order') == 'asc') ? 'desc' : 'asc'])) }}"
+                                       class="text-decoration-none text-dark d-flex justify-content-between align-items-center">
+                                        <span>Status</span>
+                                        @if(request('sort_by') == 'is_active')
+                                            <i class="fas fa-sort-{{ request('sort_order') == 'asc' ? 'up' : 'down' }}"></i>
+                                        @else
+                                            <i class="fas fa-sort text-muted"></i>
+                                        @endif
+                                    </a>
+                                </th>
                                 <th width="12%">Action</th>
                             </tr>
                         </thead>
@@ -84,12 +124,14 @@
                             @forelse($settings as $setting)
                                 <tr>
                                     <td>
-                                        <span class="fw-bold text-primary">{{ $setting->key }}</span>
-                                        @if($setting->is_encrypted)
-                                            <span class="badge bg-warning text-dark ms-1" title="Encrypted">
-                                                <i class="fas fa-lock"></i>
-                                            </span>
-                                        @endif
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold text-primary" style="word-break: break-word;">{{ $setting->key }}</span>
+                                            @if($setting->is_encrypted)
+                                                <span class="badge bg-warning text-dark mt-1" style="width: fit-content;" title="Encrypted">
+                                                    <i class="fas fa-lock"></i> Encrypted
+                                                </span>
+                                            @endif
+                                        </div>
                                     </td>
                                     <td>
                                         @if($setting->is_encrypted)
@@ -122,7 +164,7 @@
                                             {{ ucfirst($setting->type) }}
                                         </span>
                                     </td>
-                                    <td>{{ Str::limit($setting->description, 40) }}</td>
+                                    <td style="word-break: break-word;">{{ $setting->description }}</td>
                                     <td>
                                         @if ($setting->is_active == 0)
                                             <span class="badge bg-danger text-white">Inactive</span>

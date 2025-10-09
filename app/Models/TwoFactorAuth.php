@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Crypt;
 class TwoFactorAuth extends Model
 {
     use HasFactory;
+
     protected $table = 'two_factor_auth';
 
     protected $fillable = [
@@ -68,13 +69,19 @@ class TwoFactorAuth extends Model
     {
         return Attribute::make(
             get: function ($value) {
-                if (!$value) return null;
+                if (! $value) {
+                    return null;
+                }
                 $codes = json_decode($value, true);
-                return array_map(fn($code) => Crypt::decryptString($code), $codes);
+
+                return array_map(fn ($code) => Crypt::decryptString($code), $codes);
             },
             set: function ($value) {
-                if (!$value) return null;
-                $encryptedCodes = array_map(fn($code) => Crypt::encryptString($code), $value);
+                if (! $value) {
+                    return null;
+                }
+                $encryptedCodes = array_map(fn ($code) => Crypt::encryptString($code), $value);
+
                 return json_encode($encryptedCodes);
             },
         );
@@ -98,7 +105,7 @@ class TwoFactorAuth extends Model
     {
         return $this->secret &&
                $this->enabled_at &&
-               !$this->confirmed_at;
+               ! $this->confirmed_at;
     }
 
     /**
@@ -130,27 +137,28 @@ class TwoFactorAuth extends Model
             'input_code' => $code,
             'upper_code' => $upperCode,
             'stored_codes' => $codes,
-            'codes_exist' => !empty($codes),
-            'code_in_array' => $codes ? in_array($upperCode, $codes) : false
+            'codes_exist' => ! empty($codes),
+            'code_in_array' => $codes ? in_array($upperCode, $codes) : false,
         ]);
 
-        if (!$codes || !in_array($upperCode, $codes)) {
+        if (! $codes || ! in_array($upperCode, $codes)) {
             \Log::warning('Recovery code verification failed', [
                 'input_code' => $code,
-                'codes_exist' => !empty($codes),
-                'available_codes_count' => $codes ? count($codes) : 0
+                'codes_exist' => ! empty($codes),
+                'available_codes_count' => $codes ? count($codes) : 0,
             ]);
+
             return false;
         }
 
         // Remove the used code
-        $codes = array_filter($codes, fn($c) => $c !== $upperCode);
+        $codes = array_filter($codes, fn ($c) => $c !== $upperCode);
         $this->recovery_codes = array_values($codes);
         $this->save();
 
         \Log::info('Recovery code used successfully', [
             'used_code' => $upperCode,
-            'remaining_codes' => count($this->recovery_codes)
+            'remaining_codes' => count($this->recovery_codes),
         ]);
 
         return true;
@@ -162,6 +170,7 @@ class TwoFactorAuth extends Model
     public function isValidRecoveryCode(string $code): bool
     {
         $codes = $this->recovery_codes;
+
         return $codes && in_array(strtoupper($code), $codes);
     }
 

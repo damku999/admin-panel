@@ -21,12 +21,12 @@ class CustomerAuditLog extends Model
         'user_agent',
         'session_id',
         'success',
-        'failure_reason'
+        'failure_reason',
     ];
 
     protected $casts = [
         'metadata' => 'array',
-        'success' => 'boolean'
+        'success' => 'boolean',
     ];
 
     public function customer(): BelongsTo
@@ -37,8 +37,8 @@ class CustomerAuditLog extends Model
     public static function logAction(string $action, ?string $description = null, array $metadata = []): void
     {
         $customer = auth('customer')->user();
-        
-        if (!$customer) {
+
+        if (! $customer) {
             return;
         }
 
@@ -50,15 +50,15 @@ class CustomerAuditLog extends Model
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'session_id' => session()->getId(),
-            'success' => true
+            'success' => true,
         ]);
     }
 
     public static function logPolicyAction(string $action, CustomerInsurance $policy, ?string $description = null, array $metadata = []): void
     {
         $customer = auth('customer')->user();
-        
-        if (!$customer) {
+
+        if (! $customer) {
             return;
         }
 
@@ -71,20 +71,20 @@ class CustomerAuditLog extends Model
             'metadata' => array_merge([
                 'policy_no' => $policy->policy_no,
                 'policy_holder' => $policy->customer->name,
-                'insurance_company' => $policy->insuranceCompany->name ?? 'Unknown'
+                'insurance_company' => $policy->insuranceCompany->name ?? 'Unknown',
             ], $metadata),
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
             'session_id' => session()->getId(),
-            'success' => true
+            'success' => true,
         ]);
     }
 
     public static function logFailure(string $action, string $reason, array $metadata = []): void
     {
         $customer = auth('customer')->user();
-        
-        if (!$customer) {
+
+        if (! $customer) {
             return;
         }
 
@@ -97,7 +97,7 @@ class CustomerAuditLog extends Model
             'user_agent' => request()->userAgent(),
             'session_id' => session()->getId(),
             'success' => false,
-            'failure_reason' => $reason
+            'failure_reason' => $reason,
         ]);
     }
 }

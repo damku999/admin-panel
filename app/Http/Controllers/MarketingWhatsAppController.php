@@ -24,7 +24,7 @@ class MarketingWhatsAppController extends AbstractBaseCrudController
         $this->marketingWhatsAppService = $marketingWhatsAppService;
         $this->setupCustomPermissionMiddleware([
             ['permission' => 'customer-list|customer-edit', 'only' => ['index', 'show']],
-            ['permission' => 'customer-edit', 'only' => ['send']]
+            ['permission' => 'customer-edit', 'only' => ['send']],
         ]);
     }
 
@@ -65,7 +65,7 @@ class MarketingWhatsAppController extends AbstractBaseCrudController
                 'recipients' => $request->recipients,
                 'selected_customers' => $request->selected_customers,
                 'image' => $request->file('image'),
-                'sent_by' => auth()->user()->id
+                'sent_by' => auth()->user()->id,
             ];
 
             // Call the service to send the marketing campaign
@@ -74,16 +74,18 @@ class MarketingWhatsAppController extends AbstractBaseCrudController
             // Generate appropriate success/error messages based on the result
             if ($result['failed_count'] > 0) {
                 $message = "Messages sent with some issues. Successfully sent to {$result['success_count']} out of {$result['total_customers']} customers.";
+
                 return $this->redirectWithSuccess('marketing.whatsapp.index', $message)
                     ->with('marketing_result', $result);
             } else {
                 $message = "All marketing messages sent successfully! Sent to {$result['success_count']} customers.";
+
                 return $this->redirectWithSuccess('marketing.whatsapp.index', $message)
                     ->with('marketing_result', $result);
             }
 
         } catch (\Exception $e) {
-            return $this->redirectWithError('Failed to send marketing messages: ' . $e->getMessage())
+            return $this->redirectWithError('Failed to send marketing messages: '.$e->getMessage())
                 ->withInput();
         }
     }

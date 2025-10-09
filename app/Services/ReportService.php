@@ -5,14 +5,12 @@ namespace App\Services;
 use App\Contracts\Services\ReportServiceInterface;
 use App\Exports\CrossSellingExport;
 use App\Exports\CustomerInsurancesExport1;
-use App\Models\Branch;
 use App\Models\Broker;
 use App\Models\Customer;
 use App\Models\FuelType;
 use App\Models\InsuranceCompany;
 use App\Models\PolicyType;
 use App\Models\PremiumType;
-use App\Models\ReferenceUser;
 use App\Models\RelationshipManager;
 use App\Models\Report;
 use Illuminate\Support\Carbon;
@@ -21,9 +19,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ReportService implements ReportServiceInterface
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * Get initial data for reports page with comprehensive filter options
@@ -49,7 +45,7 @@ class ReportService implements ReportServiceInterface
     public function generateCrossSellingReport(array $parameters): array
     {
         $premiumTypes = PremiumType::select('id', 'name');
-        if (!empty($parameters['premium_type_id'])) {
+        if (! empty($parameters['premium_type_id'])) {
             $premiumTypes = $premiumTypes->whereIn('id', $parameters['premium_type_id']);
         }
         $premiumTypes = $premiumTypes->get();
@@ -58,9 +54,9 @@ class ReportService implements ReportServiceInterface
         $hasDateFilter = false;
 
         // Apply comprehensive filters matching Excel export exactly
-        if (!empty($parameters['issue_start_date']) || !empty($parameters['issue_end_date'])) {
+        if (! empty($parameters['issue_start_date']) || ! empty($parameters['issue_end_date'])) {
             $customer_obj = $customer_obj->whereHas('insurance', function ($query) use ($parameters) {
-                if (!empty($parameters['issue_start_date'])) {
+                if (! empty($parameters['issue_start_date'])) {
                     try {
                         $startDate = Carbon::createFromFormat('d/m/Y', $parameters['issue_start_date'])->format('Y-m-d');
                         $query->where('start_date', '>=', $startDate);
@@ -68,7 +64,7 @@ class ReportService implements ReportServiceInterface
                         $query->where('start_date', '>=', $parameters['issue_start_date']);
                     }
                 }
-                if (!empty($parameters['issue_end_date'])) {
+                if (! empty($parameters['issue_end_date'])) {
                     try {
                         $endDate = Carbon::createFromFormat('d/m/Y', $parameters['issue_end_date'])->format('Y-m-d');
                         $query->where('start_date', '<=', $endDate);
@@ -79,27 +75,27 @@ class ReportService implements ReportServiceInterface
             });
             $hasDateFilter = true;
         }
-        
+
         // Business entity filters
-        if (!empty($parameters['broker_id'])) {
+        if (! empty($parameters['broker_id'])) {
             $customer_obj = $customer_obj->whereHas('insurance', function ($query) use ($parameters) {
                 $query->where('broker_id', $parameters['broker_id']);
             });
         }
-        
-        if (!empty($parameters['relationship_manager_id'])) {
+
+        if (! empty($parameters['relationship_manager_id'])) {
             $customer_obj = $customer_obj->whereHas('insurance', function ($query) use ($parameters) {
                 $query->where('relationship_manager_id', $parameters['relationship_manager_id']);
             });
         }
-        
-        if (!empty($parameters['insurance_company_id'])) {
+
+        if (! empty($parameters['insurance_company_id'])) {
             $customer_obj = $customer_obj->whereHas('insurance', function ($query) use ($parameters) {
                 $query->where('insurance_company_id', $parameters['insurance_company_id']);
             });
         }
-        
-        if (!empty($parameters['customer_id'])) {
+
+        if (! empty($parameters['customer_id'])) {
             $customer_obj = $customer_obj->where('id', $parameters['customer_id']);
         }
 
@@ -109,7 +105,7 @@ class ReportService implements ReportServiceInterface
         $results = $customers->map(function ($customer) use ($premiumTypes, $oneYearAgo, $hasDateFilter) {
             $customerData = ['Customer Name' => $customer->name];
 
-            if (!$hasDateFilter) {
+            if (! $hasDateFilter) {
                 $customerData['Total Premium (Last Year)'] = number_format($customer->insurance
                     ->where('start_date', '>=', $oneYearAgo)
                     ->sum('final_premium_with_gst'), 2);
@@ -134,7 +130,7 @@ class ReportService implements ReportServiceInterface
 
                 // Flatten the data for table display
                 $customerData[$premiumType->name] = $hasPremiumType ? 'Yes' : 'No';
-                $customerData[$premiumType->name . ' (Sum Insured)'] = '₹' . number_format($premiumTotal, 2);
+                $customerData[$premiumType->name.' (Sum Insured)'] = '₹'.number_format($premiumTotal, 2);
             }
 
             return $customerData;
@@ -152,11 +148,11 @@ class ReportService implements ReportServiceInterface
     public function generateCustomerInsuranceReport(array $parameters): array
     {
         $result = Report::getInsuranceReport($parameters);
-        
-        if (!$result || $result->isEmpty()) {
+
+        if (! $result || $result->isEmpty()) {
             return [];
         }
-        
+
         // Convert the collection to array format expected by the view
         $reportData = $result->map(function ($customerInsurance) {
             return [
@@ -178,35 +174,43 @@ class ReportService implements ReportServiceInterface
                 'commission_on' => $customerInsurance->commission_on ?? 0,
             ];
         });
-        
+
         // Apply intelligent sorting for due policy reports
         if (isset($parameters['report_name']) && $parameters['report_name'] === 'due_policy_detail') {
             $reportData = $reportData->sort(function ($a, $b) {
                 $dateA = $a['expired_date'] ?? null;
                 $dateB = $b['expired_date'] ?? null;
-                
+
                 // Handle cases where dates might be null or 'N/A'
-                if (!$dateA || $dateA === 'N/A') return 1;  // Put at end
-                if (!$dateB || $dateB === 'N/A') return -1; // Put at end
-                
+                if (! $dateA || $dateA === 'N/A') {
+                    return 1;
+                }  // Put at end
+                if (! $dateB || $dateB === 'N/A') {
+                    return -1;
+                } // Put at end
+
                 $expiryA = Carbon::parse($dateA);
                 $expiryB = Carbon::parse($dateB);
                 $now = Carbon::now();
-                
+
                 $isExpiredA = $expiryA->isPast();
                 $isExpiredB = $expiryB->isPast();
-                
+
                 // Priority 1: Expired policies first
-                if ($isExpiredA && !$isExpiredB) return -1; // A is expired, B is not - A comes first
-                if (!$isExpiredA && $isExpiredB) return 1;  // B is expired, A is not - B comes first
-                
+                if ($isExpiredA && ! $isExpiredB) {
+                    return -1;
+                } // A is expired, B is not - A comes first
+                if (! $isExpiredA && $isExpiredB) {
+                    return 1;
+                }  // B is expired, A is not - B comes first
+
                 // Priority 2: Among expired policies, oldest expiry first (EXPIRED 42 days ago before EXPIRED 8 days ago)
                 // Priority 3: Among active policies, soonest expiry first (8 days remaining before 16 days remaining)
                 // Both cases: DUE DATE ASC
                 return $expiryA->timestamp <=> $expiryB->timestamp; // Always ascending by expiry date
             });
         }
-        
+
         return $reportData->values()->toArray(); // Re-index array after sorting
     }
 
@@ -216,6 +220,7 @@ class ReportService implements ReportServiceInterface
     public function exportCrossSellingReport(array $parameters): BinaryFileResponse
     {
         $timestamp = date('Y-m-d_H-i-s');
+
         return Excel::download(new CrossSellingExport($parameters), "cross_selling_report_{$timestamp}.xlsx");
     }
 
@@ -228,7 +233,7 @@ class ReportService implements ReportServiceInterface
         $reportName = $parameters['report_name'] ?? 'customer_insurances';
         $timestamp = date('Y-m-d_H-i-s');
 
-        $filename = match($reportName) {
+        $filename = match ($reportName) {
             'insurance_detail' => "insurance_detail_report_{$timestamp}.xlsx",
             'due_policy_detail' => "due_policy_report_{$timestamp}.xlsx",
             default => "customer_insurances_{$timestamp}.xlsx"
@@ -292,7 +297,7 @@ class ReportService implements ReportServiceInterface
 
             $premiumTotal = $customer->insurance
                 ->where('premium_type_id', $premiumType->id)
-                ->when(!$hasDateFilter, function ($query) use ($oneYearAgo) {
+                ->when(! $hasDateFilter, function ($query) use ($oneYearAgo) {
                     return $query->where('start_date', '>=', $oneYearAgo);
                 })
                 ->sum('final_premium_with_gst');
@@ -301,7 +306,7 @@ class ReportService implements ReportServiceInterface
 
             $customerData['actual_earnings_last_year'] = $customerData['actual_earnings_last_year'] + $customer->insurance
                 ->where('premium_type_id', $premiumType->id)
-                ->when(!$hasDateFilter, function ($query) use ($oneYearAgo) {
+                ->when(! $hasDateFilter, function ($query) use ($oneYearAgo) {
                     return $query->where('actual_earnings', '>=', $oneYearAgo);
                 })
                 ->sum('actual_earnings');

@@ -23,15 +23,11 @@ class ClaimService extends BaseService implements ClaimServiceInterface
 {
     /**
      * Claim Repository instance
-     *
-     * @var ClaimRepositoryInterface
      */
     private ClaimRepositoryInterface $claimRepository;
 
     /**
      * Constructor
-     *
-     * @param ClaimRepositoryInterface $claimRepository
      */
     public function __construct(ClaimRepositoryInterface $claimRepository)
     {
@@ -39,7 +35,17 @@ class ClaimService extends BaseService implements ClaimServiceInterface
     }
 
     /**
-     * Get paginated list of claims with filters and search.
+     * Retrieve paginated claims with filtering and search capabilities.
+     *
+     * Fetches claims list with support for multiple filter dimensions
+     * delegated to repository layer:
+     * - Search: Claim number, customer name, policy details
+     * - Status: Active/inactive claims filtering
+     * - Date ranges: Claim date, settlement date filtering
+     * - Insurance type: Vehicle, Health, Property filtering
+     *
+     * @param  Request  $request  HTTP request with filter and pagination parameters
+     * @return LengthAwarePaginator  Paginated claims with customer and insurance relationships
      */
     public function getClaims(Request $request): LengthAwarePaginator
     {
@@ -47,7 +53,29 @@ class ClaimService extends BaseService implements ClaimServiceInterface
     }
 
     /**
-     * Create a new claim.
+     * Create a new insurance claim with automated setup workflow.
+     *
+     * This method orchestrates comprehensive claim creation within a transaction:
+     * 1. Fetches customer insurance and extracts customer_id
+     * 2. Generates unique claim number (auto-incremented)
+     * 3. Sets WhatsApp number from customer if not provided
+     * 4. Creates claim record with validated data
+     * 5. Creates default document checklist based on insurance type:
+     *    - Vehicle: FIR, Survey Report, RC Book, Driving License, etc.
+     *    - Health: Discharge Summary, Bills, Reports, ID Proof, etc.
+     * 6. Creates initial claim stage ("Claim Registered")
+     * 7. Creates liability detail record with appropriate claim type:
+     *    - Health insurance → Cashless by default
+     *    - Other types → Reimbursement by default
+     * 8. Sends claim creation notification email (after transaction)
+     *
+     * Transaction ensures claim, documents, stage, and liability are created atomically.
+     *
+     * @param  StoreClaimRequest  $request  Validated claim creation request
+     * @return Claim  Newly created claim with all relationships loaded
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException  If insurance not found
+     * @throws \Illuminate\Database\QueryException  On database constraint violations
      */
     public function createClaim(StoreClaimRequest $request): Claim
     {
@@ -97,7 +125,27 @@ class ClaimService extends BaseService implements ClaimServiceInterface
     }
 
     /**
-     * Update an existing claim.
+     * Update an existing insurance claim with relationship synchronization.
+     *
+     * This method handles claim updates within a transaction:
+     * 1. If customer_insurance_id changed:
+     *    - Fetches new insurance with customer relationship
+     *    - Updates customer_id to maintain data consistency
+     * 2. Sets WhatsApp number from new customer if not provided
+     * 3. Updates claim record with validated data
+     * 4. Synchronizes liability detail claim_type if insurance_type changed:
+     *    - Health → Cashless
+     *    - Other → Reimbursement
+     *
+     * Transaction ensures claim and liability detail updates are atomic,
+     * maintaining referential integrity across related records.
+     *
+     * @param  UpdateClaimRequest  $request  Validated claim update request
+     * @param  Claim  $claim  Claim instance to update
+     * @return bool  True on successful update
+     *
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException  If new insurance not found
+     * @throws \Illuminate\Database\QueryException  On database constraint violations
      */
     public function updateClaim(UpdateClaimRequest $request, Claim $claim): bool
     {
@@ -137,7 +185,17 @@ class ClaimService extends BaseService implements ClaimServiceInterface
     }
 
     /**
-     * Update claim status.
+     * Toggle claim active/inactive status.
+     *
+     * Updates the status field (0 = inactive, 1 = active) for soft-disabling
+     * claims without full deletion. Preserves claim history while removing
+     * from active claims lists. Logs all status changes for audit trail.
+     *
+     * @param  int  $claimId  Claim ID to update
+     * @param  bool  $status  New status (true = active, false = inactive)
+     * @return bool  True on successful update
+     *
+     * @throws \Exception  On database errors or if claim not found
      */
     public function updateClaimStatus(int $claimId, bool $status): bool
     {
@@ -166,7 +224,19 @@ class ClaimService extends BaseService implements ClaimServiceInterface
     }
 
     /**
-     * Delete a claim (soft delete).
+     * Soft delete a claim record.
+     *
+     * Performs Laravel soft delete (sets deleted_at timestamp) rather than
+     * hard deletion, preserving claim history for audit and reporting purposes.
+     * Soft-deleted claims are automatically excluded from standard queries
+     * but can be recovered if needed.
+     *
+     * Logs deletion for audit trail with claim number and user context.
+     *
+     * @param  Claim  $claim  Claim instance to soft delete
+     * @return bool  True on successful soft deletion
+     *
+     * @throws \Exception  On database errors
      */
     public function deleteClaim(Claim $claim): bool
     {
@@ -194,8 +264,26 @@ class ClaimService extends BaseService implements ClaimServiceInterface
     }
 
     /**
-     * Search for policies/insurances with wildcard functionality.
-     * This method provides the wildcard search for policy selection in the create form.
+     * Search active insurance policies with wildcard matching for claim creation.
+     *
+     * This method provides intelligent policy search for claim form autocomplete:
+     * - Searches across: policy number, registration number, customer name/email/mobile
+     * - Minimum 3 characters required to prevent excessive results
+     * - Returns only active policies (status = true)
+     * - Limits to 20 results for performance
+     * - Auto-suggests insurance type (Vehicle/Health) based on policy type keywords
+     *
+     * Each result includes:
+     * - Formatted display text with customer, policy, and company details
+     * - Customer contact information (name, email, mobile)
+     * - Policy identifiers (policy number, registration number)
+     * - Suggested insurance type for pre-filling claim form
+     *
+     * Critical for user experience: enables quick policy lookup during claim entry
+     * without requiring exact matches.
+     *
+     * @param  string  $searchTerm  Search query (min 3 characters)
+     * @return array  Array of matching policies with customer and insurance details
      */
     public function searchPolicies(string $searchTerm): array
     {
@@ -206,20 +294,20 @@ class ClaimService extends BaseService implements ClaimServiceInterface
         $policies = CustomerInsurance::with([
             'customer:id,name,email,mobile_number',
             'insuranceCompany:id,name',
-            'policyType:id,name'
+            'policyType:id,name',
         ])
-        ->where(function (Builder $query) use ($searchTerm) {
-            $query->where('policy_no', 'like', "%{$searchTerm}%")
-                  ->orWhere('registration_no', 'like', "%{$searchTerm}%")
-                  ->orWhereHas('customer', function (Builder $customerQuery) use ($searchTerm) {
-                      $customerQuery->where('name', 'like', "%{$searchTerm}%")
-                                   ->orWhere('email', 'like', "%{$searchTerm}%")
-                                   ->orWhere('mobile_number', 'like', "%{$searchTerm}%");
-                  });
-        })
-        ->where('status', true) // Only active policies
-        ->limit(20)
-        ->get();
+            ->where(function (Builder $query) use ($searchTerm) {
+                $query->where('policy_no', 'like', "%{$searchTerm}%")
+                    ->orWhere('registration_no', 'like', "%{$searchTerm}%")
+                    ->orWhereHas('customer', function (Builder $customerQuery) use ($searchTerm) {
+                        $customerQuery->where('name', 'like', "%{$searchTerm}%")
+                            ->orWhere('email', 'like', "%{$searchTerm}%")
+                            ->orWhere('mobile_number', 'like', "%{$searchTerm}%");
+                    });
+            })
+            ->where('status', true) // Only active policies
+            ->limit(20)
+            ->get();
 
         return $policies->map(function ($policy) {
             return [
@@ -288,7 +376,7 @@ class ClaimService extends BaseService implements ClaimServiceInterface
         }
 
         // If registration number exists, likely vehicle
-        if (!empty($policy->registration_no)) {
+        if (! empty($policy->registration_no)) {
             return 'Vehicle';
         }
 
@@ -297,7 +385,20 @@ class ClaimService extends BaseService implements ClaimServiceInterface
     }
 
     /**
-     * Get claim statistics for dashboard.
+     * Retrieve claim statistics for dashboard analytics.
+     *
+     * Fetches comprehensive claim metrics for dashboard display:
+     * - Total claims count
+     * - Claims by status (pending, approved, rejected, settled)
+     * - Claims by insurance type (Vehicle, Health, Property)
+     * - Recent claims activity
+     * - Settlement rate percentage
+     *
+     * Delegates to repository layer for optimized queries. Returns empty
+     * array on errors to prevent dashboard crashes, with error logging
+     * for troubleshooting.
+     *
+     * @return array  Statistics array with claim counts and percentages, empty on error
      */
     public function getClaimStatistics(): array
     {
@@ -309,6 +410,7 @@ class ClaimService extends BaseService implements ClaimServiceInterface
                 'error' => $e->getMessage(),
                 'user_id' => auth()->id(),
             ]);
+
             return [];
         }
     }

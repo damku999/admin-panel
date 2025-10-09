@@ -33,7 +33,7 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class ClaimStage extends Model
 {
-    use HasApiTokens, HasFactory, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
+    use HasApiTokens, HasFactory, HasRoles, LogsActivity, SoftDeletes, TableRecordObserver;
 
     protected $fillable = [
         'claim_id',
@@ -55,6 +55,7 @@ class ClaimStage extends Model
     ];
 
     protected static $logAttributes = ['*'];
+
     protected static $logOnlyDirty = true;
 
     /**

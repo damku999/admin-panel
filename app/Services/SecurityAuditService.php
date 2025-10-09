@@ -2,10 +2,9 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SecurityAuditService
 {
@@ -294,14 +293,14 @@ class SecurityAuditService
         $trends = [];
 
         // Analyze by hour of day
-        $hourlyDistribution = $events->groupBy(function($event) {
+        $hourlyDistribution = $events->groupBy(function ($event) {
             return Carbon::parse($event->created_at)->hour;
         })->map->count();
 
         $trends['hourly_distribution'] = $hourlyDistribution;
 
         // Analyze daily patterns
-        $dailyEvents = $events->groupBy(function($event) {
+        $dailyEvents = $events->groupBy(function ($event) {
             return Carbon::parse($event->created_at)->format('Y-m-d');
         })->map->count();
 

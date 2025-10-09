@@ -10,7 +10,6 @@ use App\Traits\WhatsAppApiTrait;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PolicyService extends BaseService implements PolicyServiceInterface
@@ -19,9 +18,17 @@ class PolicyService extends BaseService implements PolicyServiceInterface
 
     public function __construct(
         private PolicyRepositoryInterface $policyRepository
-    ) {
-    }
+    ) {}
 
+    /**
+     * Get paginated list of policies with filtering.
+     *
+     * Retrieves policies with comprehensive filtering options including search,
+     * customer, insurance company, policy type, status, and date range filters.
+     *
+     * @param  Request  $request  HTTP request with filter parameters (search, customer_id, insurance_company_id, etc.)
+     * @return LengthAwarePaginator Paginated policy collection with 10 items per page
+     */
     public function getPolicies(Request $request): LengthAwarePaginator
     {
         $filters = [
@@ -37,30 +44,74 @@ class PolicyService extends BaseService implements PolicyServiceInterface
         return $this->policyRepository->getPaginated($filters, 10);
     }
 
+    /**
+     * Create a new insurance policy record.
+     *
+     * Creates a new policy within a database transaction to ensure data consistency.
+     *
+     * @param  array  $data  Policy data including customer, company, dates, and premium information
+     * @return CustomerInsurance The newly created policy instance
+     */
     public function createPolicy(array $data): CustomerInsurance
     {
         return $this->createInTransaction(
-            fn() => $this->policyRepository->create($data)
+            fn () => $this->policyRepository->create($data)
         );
     }
 
+    /**
+     * Update existing insurance policy information.
+     *
+     * Updates policy data within a transaction to maintain data integrity.
+     *
+     * @param  CustomerInsurance  $policy  The policy instance to update
+     * @param  array  $data  Updated policy data
+     * @return bool True if update successful, false otherwise
+     */
     public function updatePolicy(CustomerInsurance $policy, array $data): bool
     {
         return $this->updateInTransaction(
-            fn() => $this->policyRepository->update($policy, $data)
+            fn () => $this->policyRepository->update($policy, $data)
         );
     }
 
+    /**
+     * Get all policies belonging to a specific customer.
+     *
+     * Retrieves customer's insurance policies for portfolio view and management.
+     *
+     * @param  Customer  $customer  The customer to retrieve policies for
+     * @return Collection Collection of customer's insurance policies
+     */
     public function getCustomerPolicies(Customer $customer): Collection
     {
         return $this->policyRepository->getByCustomer($customer->id);
     }
 
+    /**
+     * Get policies expiring within specified days for renewal processing.
+     *
+     * Identifies policies approaching expiration to trigger renewal reminders
+     * and proactive customer outreach.
+     *
+     * @param  int  $daysAhead  Number of days ahead to check for expiring policies (default 30)
+     * @return Collection Collection of policies due for renewal
+     */
     public function getPoliciesDueForRenewal(int $daysAhead = 30): Collection
     {
         return $this->policyRepository->getDueForRenewal($daysAhead);
     }
 
+    /**
+     * Send renewal reminder WhatsApp message to policy holder.
+     *
+     * Sends contextual renewal reminder based on days remaining until policy expiration.
+     * Uses notification template system with dynamic message selection (30/15/7 days or expired).
+     * Logs send status for tracking renewal campaign effectiveness.
+     *
+     * @param  CustomerInsurance  $policy  The policy requiring renewal reminder
+     * @return bool True if message sent successfully, false otherwise
+     */
     public function sendRenewalReminder(CustomerInsurance $policy): bool
     {
         try {
@@ -77,25 +128,12 @@ class PolicyService extends BaseService implements PolicyServiceInterface
                 $notificationTypeCode = 'renewal_30_days';
             }
 
-            // Prepare template data
-            $templateData = [
-                'customer_name' => $policy->customer->name,
-                'policy_number' => $policy->policy_number ?? $policy->policy_no,
-                'policy_type' => $policy->policyType->name ?? 'Insurance',
-                'insurance_company' => $policy->insuranceCompany->name ?? 'Insurance Company',
-                'expiry_date' => $policy->policy_end_date ? $policy->policy_end_date->format('d-M-Y') : 'N/A',
-                'days_remaining' => (string)$daysRemaining,
-                'premium_amount' => '₹' . number_format($policy->premium_amount ?? 0, 0),
-                'vehicle_number' => $policy->registration_no ?? 'N/A',
-                'advisor_name' => 'Parth Rawal',
-                'company_website' => 'https://parthrawal.in',
-                'company_phone' => '+91 97277 93123',
-            ];
+            // Try to get message from template, fallback to hardcoded
+            $templateService = app(\App\Services\TemplateService::class);
+            $message = $templateService->renderFromInsurance($notificationTypeCode, 'whatsapp', $policy);
 
-            // Try template first, fallback to old method
-            $message = $this->getMessageFromTemplate($notificationTypeCode, $templateData);
-
-            if (!$message) {
+            if (! $message) {
+                // Fallback to old hardcoded message
                 $message = $this->generateRenewalReminderMessage($policy);
             }
 
@@ -106,7 +144,7 @@ class PolicyService extends BaseService implements PolicyServiceInterface
                     'policy_id' => $policy->id,
                     'customer_id' => $policy->customer_id,
                     'policy_number' => $policy->policy_number,
-                    'notification_type' => $notificationTypeCode
+                    'notification_type' => $notificationTypeCode,
                 ]);
             }
 
@@ -115,16 +153,25 @@ class PolicyService extends BaseService implements PolicyServiceInterface
             Log::error('Failed to send renewal reminder', [
                 'policy_id' => $policy->id,
                 'customer_id' => $policy->customer_id,
-                'error' => $th->getMessage()
+                'error' => $th->getMessage(),
             ]);
 
             return false;
         }
     }
 
+    /**
+     * Get all policies for a customer's family group.
+     *
+     * Retrieves policies for all family members if customer is family head,
+     * otherwise returns only customer's own policies for privacy.
+     *
+     * @param  Customer  $customer  The customer to retrieve family policies for
+     * @return Collection Collection of family policies or empty collection if not in family group
+     */
     public function getFamilyPolicies(Customer $customer): Collection
     {
-        if (!$customer->hasFamily()) {
+        if (! $customer->hasFamily()) {
             return collect([]);
         }
 
@@ -136,6 +183,16 @@ class PolicyService extends BaseService implements PolicyServiceInterface
         return $this->getCustomerPolicies($customer);
     }
 
+    /**
+     * Check if customer has permission to view specific policy.
+     *
+     * Enforces access control rules: customers can view their own policies,
+     * and family heads can view family member policies.
+     *
+     * @param  Customer  $customer  The customer requesting policy access
+     * @param  CustomerInsurance  $policy  The policy to check access for
+     * @return bool True if customer can view policy, false otherwise
+     */
     public function canCustomerViewPolicy(Customer $customer, CustomerInsurance $policy): bool
     {
         // Customer can view their own policy
@@ -146,19 +203,30 @@ class PolicyService extends BaseService implements PolicyServiceInterface
         // Family head can view family member policies
         if ($customer->isFamilyHead() && $customer->hasFamily()) {
             $policyCustomer = $policy->customer;
+
             return $policyCustomer->family_group_id === $customer->family_group_id;
         }
 
         return false;
     }
 
+    /**
+     * Get policy statistics for dashboard.
+     *
+     * Aggregates policy metrics including counts by status, type, and company.
+     *
+     * @return array Associative array with policy statistics and metrics
+     */
     public function getPolicyStatistics(): array
     {
         return $this->policyRepository->getStatistics();
     }
 
     /**
-     * Get policies by insurance company.
+     * Get all policies from specific insurance company.
+     *
+     * @param  int  $companyId  The insurance company ID
+     * @return Collection Collection of policies from the specified company
      */
     public function getPoliciesByCompany(int $companyId): Collection
     {
@@ -166,7 +234,9 @@ class PolicyService extends BaseService implements PolicyServiceInterface
     }
 
     /**
-     * Get active policies.
+     * Get all active policies.
+     *
+     * @return Collection Collection of currently active policies
      */
     public function getActivePolicies(): Collection
     {
@@ -174,7 +244,9 @@ class PolicyService extends BaseService implements PolicyServiceInterface
     }
 
     /**
-     * Get expired policies.
+     * Get all expired policies.
+     *
+     * @return Collection Collection of expired policies requiring renewal
      */
     public function getExpiredPolicies(): Collection
     {
@@ -182,7 +254,10 @@ class PolicyService extends BaseService implements PolicyServiceInterface
     }
 
     /**
-     * Get policies by type.
+     * Get policies by policy type (vehicle, health, life, etc.).
+     *
+     * @param  int  $policyTypeId  The policy type ID
+     * @return Collection Collection of policies matching the type
      */
     public function getPoliciesByType(int $policyTypeId): Collection
     {
@@ -190,7 +265,12 @@ class PolicyService extends BaseService implements PolicyServiceInterface
     }
 
     /**
-     * Search policies.
+     * Search policies by query string.
+     *
+     * Performs full-text search across policy number, customer name, and registration number.
+     *
+     * @param  string  $query  Search term
+     * @return Collection Collection of matching policies
      */
     public function searchPolicies(string $query): Collection
     {
@@ -198,27 +278,36 @@ class PolicyService extends BaseService implements PolicyServiceInterface
     }
 
     /**
-     * Delete policy.
+     * Delete policy record within transaction.
+     *
+     * @param  CustomerInsurance  $policy  The policy to delete
+     * @return bool True if deletion successful
      */
     public function deletePolicy(CustomerInsurance $policy): bool
     {
         return $this->deleteInTransaction(
-            fn() => $this->policyRepository->delete($policy)
+            fn () => $this->policyRepository->delete($policy)
         );
     }
 
     /**
-     * Update policy status.
+     * Update policy active status.
+     *
+     * @param  CustomerInsurance  $policy  The policy to update
+     * @param  int  $status  New status (0 = inactive, 1 = active)
+     * @return bool True if update successful
      */
     public function updatePolicyStatus(CustomerInsurance $policy, int $status): bool
     {
         return $this->updateInTransaction(
-            fn() => $this->policyRepository->update($policy, ['status' => $status])
+            fn () => $this->policyRepository->update($policy, ['status' => $status])
         );
     }
 
     /**
-     * Get policy count by status.
+     * Get count of policies grouped by status.
+     *
+     * @return array Associative array with status counts
      */
     public function getPolicyCountByStatus(): array
     {
@@ -226,7 +315,10 @@ class PolicyService extends BaseService implements PolicyServiceInterface
     }
 
     /**
-     * Check if policy exists.
+     * Check if policy exists by ID.
+     *
+     * @param  int  $policyId  The policy ID to verify
+     * @return bool True if policy exists
      */
     public function policyExists(int $policyId): bool
     {
@@ -234,7 +326,11 @@ class PolicyService extends BaseService implements PolicyServiceInterface
     }
 
     /**
-     * Get policies for renewal processing.
+     * Get high-priority policies for renewal processing.
+     *
+     * Retrieves policies expiring in next 7 days requiring immediate attention.
+     *
+     * @return Collection Collection of urgent renewal policies
      */
     public function getPoliciesForRenewalProcessing(): Collection
     {
@@ -243,23 +339,29 @@ class PolicyService extends BaseService implements PolicyServiceInterface
     }
 
     /**
-     * Send bulk renewal reminders.
+     * Send renewal reminders to multiple policies in bulk.
+     *
+     * Processes batch renewal reminders for policies expiring within specified days.
+     * Tracks success/failure rates for campaign effectiveness monitoring.
+     *
+     * @param  int|null  $daysAhead  Number of days ahead to check (default 30)
+     * @return array Results array with 'total', 'sent', 'failed' counts and error details
      */
     public function sendBulkRenewalReminders(?int $daysAhead = null): array
     {
         $daysAhead = $daysAhead ?? 30;
         $policies = $this->getPoliciesDueForRenewal($daysAhead);
-        
+
         $results = [
             'total' => $policies->count(),
             'sent' => 0,
             'failed' => 0,
-            'errors' => []
+            'errors' => [],
         ];
 
         foreach ($policies as $policy) {
             $sent = $this->sendRenewalReminder($policy);
-            
+
             if ($sent) {
                 $results['sent']++;
             } else {
@@ -267,7 +369,7 @@ class PolicyService extends BaseService implements PolicyServiceInterface
                 $results['errors'][] = [
                     'policy_id' => $policy->id,
                     'policy_number' => $policy->policy_number,
-                    'customer_name' => $policy->customer->name
+                    'customer_name' => $policy->customer->name,
                 ];
             }
         }
@@ -282,7 +384,7 @@ class PolicyService extends BaseService implements PolicyServiceInterface
     {
         $customer = $policy->customer;
         $daysRemaining = now()->diffInDays($policy->policy_end_date);
-        
+
         $message = "🔔 *Policy Renewal Reminder*\n\n";
         $message .= "Dear *{$customer->name}*,\n\n";
         $message .= "Your insurance policy is due for renewal:\n\n";
@@ -292,17 +394,17 @@ class PolicyService extends BaseService implements PolicyServiceInterface
         $message .= "• Type: *{$policy->policyType->name}*\n";
         $message .= "• End Date: *{$policy->policy_end_date->format('d M Y')}*\n";
         $message .= "• Days Remaining: *{$daysRemaining} days*\n\n";
-        
+
         if ($daysRemaining <= 7) {
             $message .= "⚠️ *URGENT: Your policy expires in {$daysRemaining} days!*\n\n";
         }
-        
+
         $message .= "📞 Please contact us to renew your policy and avoid any lapse in coverage.\n\n";
         $message .= "Best regards,\n";
-        $message .= "Parth Rawal\n";
-        $message .= "https://parthrawal.in\n";
-        $message .= "Your Trusted Insurance Advisor\n";
-        $message .= "\"Think of Insurance, Think of Us.\"";
+        $message .= company_advisor_name()."\n";
+        $message .= company_website()."\n";
+        $message .= company_title()."\n";
+        $message .= '"'.company_tagline().'"';
 
         return $message;
     }

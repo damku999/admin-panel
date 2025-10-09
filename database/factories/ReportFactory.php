@@ -14,7 +14,7 @@ class ReportFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'name' => $this->faker->words(3, true) . ' Report',
+            'name' => $this->faker->words(3, true).' Report',
             'selected_columns' => [
                 'policy_number',
                 'customer_name',

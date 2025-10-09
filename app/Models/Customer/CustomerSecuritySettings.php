@@ -2,9 +2,9 @@
 
 namespace App\Models\Customer;
 
+use App\Models\Customer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use App\Models\Customer;
 
 /**
  * Customer-specific Security Settings Model

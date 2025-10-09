@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\CustomerInsurance;
-use App\Models\Customer;
 use App\Models\Branch;
 use App\Models\Broker;
+use App\Models\Customer;
+use App\Models\CustomerInsurance;
 use App\Models\InsuranceCompany;
 use App\Models\PolicyType;
 use App\Models\PremiumType;
@@ -12,7 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 it('has correct fillable attributes', function () {
-    $insurance = new CustomerInsurance();
+    $insurance = new CustomerInsurance;
     $expectedFillable = [
         'issue_date',
         'branch_id',

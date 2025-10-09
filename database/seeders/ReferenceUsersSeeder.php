@@ -30,7 +30,7 @@ class ReferenceUsersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 2,
@@ -43,8 +43,8 @@ class ReferenceUsersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
-            ]
+                'deleted_by' => null,
+            ],
         ]);
 
         $this->command->info('Reference users seeded successfully!');

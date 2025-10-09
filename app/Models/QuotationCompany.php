@@ -11,7 +11,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class QuotationCompany extends Model
 {
-    use HasFactory, TableRecordObserver, LogsActivity;
+    use HasFactory, LogsActivity, TableRecordObserver;
 
     protected $fillable = [
         'quotation_id',
@@ -71,6 +71,7 @@ class QuotationCompany extends Model
     ];
 
     protected static $logAttributes = ['*'];
+
     protected static $logOnlyDirty = true;
 
     public function quotation(): BelongsTo
@@ -90,15 +91,15 @@ class QuotationCompany extends Model
 
     public function calculateSavings(?QuotationCompany $compareWith = null): float
     {
-        if (!$compareWith) {
+        if (! $compareWith) {
             return 0;
         }
-        
+
         return $compareWith->final_premium - $this->final_premium;
     }
 
     public function getFormattedPremium(): string
     {
-        return '₹ ' . number_format($this->final_premium, 0);
+        return '₹ '.number_format($this->final_premium, 0);
     }
 }

@@ -2,14 +2,13 @@
 
 namespace App\Services;
 
-use App\Models\TwoFactorAuth;
-use App\Models\TrustedDevice;
-use App\Models\User;
 use App\Models\Customer;
+use App\Models\TrustedDevice;
+use App\Models\TwoFactorAuth;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
-use PragmaRX\Google2FA\Google2FA;
 
 class TwoFactorAuthService extends BaseService
 {
@@ -30,7 +29,7 @@ class TwoFactorAuthService extends BaseService
             Log::info('2FA setup started', [
                 'user_type' => get_class($user),
                 'user_id' => $user->id,
-                'email' => $user->email ?? 'N/A'
+                'email' => $user->email ?? 'N/A',
             ]);
 
             // Refresh user to ensure relationship is loaded
@@ -60,7 +59,7 @@ class TwoFactorAuthService extends BaseService
             }
 
             // Verify the code
-            if (!$user->confirmTwoFactor($code)) {
+            if (! $user->confirmTwoFactor($code)) {
                 $user->logTwoFactorAttempt('totp', false, $request, 'Invalid code');
                 throw new \Exception('Invalid verification code. Please try again.');
             }
@@ -72,7 +71,7 @@ class TwoFactorAuthService extends BaseService
                 'user_type' => get_class($user),
                 'user_id' => $user->id,
                 'email' => $user->email ?? 'N/A',
-                'ip_address' => $request->ip()
+                'ip_address' => $request->ip(),
             ]);
 
             return true;
@@ -82,12 +81,12 @@ class TwoFactorAuthService extends BaseService
     /**
      * Disable 2FA for user
      */
-    public function disableTwoFactor($user, string $currentPassword = null): bool
+    public function disableTwoFactor($user, ?string $currentPassword = null): bool
     {
         return $this->updateInTransaction(function () use ($user, $currentPassword) {
             // Verify current password if provided (for security)
             if ($currentPassword && method_exists($user, 'checkPassword')) {
-                if (!$user->checkPassword($currentPassword)) {
+                if (! $user->checkPassword($currentPassword)) {
                     throw new \Exception('Current password is incorrect.');
                 }
             }
@@ -98,7 +97,7 @@ class TwoFactorAuthService extends BaseService
             Log::info('2FA disabled', [
                 'user_type' => get_class($user),
                 'user_id' => $user->id,
-                'email' => $user->email ?? 'N/A'
+                'email' => $user->email ?? 'N/A',
             ]);
 
             return true;
@@ -139,7 +138,7 @@ class TwoFactorAuthService extends BaseService
                 $isValid ? null : 'Invalid code'
             );
 
-            if (!$isValid) {
+            if (! $isValid) {
                 if ($codeType === 'recovery') {
                     throw new \Exception('Invalid recovery code. This code may have already been used or is not valid.');
                 } else {
@@ -151,7 +150,7 @@ class TwoFactorAuthService extends BaseService
                 'user_type' => get_class($user),
                 'user_id' => $user->id,
                 'code_type' => $codeType,
-                'ip_address' => $request->ip()
+                'ip_address' => $request->ip(),
             ]);
 
             return true;
@@ -161,7 +160,7 @@ class TwoFactorAuthService extends BaseService
     /**
      * Trust current device
      */
-    public function trustDevice($user, Request $request, string $deviceName = null): array
+    public function trustDevice($user, Request $request, ?string $deviceName = null): array
     {
         return $this->createInTransaction(function () use ($user, $request, $deviceName) {
             $userAgent = $request->userAgent() ?? '';
@@ -184,12 +183,12 @@ class TwoFactorAuthService extends BaseService
                 'device_id' => $device->device_id,
                 'device_name' => $device->device_name,
                 'ip_address' => $request->ip(),
-                'was_already_trusted' => $wasAlreadyTrusted
+                'was_already_trusted' => $wasAlreadyTrusted,
             ]);
 
             return [
                 'device' => $device,
-                'was_already_trusted' => $wasAlreadyTrusted
+                'was_already_trusted' => $wasAlreadyTrusted,
             ];
         });
     }
@@ -206,7 +205,7 @@ class TwoFactorAuthService extends BaseService
                 Log::info('Device trust revoked', [
                     'user_type' => get_class($user),
                     'user_id' => $user->id,
-                    'device_id' => $deviceId
+                    'device_id' => $deviceId,
                 ]);
             }
 
@@ -220,7 +219,7 @@ class TwoFactorAuthService extends BaseService
     public function generateNewRecoveryCodes($user): array
     {
         return $this->updateInTransaction(function () use ($user) {
-            if (!$user->hasTwoFactorEnabled()) {
+            if (! $user->hasTwoFactorEnabled()) {
                 throw new \Exception('Two-factor authentication is not enabled.');
             }
 
@@ -229,7 +228,7 @@ class TwoFactorAuthService extends BaseService
             Log::info('New recovery codes generated', [
                 'user_type' => get_class($user),
                 'user_id' => $user->id,
-                'codes_count' => count($codes)
+                'codes_count' => count($codes),
             ]);
 
             return $codes;
@@ -296,9 +295,9 @@ class TwoFactorAuthService extends BaseService
     protected function generateQrCodeSvg(string $url): string
     {
         return QrCode::format('svg')
-                    ->size(200)
-                    ->margin(2)
-                    ->generate($url);
+            ->size(200)
+            ->margin(2)
+            ->generate($url);
     }
 
     /**
@@ -308,23 +307,23 @@ class TwoFactorAuthService extends BaseService
     {
         return $this->executeInTransaction(function () {
             $expiredDevices = TrustedDevice::where('expires_at', '<', now())
-                                          ->where('is_active', true)
-                                          ->count();
+                ->where('is_active', true)
+                ->count();
 
             // Deactivate expired devices
             TrustedDevice::where('expires_at', '<', now())
-                        ->update(['is_active' => false]);
+                ->update(['is_active' => false]);
 
             // Delete old 2FA attempts (keep last 30 days)
             $oldAttempts = \App\Models\TwoFactorAttempt::where('attempted_at', '<', now()->subDays(30))
-                                                      ->count();
+                ->count();
 
             \App\Models\TwoFactorAttempt::where('attempted_at', '<', now()->subDays(30))
-                                       ->delete();
+                ->delete();
 
             Log::info('2FA cleanup completed', [
                 'expired_devices' => $expiredDevices,
-                'old_attempts_deleted' => $oldAttempts
+                'old_attempts_deleted' => $oldAttempts,
             ]);
 
             return $expiredDevices + $oldAttempts;
@@ -341,11 +340,11 @@ class TwoFactorAuthService extends BaseService
             'total_trusted_devices' => TrustedDevice::valid()->count(),
             'recent_2fa_attempts' => \App\Models\TwoFactorAttempt::where('attempted_at', '>=', now()->subDay())->count(),
             'successful_2fa_attempts_today' => \App\Models\TwoFactorAttempt::where('attempted_at', '>=', now()->startOfDay())
-                                                                          ->where('successful', true)
-                                                                          ->count(),
+                ->where('successful', true)
+                ->count(),
             'failed_2fa_attempts_today' => \App\Models\TwoFactorAttempt::where('attempted_at', '>=', now()->startOfDay())
-                                                                      ->where('successful', false)
-                                                                      ->count(),
+                ->where('successful', false)
+                ->count(),
         ];
     }
 }

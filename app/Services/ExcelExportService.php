@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
+use App\Exports\GenericExport;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection as SupportCollection;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\GenericExport;
 
 class ExcelExportService
 {
@@ -33,7 +33,7 @@ class ExcelExportService
             'headings' => $headings,
             'mapping' => $mapping,
             'with_headings' => true,
-            'with_mapping' => true
+            'with_mapping' => true,
         ]);
 
         return $this->export($data, $config);
@@ -50,7 +50,7 @@ class ExcelExportService
         $config = array_merge($config, [
             'columns' => $columns,
             'headings' => $this->generateHeadingsFromColumns($columns),
-            'with_headings' => true
+            'with_headings' => true,
         ]);
 
         return $this->export($modelClass, $config);
@@ -63,7 +63,7 @@ class ExcelExportService
     {
         $config = array_merge($config, [
             'relations' => $relations,
-            'with_relations' => true
+            'with_relations' => true,
         ]);
 
         return $this->export($modelClass, $config);
@@ -79,7 +79,7 @@ class ExcelExportService
         foreach ($filters as $field => $value) {
             if (is_array($value)) {
                 $query->whereIn($field, $value);
-            } elseif (!empty($value)) {
+            } elseif (! empty($value)) {
                 $query->where($field, 'like', "%{$value}%");
             }
         }
@@ -97,7 +97,7 @@ class ExcelExportService
             ->orderBy($dateField, 'desc');
 
         $config = array_merge($config, [
-            'filename_suffix' => date('Y_m_d', strtotime($startDate)) . '_to_' . date('Y_m_d', strtotime($endDate))
+            'filename_suffix' => date('Y_m_d', strtotime($startDate)).'_to_'.date('Y_m_d', strtotime($endDate)),
         ]);
 
         return $this->export($query, $config);
@@ -110,17 +110,17 @@ class ExcelExportService
         }
 
         if ($data instanceof Builder) {
-            if (!empty($config['relations'])) {
+            if (! empty($config['relations'])) {
                 $data->with($config['relations']);
             }
 
-            if (!empty($config['order_by'])) {
+            if (! empty($config['order_by'])) {
                 $data->orderBy($config['order_by']['column'], $config['order_by']['direction'] ?? 'asc');
             } else {
                 $data->orderBy('created_at', 'desc');
             }
 
-            if (!empty($config['limit'])) {
+            if (! empty($config['limit'])) {
                 $data->limit($config['limit']);
             }
 
@@ -130,21 +130,21 @@ class ExcelExportService
         if (is_string($data) && class_exists($data)) {
             $query = app($data)->newQuery();
 
-            if (!empty($config['relations'])) {
+            if (! empty($config['relations'])) {
                 $query->with($config['relations']);
             }
 
-            if (!empty($config['columns'])) {
+            if (! empty($config['columns'])) {
                 $query->select($config['columns']);
             }
 
-            if (!empty($config['order_by'])) {
+            if (! empty($config['order_by'])) {
                 $query->orderBy($config['order_by']['column'], $config['order_by']['direction'] ?? 'asc');
             } else {
                 $query->orderBy('created_at', 'desc');
             }
 
-            if (!empty($config['limit'])) {
+            if (! empty($config['limit'])) {
                 $query->limit($config['limit']);
             }
 
@@ -179,7 +179,7 @@ class ExcelExportService
             'headings' => [],
             'mapping' => null,
             'filename' => 'export',
-            'filename_suffix' => date('Y_m_d_H_i_s')
+            'filename_suffix' => date('Y_m_d_H_i_s'),
         ];
     }
 
@@ -193,7 +193,7 @@ class ExcelExportService
 
     private function generateHeadingsFromColumns(array $columns): array
     {
-        return array_map(function($column) {
+        return array_map(function ($column) {
             return ucwords(str_replace(['_', 'id'], [' ', 'ID'], $column));
         }, $columns);
     }
@@ -208,18 +208,18 @@ class ExcelExportService
                 'filename' => 'customers',
                 'relations' => ['familyGroup'],
                 'headings' => ['ID', 'Name', 'Email', 'Mobile', 'Status', 'Created Date'],
-                'mapping' => function($customer) {
+                'mapping' => function ($customer) {
                     return [
                         $customer->id,
                         $customer->name,
                         $customer->email,
                         $customer->mobile_number,
                         ucfirst($customer->status),
-                        $customer->created_at->format('Y-m-d H:i:s')
+                        $customer->created_at->format('Y-m-d H:i:s'),
                     ];
                 },
                 'with_headings' => true,
-                'with_mapping' => true
+                'with_mapping' => true,
             ],
         ];
 

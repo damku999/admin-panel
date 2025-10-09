@@ -4,25 +4,20 @@ namespace App\Exports;
 
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class GenericExport implements
-    FromCollection,
-    WithHeadings,
-    WithMapping,
-    WithStrictNullComparison,
-    ShouldAutoSize,
-    WithStyles
+class GenericExport implements FromCollection, ShouldAutoSize, WithHeadings, WithMapping, WithStrictNullComparison, WithStyles
 {
     protected Collection $collection;
+
     protected array $config;
 
     public function __construct(Collection $collection, array $config = [])
@@ -38,7 +33,7 @@ class GenericExport implements
 
     public function headings(): array
     {
-        if (!$this->config['with_headings'] ?? false) {
+        if (! $this->config['with_headings'] ?? false) {
             return [];
         }
 
@@ -47,7 +42,7 @@ class GenericExport implements
 
     public function map($row): array
     {
-        if (!$this->config['with_mapping'] ?? false) {
+        if (! $this->config['with_mapping'] ?? false) {
             return $this->defaultMapping($row);
         }
 
@@ -70,11 +65,12 @@ class GenericExport implements
             if (method_exists($row, 'toArray')) {
                 $data = $row->toArray();
 
-                if (!empty($this->config['columns'])) {
+                if (! empty($this->config['columns'])) {
                     $filtered = [];
                     foreach ($this->config['columns'] as $column) {
                         $filtered[$column] = $data[$column] ?? '';
                     }
+
                     return array_values($filtered);
                 }
 
@@ -100,22 +96,22 @@ class GenericExport implements
                 'font' => [
                     'bold' => true,
                     'color' => ['rgb' => 'FFFFFF'],
-                    'size' => 12
+                    'size' => 12,
                 ],
                 'fill' => [
                     'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => '4472C4']
+                    'startColor' => ['rgb' => '4472C4'],
                 ],
                 'alignment' => [
                     'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    'vertical' => Alignment::VERTICAL_CENTER
+                    'vertical' => Alignment::VERTICAL_CENTER,
                 ],
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
-                        'color' => ['rgb' => '000000']
-                    ]
-                ]
+                        'color' => ['rgb' => '000000'],
+                    ],
+                ],
             ];
         }
 
@@ -129,13 +125,13 @@ class GenericExport implements
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
-                        'color' => ['rgb' => 'CCCCCC']
-                    ]
+                        'color' => ['rgb' => 'CCCCCC'],
+                    ],
                 ],
                 'alignment' => [
                     'vertical' => Alignment::VERTICAL_TOP,
-                    'wrapText' => true
-                ]
+                    'wrapText' => true,
+                ],
             ];
 
             // Alternate row colors
@@ -143,8 +139,8 @@ class GenericExport implements
                 $styles["A{$row}:{$lastColumn}{$row}"] = [
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => 'F8F9FA']
-                    ]
+                        'startColor' => ['rgb' => 'F8F9FA'],
+                    ],
                 ];
             }
         }
@@ -169,6 +165,6 @@ class GenericExport implements
         $firstLetter = chr(64 + floor(($headingsCount - 1) / 26));
         $secondLetter = chr(65 + (($headingsCount - 1) % 26));
 
-        return $firstLetter . $secondLetter;
+        return $firstLetter.$secondLetter;
     }
 }

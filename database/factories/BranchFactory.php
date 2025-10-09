@@ -20,7 +20,7 @@ class BranchFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->company() . ' Branch',
+            'name' => $this->faker->company().' Branch',
             'email' => $this->faker->unique()->companyEmail(),
             'mobile_number' => $this->faker->numerify('##########'),
             'status' => 1,

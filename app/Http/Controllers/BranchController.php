@@ -32,19 +32,16 @@ class BranchController extends AbstractBaseCrudController
 
     /**
      * List Branches
-     * @param Request $request
-     * @return \Illuminate\View\View
      */
     public function index(Request $request): View
     {
         $branches = $this->branchRepository->getBranchesWithFilters($request, 10);
-            
+
         return view('branches.index', ['branches' => $branches, 'request' => $request->all()]);
     }
 
     /**
      * Create Branch
-     * @return \Illuminate\View\View
      */
     public function create(): View
     {
@@ -53,8 +50,6 @@ class BranchController extends AbstractBaseCrudController
 
     /**
      * Store Branch
-     * @param Request $request
-     * @return RedirectResponse
      */
     public function store(Request $request): RedirectResponse
     {
@@ -75,8 +70,6 @@ class BranchController extends AbstractBaseCrudController
 
     /**
      * Edit Branch
-     * @param Branch $branch
-     * @return \Illuminate\View\View
      */
     public function edit(Branch $branch): View
     {
@@ -85,14 +78,11 @@ class BranchController extends AbstractBaseCrudController
 
     /**
      * Update Branch
-     * @param Request $request
-     * @param Branch $branch
-     * @return RedirectResponse
      */
     public function update(Request $request, Branch $branch): RedirectResponse
     {
         $request->validate([
-            'name' => 'required|string|max:255|unique:branches,name,' . $branch->id,
+            'name' => 'required|string|max:255|unique:branches,name,'.$branch->id,
         ]);
 
         $branch->update([
@@ -107,15 +97,15 @@ class BranchController extends AbstractBaseCrudController
 
     /**
      * Update Branch Status
-     * @param int $branch_id
-     * @param int $status
-     * @return RedirectResponse
+     *
+     * @param  int  $branch_id
+     * @param  int  $status
      */
     public function updateStatus($branch_id, $status): RedirectResponse
     {
         $branch = $this->branchRepository->findById($branch_id);
 
-        if (!$branch) {
+        if (! $branch) {
             return $this->redirectWithError('Branch not found.');
         }
 
@@ -125,6 +115,7 @@ class BranchController extends AbstractBaseCrudController
         ]);
 
         $message = $status == 1 ? 'Branch activated successfully.' : 'Branch deactivated successfully.';
+
         return $this->redirectWithSuccess('branches.index', $message);
     }
 
@@ -148,15 +139,15 @@ class BranchController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
             'headings' => ['ID', 'Name', 'Status', 'Created Date'],
-            'mapping' => function($model) {
+            'mapping' => function ($model) {
                 return [
                     $model->id,
                     $model->name,
                     $model->status ? 'Active' : 'Inactive',
-                    $model->created_at->format('Y-m-d H:i:s')
+                    $model->created_at->format('Y-m-d H:i:s'),
                 ];
             },
-            'with_mapping' => true
+            'with_mapping' => true,
         ];
     }
 }

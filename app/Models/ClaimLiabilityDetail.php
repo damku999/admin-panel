@@ -36,7 +36,7 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class ClaimLiabilityDetail extends Model
 {
-    use HasApiTokens, HasFactory, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
+    use HasApiTokens, HasFactory, HasRoles, LogsActivity, SoftDeletes, TableRecordObserver;
 
     protected $fillable = [
         'claim_id',
@@ -68,6 +68,7 @@ class ClaimLiabilityDetail extends Model
     ];
 
     protected static $logAttributes = ['*'];
+
     protected static $logOnlyDirty = true;
 
     /**
@@ -115,7 +116,7 @@ class ClaimLiabilityDetail extends Model
      */
     public function getFormattedEstimatedAmount(): string
     {
-        return $this->estimated_amount ? '₹' . number_format($this->estimated_amount, 2) : '-';
+        return $this->estimated_amount ? '₹'.number_format($this->estimated_amount, 2) : '-';
     }
 
     /**
@@ -123,7 +124,7 @@ class ClaimLiabilityDetail extends Model
      */
     public function getFormattedApprovedAmount(): string
     {
-        return $this->approved_amount ? '₹' . number_format($this->approved_amount, 2) : '-';
+        return $this->approved_amount ? '₹'.number_format($this->approved_amount, 2) : '-';
     }
 
     /**
@@ -131,7 +132,7 @@ class ClaimLiabilityDetail extends Model
      */
     public function getFormattedFinalAmount(): string
     {
-        return $this->final_amount ? '₹' . number_format($this->final_amount, 2) : '-';
+        return $this->final_amount ? '₹'.number_format($this->final_amount, 2) : '-';
     }
 
     /**

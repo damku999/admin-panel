@@ -12,6 +12,7 @@ class SendBirthdayWishes extends Command
     use WhatsAppApiTrait;
 
     protected $signature = 'send:birthday-wishes';
+
     protected $description = 'Send birthday wishes to customers whose birthday is today';
 
     /**
@@ -25,8 +26,9 @@ class SendBirthdayWishes extends Command
     public function handle()
     {
         // Check if birthday wishes feature is enabled
-        if (!is_birthday_wishes_enabled()) {
+        if (! is_birthday_wishes_enabled()) {
             $this->info('Birthday wishes feature is disabled in settings.');
+
             return;
         }
 
@@ -42,6 +44,7 @@ class SendBirthdayWishes extends Command
 
         if ($customers->isEmpty()) {
             $this->info('No birthdays today.');
+
             return;
         }
 
@@ -52,19 +55,11 @@ class SendBirthdayWishes extends Command
 
         foreach ($customers as $customer) {
             try {
-                // Prepare template data
-                $templateData = [
-                    'customer_name' => $customer->name,
-                    'advisor_name' => 'Parth Rawal',
-                    'company_website' => 'https://parthrawal.in',
-                    'company_phone' => '+91 97277 93123',
-                    'company_name' => 'Parth Rawal Insurance Advisor',
-                ];
+                // Try to get message from template, fallback to hardcoded
+                $templateService = app(\App\Services\TemplateService::class);
+                $message = $templateService->renderFromCustomer('birthday_wish', 'whatsapp', $customer);
 
-                // Try to get message from template, fallback to old method
-                $message = $this->getMessageFromTemplate('birthday_wish', $templateData);
-
-                if (!$message) {
+                if (! $message) {
                     // Fallback to old hardcoded method
                     $message = $this->getBirthdayMessage($customer);
                 }
@@ -74,7 +69,7 @@ class SendBirthdayWishes extends Command
                 $this->info("✓ Sent birthday wish to {$customer->name} ({$customer->mobile_number})");
                 $sentCount++;
             } catch (\Exception $e) {
-                $this->error("✗ Failed for {$customer->name}: " . $e->getMessage());
+                $this->error("✗ Failed for {$customer->name}: ".$e->getMessage());
                 $skippedCount++;
             }
         }
@@ -95,9 +90,9 @@ Wishing you a wonderful day filled with joy, happiness, and blessings. May this 
 Thank you for trusting us with your insurance needs. We're honored to be part of your journey!
 
 Warm wishes,
-Parth Rawal
-https://parthrawal.in
-Your Trusted Insurance Advisor
-\"Think of Insurance, Think of Us.\"";
+".company_advisor_name().'
+'.company_website().'
+'.company_title().'
+"'.company_tagline().'"';
     }
 }

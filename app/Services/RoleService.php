@@ -27,7 +27,7 @@ class RoleService extends BaseService implements RoleServiceInterface
         return $this->createInTransaction(function () use ($data) {
             $role = $this->roleRepository->create([
                 'name' => $data['name'],
-                'guard_name' => $data['guard_name'] ?? 'web'
+                'guard_name' => $data['guard_name'] ?? 'web',
             ]);
 
             // Assign permissions if provided
@@ -44,7 +44,7 @@ class RoleService extends BaseService implements RoleServiceInterface
         return $this->updateInTransaction(function () use ($role, $data) {
             $updated = $this->roleRepository->update($role, [
                 'name' => $data['name'],
-                'guard_name' => $data['guard_name'] ?? $role->guard_name
+                'guard_name' => $data['guard_name'] ?? $role->guard_name,
             ]);
 
             // Update permissions if provided
@@ -78,7 +78,7 @@ class RoleService extends BaseService implements RoleServiceInterface
     public function getRolesByUser(int $userId): Collection
     {
         $user = $this->userRepository->findById($userId);
-        if (!$user) {
+        if (! $user) {
             return collect();
         }
 
@@ -99,11 +99,12 @@ class RoleService extends BaseService implements RoleServiceInterface
     {
         return $this->updateInTransaction(function () use ($roleId, $permissionIds) {
             $role = $this->roleRepository->findById($roleId);
-            if (!$role) {
+            if (! $role) {
                 return false;
             }
 
             $role->givePermissionTo($permissionIds);
+
             return true;
         });
     }
@@ -112,11 +113,12 @@ class RoleService extends BaseService implements RoleServiceInterface
     {
         return $this->updateInTransaction(function () use ($roleId, $permissionIds) {
             $role = $this->roleRepository->findById($roleId);
-            if (!$role) {
+            if (! $role) {
                 return false;
             }
 
             $role->revokePermissionTo($permissionIds);
+
             return true;
         });
     }
@@ -127,11 +129,12 @@ class RoleService extends BaseService implements RoleServiceInterface
             $user = $this->userRepository->findById($userId);
             $role = $this->roleRepository->findById($roleId);
 
-            if (!$user || !$role) {
+            if (! $user || ! $role) {
                 return false;
             }
 
             $user->assignRole($role);
+
             return true;
         });
     }
@@ -142,11 +145,12 @@ class RoleService extends BaseService implements RoleServiceInterface
             $user = $this->userRepository->findById($userId);
             $role = $this->roleRepository->findById($roleId);
 
-            if (!$user || !$role) {
+            if (! $user || ! $role) {
                 return false;
             }
 
             $user->removeRole($role);
+
             return true;
         });
     }

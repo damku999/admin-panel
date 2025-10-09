@@ -12,6 +12,7 @@ class SendRenewalReminders extends Command
     use WhatsAppApiTrait;
 
     protected $signature = 'send:renewal-reminders';
+
     protected $description = 'Send WhatsApp reminders for insurance renewals based on configured reminder days.';
 
     /**
@@ -29,7 +30,7 @@ class SendRenewalReminders extends Command
         // Get reminder days from app settings (e.g., 30,15,7,1)
         $reminderDays = get_renewal_reminder_days();
 
-        $this->info('Checking for renewals expiring in: ' . implode(', ', $reminderDays) . ' days');
+        $this->info('Checking for renewals expiring in: '.implode(', ', $reminderDays).' days');
 
         // Build query dynamically based on configured days
         $insurances = CustomerInsurance::where(function ($query) use ($currentDate, $reminderDays) {
@@ -54,50 +55,42 @@ class SendRenewalReminders extends Command
                 $daysUntilExpiry = Carbon::now()->diffInDays(Carbon::parse($insurance->expired_date), false);
                 $notificationTypeCode = $this->getNotificationTypeCode($daysUntilExpiry);
 
-                // Prepare template data
-                $templateData = [
-                    'customer_name' => $insurance->customer->name,
-                    'policy_number' => $insurance->policy_no,
-                    'policy_type' => $insurance->policyType->name ?? 'Insurance',
-                    'insurance_company' => $insurance->insuranceCompany->name ?? 'Insurance Company',
-                    'expiry_date' => Carbon::parse($insurance->expired_date)->format('d-M-Y'),
-                    'days_remaining' => (string)$daysUntilExpiry,
-                    'premium_amount' => '₹' . number_format($insurance->premium_amount ?? 0, 0),
-                    'vehicle_number' => $insurance->registration_no ?? 'N/A',
-                    'advisor_name' => 'Parth Rawal',
-                    'company_website' => 'https://parthrawal.in',
-                    'company_phone' => '+91 97277 93123',
-                ];
-
                 try {
-                    // Try to get message from template, fallback to old method
-                    $messageText = $this->getMessageFromTemplate($notificationTypeCode, $templateData);
+                    // Send WhatsApp notification
+                    if (! empty($receiverId) && is_whatsapp_notification_enabled()) {
+                        $templateService = app(\App\Services\TemplateService::class);
+                        $messageText = $templateService->renderFromInsurance($notificationTypeCode, 'whatsapp', $insurance);
 
-                    if (!$messageText) {
-                        // Fallback to old hardcoded method
-                        $messageText = $insurance->premiumType->is_vehicle == 1
-                            ? $this->renewalReminderVehicle($insurance)
-                            : $this->renewalReminder($insurance);
+                        if (! $messageText) {
+                            // Fallback to old hardcoded method
+                            $messageText = $insurance->premiumType->is_vehicle == 1
+                                ? $this->renewalReminderVehicle($insurance)
+                                : $this->renewalReminder($insurance);
+                        }
+
+                        $this->whatsAppSendMessage($messageText, $receiverId, $customerId, $notificationTypeCode);
                     }
 
-                    $this->whatsAppSendMessage($messageText, $receiverId, $customerId, $notificationTypeCode);
+                    // Send Email notification
+                    if (! empty($insurance->customer->email) && is_email_notification_enabled()) {
+                        $emailService = app(\App\Services\EmailService::class);
+                        $emailService->sendFromInsurance($notificationTypeCode, $insurance);
+                    }
+
                     $sentCount++;
                 } catch (\Exception $e) {
-                    $this->error("Failed to send reminder for insurance #{$insurance->id}: " . $e->getMessage());
+                    $this->error("Failed to send reminder for insurance #{$insurance->id}: ".$e->getMessage());
                     $skippedCount++;
                 }
             }
         }
 
-        $this->info("Renewal reminders sent successfully!");
+        $this->info('Renewal reminders sent successfully!');
         $this->info("Total found: {$insurances->count()}, Sent: {$sentCount}, Skipped: {$skippedCount}");
     }
 
     /**
      * Get notification type code based on days until expiry.
-     *
-     * @param int $daysUntilExpiry
-     * @return string
      */
     private function getNotificationTypeCode(int $daysUntilExpiry): string
     {

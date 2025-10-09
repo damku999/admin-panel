@@ -9,13 +9,20 @@ class AppSettingFactory extends Factory
 {
     protected $model = AppSetting::class;
 
+    // Static counter to ensure unique keys across test suite
+    protected static $keyCounter = 0;
+
     public function definition()
     {
         $types = ['string', 'integer', 'boolean', 'json', 'text'];
         $categories = ['general', 'email', 'sms', 'whatsapp', 'notification', 'business', 'technical', 'security'];
 
+        // Generate unique key using timestamp + counter to avoid database duplicates
+        self::$keyCounter++;
+        $uniqueKey = 'test_setting_' . time() . '_' . self::$keyCounter . '_' . $this->faker->unique()->numberBetween(1000, 9999);
+
         return [
-            'key' => $this->faker->unique()->word() . '_setting',
+            'key' => $uniqueKey,
             'value' => $this->faker->word(),
             'type' => $this->faker->randomElement($types),
             'category' => $this->faker->randomElement($categories),

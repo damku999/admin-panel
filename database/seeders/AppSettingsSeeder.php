@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Services\AppSettingService;
+use Illuminate\Database\Seeder;
 
 class AppSettingsSeeder extends Seeder
 {
@@ -191,7 +191,57 @@ class AppSettingsSeeder extends Seeder
 
         AppSettingService::setBulk($notificationSettings, 'notifications');
 
+        // ========================================
+        // CATEGORY: Company
+        // ========================================
+        $companySettings = [
+            'company_name' => [
+                'value' => 'Parth Rawal Insurance Advisor',
+                'type' => 'string',
+                'description' => 'Company/Business Name',
+                'is_encrypted' => false,
+            ],
+            'company_advisor_name' => [
+                'value' => 'Parth Rawal',
+                'type' => 'string',
+                'description' => 'Insurance Advisor Name',
+                'is_encrypted' => false,
+            ],
+            'company_website' => [
+                'value' => 'https://parthrawal.in',
+                'type' => 'string',
+                'description' => 'Company Website URL',
+                'is_encrypted' => false,
+            ],
+            'company_phone' => [
+                'value' => '+91 97277 93123',
+                'type' => 'string',
+                'description' => 'Company Contact Phone Number (display format)',
+                'is_encrypted' => false,
+            ],
+            'company_phone_whatsapp' => [
+                'value' => '919727793123',
+                'type' => 'string',
+                'description' => 'WhatsApp Phone Number (API format without + or spaces)',
+                'is_encrypted' => false,
+            ],
+            'company_title' => [
+                'value' => 'Your Trusted Insurance Advisor',
+                'type' => 'string',
+                'description' => 'Company Professional Title/Role',
+                'is_encrypted' => false,
+            ],
+            'company_tagline' => [
+                'value' => 'Think of Insurance, Think of Us.',
+                'type' => 'string',
+                'description' => 'Company Tagline/Motto',
+                'is_encrypted' => false,
+            ],
+        ];
+
+        AppSettingService::setBulk($companySettings, 'company');
+
         $this->command->info('✅ App Settings seeded successfully!');
-        $this->command->info('📊 Categories: application, whatsapp, mail, notifications');
+        $this->command->info('📊 Categories: application, whatsapp, mail, notifications, company');
     }
 }

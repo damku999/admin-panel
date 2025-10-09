@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -29,7 +28,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 2,
@@ -42,7 +41,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 3,
@@ -55,7 +54,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 4,
@@ -68,7 +67,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 5,
@@ -81,7 +80,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 6,
@@ -94,7 +93,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 7,
@@ -107,7 +106,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 8,
@@ -120,7 +119,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 9,
@@ -133,7 +132,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 10,
@@ -146,7 +145,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 11,
@@ -159,7 +158,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 12,
@@ -172,7 +171,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 13,
@@ -185,7 +184,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 14,
@@ -198,7 +197,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 15,
@@ -211,7 +210,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 16,
@@ -224,7 +223,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 17,
@@ -237,7 +236,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 18,
@@ -250,7 +249,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 19,
@@ -263,7 +262,7 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 20,
@@ -276,8 +275,8 @@ class InsuranceCompaniesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => null,
                 'updated_by' => null,
-                'deleted_by' => null
-            ]
+                'deleted_by' => null,
+            ],
         ]);
     }
 }

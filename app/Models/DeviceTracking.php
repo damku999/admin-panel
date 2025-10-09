@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Facades\Hash;
 
 /**
  * App\Models\DeviceTracking
@@ -87,10 +86,10 @@ class DeviceTracking extends Model
     public function scopeTrusted($query)
     {
         return $query->where('is_trusted', true)
-                    ->where(function ($q) {
-                        $q->whereNull('trust_expires_at')
-                          ->orWhere('trust_expires_at', '>', now());
-                    });
+            ->where(function ($q) {
+                $q->whereNull('trust_expires_at')
+                    ->orWhere('trust_expires_at', '>', now());
+            });
     }
 
     public function scopeUntrusted($query)
@@ -117,18 +116,18 @@ class DeviceTracking extends Model
     {
         return $query->where(function ($q) {
             $q->where('failed_login_attempts', '>=', 3)
-              ->orWhere('trust_score', '<', 30)
-              ->orWhereHas('securityEvents', function ($eventQuery) {
-                  $eventQuery->where('event_severity', 'high')
-                            ->orWhere('event_severity', 'critical')
-                            ->where('is_resolved', false);
-              });
+                ->orWhere('trust_score', '<', 30)
+                ->orWhereHas('securityEvents', function ($eventQuery) {
+                    $eventQuery->where('event_severity', 'high')
+                        ->orWhere('event_severity', 'critical')
+                        ->where('is_resolved', false);
+                });
         });
     }
 
     public function isTrusted(): bool
     {
-        return $this->is_trusted && !$this->isTrustExpired();
+        return $this->is_trusted && ! $this->isTrustExpired();
     }
 
     public function isTrustExpired(): bool
@@ -146,7 +145,7 @@ class DeviceTracking extends Model
         return $this->trust_score < 50 || $this->failed_login_attempts >= 3;
     }
 
-    public function grantTrust(int $durationDays = 30, string $reason = null): void
+    public function grantTrust(int $durationDays = 30, ?string $reason = null): void
     {
         $this->update([
             'is_trusted' => true,
@@ -158,7 +157,7 @@ class DeviceTracking extends Model
         $this->logSecurityEvent('trust_granted', 'medium', $reason ?? 'Device trust granted by user');
     }
 
-    public function revokeTrust(string $reason = null): void
+    public function revokeTrust(?string $reason = null): void
     {
         $this->update([
             'is_trusted' => false,
@@ -181,7 +180,7 @@ class DeviceTracking extends Model
         $this->logSecurityEvent('device_blocked', 'high', "Device blocked: {$reason}");
     }
 
-    public function unblockDevice(string $reason = null): void
+    public function unblockDevice(?string $reason = null): void
     {
         $this->update([
             'is_blocked' => false,
@@ -192,7 +191,7 @@ class DeviceTracking extends Model
         $this->logSecurityEvent('device_unblocked', 'medium', $reason ?? 'Device unblocked');
     }
 
-    public function recordSuccessfulLogin(string $ip, array $location = null): void
+    public function recordSuccessfulLogin(string $ip, ?array $location = null): void
     {
         $this->increment('login_count');
         $this->update([
@@ -256,9 +255,9 @@ class DeviceTracking extends Model
 
         // Security events penalty
         $criticalEvents = $this->securityEvents()
-                               ->where('event_severity', 'critical')
-                               ->where('is_resolved', false)
-                               ->count();
+            ->where('event_severity', 'critical')
+            ->where('is_resolved', false)
+            ->count();
         $score -= $criticalEvents * 10;
 
         return max(0, min(100, $score));
@@ -270,7 +269,7 @@ class DeviceTracking extends Model
         $this->update(['trust_score' => $newScore]);
 
         // Auto-block if score is too low
-        if ($newScore < 20 && !$this->is_blocked) {
+        if ($newScore < 20 && ! $this->is_blocked) {
             $this->blockDevice('Trust score too low');
         }
     }
@@ -287,20 +286,22 @@ class DeviceTracking extends Model
     public function getLastLocationAttribute(): ?array
     {
         $history = $this->location_history ?? [];
+
         return end($history) ?: null;
     }
 
     public function getLastIpAttribute(): ?string
     {
         $history = $this->ip_history ?? [];
+
         return end($history) ?: null;
     }
 
     public function getActivitySummary(int $days = 30): array
     {
         $sessions = $this->sessions()
-                        ->where('started_at', '>=', now()->subDays($days))
-                        ->get();
+            ->where('started_at', '>=', now()->subDays($days))
+            ->get();
 
         return [
             'total_sessions' => $sessions->count(),
@@ -316,7 +317,8 @@ class DeviceTracking extends Model
     {
         // Create a unique device ID based on fingerprint data
         $fingerprintString = json_encode($fingerprintData);
-        return 'device_' . hash('sha256', $fingerprintString);
+
+        return 'device_'.hash('sha256', $fingerprintString);
     }
 
     protected function logSecurityEvent(string $type, string $severity, string $description, array $data = []): void
@@ -332,9 +334,11 @@ class DeviceTracking extends Model
         ]);
     }
 
-    protected function updateLocationHistory(array $location = null): void
+    protected function updateLocationHistory(?array $location = null): void
     {
-        if (!$location) return;
+        if (! $location) {
+            return;
+        }
 
         $history = $this->location_history ?? [];
         $history[] = array_merge($location, ['timestamp' => now()->toISOString()]);

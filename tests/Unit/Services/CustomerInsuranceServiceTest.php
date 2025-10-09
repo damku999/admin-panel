@@ -1,7 +1,7 @@
 <?php
 
-use App\Services\CustomerInsuranceService;
 use App\Models\CustomerInsurance;
+use App\Services\CustomerInsuranceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\ReferenceUser;
 use App\Services\ReferenceUserService;
 use App\Traits\ExportableTrait;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
 
@@ -28,7 +28,6 @@ class ReferenceUsersController extends AbstractBaseCrudController
     /**
      * List ReferenceUsers
      *
-     * @param Request $request
      * @return \Illuminate\View\View
      */
     public function index(Request $request)
@@ -36,7 +35,7 @@ class ReferenceUsersController extends AbstractBaseCrudController
         $query = ReferenceUser::query();
 
         if ($request->filled('search')) {
-            $searchTerm = '%' . trim($request->search) . '%';
+            $searchTerm = '%'.trim($request->search).'%';
             $query->where('name', 'LIKE', $searchTerm)
                 ->orWhere('email', 'LIKE', $searchTerm)
                 ->orWhere('mobile_number', 'LIKE', $searchTerm);
@@ -60,7 +59,6 @@ class ReferenceUsersController extends AbstractBaseCrudController
     /**
      * Store ReferenceUser
      *
-     * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
@@ -75,9 +73,10 @@ class ReferenceUsersController extends AbstractBaseCrudController
 
         try {
             $this->referenceUserService->createReferenceUser($validated);
+
             return $this->redirectWithSuccess('reference_users.index', $this->getSuccessMessage('Reference User', 'created'));
         } catch (Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Reference User', 'create') . ': ' . $th->getMessage())
+            return $this->redirectWithError($this->getErrorMessage('Reference User', 'create').': '.$th->getMessage())
                 ->withInput();
         }
     }
@@ -85,8 +84,8 @@ class ReferenceUsersController extends AbstractBaseCrudController
     /**
      * Update Status Of ReferenceUser
      *
-     * @param Integer $reference_user_id
-     * @param Integer $status
+     * @param  int  $reference_user_id
+     * @param  int  $status
      * @return \Illuminate\Http\RedirectResponse
      */
     public function updateStatus($reference_user_id, $status)
@@ -107,16 +106,16 @@ class ReferenceUsersController extends AbstractBaseCrudController
 
         try {
             $this->referenceUserService->updateStatus($reference_user_id, $status);
+
             return $this->redirectWithSuccess('reference_users.index', $this->getSuccessMessage('Reference User Status', 'updated'));
         } catch (Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Reference User Status', 'update') . ': ' . $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Reference User Status', 'update').': '.$th->getMessage());
         }
     }
 
     /**
      * Edit ReferenceUser
      *
-     * @param ReferenceUser $reference_user
      * @return \Illuminate\View\View
      */
     public function edit(ReferenceUser $reference_user)
@@ -127,8 +126,6 @@ class ReferenceUsersController extends AbstractBaseCrudController
     /**
      * Update ReferenceUser
      *
-     * @param Request $request
-     * @param ReferenceUser $reference_user
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, ReferenceUser $reference_user)
@@ -143,9 +140,10 @@ class ReferenceUsersController extends AbstractBaseCrudController
 
         try {
             $this->referenceUserService->updateReferenceUser($reference_user, $validated);
+
             return $this->redirectWithSuccess('reference_users.index', $this->getSuccessMessage('Reference User', 'updated'));
         } catch (Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Reference User', 'update') . ': ' . $th->getMessage())
+            return $this->redirectWithError($this->getErrorMessage('Reference User', 'update').': '.$th->getMessage())
                 ->withInput();
         }
     }
@@ -153,16 +151,16 @@ class ReferenceUsersController extends AbstractBaseCrudController
     /**
      * Delete ReferenceUser
      *
-     * @param ReferenceUser $reference_user
      * @return \Illuminate\Http\RedirectResponse
      */
     public function delete(ReferenceUser $reference_user)
     {
         try {
             $this->referenceUserService->deleteReferenceUser($reference_user);
+
             return $this->redirectWithSuccess('reference_users.index', $this->getSuccessMessage('Reference User', 'deleted'));
         } catch (Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Reference User', 'delete') . ': ' . $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Reference User', 'delete').': '.$th->getMessage());
         }
     }
 
@@ -196,17 +194,17 @@ class ReferenceUsersController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
             'headings' => ['ID', 'Name', 'Email', 'Mobile Number', 'Status', 'Created Date'],
-            'mapping' => function($model) {
+            'mapping' => function ($model) {
                 return [
                     $model->id,
                     $model->name,
                     $model->email ?? 'N/A',
                     $model->mobile_number ?? 'N/A',
                     $model->status ? 'Active' : 'Inactive',
-                    $model->created_at->format('Y-m-d H:i:s')
+                    $model->created_at->format('Y-m-d H:i:s'),
                 ];
             },
-            'with_mapping' => true
+            'with_mapping' => true,
         ];
     }
 }

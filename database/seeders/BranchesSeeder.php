@@ -28,8 +28,8 @@ class BranchesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
-            ]
+                'deleted_by' => null,
+            ],
         ]);
 
         $this->command->info('Branches seeded successfully!');

@@ -6,11 +6,11 @@ use App\Contracts\Services\QuotationServiceInterface;
 use App\Http\Requests\CreateQuotationRequest;
 use App\Http\Requests\UpdateQuotationRequest;
 use App\Models\Quotation;
+use App\Traits\ExportableTrait;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
-use App\Traits\ExportableTrait;
 
 /**
  * Quotation Controller
@@ -31,19 +31,63 @@ class QuotationController extends AbstractBaseCrudController
             ['permission' => 'quotation-generate', 'only' => ['generateQuotes']],
             ['permission' => 'quotation-send-whatsapp', 'only' => ['sendToWhatsApp']],
             ['permission' => 'quotation-download-pdf', 'only' => ['downloadPdf']],
-            ['permission' => 'quotation-delete', 'only' => ['delete']]
+            ['permission' => 'quotation-delete', 'only' => ['delete']],
         ]);
     }
 
-    public function index(Request $request): View
+    public function index(Request $request)
     {
+        // Handle AJAX requests for Select2 autocomplete
+        if ($request->ajax() || $request->has('ajax')) {
+            $search = $request->input('q', $request->input('search', ''));
+
+            $query = \App\Models\Quotation::with('customer:id,name')
+                ->select('id', 'customer_id', 'registration_no', 'vehicle_make', 'vehicle_model', 'created_at');
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('registration_no', 'LIKE', "%{$search}%")
+                        ->orWhere('vehicle_make', 'LIKE', "%{$search}%")
+                        ->orWhere('vehicle_model', 'LIKE', "%{$search}%")
+                        ->orWhereHas('customer', function ($cq) use ($search) {
+                            $cq->where('name', 'LIKE', "%{$search}%");
+                        });
+                });
+            }
+
+            $quotations = $query->orderBy('created_at', 'desc')
+                ->limit(20)
+                ->get();
+
+            // Format for Select2
+            return response()->json([
+                'results' => $quotations->map(function ($quotation) {
+                    $label = 'ID:'.$quotation->id;
+                    if ($quotation->registration_no) {
+                        $label .= ' | '.$quotation->registration_no;
+                    }
+                    if ($quotation->vehicle_make || $quotation->vehicle_model) {
+                        $label .= ' | '.trim($quotation->vehicle_make.' '.$quotation->vehicle_model);
+                    }
+                    $label .= ' - '.($quotation->customer?->name ?? 'Unknown');
+
+                    return [
+                        'id' => $quotation->id,
+                        'text' => $label,
+                    ];
+                }),
+            ]);
+        }
+
         $quotations = $this->quotationService->getQuotations($request);
+
         return view('quotations.index', compact('quotations'));
     }
 
     public function create(): View
     {
         $formData = $this->quotationService->getQuotationFormData();
+
         return view('quotations.create', $formData);
     }
 
@@ -58,7 +102,8 @@ class QuotationController extends AbstractBaseCrudController
             return $this->redirectWithSuccess('quotations.show', 'Quotation created successfully. Generating quotes from multiple companies...', ['quotation' => $quotation]);
         } catch (\Throwable $th) {
             DB::rollBack();
-            return $this->redirectWithError('Failed to create quotation: ' . $th->getMessage())
+
+            return $this->redirectWithError('Failed to create quotation: '.$th->getMessage())
                 ->withInput();
         }
     }
@@ -74,7 +119,7 @@ class QuotationController extends AbstractBaseCrudController
     {
         $formData = $this->quotationService->getQuotationFormData();
         $formData['quotation'] = $quotation;
-        
+
         return view('quotations.edit', $formData);
     }
 
@@ -93,11 +138,11 @@ class QuotationController extends AbstractBaseCrudController
             return $this->redirectWithSuccess('quotations.show', 'Quotation updated successfully!', ['quotation' => $quotation]);
         } catch (\Throwable $th) {
             DB::rollBack();
-            return $this->redirectWithError('Failed to update quotation: ' . $th->getMessage())
+
+            return $this->redirectWithError('Failed to update quotation: '.$th->getMessage())
                 ->withInput();
         }
     }
-
 
     public function generateQuotes(Quotation $quotation): RedirectResponse
     {
@@ -106,7 +151,7 @@ class QuotationController extends AbstractBaseCrudController
 
             return $this->redirectWithSuccess(null, 'Quotes generated successfully from all companies!');
         } catch (\Throwable $th) {
-            return $this->redirectWithError('Failed to generate quotes: ' . $th->getMessage());
+            return $this->redirectWithError('Failed to generate quotes: '.$th->getMessage());
         }
     }
 
@@ -117,7 +162,7 @@ class QuotationController extends AbstractBaseCrudController
 
             return $this->redirectWithSuccess(null, 'Quotation sent via WhatsApp successfully!');
         } catch (\Throwable $th) {
-            return $this->redirectWithError('Failed to send quotation: ' . $th->getMessage());
+            return $this->redirectWithError('Failed to send quotation: '.$th->getMessage());
         }
     }
 
@@ -126,7 +171,7 @@ class QuotationController extends AbstractBaseCrudController
         try {
             return $this->quotationService->generatePdf($quotation);
         } catch (\Throwable $th) {
-            return $this->redirectWithError('Failed to generate PDF: ' . $th->getMessage());
+            return $this->redirectWithError('Failed to generate PDF: '.$th->getMessage());
         }
     }
 
@@ -134,7 +179,7 @@ class QuotationController extends AbstractBaseCrudController
     {
         $formData = $this->quotationService->getQuotationFormData();
         $formData['currentIndex'] = $request->input('index', 0);
-        
+
         return view('quotations.partials.quote-form', $formData)->render();
     }
 
@@ -157,7 +202,7 @@ class QuotationController extends AbstractBaseCrudController
 
             return $this->redirectWithError('Failed to delete quotation.');
         } catch (\Throwable $th) {
-            return $this->redirectWithError('Failed to delete quotation: ' . $th->getMessage());
+            return $this->redirectWithError('Failed to delete quotation: '.$th->getMessage());
         }
     }
 
@@ -181,17 +226,17 @@ class QuotationController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
             'headings' => ['ID', 'Customer', 'Insurance Type', 'Status', 'Companies Count', 'Created Date'],
-            'mapping' => function($quotation) {
+            'mapping' => function ($quotation) {
                 return [
                     $quotation->id,
                     $quotation->customer->name ?? 'N/A',
                     $quotation->insurance_type ?? 'N/A',
                     $quotation->status ? 'Active' : 'Inactive',
                     $quotation->quotationCompanies()->count(),
-                    $quotation->created_at->format('Y-m-d H:i:s')
+                    $quotation->created_at->format('Y-m-d H:i:s'),
                 ];
             },
-            'with_mapping' => true
+            'with_mapping' => true,
         ];
     }
 }

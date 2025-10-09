@@ -6,7 +6,6 @@ use App\Models\AuditLog;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 
 class AuditService
 {
@@ -79,46 +78,46 @@ class AuditService
     {
         $query = AuditLog::with(['auditable', 'actor']);
 
-        if (!empty($filters['event'])) {
+        if (! empty($filters['event'])) {
             $query->where('event', $filters['event']);
         }
 
-        if (!empty($filters['event_category'])) {
+        if (! empty($filters['event_category'])) {
             $query->where('event_category', $filters['event_category']);
         }
 
-        if (!empty($filters['risk_level'])) {
+        if (! empty($filters['risk_level'])) {
             $query->where('risk_level', $filters['risk_level']);
         }
 
-        if (!empty($filters['is_suspicious'])) {
+        if (! empty($filters['is_suspicious'])) {
             $query->where('is_suspicious', $filters['is_suspicious']);
         }
 
-        if (!empty($filters['ip_address'])) {
+        if (! empty($filters['ip_address'])) {
             $query->where('ip_address', $filters['ip_address']);
         }
 
-        if (!empty($filters['actor_id']) && !empty($filters['actor_type'])) {
+        if (! empty($filters['actor_id']) && ! empty($filters['actor_type'])) {
             $query->where('actor_id', $filters['actor_id'])
-                  ->where('actor_type', $filters['actor_type']);
+                ->where('actor_type', $filters['actor_type']);
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->where('occurred_at', '>=', Carbon::parse($filters['date_from']));
         }
 
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $query->where('occurred_at', '<=', Carbon::parse($filters['date_to'])->endOfDay());
         }
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('event', 'like', "%{$search}%")
-                  ->orWhere('ip_address', 'like', "%{$search}%")
-                  ->orWhere('user_agent', 'like', "%{$search}%")
-                  ->orWhereJsonContains('metadata', $search);
+                    ->orWhere('ip_address', 'like', "%{$search}%")
+                    ->orWhere('user_agent', 'like', "%{$search}%")
+                    ->orWhereJsonContains('metadata', $search);
             });
         }
 
@@ -197,6 +196,7 @@ class AuditService
         }
 
         arsort($factors);
+
         return array_slice($factors, 0, 10);
     }
 
@@ -244,8 +244,8 @@ class AuditService
                 $log->id,
                 $log->event,
                 $log->event_category,
-                $log->actor_type ? class_basename($log->actor_type) . '#' . $log->actor_id : 'System',
-                $log->auditable_type ? class_basename($log->auditable_type) . '#' . $log->auditable_id : 'N/A',
+                $log->actor_type ? class_basename($log->actor_type).'#'.$log->actor_id : 'System',
+                $log->auditable_type ? class_basename($log->auditable_type).'#'.$log->auditable_id : 'N/A',
                 $log->ip_address,
                 $log->risk_level,
                 $log->risk_score,

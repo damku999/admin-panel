@@ -4,9 +4,9 @@ namespace App\Services;
 
 use App\Contracts\Repositories\FamilyGroupRepositoryInterface;
 use App\Contracts\Services\FamilyGroupServiceInterface;
+use App\Models\Customer;
 use App\Models\FamilyGroup;
 use App\Models\FamilyMember;
-use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
@@ -22,15 +22,11 @@ class FamilyGroupService extends BaseService implements FamilyGroupServiceInterf
 {
     /**
      * Family Group Repository instance
-     *
-     * @var FamilyGroupRepositoryInterface
      */
     private FamilyGroupRepositoryInterface $familyGroupRepository;
 
     /**
      * Constructor
-     *
-     * @param FamilyGroupRepositoryInterface $familyGroupRepository
      */
     public function __construct(FamilyGroupRepositoryInterface $familyGroupRepository)
     {
@@ -78,16 +74,16 @@ class FamilyGroupService extends BaseService implements FamilyGroupServiceInterf
             $familyHead = Customer::find($data['family_head_id']);
 
             // Use admin-provided password or generate one
-            $customPassword = !empty($data['family_head_password']) ? $data['family_head_password'] : null;
+            $customPassword = ! empty($data['family_head_password']) ? $data['family_head_password'] : null;
             $forcePasswordChange = $data['force_password_change'] ?? true;
 
-            if ($customPassword || !$familyHead->hasVerifiedEmail() || $familyHead->needsPasswordChange()) {
+            if ($customPassword || ! $familyHead->hasVerifiedEmail() || $familyHead->needsPasswordChange()) {
                 $password = $customPassword ? $familyHead->setCustomPassword($customPassword, $forcePasswordChange) : $familyHead->setDefaultPassword();
                 $passwordNotifications[] = [
                     'customer' => $familyHead,
                     'password' => $password,
                     'is_head' => true,
-                    'admin_set' => !empty($customPassword)
+                    'admin_set' => ! empty($customPassword),
                 ];
             }
 
@@ -101,7 +97,7 @@ class FamilyGroupService extends BaseService implements FamilyGroupServiceInterf
             ]);
 
             // Add other family members if provided
-            if (!empty($data['member_ids'])) {
+            if (! empty($data['member_ids'])) {
                 foreach ($data['member_ids'] as $index => $memberId) {
                     if ($memberId != $data['family_head_id']) {
                         Customer::where('id', $memberId)
@@ -109,12 +105,12 @@ class FamilyGroupService extends BaseService implements FamilyGroupServiceInterf
 
                         // Setup password for family member
                         $familyMember = Customer::find($memberId);
-                        if (!$familyMember->hasVerifiedEmail() || $familyMember->needsPasswordChange()) {
+                        if (! $familyMember->hasVerifiedEmail() || $familyMember->needsPasswordChange()) {
                             $password = $familyMember->setDefaultPassword();
                             $passwordNotifications[] = [
                                 'customer' => $familyMember,
                                 'password' => $password,
-                                'is_head' => false
+                                'is_head' => false,
                             ];
                         }
 
@@ -253,7 +249,7 @@ class FamilyGroupService extends BaseService implements FamilyGroupServiceInterf
 
             // Setup password if needed
             $customer = Customer::find($memberData['customer_id']);
-            if (!$customer->hasVerifiedEmail() || $customer->needsPasswordChange()) {
+            if (! $customer->hasVerifiedEmail() || $customer->needsPasswordChange()) {
                 $customer->setDefaultPassword();
             }
 
@@ -312,12 +308,12 @@ class FamilyGroupService extends BaseService implements FamilyGroupServiceInterf
 
         foreach ($memberIds as $memberId) {
             $customer = Customer::find($memberId);
-            if ($customer && (!$customer->hasVerifiedEmail() || $customer->needsPasswordChange())) {
+            if ($customer && (! $customer->hasVerifiedEmail() || $customer->needsPasswordChange())) {
                 $password = $customer->setDefaultPassword();
                 $passwordNotifications[] = [
                     'customer' => $customer,
                     'password' => $password,
-                    'is_head' => false
+                    'is_head' => false,
                 ];
             }
         }
@@ -342,12 +338,14 @@ class FamilyGroupService extends BaseService implements FamilyGroupServiceInterf
                     ]);
                 }
             }
+
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to send password notifications', [
                 'family_group_id' => $familyGroup->id,
                 'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -371,14 +369,14 @@ class FamilyGroupService extends BaseService implements FamilyGroupServiceInterf
     {
         $orphanedCount = FamilyMember::whereNotExists(function ($query) {
             $query->select(\DB::raw(1))
-                  ->from('family_groups')
-                  ->whereRaw('family_groups.id = family_members.family_group_id');
+                ->from('family_groups')
+                ->whereRaw('family_groups.id = family_members.family_group_id');
         })->count();
 
         FamilyMember::whereNotExists(function ($query) {
             $query->select(\DB::raw(1))
-                  ->from('family_groups')
-                  ->whereRaw('family_groups.id = family_members.family_group_id');
+                ->from('family_groups')
+                ->whereRaw('family_groups.id = family_members.family_group_id');
         })->delete();
 
         if ($orphanedCount > 0) {
@@ -403,17 +401,13 @@ class FamilyGroupService extends BaseService implements FamilyGroupServiceInterf
                 'error' => $e->getMessage(),
                 'user_id' => auth()->id(),
             ]);
+
             return [];
         }
     }
 
     /**
      * Update family members for a family group
-     *
-     * @param FamilyGroup $familyGroup
-     * @param array $memberIds
-     * @param array $relationships
-     * @return void
      */
     private function updateFamilyMembers(FamilyGroup $familyGroup, array $memberIds, array $relationships = []): void
     {
@@ -467,7 +461,7 @@ class FamilyGroupService extends BaseService implements FamilyGroupServiceInterf
                 'family_group_id' => null,
                 'password' => null,
                 'email_verified_at' => null,
-                'password_reset_sent_at' => null
+                'password_reset_sent_at' => null,
             ]);
 
             // Delete the family member record

@@ -17,18 +17,19 @@ class AppSettingController extends AbstractBaseCrudController
     protected AppSettingService $appSettingService;
 
     protected array $categories = [
+        'application' => 'Application',
+        'company' => 'Company',
         'whatsapp' => 'WhatsApp',
         'mail' => 'Mail',
-        'application' => 'Application',
         'notifications' => 'Notifications',
-        'general' => 'General'
+        'general' => 'General',
     ];
 
     protected array $types = [
         'string' => 'String',
         'json' => 'JSON',
         'boolean' => 'Boolean',
-        'numeric' => 'Numeric'
+        'numeric' => 'Numeric',
     ];
 
     public function __construct(AppSettingService $appSettingService)
@@ -40,7 +41,6 @@ class AppSettingController extends AbstractBaseCrudController
     /**
      * Display a listing of the app settings
      *
-     * @param Request $request
      * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function index(Request $request)
@@ -68,14 +68,36 @@ class AppSettingController extends AbstractBaseCrudController
                 $query->where('is_active', $request->status);
             }
 
-            $settings = $query->orderBy('category')->orderBy('key')->paginate(config('app.pagination_default', 15));
+            // Sorting
+            $sortBy = $request->get('sort_by', 'category');
+            $sortOrder = $request->get('sort_order', 'asc');
+
+            // Validate sort columns
+            $allowedSorts = ['key', 'category', 'type', 'is_active', 'created_at', 'updated_at'];
+            if (! in_array($sortBy, $allowedSorts)) {
+                $sortBy = 'category';
+            }
+
+            // Validate sort order
+            if (! in_array($sortOrder, ['asc', 'desc'])) {
+                $sortOrder = 'asc';
+            }
+
+            // Apply sorting with secondary sort by key
+            if ($sortBy === 'category') {
+                $settings = $query->orderBy($sortBy, $sortOrder)->orderBy('key', 'asc')->paginate(config('app.pagination_default', 15));
+            } else {
+                $settings = $query->orderBy($sortBy, $sortOrder)->paginate(config('app.pagination_default', 15));
+            }
+
+            $settings->appends($request->except('page'));
 
             return view('app_settings.index', [
                 'settings' => $settings,
-                'categories' => $this->categories
+                'categories' => $this->categories,
             ]);
         } catch (\Throwable $th) {
-            return $this->redirectWithError('Failed to load settings: ' . $th->getMessage());
+            return $this->redirectWithError('Failed to load settings: '.$th->getMessage());
         }
     }
 
@@ -88,14 +110,13 @@ class AppSettingController extends AbstractBaseCrudController
     {
         return view('app_settings.create', [
             'categories' => $this->categories,
-            'types' => $this->types
+            'types' => $this->types,
         ]);
     }
 
     /**
      * Store a newly created app setting in storage
      *
-     * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
@@ -104,10 +125,10 @@ class AppSettingController extends AbstractBaseCrudController
             'key' => 'required|string|max:255|unique:app_settings,key',
             'value' => 'required',
             'type' => 'required|in:string,json,boolean,numeric',
-            'category' => 'required|in:whatsapp,mail,application,notifications,general',
+            'category' => 'required|in:application,company,whatsapp,mail,notifications,general',
             'description' => 'nullable|string|max:1000',
             'is_encrypted' => 'nullable|boolean',
-            'is_active' => 'nullable|boolean'
+            'is_active' => 'nullable|boolean',
         ]);
 
         try {
@@ -130,7 +151,7 @@ class AppSettingController extends AbstractBaseCrudController
                     'category' => $request->category,
                     'description' => $request->description,
                     'is_encrypted' => $request->has('is_encrypted'),
-                    'is_active' => $request->has('is_active') ? 1 : 0
+                    'is_active' => $request->has('is_active') ? 1 : 0,
                 ]
             );
 
@@ -140,7 +161,7 @@ class AppSettingController extends AbstractBaseCrudController
             );
         } catch (\Throwable $th) {
             return $this->redirectWithError(
-                $this->getErrorMessage('App Setting', 'create') . ': ' . $th->getMessage()
+                $this->getErrorMessage('App Setting', 'create').': '.$th->getMessage()
             )->withInput();
         }
     }
@@ -148,7 +169,7 @@ class AppSettingController extends AbstractBaseCrudController
     /**
      * Display the specified app setting
      *
-     * @param int $id
+     * @param  int  $id
      * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function show($id)
@@ -159,17 +180,17 @@ class AppSettingController extends AbstractBaseCrudController
             return view('app_settings.show', [
                 'setting' => $setting,
                 'categories' => $this->categories,
-                'types' => $this->types
+                'types' => $this->types,
             ]);
         } catch (\Throwable $th) {
-            return $this->redirectWithError('Setting not found: ' . $th->getMessage());
+            return $this->redirectWithError('Setting not found: '.$th->getMessage());
         }
     }
 
     /**
      * Show the form for editing the specified app setting
      *
-     * @param int $id
+     * @param  int  $id
      * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
      */
     public function edit($id)
@@ -180,30 +201,29 @@ class AppSettingController extends AbstractBaseCrudController
             return view('app_settings.edit', [
                 'setting' => $setting,
                 'categories' => $this->categories,
-                'types' => $this->types
+                'types' => $this->types,
             ]);
         } catch (\Throwable $th) {
-            return $this->redirectWithError('Setting not found: ' . $th->getMessage());
+            return $this->redirectWithError('Setting not found: '.$th->getMessage());
         }
     }
 
     /**
      * Update the specified app setting in storage
      *
-     * @param Request $request
-     * @param int $id
+     * @param  int  $id
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, $id)
     {
         $request->validate([
-            'key' => 'required|string|max:255|unique:app_settings,key,' . $id,
+            'key' => 'required|string|max:255|unique:app_settings,key,'.$id,
             'value' => 'required',
             'type' => 'required|in:string,json,boolean,numeric',
-            'category' => 'required|in:whatsapp,mail,application,notifications,general',
+            'category' => 'required|in:application,company,whatsapp,mail,notifications,general',
             'description' => 'nullable|string|max:1000',
             'is_encrypted' => 'nullable|boolean',
-            'is_active' => 'nullable|boolean'
+            'is_active' => 'nullable|boolean',
         ]);
 
         try {
@@ -229,7 +249,7 @@ class AppSettingController extends AbstractBaseCrudController
             );
         } catch (\Throwable $th) {
             return $this->redirectWithError(
-                $this->getErrorMessage('App Setting', 'update') . ': ' . $th->getMessage()
+                $this->getErrorMessage('App Setting', 'update').': '.$th->getMessage()
             )->withInput();
         }
     }
@@ -237,7 +257,7 @@ class AppSettingController extends AbstractBaseCrudController
     /**
      * Remove the specified app setting from storage (soft delete / mark inactive)
      *
-     * @param int $id
+     * @param  int  $id
      * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy($id)
@@ -255,7 +275,7 @@ class AppSettingController extends AbstractBaseCrudController
                 }
             }
 
-            if (!$isAuthorized) {
+            if (! $isAuthorized) {
                 return $this->redirectWithError(
                     'You do not have permission to delete app settings. Only @webmonks.in or @midastech.in users can delete settings.'
                 );
@@ -275,7 +295,7 @@ class AppSettingController extends AbstractBaseCrudController
             );
         } catch (\Throwable $th) {
             return $this->redirectWithError(
-                $this->getErrorMessage('App Setting', 'deactivate') . ': ' . $th->getMessage()
+                $this->getErrorMessage('App Setting', 'deactivate').': '.$th->getMessage()
             );
         }
     }
@@ -283,8 +303,8 @@ class AppSettingController extends AbstractBaseCrudController
     /**
      * Toggle setting status
      *
-     * @param int $id
-     * @param int $status
+     * @param  int  $id
+     * @param  int  $status
      * @return \Illuminate\Http\RedirectResponse
      */
     public function updateStatus($id, $status)
@@ -302,7 +322,7 @@ class AppSettingController extends AbstractBaseCrudController
             );
         } catch (\Throwable $th) {
             return $this->redirectWithError(
-                $this->getErrorMessage('App Setting status', 'update') . ': ' . $th->getMessage()
+                $this->getErrorMessage('App Setting status', 'update').': '.$th->getMessage()
             );
         }
     }
@@ -310,7 +330,7 @@ class AppSettingController extends AbstractBaseCrudController
     /**
      * Get decrypted value for encrypted setting (AJAX)
      *
-     * @param int $id
+     * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function getDecryptedValue($id)
@@ -318,10 +338,10 @@ class AppSettingController extends AbstractBaseCrudController
         try {
             $setting = AppSetting::findOrFail($id);
 
-            if (!$setting->is_encrypted) {
+            if (! $setting->is_encrypted) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'This setting is not encrypted.'
+                    'message' => 'This setting is not encrypted.',
                 ], 400);
             }
 
@@ -330,13 +350,13 @@ class AppSettingController extends AbstractBaseCrudController
 
             return response()->json([
                 'success' => true,
-                'value' => $decryptedValue
+                'value' => $decryptedValue,
             ]);
 
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error decrypting value: ' . $th->getMessage()
+                'message' => 'Error decrypting value: '.$th->getMessage(),
             ], 500);
         }
     }

@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 it('has correct fillable attributes', function () {
-    $branch = new Branch();
+    $branch = new Branch;
     $fillable = ['name', 'email', 'mobile_number', 'status'];
 
     expect($branch->getFillable())->toBe($fillable);

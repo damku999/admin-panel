@@ -56,7 +56,7 @@ trait ExportableTrait
             $query = app($modelClass)->newQuery();
 
             foreach ($searchFields as $field) {
-                $query->orWhere($field, 'like', '%' . $request->search . '%');
+                $query->orWhere($field, 'like', '%'.$request->search.'%');
             }
 
             return $exportService->export($query, $config);
@@ -76,7 +76,7 @@ trait ExportableTrait
             );
         }
 
-        if (!empty($filters)) {
+        if (! empty($filters)) {
             return $exportService->exportFiltered($modelClass, $filters, $config);
         }
 
@@ -94,7 +94,7 @@ trait ExportableTrait
 
         $modelClass = "App\\Models\\{$modelName}";
 
-        if (!class_exists($modelClass)) {
+        if (! class_exists($modelClass)) {
             throw new \Exception("Model class {$modelClass} not found. Override getExportModelClass()");
         }
 
@@ -109,7 +109,7 @@ trait ExportableTrait
             'with_headings' => true,
             'auto_size' => true,
             'relations' => $this->getExportRelations(),
-            'order_by' => $this->getExportOrderBy()
+            'order_by' => $this->getExportOrderBy(),
         ];
     }
 
@@ -117,7 +117,7 @@ trait ExportableTrait
     {
         $controllerName = class_basename($this);
 
-        return match($controllerName) {
+        return match ($controllerName) {
             'CustomerController' => 'customers',
             default => null
         };

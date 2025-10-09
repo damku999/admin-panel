@@ -15,8 +15,6 @@ class PremiumTypeService extends BaseService
     /**
      * Create a new premium type
      *
-     * @param array $data
-     * @return PremiumType
      * @throws \Throwable
      */
     public function createPremiumType(array $data): PremiumType
@@ -24,16 +22,13 @@ class PremiumTypeService extends BaseService
         $this->validateVehicleAndLifeInsurance($data);
 
         return $this->createInTransaction(
-            fn() => PremiumType::create($data)
+            fn () => PremiumType::create($data)
         );
     }
 
     /**
      * Update an existing premium type
      *
-     * @param PremiumType $premiumType
-     * @param array $data
-     * @return bool
      * @throws \Throwable
      */
     public function updatePremiumType(PremiumType $premiumType, array $data): bool
@@ -41,43 +36,37 @@ class PremiumTypeService extends BaseService
         $this->validateVehicleAndLifeInsurance($data);
 
         return $this->updateInTransaction(
-            fn() => $premiumType->update($data)
+            fn () => $premiumType->update($data)
         );
     }
 
     /**
      * Delete a premium type
      *
-     * @param PremiumType $premiumType
-     * @return bool
      * @throws \Throwable
      */
     public function deletePremiumType(PremiumType $premiumType): bool
     {
         return $this->deleteInTransaction(
-            fn() => $premiumType->delete()
+            fn () => $premiumType->delete()
         );
     }
 
     /**
      * Update premium type status
      *
-     * @param int $premiumTypeId
-     * @param int $status
-     * @return bool
      * @throws \Throwable
      */
     public function updateStatus(int $premiumTypeId, int $status): bool
     {
         return $this->executeInTransaction(
-            fn() => PremiumType::whereId($premiumTypeId)->update(['status' => $status])
+            fn () => PremiumType::whereId($premiumTypeId)->update(['status' => $status])
         );
     }
 
     /**
      * Validate that both vehicle and life insurance cannot be true
      *
-     * @param array $data
      * @throws \InvalidArgumentException
      */
     private function validateVehicleAndLifeInsurance(array $data): void

@@ -26,25 +26,30 @@ class FuelTypeController extends AbstractBaseCrudController
 
     /**
      * List FuelType
+     *
      * @param Nill
-     * @return Array $fuel_type
+     * @return array $fuel_type
+     *
      * @author Darshan Baraiya
      */
     public function index(Request $request)
     {
         $fuel_type_obj = FuelType::select('*');
-        if (!empty($request->search)) {
-            $fuel_type_obj->where('name', 'LIKE', '%' . trim($request->search) . '%');
+        if (! empty($request->search)) {
+            $fuel_type_obj->where('name', 'LIKE', '%'.trim($request->search).'%');
         }
 
         $fuel_type = $fuel_type_obj->paginate(config('app.pagination_default', 15));
+
         return view('fuel_type.index', ['fuel_type' => $fuel_type, 'request' => $request->all()]);
     }
 
     /**
      * Create FuelType
+     *
      * @param Nill
-     * @return Array $fuel_type
+     * @return array $fuel_type
+     *
      * @author Darshan Baraiya
      */
     public function create()
@@ -54,8 +59,9 @@ class FuelTypeController extends AbstractBaseCrudController
 
     /**
      * Store FuelType
-     * @param Request $request
+     *
      * @return View FuelTypes
+     *
      * @author Darshan Baraiya
      */
     public function store(Request $request)
@@ -69,17 +75,20 @@ class FuelTypeController extends AbstractBaseCrudController
 
         try {
             $this->fuelTypeService->createFuelType($validated);
+
             return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type', 'created'));
         } catch (\Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'create') . ': ' . $th->getMessage())
+            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'create').': '.$th->getMessage())
                 ->withInput();
         }
     }
 
     /**
      * Update Status Of FuelType
-     * @param Integer $status
+     *
+     * @param  int  $status
      * @return List Page With Success
+     *
      * @author Darshan Baraiya
      */
     public function updateStatus($fuel_type_id, $status)
@@ -100,16 +109,19 @@ class FuelTypeController extends AbstractBaseCrudController
 
         try {
             $this->fuelTypeService->updateStatus($fuel_type_id, $status);
+
             return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type Status', 'updated'));
         } catch (\Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Fuel Type Status', 'update') . ': ' . $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Fuel Type Status', 'update').': '.$th->getMessage());
         }
     }
 
     /**
      * Edit FuelType
-     * @param Integer $fuel_type
+     *
+     * @param  int  $fuel_type
      * @return Collection $fuel_type
+     *
      * @author Darshan Baraiya
      */
     public function edit(FuelType $fuel_type)
@@ -121,8 +133,10 @@ class FuelTypeController extends AbstractBaseCrudController
 
     /**
      * Update FuelType
-     * @param Request $request, FuelType $fuel_type
+     *
+     * @param  Request  $request,  FuelType $fuel_type
      * @return View FuelTypes
+     *
      * @author Darshan Baraiya
      */
     public function update(Request $request, FuelType $fuel_type)
@@ -135,32 +149,36 @@ class FuelTypeController extends AbstractBaseCrudController
 
         try {
             $this->fuelTypeService->updateFuelType($fuel_type, $validated);
+
             return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type', 'updated'));
         } catch (\Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'update') . ': ' . $th->getMessage())
+            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'update').': '.$th->getMessage())
                 ->withInput();
         }
     }
 
     /**
      * Delete FuelType
-     * @param FuelType $fuel_type
+     *
      * @return Index FuelTypes
+     *
      * @author Darshan Baraiya
      */
     public function delete(FuelType $fuel_type)
     {
         try {
             $this->fuelTypeService->deleteFuelType($fuel_type);
+
             return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type', 'deleted'));
         } catch (\Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'delete') . ': ' . $th->getMessage());
+            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'delete').': '.$th->getMessage());
         }
     }
 
     /**
      * Import FuelTypes
-     * @param Null
+     *
+     * @param null
      * @return View File
      */
     public function importFuelTypes()
@@ -188,15 +206,15 @@ class FuelTypeController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
             'headings' => ['ID', 'Name', 'Status', 'Created Date'],
-            'mapping' => function($model) {
+            'mapping' => function ($model) {
                 return [
                     $model->id,
                     $model->name,
                     $model->status ? 'Active' : 'Inactive',
-                    $model->created_at->format('Y-m-d H:i:s')
+                    $model->created_at->format('Y-m-d H:i:s'),
                 ];
             },
-            'with_mapping' => true
+            'with_mapping' => true,
         ];
     }
 }

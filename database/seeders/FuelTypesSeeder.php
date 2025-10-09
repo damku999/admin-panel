@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +26,7 @@ class FuelTypesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 2,
@@ -38,7 +37,7 @@ class FuelTypesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 3,
@@ -49,7 +48,7 @@ class FuelTypesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 4,
@@ -60,8 +59,8 @@ class FuelTypesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
-            ]
+                'deleted_by' => null,
+            ],
         ]);
     }
 }

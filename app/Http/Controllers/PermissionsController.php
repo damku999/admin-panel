@@ -26,7 +26,7 @@ class PermissionsController extends AbstractBaseCrudController
             ['permission' => 'permission-list|permission-create|permission-edit|permission-delete', 'only' => ['index']],
             ['permission' => 'permission-create', 'only' => ['create', 'store']],
             ['permission' => 'permission-edit', 'only' => ['edit', 'update']],
-            ['permission' => 'permission-delete', 'only' => ['destroy']]
+            ['permission' => 'permission-delete', 'only' => ['destroy']],
         ]);
     }
 
@@ -40,7 +40,7 @@ class PermissionsController extends AbstractBaseCrudController
         $permissions = $this->permissionRepository->getPermissionsWithFilters($request, 10);
 
         return view('permissions.index', [
-            'permissions' => $permissions
+            'permissions' => $permissions,
         ]);
     }
 
@@ -57,7 +57,6 @@ class PermissionsController extends AbstractBaseCrudController
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -65,7 +64,7 @@ class PermissionsController extends AbstractBaseCrudController
         try {
             $request->validate([
                 'name' => 'required',
-                'guard_name' => 'required'
+                'guard_name' => 'required',
             ]);
 
             DB::beginTransaction();
@@ -76,8 +75,9 @@ class PermissionsController extends AbstractBaseCrudController
                 $this->getSuccessMessage('Permission', 'created'));
         } catch (\Throwable $th) {
             DB::rollback();
+
             return $this->redirectWithError(
-                $this->getErrorMessage('Permission', 'create') . ': ' . $th->getMessage());
+                $this->getErrorMessage('Permission', 'create').': '.$th->getMessage());
         }
     }
 
@@ -91,7 +91,7 @@ class PermissionsController extends AbstractBaseCrudController
     {
         $permission = $this->permissionRepository->getPermissionWithRoles($id);
 
-        if (!$permission) {
+        if (! $permission) {
             return $this->redirectWithError(
                 $this->getErrorMessage('Permission', 'find'));
         }
@@ -109,7 +109,7 @@ class PermissionsController extends AbstractBaseCrudController
     {
         $permission = $this->permissionRepository->findById($id);
 
-        if (!$permission) {
+        if (! $permission) {
             return $this->redirectWithError(
                 $this->getErrorMessage('Permission', 'find'));
         }
@@ -120,7 +120,6 @@ class PermissionsController extends AbstractBaseCrudController
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
@@ -129,11 +128,11 @@ class PermissionsController extends AbstractBaseCrudController
         try {
             $request->validate([
                 'name' => 'required',
-                'guard_name' => 'required'
+                'guard_name' => 'required',
             ]);
 
             $permission = $this->permissionRepository->findById($id);
-            if (!$permission) {
+            if (! $permission) {
                 return $this->redirectWithError(
                     $this->getErrorMessage('Permission', 'find'));
             }
@@ -146,8 +145,9 @@ class PermissionsController extends AbstractBaseCrudController
                 $this->getSuccessMessage('Permission', 'updated'));
         } catch (\Throwable $th) {
             DB::rollback();
+
             return $this->redirectWithError(
-                $this->getErrorMessage('Permission', 'update') . ': ' . $th->getMessage());
+                $this->getErrorMessage('Permission', 'update').': '.$th->getMessage());
         }
     }
 
@@ -161,7 +161,7 @@ class PermissionsController extends AbstractBaseCrudController
     {
         try {
             $permission = $this->permissionRepository->findById($id);
-            if (!$permission) {
+            if (! $permission) {
                 return $this->redirectWithError(
                     $this->getErrorMessage('Permission', 'find'));
             }
@@ -174,8 +174,9 @@ class PermissionsController extends AbstractBaseCrudController
                 $this->getSuccessMessage('Permission', 'deleted'));
         } catch (\Throwable $th) {
             DB::rollback();
+
             return $this->redirectWithError(
-                $this->getErrorMessage('Permission', 'delete') . ': ' . $th->getMessage());
+                $this->getErrorMessage('Permission', 'delete').': '.$th->getMessage());
         }
     }
 }

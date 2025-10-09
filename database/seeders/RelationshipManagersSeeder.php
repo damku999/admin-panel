@@ -30,7 +30,7 @@ class RelationshipManagersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 2,
@@ -43,7 +43,7 @@ class RelationshipManagersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 3,
@@ -56,7 +56,7 @@ class RelationshipManagersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 4,
@@ -69,7 +69,7 @@ class RelationshipManagersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 5,
@@ -82,7 +82,7 @@ class RelationshipManagersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 6,
@@ -95,7 +95,7 @@ class RelationshipManagersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 7,
@@ -108,7 +108,7 @@ class RelationshipManagersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 8,
@@ -121,7 +121,7 @@ class RelationshipManagersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 9,
@@ -134,7 +134,7 @@ class RelationshipManagersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 10,
@@ -147,8 +147,8 @@ class RelationshipManagersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
-            ]
+                'deleted_by' => null,
+            ],
         ]);
 
         $this->command->info('Relationship managers seeded successfully!');

@@ -2,10 +2,9 @@
 
 namespace App\Models\Customer;
 
+use App\Models\Customer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use App\Models\Customer;
-use Carbon\Carbon;
 
 /**
  * Customer-specific Trusted Device Model
@@ -60,7 +59,7 @@ class CustomerTrustedDevice extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true)
-                    ->where('expires_at', '>', now());
+            ->where('expires_at', '>', now());
     }
 
     /**
@@ -76,7 +75,7 @@ class CustomerTrustedDevice extends Model
      */
     public function isActive(): bool
     {
-        return $this->is_active && !$this->isExpired();
+        return $this->is_active && ! $this->isExpired();
     }
 
     /**
@@ -111,7 +110,7 @@ class CustomerTrustedDevice extends Model
      */
     public static function generateDeviceId(string $userAgent, string $ipAddress): string
     {
-        return hash('sha256', $userAgent . '|' . $ipAddress);
+        return hash('sha256', $userAgent.'|'.$ipAddress);
     }
 
     /**
@@ -167,6 +166,6 @@ class CustomerTrustedDevice extends Model
      */
     public static function createDeviceName(array $deviceInfo): string
     {
-        return $deviceInfo['browser'] . ' on ' . $deviceInfo['platform'];
+        return $deviceInfo['browser'].' on '.$deviceInfo['platform'];
     }
 }

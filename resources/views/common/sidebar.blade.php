@@ -75,6 +75,54 @@
     <!-- Divider -->
     <hr class="border-light border-opacity-25 my-2 mx-3">
 
+    <!-- NOTIFICATIONS SUBMENU -->
+    @php
+        $notificationRoutes = ['notification-templates.*', 'admin.notification-logs.*', 'admin.customer-devices.*'];
+        $isNotificationActive = collect($notificationRoutes)->contains(fn($route) => request()->routeIs($route));
+    @endphp
+    <div class="nav-item">
+        <a class="nav-link d-flex align-items-center justify-content-between py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ $isNotificationActive ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}"
+           href="#notificationSubmenu"
+           data-bs-toggle="collapse"
+           role="button"
+           data-tooltip="Notifications"
+           aria-expanded="{{ $isNotificationActive ? 'true' : 'false' }}"
+           aria-controls="notificationSubmenu">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-bell me-3"></i>
+                <span>Notifications</span>
+            </div>
+            <i class="fas fa-chevron-{{ $isNotificationActive ? 'up' : 'down' }}"></i>
+        </a>
+        <div class="collapse {{ $isNotificationActive ? 'show' : '' }}" id="notificationSubmenu">
+            <div class="ms-4">
+                <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('notification-templates.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('notification-templates.index') }}">
+                    <i class="fas fa-file-alt me-3 fs-6"></i>
+                    <span>Templates</span>
+                </a>
+                <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('admin.notification-logs.index') && !request()->routeIs('admin.notification-logs.analytics') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('admin.notification-logs.index') }}">
+                    <i class="fas fa-list me-3 fs-6"></i>
+                    <span>Notification Logs</span>
+                </a>
+                <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('admin.notification-logs.analytics') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('admin.notification-logs.analytics') }}">
+                    <i class="fas fa-chart-line me-3 fs-6"></i>
+                    <span>Analytics</span>
+                </a>
+                <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('admin.customer-devices.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('admin.customer-devices.index') }}">
+                    <i class="fas fa-mobile-alt me-3 fs-6"></i>
+                    <span>Customer Devices</span>
+                </a>
+                <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('admin.notification-logs.index') && request('status') == 'failed' ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('admin.notification-logs.index', ['status' => 'failed']) }}">
+                    <i class="fas fa-exclamation-triangle text-danger me-3 fs-6"></i>
+                    <span>Failed Notifications</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Divider -->
+    <hr class="border-light border-opacity-25 my-2 mx-3">
+
     <!-- MASTER DATA SUBMENU -->
     @php
         $masterRoutes = ['relationship_managers.*', 'reference_users.*', 'insurance_companies.*', 'brokers.*', 'addon-covers.*', 'policy_type.*', 'premium_type.*', 'fuel_type.*', 'branches.*'];
@@ -141,7 +189,7 @@
 
     <!-- USERS & ADMINISTRATION SUBMENU -->
     @php
-        $adminRoutes = ['users.*', 'roles.*', 'permissions.*', 'app-settings.*', 'notification-templates.*'];
+        $adminRoutes = ['users.*', 'roles.*', 'permissions.*', 'app-settings.*'];
         $isAdminActive = collect($adminRoutes)->contains(fn($route) => request()->routeIs($route));
     @endphp
     <div class="nav-item">
@@ -175,10 +223,6 @@
                 <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('app-settings.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('app-settings.index') }}">
                     <i class="fas fa-cog me-3 fs-6"></i>
                     <span>App Settings</span>
-                </a>
-                <a class="nav-link d-flex align-items-center py-2 mx-2 my-1 rounded text-white-50 text-decoration-none {{ request()->routeIs('notification-templates.*') ? 'bg-light bg-opacity-10 text-white fw-semibold' : '' }}" href="{{ route('notification-templates.index') }}">
-                    <i class="fas fa-envelope me-3 fs-6"></i>
-                    <span>Message Templates</span>
                 </a>
             </div>
         </div>

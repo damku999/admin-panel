@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -26,7 +25,7 @@ class PremiumTypesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'name' => 'ROLLOVER',
@@ -36,7 +35,7 @@ class PremiumTypesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'name' => 'RENEWAL',
@@ -46,8 +45,8 @@ class PremiumTypesSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
-            ]
+                'deleted_by' => null,
+            ],
         ]);
     }
 }

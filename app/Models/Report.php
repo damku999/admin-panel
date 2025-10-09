@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\CustomerInsurance;
 use App\Traits\TableRecordObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -32,6 +31,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|Report newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Report newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Report onlyTrashed()
@@ -51,11 +51,12 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static \Illuminate\Database\Eloquent\Builder|Report withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Report withoutTrashed()
  * @method static \Database\Factories\ReportFactory factory($count = null, $state = [])
+ *
  * @mixin \Eloquent
  */
 class Report extends Authenticatable
 {
-    use HasFactory, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
+    use HasFactory, HasRoles, LogsActivity, SoftDeletes, TableRecordObserver;
 
     protected $guarded = [];
 
@@ -80,11 +81,10 @@ class Report extends Authenticatable
     /**
      * @return \Illuminate\Support\Collection
      */
-
     public static function getInsuranceReport($filters)
     {
 
-        // Note: Column selection will be handled by frontend/views, 
+        // Note: Column selection will be handled by frontend/views,
         // this method just retrieves the data with all necessary relationships
 
         $customerInsurances = CustomerInsurance::with(
@@ -97,60 +97,64 @@ class Report extends Authenticatable
             'policyType',
             'fuelType'
         )
-            ->when(!empty($filters['record_creation_start_date']), function ($query) use ($filters) {
-                $startDate = \App\Helpers\DateHelper::isValidDatabaseFormat($filters['record_creation_start_date']) 
-                    ? $filters['record_creation_start_date'] 
+            ->when(! empty($filters['record_creation_start_date']), function ($query) use ($filters) {
+                $startDate = \App\Helpers\DateHelper::isValidDatabaseFormat($filters['record_creation_start_date'])
+                    ? $filters['record_creation_start_date']
                     : formatDateForDatabase($filters['record_creation_start_date']);
+
                 return $query->where('created_at', '>=', Carbon::parse($startDate)->startOfDay()->format('Y-m-d H:i:s'));
             })
-            ->when(!empty($filters['record_creation_end_date']), function ($query) use ($filters) {
-                $endDate = \App\Helpers\DateHelper::isValidDatabaseFormat($filters['record_creation_end_date']) 
-                    ? $filters['record_creation_end_date'] 
+            ->when(! empty($filters['record_creation_end_date']), function ($query) use ($filters) {
+                $endDate = \App\Helpers\DateHelper::isValidDatabaseFormat($filters['record_creation_end_date'])
+                    ? $filters['record_creation_end_date']
                     : formatDateForDatabase($filters['record_creation_end_date']);
+
                 return $query->where('created_at', '<=', Carbon::parse($endDate)->endOfDay()->format('Y-m-d H:i:s'));
             })
-            ->when(!empty($filters['issue_start_date']), function ($query) use ($filters) {
+            ->when(! empty($filters['issue_start_date']), function ($query) use ($filters) {
                 try {
                     $startDate = Carbon::createFromFormat('d/m/Y', $filters['issue_start_date'])->format('Y-m-d');
+
                     return $query->where('issue_date', '>=', $startDate);
                 } catch (\Exception $e) {
                     return $query->where('issue_date', '>=', $filters['issue_start_date']);
                 }
             })
-            ->when(!empty($filters['issue_end_date']), function ($query) use ($filters) {
+            ->when(! empty($filters['issue_end_date']), function ($query) use ($filters) {
                 try {
                     $endDate = Carbon::createFromFormat('d/m/Y', $filters['issue_end_date'])->format('Y-m-d');
+
                     return $query->where('issue_date', '<=', $endDate);
                 } catch (\Exception $e) {
                     return $query->where('issue_date', '<=', $filters['issue_end_date']);
                 }
             })
-            ->when(!empty($filters['broker_id']), function ($query) use ($filters) {
+            ->when(! empty($filters['broker_id']), function ($query) use ($filters) {
                 return $query->whereHas('broker', function ($query) use ($filters) {
                     $query->where('id', $filters['broker_id']);
                 });
             })
-            ->when(!empty($filters['relationship_manager_id']), function ($query) use ($filters) {
+            ->when(! empty($filters['relationship_manager_id']), function ($query) use ($filters) {
                 return $query->whereHas('relationshipManager', function ($query) use ($filters) {
                     $query->where('id', $filters['relationship_manager_id']);
                 });
             })
-            ->when(!empty($filters['insurance_company_id']), function ($query) use ($filters) {
+            ->when(! empty($filters['insurance_company_id']), function ($query) use ($filters) {
                 return $query->whereHas('insuranceCompany', function ($query) use ($filters) {
                     $query->where('id', $filters['insurance_company_id']);
                 });
             })
-            ->when(!empty($filters['policy_type_id']), function ($query) use ($filters) {
+            ->when(! empty($filters['policy_type_id']), function ($query) use ($filters) {
                 return $query->whereHas('policyType', function ($query) use ($filters) {
                     $query->where('id', $filters['policy_type_id']);
                 });
             })
-            ->when(!empty($filters['fuel_type_id']), function ($query) use ($filters) {
+            ->when(! empty($filters['fuel_type_id']), function ($query) use ($filters) {
                 return $query->whereHas('fuelType', function ($query) use ($filters) {
                     $query->where('id', $filters['fuel_type_id']);
                 });
             })
-            ->when(!empty($filters['premium_type_id']), function ($query) use ($filters) {
+            ->when(! empty($filters['premium_type_id']), function ($query) use ($filters) {
                 return $query->whereHas('premiumType', function ($query) use ($filters) {
                     if (is_array($filters['premium_type_id'])) {
                         $query->whereIn('id', $filters['premium_type_id']);
@@ -159,12 +163,12 @@ class Report extends Authenticatable
                     }
                 });
             })
-            ->when(!empty($filters['customer_id']), function ($query) use ($filters) {
+            ->when(! empty($filters['customer_id']), function ($query) use ($filters) {
                 return $query->whereHas('customer', function ($query) use ($filters) {
                     $query->where('id', $filters['customer_id']);
                 });
             })
-            ->when(!empty($filters['due_start_date']), function ($query) use ($filters) {
+            ->when(! empty($filters['due_start_date']), function ($query) use ($filters) {
                 // Due dates can be in m/Y or mm/Y format, handle both
                 try {
                     $dateStr = trim($filters['due_start_date']);
@@ -185,7 +189,7 @@ class Report extends Authenticatable
                         }
                     }
 
-                    if (!$startDate) {
+                    if (! $startDate) {
                         throw new \Exception("Unable to parse date: {$dateStr}");
                     }
 
@@ -195,19 +199,20 @@ class Report extends Authenticatable
                         'input' => $dateStr,
                         'format_used' => $usedFormat,
                         'parsed' => $formattedDate,
-                        'query' => "expired_date >= {$formattedDate}"
+                        'query' => "expired_date >= {$formattedDate}",
                     ]);
 
                     return $query->where('expired_date', '>=', $formattedDate);
                 } catch (\Exception $e) {
                     \Log::error('❌ Due start date parsing failed', [
                         'input' => $filters['due_start_date'] ?? 'null',
-                        'error' => $e->getMessage()
+                        'error' => $e->getMessage(),
                     ]);
+
                     return $query;
                 }
             })
-            ->when(!empty($filters['due_end_date']), function ($query) use ($filters) {
+            ->when(! empty($filters['due_end_date']), function ($query) use ($filters) {
                 // Due dates can be in m/Y or mm/Y format, handle both
                 try {
                     $dateStr = trim($filters['due_end_date']);
@@ -228,7 +233,7 @@ class Report extends Authenticatable
                         }
                     }
 
-                    if (!$endDate) {
+                    if (! $endDate) {
                         throw new \Exception("Unable to parse date: {$dateStr}");
                     }
 
@@ -238,33 +243,36 @@ class Report extends Authenticatable
                         'input' => $dateStr,
                         'format_used' => $usedFormat,
                         'parsed' => $formattedDate,
-                        'query' => "expired_date <= {$formattedDate}"
+                        'query' => "expired_date <= {$formattedDate}",
                     ]);
 
                     return $query->where('expired_date', '<=', $formattedDate);
                 } catch (\Exception $e) {
                     \Log::error('❌ Due end date parsing failed', [
                         'input' => $filters['due_end_date'] ?? 'null',
-                        'error' => $e->getMessage()
+                        'error' => $e->getMessage(),
                     ]);
+
                     return $query;
                 }
             })
-            ->when(!empty($filters['status']), function ($query) use ($filters) {
+            ->when(! empty($filters['status']), function ($query) use ($filters) {
                 if ($filters['status'] === 'active') {
                     return $query->where('status', 1);
                 } elseif ($filters['status'] === 'inactive') {
                     return $query->where('status', 0);
                 }
+
                 return $query;
             })
-            ->when(!empty($filters['premium_amount_min']), function ($query) use ($filters) {
+            ->when(! empty($filters['premium_amount_min']), function ($query) use ($filters) {
                 return $query->where('final_premium_with_gst', '>=', $filters['premium_amount_min']);
             })
-            ->when(!empty($filters['premium_amount_max']), function ($query) use ($filters) {
+            ->when(! empty($filters['premium_amount_max']), function ($query) use ($filters) {
                 return $query->where('final_premium_with_gst', '<=', $filters['premium_amount_max']);
             })
             ->get();
+
         return $customerInsurances;
     }
 }

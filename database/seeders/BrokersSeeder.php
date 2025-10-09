@@ -30,7 +30,7 @@ class BrokersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 2,
@@ -43,7 +43,7 @@ class BrokersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 3,
@@ -56,7 +56,7 @@ class BrokersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 4,
@@ -69,7 +69,7 @@ class BrokersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
+                'deleted_by' => null,
             ],
             [
                 'id' => 5,
@@ -82,8 +82,8 @@ class BrokersSeeder extends Seeder
                 'deleted_at' => null,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'deleted_by' => null
-            ]
+                'deleted_by' => null,
+            ],
         ]);
 
         $this->command->info('Brokers seeded successfully!');

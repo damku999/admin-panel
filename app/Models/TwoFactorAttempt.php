@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class TwoFactorAttempt extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'authenticatable_type',
         'authenticatable_id',
@@ -83,7 +84,7 @@ class TwoFactorAttempt extends Model
      */
     public function getCodeTypeDisplay(): string
     {
-        return match($this->code_type) {
+        return match ($this->code_type) {
             'totp' => 'Authenticator App',
             'recovery' => 'Recovery Code',
             'sms' => 'SMS',

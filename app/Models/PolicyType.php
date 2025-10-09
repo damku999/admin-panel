@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
-use App\Models\CustomerInsurance;
-use Spatie\Activitylog\LogOptions;
 use App\Traits\TableRecordObserver;
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Notifications\Notifiable;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * App\Models\PolicyType
@@ -34,6 +33,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property-read int|null $permissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|PolicyType newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|PolicyType newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|PolicyType onlyTrashed()
@@ -51,13 +51,17 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @method static \Illuminate\Database\Eloquent\Builder|PolicyType whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|PolicyType withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|PolicyType withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class PolicyType extends Authenticatable
 {
-    use  HasFactory, Notifiable, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
+    use HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes, TableRecordObserver;
+
     protected static $logAttributes = ['*'];
+
     protected static $logOnlyDirty = true;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -71,6 +75,7 @@ class PolicyType extends Authenticatable
     {
         return $this->hasMany(CustomerInsurance::class, 'policy_type_id');
     }
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults();

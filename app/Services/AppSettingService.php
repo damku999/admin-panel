@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Cache;
 class AppSettingService
 {
     protected const CACHE_PREFIX = 'app_setting_';
+
     protected const CACHE_TTL = 3600; // 1 hour
 
     /**
@@ -15,7 +16,7 @@ class AppSettingService
      */
     public static function get(string $key, $default = null)
     {
-        $cacheKey = self::CACHE_PREFIX . $key;
+        $cacheKey = self::CACHE_PREFIX.$key;
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($key, $default) {
             $setting = AppSetting::where('key', $key)
@@ -49,7 +50,7 @@ class AppSettingService
         // Save
         $setting->save();
 
-        Cache::forget(self::CACHE_PREFIX . $key);
+        Cache::forget(self::CACHE_PREFIX.$key);
 
         return $setting;
     }
@@ -60,6 +61,7 @@ class AppSettingService
     public static function setEncrypted(string $key, $value, array $options = []): AppSetting
     {
         $options['is_encrypted'] = true;
+
         return self::set($key, $value, $options);
     }
 
@@ -68,7 +70,7 @@ class AppSettingService
      */
     public static function getByCategory(string $category): array
     {
-        $cacheKey = self::CACHE_PREFIX . 'category_' . $category;
+        $cacheKey = self::CACHE_PREFIX.'category_'.$category;
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($category) {
             $settings = AppSetting::where('category', $category)
@@ -94,6 +96,7 @@ class AppSettingService
         foreach ($keys as $key) {
             $result[$key] = self::get($key);
         }
+
         return $result;
     }
 
@@ -106,7 +109,8 @@ class AppSettingService
 
         if ($setting) {
             $setting->delete();
-            Cache::forget(self::CACHE_PREFIX . $key);
+            Cache::forget(self::CACHE_PREFIX.$key);
+
             return true;
         }
 
@@ -121,9 +125,10 @@ class AppSettingService
         $setting = AppSetting::where('key', $key)->first();
 
         if ($setting) {
-            $setting->is_active = !$setting->is_active;
+            $setting->is_active = ! $setting->is_active;
             $setting->save();
-            Cache::forget(self::CACHE_PREFIX . $key);
+            Cache::forget(self::CACHE_PREFIX.$key);
+
             return true;
         }
 

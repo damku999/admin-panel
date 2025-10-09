@@ -11,10 +11,10 @@ class FileUploadService
     {
         $timestamp = time();
         $extension = $file->getClientOriginalExtension();
-        $filename = $this->sanitizeFilename($customerName) . '_' . $documentType . '_' . $timestamp . '.' . $extension;
-        
+        $filename = $this->sanitizeFilename($customerName).'_'.$documentType.'_'.$timestamp.'.'.$extension;
+
         return $file->storeAs(
-            'customers/' . $customerId . '/' . $documentType . '_path',
+            'customers/'.$customerId.'/'.$documentType.'_path',
             $filename,
             'public'
         );
@@ -25,7 +25,7 @@ class FileUploadService
         if (Storage::disk('public')->exists($path)) {
             return Storage::disk('public')->delete($path);
         }
-        
+
         return false;
     }
 
@@ -55,22 +55,22 @@ class FileUploadService
             $timestamp = time();
             $extension = $file->getClientOriginalExtension();
             $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-            $filename = $this->sanitizeFilename($originalName) . '_' . $timestamp . '.' . $extension;
-            
+            $filename = $this->sanitizeFilename($originalName).'_'.$timestamp.'.'.$extension;
+
             $filePath = $file->storeAs($directory, $filename, 'public');
-            
+
             return [
                 'status' => true,
                 'file_path' => $filePath,
                 'filename' => $filename,
-                'message' => 'File uploaded successfully'
+                'message' => 'File uploaded successfully',
             ];
         } catch (\Exception $e) {
             return [
                 'status' => false,
                 'file_path' => null,
                 'filename' => null,
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ];
         }
     }

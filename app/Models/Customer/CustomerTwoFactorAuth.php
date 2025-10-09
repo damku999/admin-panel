@@ -2,12 +2,11 @@
 
 namespace App\Models\Customer;
 
+use App\Models\Customer;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\Crypt;
-use App\Models\Customer;
-use Carbon\Carbon;
 
 /**
  * Customer-specific Two Factor Authentication Model
@@ -64,7 +63,9 @@ class CustomerTwoFactorAuth extends Model
     {
         return Attribute::make(
             get: function ($value) {
-                if (!$value) return null;
+                if (! $value) {
+                    return null;
+                }
 
                 // Handle legacy unencrypted secrets (backwards compatibility)
                 try {
@@ -73,8 +74,9 @@ class CustomerTwoFactorAuth extends Model
                     // If decryption fails, assume it's an old unencrypted secret
                     \Log::warning('Found legacy unencrypted customer 2FA secret', [
                         'customer_id' => $this->authenticatable_id,
-                        'secret_preview' => substr($value, 0, 8) . '...'
+                        'secret_preview' => substr($value, 0, 8).'...',
                     ]);
+
                     return $value;
                 }
             },
@@ -89,13 +91,19 @@ class CustomerTwoFactorAuth extends Model
     {
         return Attribute::make(
             get: function ($value) {
-                if (!$value) return null;
+                if (! $value) {
+                    return null;
+                }
                 $codes = json_decode($value, true);
-                return array_map(fn($code) => Crypt::decryptString($code), $codes);
+
+                return array_map(fn ($code) => Crypt::decryptString($code), $codes);
             },
             set: function ($value) {
-                if (!$value) return null;
-                $encryptedCodes = array_map(fn($code) => Crypt::encryptString($code), $value);
+                if (! $value) {
+                    return null;
+                }
+                $encryptedCodes = array_map(fn ($code) => Crypt::encryptString($code), $value);
+
                 return json_encode($encryptedCodes);
             },
         );
@@ -106,8 +114,8 @@ class CustomerTwoFactorAuth extends Model
      */
     public function isFullyConfigured(): bool
     {
-        return !empty($this->secret) &&
-               !empty($this->recovery_codes) &&
+        return ! empty($this->secret) &&
+               ! empty($this->recovery_codes) &&
                $this->confirmed_at !== null &&
                $this->is_active;
     }
@@ -117,8 +125,8 @@ class CustomerTwoFactorAuth extends Model
      */
     public function isPendingConfirmation(): bool
     {
-        return !empty($this->secret) &&
-               !empty($this->recovery_codes) &&
+        return ! empty($this->secret) &&
+               ! empty($this->recovery_codes) &&
                $this->confirmed_at === null &&
                $this->is_active;
     }
@@ -161,14 +169,15 @@ class CustomerTwoFactorAuth extends Model
             'upper_code' => $upperCode,
             'stored_codes' => $this->recovery_codes,
             'codes_exist' => is_array($this->recovery_codes),
-            'code_in_array' => is_array($this->recovery_codes) ? in_array($upperCode, $this->recovery_codes) : false
+            'code_in_array' => is_array($this->recovery_codes) ? in_array($upperCode, $this->recovery_codes) : false,
         ]);
 
-        if (!is_array($this->recovery_codes)) {
+        if (! is_array($this->recovery_codes)) {
             \Log::warning('Customer recovery code verification failed - no codes stored', [
                 'input_code' => $code,
-                'recovery_codes_type' => gettype($this->recovery_codes)
+                'recovery_codes_type' => gettype($this->recovery_codes),
             ]);
+
             return false;
         }
 
@@ -181,15 +190,17 @@ class CustomerTwoFactorAuth extends Model
 
             \Log::info('Customer recovery code used successfully', [
                 'used_code' => $upperCode,
-                'remaining_codes' => count($this->recovery_codes)
+                'remaining_codes' => count($this->recovery_codes),
             ]);
+
             return true;
         }
 
         \Log::warning('Customer recovery code verification failed', [
             'input_code' => $code,
-            'available_codes_count' => count($this->recovery_codes)
+            'available_codes_count' => count($this->recovery_codes),
         ]);
+
         return false;
     }
 

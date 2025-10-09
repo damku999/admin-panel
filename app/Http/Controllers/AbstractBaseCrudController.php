@@ -16,8 +16,7 @@ abstract class AbstractBaseCrudController extends Controller
      * This method provides standardized permission middleware setup for all CRUD controllers,
      * ensuring consistent security patterns across the application.
      *
-     * @param string $entityName The entity name for permission checks (e.g., 'broker', 'addon-cover')
-     * @return void
+     * @param  string  $entityName  The entity name for permission checks (e.g., 'broker', 'addon-cover')
      */
     protected function setupPermissionMiddleware(string $entityName): void
     {
@@ -33,7 +32,7 @@ abstract class AbstractBaseCrudController extends Controller
      *
      * For controllers that need custom permission patterns beyond standard CRUD.
      *
-     * @param array $permissions Array of permission configurations
+     * @param  array  $permissions  Array of permission configurations
      * @return void
      *
      * Example usage:
@@ -55,8 +54,6 @@ abstract class AbstractBaseCrudController extends Controller
      * Setup authentication middleware only
      *
      * For controllers that need authentication but no specific permissions.
-     *
-     * @return void
      */
     protected function setupAuthMiddleware(): void
     {
@@ -67,8 +64,6 @@ abstract class AbstractBaseCrudController extends Controller
      * Setup guest middleware
      *
      * For controllers that should only be accessible to guests (not authenticated users).
-     *
-     * @return void
      */
     protected function setupGuestMiddleware(): void
     {
@@ -78,9 +73,8 @@ abstract class AbstractBaseCrudController extends Controller
     /**
      * Get standardized success message for CRUD operations
      *
-     * @param string $entityName The entity name (e.g., 'Broker', 'Addon Cover')
-     * @param string $operation The operation performed ('created', 'updated', 'deleted')
-     * @return string
+     * @param  string  $entityName  The entity name (e.g., 'Broker', 'Addon Cover')
+     * @param  string  $operation  The operation performed ('created', 'updated', 'deleted')
      */
     protected function getSuccessMessage(string $entityName, string $operation): string
     {
@@ -90,9 +84,8 @@ abstract class AbstractBaseCrudController extends Controller
     /**
      * Get standardized error message for CRUD operations
      *
-     * @param string $entityName The entity name (e.g., 'Broker', 'Addon Cover')
-     * @param string $operation The operation attempted ('create', 'update', 'delete')
-     * @return string
+     * @param  string  $entityName  The entity name (e.g., 'Broker', 'Addon Cover')
+     * @param  string  $operation  The operation attempted ('create', 'update', 'delete')
      */
     protected function getErrorMessage(string $entityName, string $operation): string
     {
@@ -102,10 +95,9 @@ abstract class AbstractBaseCrudController extends Controller
     /**
      * Get redirect response with success message
      *
-     * @param string|null $route The route to redirect to (null for back)
-     * @param string $message The success message
-     * @param array $routeParameters Optional route parameters
-     * @return \Illuminate\Http\RedirectResponse
+     * @param  string|null  $route  The route to redirect to (null for back)
+     * @param  string  $message  The success message
+     * @param  array  $routeParameters  Optional route parameters
      */
     protected function redirectWithSuccess(?string $route, string $message, array $routeParameters = []): \Illuminate\Http\RedirectResponse
     {
@@ -113,7 +105,7 @@ abstract class AbstractBaseCrudController extends Controller
             return redirect()->back()->with('success', $message);
         }
 
-        if (!empty($routeParameters)) {
+        if (! empty($routeParameters)) {
             return redirect()->route($route, $routeParameters)->with('success', $message);
         }
 
@@ -123,8 +115,7 @@ abstract class AbstractBaseCrudController extends Controller
     /**
      * Get redirect response with error message
      *
-     * @param string $message The error message
-     * @return \Illuminate\Http\RedirectResponse
+     * @param  string  $message  The error message
      */
     protected function redirectWithError(string $message): \Illuminate\Http\RedirectResponse
     {
@@ -134,8 +125,7 @@ abstract class AbstractBaseCrudController extends Controller
     /**
      * Get redirect response with validation errors
      *
-     * @param \Illuminate\Contracts\Validation\Validator $validator The validator instance
-     * @return \Illuminate\Http\RedirectResponse
+     * @param  \Illuminate\Contracts\Validation\Validator  $validator  The validator instance
      */
     protected function redirectWithValidationErrors(\Illuminate\Contracts\Validation\Validator $validator): \Illuminate\Http\RedirectResponse
     {

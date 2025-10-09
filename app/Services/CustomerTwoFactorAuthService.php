@@ -3,9 +3,8 @@
 namespace App\Services;
 
 use App\Models\Customer;
-use App\Models\Customer\CustomerTwoFactorAuth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 /**
@@ -32,13 +31,13 @@ class CustomerTwoFactorAuthService
 
             Log::info('Customer 2FA setup started', [
                 'customer_id' => $customer->id,
-                'email' => $customer->email ?? 'N/A'
+                'email' => $customer->email ?? 'N/A',
             ]);
 
             // Generate QR code
             $qrCodeUrl = $customer->getCustomerTwoFactorQrCodeUrl();
 
-            if (!$qrCodeUrl) {
+            if (! $qrCodeUrl) {
                 throw new \Exception('Failed to generate QR code URL. Please try again.');
             }
 
@@ -53,7 +52,7 @@ class CustomerTwoFactorAuthService
             Log::error('Failed to enable customer 2FA', [
                 'customer_id' => $customer->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
             throw $e;
         }
@@ -65,7 +64,7 @@ class CustomerTwoFactorAuthService
     public function confirmTwoFactor(Customer $customer, string $code, Request $request): bool
     {
         try {
-            if (!$customer->hasCustomerTwoFactorPending()) {
+            if (! $customer->hasCustomerTwoFactorPending()) {
                 if (method_exists($customer, 'logTwoFactorAttempt')) {
                     $customer->logTwoFactorAttempt('totp', false, $request, '2FA setup not pending');
                 }
@@ -82,7 +81,7 @@ class CustomerTwoFactorAuthService
 
             $verified = $customer->confirmCustomerTwoFactor($code);
 
-            if (!$verified) {
+            if (! $verified) {
                 if (method_exists($customer, 'logTwoFactorAttempt')) {
                     $customer->logTwoFactorAttempt('totp', false, $request, 'Invalid setup code');
                 }
@@ -97,7 +96,7 @@ class CustomerTwoFactorAuthService
             Log::info('Customer 2FA confirmed and enabled', [
                 'customer_id' => $customer->id,
                 'email' => $customer->email ?? 'N/A',
-                'ip_address' => $request->ip()
+                'ip_address' => $request->ip(),
             ]);
 
             return true;
@@ -106,7 +105,7 @@ class CustomerTwoFactorAuthService
                 'customer_id' => $customer->id,
                 'error' => $e->getMessage(),
                 'code_length' => strlen($code),
-                'recent_failed_attempts' => method_exists($customer, 'getRecentFailedTwoFactorAttempts') ? $customer->getRecentFailedTwoFactorAttempts() : 0
+                'recent_failed_attempts' => method_exists($customer, 'getRecentFailedTwoFactorAttempts') ? $customer->getRecentFailedTwoFactorAttempts() : 0,
             ]);
             throw $e;
         }
@@ -115,40 +114,40 @@ class CustomerTwoFactorAuthService
     /**
      * Disable 2FA for customer
      */
-    public function disableTwoFactor(Customer $customer, string $currentPassword = null, bool $skipPasswordCheck = false): bool
+    public function disableTwoFactor(Customer $customer, ?string $currentPassword = null, bool $skipPasswordCheck = false): bool
     {
         try {
-            if (!$customer->hasCustomerTwoFactorEnabled()) {
+            if (! $customer->hasCustomerTwoFactorEnabled()) {
                 throw new \Exception('Two-factor authentication is not enabled.');
             }
 
             // Verify current password (unless explicitly skipped for family head actions)
-            if (!$skipPasswordCheck && !empty($currentPassword) && !$customer->checkPassword($currentPassword)) {
+            if (! $skipPasswordCheck && ! empty($currentPassword) && ! $customer->checkPassword($currentPassword)) {
                 throw new \Exception('Current password is incorrect.');
             }
 
             // Check password is provided when not skipping
-            if (!$skipPasswordCheck && empty($currentPassword)) {
+            if (! $skipPasswordCheck && empty($currentPassword)) {
                 throw new \Exception('Current password is required.');
             }
 
             $disabled = $customer->disableCustomerTwoFactor();
 
-            if (!$disabled) {
+            if (! $disabled) {
                 throw new \Exception('Failed to disable two-factor authentication.');
             }
 
             Log::info('Customer 2FA disabled', [
                 'customer_id' => $customer->id,
                 'email' => $customer->email ?? 'N/A',
-                'skip_password_check' => $skipPasswordCheck
+                'skip_password_check' => $skipPasswordCheck,
             ]);
 
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to disable customer 2FA', [
                 'customer_id' => $customer->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -157,10 +156,10 @@ class CustomerTwoFactorAuthService
     /**
      * Verify 2FA code for customer
      */
-    public function verifyCode(Customer $customer, string $code, Request $request = null): bool
+    public function verifyCode(Customer $customer, string $code, ?Request $request = null): bool
     {
         try {
-            if (!$customer->hasCustomerTwoFactorEnabled()) {
+            if (! $customer->hasCustomerTwoFactorEnabled()) {
                 if ($request && method_exists($customer, 'logTwoFactorAttempt')) {
                     $customer->logTwoFactorAttempt('totp', false, $request, '2FA not enabled');
                 }
@@ -191,8 +190,9 @@ class CustomerTwoFactorAuthService
                 'customer_id' => $customer->id,
                 'error' => $e->getMessage(),
                 'code_length' => strlen($code),
-                'recent_failed_attempts' => method_exists($customer, 'getRecentFailedTwoFactorAttempts') ? $customer->getRecentFailedTwoFactorAttempts() : 0
+                'recent_failed_attempts' => method_exists($customer, 'getRecentFailedTwoFactorAttempts') ? $customer->getRecentFailedTwoFactorAttempts() : 0,
             ]);
+
             return false;
         }
     }
@@ -203,7 +203,7 @@ class CustomerTwoFactorAuthService
     public function generateNewRecoveryCodes(Customer $customer): array
     {
         try {
-            if (!$customer->hasCustomerTwoFactorEnabled()) {
+            if (! $customer->hasCustomerTwoFactorEnabled()) {
                 throw new \Exception('Two-factor authentication is not enabled.');
             }
 
@@ -212,14 +212,14 @@ class CustomerTwoFactorAuthService
 
             Log::info('New customer recovery codes generated', [
                 'customer_id' => $customer->id,
-                'codes_count' => count($codes)
+                'codes_count' => count($codes),
             ]);
 
             return $codes;
         } catch (\Exception $e) {
             Log::error('Failed to generate customer recovery codes', [
                 'customer_id' => $customer->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -280,7 +280,7 @@ class CustomerTwoFactorAuthService
             Log::info('Customer device trusted', [
                 'customer_id' => $customer->id,
                 'device_name' => $trustedDevice->device_name,
-                'expires_at' => $trustedDevice->expires_at->format('Y-m-d H:i:s')
+                'expires_at' => $trustedDevice->expires_at->format('Y-m-d H:i:s'),
             ]);
 
             return [
@@ -291,7 +291,7 @@ class CustomerTwoFactorAuthService
         } catch (\Exception $e) {
             Log::error('Failed to trust customer device', [
                 'customer_id' => $customer->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -308,7 +308,7 @@ class CustomerTwoFactorAuthService
             if ($revoked) {
                 Log::info('Customer device trust revoked', [
                     'customer_id' => $customer->id,
-                    'device_id' => $deviceId
+                    'device_id' => $deviceId,
                 ]);
             }
 
@@ -317,8 +317,9 @@ class CustomerTwoFactorAuthService
             Log::error('Failed to revoke customer device trust', [
                 'customer_id' => $customer->id,
                 'device_id' => $deviceId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -333,8 +334,9 @@ class CustomerTwoFactorAuthService
         } catch (\Exception $e) {
             Log::error('Failed to check customer device trust', [
                 'customer_id' => $customer->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -345,7 +347,7 @@ class CustomerTwoFactorAuthService
     public function verifyTwoFactorLogin(Customer $customer, string $code, string $codeType, Request $request): bool
     {
         try {
-            if (!$customer->hasCustomerTwoFactorEnabled()) {
+            if (! $customer->hasCustomerTwoFactorEnabled()) {
                 if (method_exists($customer, 'logTwoFactorAttempt')) {
                     $customer->logTwoFactorAttempt($codeType, false, $request, '2FA not enabled');
                 }
@@ -385,7 +387,7 @@ class CustomerTwoFactorAuthService
                     throw new \Exception('Invalid code type.');
             }
 
-            if (!$isValid) {
+            if (! $isValid) {
                 if (method_exists($customer, 'logTwoFactorAttempt')) {
                     $customer->logTwoFactorAttempt($codeType, false, $request, 'Invalid code');
                 }
@@ -401,7 +403,7 @@ class CustomerTwoFactorAuthService
                 'customer_id' => $customer->id,
                 'email' => $customer->email ?? 'N/A',
                 'code_type' => $codeType,
-                'ip_address' => $request->ip()
+                'ip_address' => $request->ip(),
             ]);
 
             return true;
@@ -410,7 +412,7 @@ class CustomerTwoFactorAuthService
                 'customer_id' => $customer->id,
                 'error' => $e->getMessage(),
                 'code_type' => $codeType,
-                'recent_failed_attempts' => method_exists($customer, 'getRecentFailedTwoFactorAttempts') ? $customer->getRecentFailedTwoFactorAttempts() : 0
+                'recent_failed_attempts' => method_exists($customer, 'getRecentFailedTwoFactorAttempts') ? $customer->getRecentFailedTwoFactorAttempts() : 0,
             ]);
             throw $e;
         }
@@ -422,10 +424,10 @@ class CustomerTwoFactorAuthService
     private function generateQrCodeSvg(string $url): string
     {
         $svg = QrCode::format('svg')
-                    ->size(400)
-                    ->errorCorrection('M')
-                    ->margin(1)
-                    ->generate($url);
+            ->size(400)
+            ->errorCorrection('M')
+            ->margin(1)
+            ->generate($url);
 
         // Remove XML declaration for better HTML integration
         $svg = preg_replace('/<\?xml[^>]*\?>/i', '', $svg);

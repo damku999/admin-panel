@@ -112,7 +112,7 @@ Your Trusted Insurance Advisor
                     'notification_type_id' => $notificationTypes[$code]->id,
                     'channel' => 'whatsapp',
                     'subject' => null,
-                    'template_content' => "Dear *{{customer_name}}*
+                    'template_content' => 'Dear *{{customer_name}}*
 
 Your *{{policy_type}}* Under Policy No *{{policy_number}}* of *{{insurance_company}}* for Vehicle Number *{{vehicle_number}}* is due for renewal on *{{expiry_date}}*. To ensure continuous coverage, please renew by the due date.
 
@@ -122,7 +122,7 @@ Best regards,
 {{advisor_name}}
 {{company_website}}
 Your Trusted Insurance Advisor
-\"Think of Insurance, Think of Us.\"",
+"Think of Insurance, Think of Us."',
                     'available_variables' => json_encode(['customer_name', 'policy_number', 'policy_type', 'insurance_company', 'expiry_date', 'days_remaining', 'premium_amount', 'vehicle_number', 'advisor_name', 'company_website', 'company_phone']),
                     'sample_output' => "Dear *Raj Patel*\n\nYour *Comprehensive* Under Policy No *POL123456* of *HDFC ERGO*...",
                     'is_active' => true,
@@ -138,7 +138,7 @@ Your Trusted Insurance Advisor
                 'notification_type_id' => $notificationTypes['quotation_ready']->id,
                 'channel' => 'whatsapp',
                 'subject' => null,
-                'template_content' => "🚗 *Insurance Quotation*
+                'template_content' => '🚗 *Insurance Quotation*
 
 Dear *{{customer_name}}*,
 
@@ -163,7 +163,7 @@ Best regards,
 {{advisor_name}}
 {{company_website}}
 Your Trusted Insurance Advisor
-\"Think of Insurance, Think of Us.\"",
+"Think of Insurance, Think of Us."',
                 'available_variables' => json_encode(['customer_name', 'quotes_count', 'vehicle_make_model', 'vehicle_number', 'idv_amount', 'policy_type', 'policy_tenure', 'best_company_name', 'best_premium', 'comparison_list', 'advisor_name', 'company_phone', 'company_website']),
                 'sample_output' => "🚗 *Insurance Quotation*\n\nDear *Raj Patel*,\n\nYour insurance quotation is ready!...",
                 'is_active' => true,
@@ -182,7 +182,7 @@ Your Trusted Insurance Advisor
                 'notification_type_id' => $notificationTypes['claim_registered']->id,
                 'channel' => 'whatsapp',
                 'subject' => null,
-                'template_content' => "Dear customer,
+                'template_content' => 'Dear customer,
 
 Your Claim Number *{{claim_number}}* is registered for *{{vehicle_number}}*. We will keep you updated on the claim status.
 
@@ -192,7 +192,7 @@ Best regards,
 {{advisor_name}}
 {{company_website}}
 Your Trusted Insurance Advisor
-\"Think of Insurance, Think of Us.\"",
+"Think of Insurance, Think of Us."',
                 'available_variables' => json_encode(['claim_number', 'vehicle_number', 'advisor_name', 'company_website']),
                 'sample_output' => "Dear customer,\n\nYour Claim Number *CLM123456* is registered...",
                 'is_active' => true,
@@ -207,7 +207,7 @@ Your Trusted Insurance Advisor
                 'notification_type_id' => $notificationTypes['document_request_health']->id,
                 'channel' => 'whatsapp',
                 'subject' => null,
-                'template_content' => "🏥 *Health Insurance Claim Documents*
+                'template_content' => '🏥 *Health Insurance Claim Documents*
 
 For health Insurance - Kindly provide below mention documents for smooth processing:
 
@@ -227,7 +227,7 @@ Best regards,
 {{advisor_name}}
 {{company_website}}
 Your Trusted Insurance Advisor
-\"Think of Insurance, Think of Us.\"",
+"Think of Insurance, Think of Us."',
                 'available_variables' => json_encode(['advisor_name', 'company_website']),
                 'sample_output' => "🏥 *Health Insurance Claim Documents*\n\nFor health Insurance...",
                 'is_active' => true,
@@ -242,7 +242,7 @@ Your Trusted Insurance Advisor
                 'notification_type_id' => $notificationTypes['document_request_vehicle']->id,
                 'channel' => 'whatsapp',
                 'subject' => null,
-                'template_content' => "🚗 *Vehicle Insurance Claim Documents*
+                'template_content' => '🚗 *Vehicle Insurance Claim Documents*
 
 For Vehicle/Truck Insurance - Kindly provide below mention documents:
 
@@ -268,7 +268,7 @@ Best regards,
 {{advisor_name}}
 {{company_website}}
 Your Trusted Insurance Advisor
-\"Think of Insurance, Think of Us.\"",
+"Think of Insurance, Think of Us."',
                 'available_variables' => json_encode(['advisor_name', 'company_website']),
                 'sample_output' => "🚗 *Vehicle Insurance Claim Documents*\n\nFor Vehicle/Truck Insurance...",
                 'is_active' => true,
@@ -283,7 +283,7 @@ Your Trusted Insurance Advisor
                 'notification_type_id' => $notificationTypes['document_request_reminder']->id,
                 'channel' => 'whatsapp',
                 'subject' => null,
-                'template_content' => "📄 *Pending Documents Reminder*
+                'template_content' => '📄 *Pending Documents Reminder*
 
 Below are the Documents pending from your side. Send it as soon as possible:
 
@@ -295,7 +295,7 @@ Best regards,
 {{advisor_name}}
 {{company_website}}
 Your Trusted Insurance Advisor
-\"Think of Insurance, Think of Us.\"",
+"Think of Insurance, Think of Us."',
                 'available_variables' => json_encode(['pending_documents_list', 'advisor_name', 'company_website']),
                 'sample_output' => "📄 *Pending Documents Reminder*\n\nBelow are the Documents pending...",
                 'is_active' => true,
@@ -310,7 +310,7 @@ Your Trusted Insurance Advisor
                 'notification_type_id' => $notificationTypes['claim_stage_update']->id,
                 'channel' => 'whatsapp',
                 'subject' => null,
-                'template_content' => "Dear {{customer_name}},
+                'template_content' => 'Dear {{customer_name}},
 
 Your claim *{{claim_number}}* status has been updated to: *{{stage_name}}*
 
@@ -322,7 +322,7 @@ Best regards,
 {{advisor_name}}
 {{company_website}}
 Your Trusted Insurance Advisor
-\"Think of Insurance, Think of Us.\"",
+"Think of Insurance, Think of Us."',
                 'available_variables' => json_encode(['customer_name', 'claim_number', 'stage_name', 'notes', 'advisor_name', 'company_website']),
                 'sample_output' => "Dear Raj Patel,\n\nYour claim *CLM123456* status has been updated...",
                 'is_active' => true,

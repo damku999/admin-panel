@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
+use App\Traits\HasSecuritySettings;
+use App\Traits\HasTwoFactorAuth;
+use App\Traits\TableRecordObserver;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
-use App\Traits\TableRecordObserver;
-use App\Traits\HasTwoFactorAuth;
-use App\Traits\HasSecuritySettings;
-use App\Traits\Auditable;
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * App\Models\User
@@ -48,6 +48,7 @@ use Illuminate\Support\Facades\Hash;
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
+ *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|User newQuery()
@@ -73,11 +74,12 @@ use Illuminate\Support\Facades\Hash;
  * @method static \Illuminate\Database\Eloquent\Builder|User whereUpdatedBy($value)
  * @method static \Illuminate\Database\Eloquent\Builder|User withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|User withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity, HasTwoFactorAuth, HasSecuritySettings, Auditable;
+    use Auditable, HasApiTokens, HasFactory, HasRoles, HasSecuritySettings, HasTwoFactorAuth, LogsActivity, Notifiable, SoftDeletes, TableRecordObserver;
 
     /**
      * The attributes that are mass assignable.
@@ -122,6 +124,7 @@ class User extends Authenticatable
     {
         return "{$this->first_name} {$this->last_name}";
     }
+
     protected static $logName = 'User profile';
 
     protected static $logAttributes = ['*'];

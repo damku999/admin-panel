@@ -2,26 +2,23 @@
 
 namespace App\Models;
 
-use App\Models\CustomerInsurance;
-use App\Models\Quotation;
-use App\Models\Claim;
-use App\Traits\Customer\HasCustomerTwoFactorAuth;
 use App\Traits\Auditable;
-use Laravel\Sanctum\HasApiTokens;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Permission\Traits\HasRoles;
+use App\Traits\Customer\HasCustomerTwoFactorAuth;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Notifications\Notifiable;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * App\Models\Customer
@@ -60,6 +57,7 @@ use Illuminate\Support\Str;
  * @property-read int|null $roles_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|Customer newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer onlyTrashed()
@@ -90,13 +88,17 @@ use Illuminate\Support\Str;
  * @method static \Illuminate\Database\Eloquent\Builder|Customer whereWeddingAnniversaryDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder|Customer withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|Customer withoutTrashed()
+ *
  * @mixin \Eloquent
  */
 class Customer extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, LogsActivity, HasCustomerTwoFactorAuth, Auditable;
+    use Auditable, HasApiTokens, HasCustomerTwoFactorAuth, HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes;
+
     protected static $logAttributes = ['*'];
+
     protected static $logOnlyDirty = true;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -125,7 +127,8 @@ class Customer extends Authenticatable
         'email_verification_token',
         'password_reset_sent_at',
         'password_reset_token',
-        'password_reset_expires_at'
+        'password_reset_expires_at',
+        'notification_preferences',
     ];
 
     protected $casts = [
@@ -141,6 +144,7 @@ class Customer extends Authenticatable
         'must_change_password' => 'boolean',
         'password_reset_sent_at' => 'datetime',
         'password_reset_expires_at' => 'datetime',
+        'notification_preferences' => 'array',
     ];
 
     /**
@@ -157,7 +161,7 @@ class Customer extends Authenticatable
     protected static function boot()
     {
         parent::boot();
-        
+
         static::creating(function ($model) {
             // Check both customer and web guards for created_by
             if (Auth::guard('customer')->check()) {
@@ -210,6 +214,30 @@ class Customer extends Authenticatable
     }
 
     /**
+     * Get all devices for push notifications
+     */
+    public function devices(): HasMany
+    {
+        return $this->hasMany(CustomerDevice::class);
+    }
+
+    /**
+     * Get active devices for push notifications
+     */
+    public function activeDevices(): HasMany
+    {
+        return $this->hasMany(CustomerDevice::class)->where('is_active', true);
+    }
+
+    /**
+     * Get notification logs for this customer
+     */
+    public function notificationLogs(): HasMany
+    {
+        return $this->hasMany(NotificationLog::class);
+    }
+
+    /**
      * Get all claims for the customer.
      */
     public function claims(): HasMany
@@ -256,7 +284,7 @@ class Customer extends Authenticatable
     {
         // SECURITY FIX: Validate family_group_id to prevent SQL injection
         $familyGroupId = $this->validateFamilyGroupId($this->family_group_id);
-        
+
         return $this->hasMany(CustomerInsurance::class, 'customer_id')
             ->whereHas('customer', function ($query) use ($familyGroupId) {
                 $query->where('family_group_id', '=', $familyGroupId);
@@ -268,7 +296,7 @@ class Customer extends Authenticatable
      */
     public function hasFamily(): bool
     {
-        return !is_null($this->family_group_id);
+        return ! is_null($this->family_group_id);
     }
 
     /**
@@ -276,10 +304,10 @@ class Customer extends Authenticatable
      */
     public function isFamilyHead(): bool
     {
-        if (!$this->hasFamily()) {
+        if (! $this->hasFamily()) {
             return false;
         }
-        
+
         return $this->familyMember?->is_head === true;
     }
 
@@ -291,7 +319,7 @@ class Customer extends Authenticatable
         if ($this->isFamilyHead()) {
             // SECURITY FIX: Validate family_group_id to prevent SQL injection
             $familyGroupId = $this->validateFamilyGroupId($this->family_group_id);
-            
+
             // Family head can view all family insurance
             return CustomerInsurance::whereHas('customer', function ($query) use ($familyGroupId) {
                 $query->where('family_group_id', '=', $familyGroupId);
@@ -307,8 +335,8 @@ class Customer extends Authenticatable
      */
     public function isInSameFamilyAs(Customer $customer): bool
     {
-        return $this->hasFamily() && 
-               $customer->hasFamily() && 
+        return $this->hasFamily() &&
+               $customer->hasFamily() &&
                $this->family_group_id === $customer->family_group_id;
     }
 
@@ -325,7 +353,7 @@ class Customer extends Authenticatable
             'date_of_birth' => $this->date_of_birth?->format('M d'), // Hide year for privacy
             'status' => $this->status,
             'created_at' => $this->created_at->format('M Y'),
-            'relationship' => $this->familyMember?->relationship
+            'relationship' => $this->familyMember?->relationship,
         ];
     }
 
@@ -334,19 +362,23 @@ class Customer extends Authenticatable
      */
     protected function maskEmail(?string $email): ?string
     {
-        if (!$email) return null;
-        
+        if (! $email) {
+            return null;
+        }
+
         $parts = explode('@', $email);
-        if (count($parts) !== 2) return $email;
-        
+        if (count($parts) !== 2) {
+            return $email;
+        }
+
         $username = $parts[0];
         $domain = $parts[1];
-        
+
         if (strlen($username) <= 2) {
-            return $username . '@' . $domain;
+            return $username.'@'.$domain;
         }
-        
-        return substr($username, 0, 2) . str_repeat('*', strlen($username) - 2) . '@' . $domain;
+
+        return substr($username, 0, 2).str_repeat('*', strlen($username) - 2).'@'.$domain;
     }
 
     /**
@@ -354,9 +386,11 @@ class Customer extends Authenticatable
      */
     protected function maskMobile(?string $mobile): ?string
     {
-        if (!$mobile || strlen($mobile) < 4) return $mobile;
-        
-        return substr($mobile, 0, 2) . str_repeat('*', strlen($mobile) - 4) . substr($mobile, -2);
+        if (! $mobile || strlen($mobile) < 4) {
+            return $mobile;
+        }
+
+        return substr($mobile, 0, 2).str_repeat('*', strlen($mobile) - 4).substr($mobile, -2);
     }
 
     /**
@@ -368,7 +402,7 @@ class Customer extends Authenticatable
         if ($this->id === $customer->id) {
             return true;
         }
-        
+
         // Family head can view family members' data
         return $this->isFamilyHead() && $this->isInSameFamilyAs($customer);
     }
@@ -404,21 +438,21 @@ class Customer extends Authenticatable
     protected function panCardPath(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => $value ? asset('storage/' . $value) : null,
+            get: fn (?string $value) => $value ? asset('storage/'.$value) : null,
         );
     }
 
     protected function aadharCardPath(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => $value ? asset('storage/' . $value) : null,
+            get: fn (?string $value) => $value ? asset('storage/'.$value) : null,
         );
     }
 
     protected function gstPath(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => $value ? asset('storage/' . $value) : null,
+            get: fn (?string $value) => $value ? asset('storage/'.$value) : null,
         );
     }
 
@@ -436,7 +470,7 @@ class Customer extends Authenticatable
     public function setDefaultPassword(?string $password = null): string
     {
         $plainPassword = $password ?? self::generateDefaultPassword();
-        
+
         $this->update([
             'password' => Hash::make($plainPassword),
             'must_change_password' => true,
@@ -491,7 +525,7 @@ class Customer extends Authenticatable
      */
     public function hasVerifiedEmail(): bool
     {
-        return !is_null($this->email_verified_at);
+        return ! is_null($this->email_verified_at);
     }
 
     /**
@@ -501,6 +535,7 @@ class Customer extends Authenticatable
     {
         $token = Str::random(60);
         $this->update(['email_verification_token' => $token]);
+
         return $token;
     }
 
@@ -514,8 +549,10 @@ class Customer extends Authenticatable
                 'email_verified_at' => now(),
                 'email_verification_token' => null,
             ]);
+
             return true;
         }
+
         return false;
     }
 
@@ -526,16 +563,16 @@ class Customer extends Authenticatable
     {
         // Generate cryptographically secure token with higher entropy
         $token = bin2hex(random_bytes(32)); // 64 character hex string
-        
+
         // Set expiration to 1 hour from now
         $expiresAt = now()->addHour();
-        
+
         $this->update([
             'password_reset_token' => $token,
             'password_reset_expires_at' => $expiresAt,
-            'password_reset_sent_at' => now()
+            'password_reset_sent_at' => now(),
         ]);
-        
+
         return $token;
     }
 
@@ -544,12 +581,12 @@ class Customer extends Authenticatable
      */
     public function verifyPasswordResetToken(string $token): bool
     {
-        if (!$this->password_reset_token || !$this->password_reset_expires_at) {
+        if (! $this->password_reset_token || ! $this->password_reset_expires_at) {
             return false;
         }
 
         // Check if token matches
-        if (!hash_equals($this->password_reset_token, $token)) {
+        if (! hash_equals($this->password_reset_token, $token)) {
             return false;
         }
 
@@ -558,8 +595,9 @@ class Customer extends Authenticatable
             // Clear expired token
             $this->update([
                 'password_reset_token' => null,
-                'password_reset_expires_at' => null
+                'password_reset_expires_at' => null,
             ]);
+
             return false;
         }
 
@@ -573,7 +611,7 @@ class Customer extends Authenticatable
     {
         $this->update([
             'password_reset_token' => null,
-            'password_reset_expires_at' => null
+            'password_reset_expires_at' => null,
         ]);
     }
 
@@ -583,19 +621,19 @@ class Customer extends Authenticatable
      */
     public function getMaskedPanNumber(): ?string
     {
-        if (!$this->pan_card_number) {
+        if (! $this->pan_card_number) {
             return null;
         }
-        
+
         $pan = $this->pan_card_number;
         $length = strlen($pan);
-        
+
         if ($length < 4) {
             return str_repeat('*', $length);
         }
-        
+
         // Show first 3 characters + stars + last 1 character
-        return substr($pan, 0, 3) . str_repeat('*', $length - 4) . substr($pan, -1);
+        return substr($pan, 0, 3).str_repeat('*', $length - 4).substr($pan, -1);
     }
 
     /**
@@ -609,7 +647,7 @@ class Customer extends Authenticatable
         }
 
         // Ensure it's an integer to prevent SQL injection
-        if (!is_numeric($familyGroupId)) {
+        if (! is_numeric($familyGroupId)) {
             throw new \InvalidArgumentException('Family group ID must be numeric');
         }
 
@@ -626,7 +664,7 @@ class Customer extends Authenticatable
             ->where('status', '=', true)
             ->exists();
 
-        if (!$familyGroupExists) {
+        if (! $familyGroupExists) {
             throw new \InvalidArgumentException('Invalid or inactive family group ID');
         }
 

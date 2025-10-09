@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \App\Models\Admin|null $updater
  * @property-read string $name
  * @property-read string $type
+ *
  * @method static \Database\Factories\NotificationTemplateFactory factory($count = null, $state = [])
  */
 class NotificationTemplate extends Model
@@ -59,16 +60,13 @@ class NotificationTemplate extends Model
 
     /**
      * Render template with provided data
-     *
-     * @param array $data
-     * @return string
      */
     public function render(array $data): string
     {
         $content = $this->template_content;
 
         foreach ($data as $key => $value) {
-            $content = str_replace('{' . $key . '}', $value, $content);
+            $content = str_replace('{'.$key.'}', $value, $content);
         }
 
         return $content;
@@ -81,13 +79,31 @@ class NotificationTemplate extends Model
      */
     public function updater()
     {
-        return $this->belongsTo(Admin::class, 'updated_by');
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Get version history for this template
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function versions()
+    {
+        return $this->hasMany(NotificationTemplateVersion::class, 'template_id');
+    }
+
+    /**
+     * Get test logs for this template
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function testLogs()
+    {
+        return $this->hasMany(NotificationTemplateTestLog::class, 'template_id');
     }
 
     /**
      * Get display name from notification type
-     *
-     * @return string
      */
     public function getNameAttribute(): string
     {
@@ -96,8 +112,6 @@ class NotificationTemplate extends Model
 
     /**
      * Get type code from notification type
-     *
-     * @return string
      */
     public function getTypeAttribute(): string
     {
@@ -106,8 +120,6 @@ class NotificationTemplate extends Model
 
     /**
      * Get category from notification type
-     *
-     * @return string
      */
     public function getCategoryAttribute(): string
     {

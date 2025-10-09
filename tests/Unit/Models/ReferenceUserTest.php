@@ -1,13 +1,13 @@
 <?php
 
-use App\Models\ReferenceUser;
 use App\Models\CustomerInsurance;
+use App\Models\ReferenceUser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 it('has correct fillable attributes', function () {
-    $referenceUser = new ReferenceUser();
+    $referenceUser = new ReferenceUser;
     $fillable = ['name', 'email', 'mobile_number', 'status'];
 
     expect($referenceUser->getFillable())->toBe($fillable);

@@ -2,15 +2,14 @@
 
 namespace App\Models;
 
-use App\Models\CustomerInsurance;
-use Spatie\Activitylog\LogOptions;
 use App\Traits\TableRecordObserver;
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Notifications\Notifiable;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * App\Models\PremiumType
@@ -36,6 +35,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property-read int|null $permissions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder|PremiumType newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|PremiumType newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|PremiumType onlyTrashed()
@@ -56,13 +56,17 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @method static \Illuminate\Database\Eloquent\Builder|PremiumType withTrashed()
  * @method static \Illuminate\Database\Eloquent\Builder|PremiumType withoutTrashed()
  * @method static \Database\Factories\PremiumTypeFactory factory($count = null, $state = [])
+ *
  * @mixin \Eloquent
  */
 class PremiumType extends Authenticatable
 {
-    use  HasFactory, Notifiable, HasRoles, SoftDeletes, TableRecordObserver, LogsActivity;
+    use HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes, TableRecordObserver;
+
     protected static $logAttributes = ['*'];
+
     protected static $logOnlyDirty = true;
+
     /**
      * The attributes that are mass assignable.
      *

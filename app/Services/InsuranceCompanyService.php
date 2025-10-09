@@ -2,13 +2,13 @@
 
 namespace App\Services;
 
-use App\Contracts\Services\InsuranceCompanyServiceInterface;
 use App\Contracts\Repositories\InsuranceCompanyRepositoryInterface;
+use App\Contracts\Services\InsuranceCompanyServiceInterface;
 use App\Exports\InsuranceCompanyExport;
 use App\Models\InsuranceCompany;
-use Illuminate\Http\Request;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
 /**
@@ -31,28 +31,28 @@ class InsuranceCompanyService extends BaseService implements InsuranceCompanySer
     public function createInsuranceCompany(array $data): InsuranceCompany
     {
         return $this->createInTransaction(
-            fn() => $this->insuranceCompanyRepository->create($data)
+            fn () => $this->insuranceCompanyRepository->create($data)
         );
     }
 
     public function updateInsuranceCompany(InsuranceCompany $insuranceCompany, array $data): InsuranceCompany
     {
         return $this->updateInTransaction(
-            fn() => $this->insuranceCompanyRepository->update($insuranceCompany, $data)
+            fn () => $this->insuranceCompanyRepository->update($insuranceCompany, $data)
         );
     }
 
     public function deleteInsuranceCompany(InsuranceCompany $insuranceCompany): bool
     {
         return $this->deleteInTransaction(
-            fn() => $this->insuranceCompanyRepository->delete($insuranceCompany)
+            fn () => $this->insuranceCompanyRepository->delete($insuranceCompany)
         );
     }
 
     public function updateStatus(int $insuranceCompanyId, int $status): bool
     {
         return $this->updateInTransaction(
-            fn() => $this->insuranceCompanyRepository->updateStatus($insuranceCompanyId, $status)
+            fn () => $this->insuranceCompanyRepository->updateStatus($insuranceCompanyId, $status)
         );
     }
 

@@ -33,7 +33,9 @@
       "Bash(vendorbinpest testsFeatureControllers --colors=always)",
       "Bash(Get-Content \"storage\\logs\\laravel.log\" -Tail 50)",
       "SlashCommand(/sc:analyze:*)",
-      "Bash(Select-String -Pattern \"WARN|coverage|Total\")"
+      "Bash(Select-String -Pattern \"WARN|coverage|Total\")",
+      "Bash(git push:*)",
+      "Bash(composer show:*)"
     ],
     "deny": [],
     "ask": []

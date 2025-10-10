@@ -52,6 +52,38 @@ composer check
 ```
 Optimizes autoloader, clears caches, runs security audit.
 
+### Automated Refactoring (Rector)
+
+**Preview Refactoring** (Dry Run)
+```bash
+composer refactor
+```
+Shows what code changes Rector would make without applying them.
+
+**Apply Refactoring**
+```bash
+composer refactor:apply
+```
+Applies automated code improvements and Laravel best practices.
+
+**Full Upgrade Workflow**
+```bash
+composer upgrade
+```
+Complete workflow: clear cache → apply refactoring → fix code style.
+
+**Clear Rector Cache**
+```bash
+composer refactor:clear
+```
+Clears Rector's cache (useful after configuration changes).
+
+**List Available Rules**
+```bash
+composer refactor:sets
+```
+Lists all available Rector refactoring rules.
+
 ### Quality Tools Installation
 
 **Install Quality Tools**
@@ -59,12 +91,6 @@ Optimizes autoloader, clears caches, runs security audit.
 composer quality:install
 ```
 Installs Laravel Pint, PHPStan, and Larastan for code quality analysis.
-
-**Install Rector Laravel (Code Refactoring)**
-```bash
-composer require driftingly/rector-laravel --dev
-```
-Automated code refactoring tool for Laravel upgrades and best practices.
 
 ---
 
@@ -84,13 +110,29 @@ git commit -m "Your message"
 
 ### Weekly Maintenance
 ```bash
-composer analyze:full
+composer refactor        # Check for refactoring opportunities
+composer analyze:full    # Full code analysis
+```
+
+### Before Major Commits
+```bash
+composer refactor        # Preview refactoring
+composer refactor:apply  # Apply if appropriate
+composer fix             # Fix code style
+php artisan test         # Run tests
 ```
 
 ### Before Deployment
 ```bash
 composer analyze
 composer test:notifications
+```
+
+### Monthly Code Improvements
+```bash
+composer upgrade         # Full refactoring + style fix
+composer analyze:full    # Check code quality
+php artisan test         # Verify all tests pass
 ```
 
 ---
@@ -125,6 +167,7 @@ php artisan pint
 
 ## Configuration Files
 
+- `rector.php` - Rector refactoring rules ✨ NEW
 - `phpstan.neon` - PHPStan configuration
 - `pint.json` - Laravel Pint rules
 - `composer.json` - All script definitions
@@ -150,6 +193,7 @@ composer install
 
 ## Additional Resources
 
+- **Rector Guide**: `claudedocs/RECTOR_GUIDE.md` - Complete refactoring guide ✨ NEW
 - Full project documentation: `claudedocs/PROJECT_DOCUMENTATION.md`
-- Test documentation: `claudedocs/TESTING_QUICK_REFERENCE.md`
+- Test documentation: `claudedocs/TESTING_GUIDE.md`
 - Architecture guide: `claudedocs/SYSTEM_ARCHITECTURE.md`

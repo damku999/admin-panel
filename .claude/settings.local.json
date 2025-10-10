@@ -29,7 +29,8 @@
       "Bash(QUICK_TEST_REFERENCE.md )",
       "Bash(RUN_NOTIFICATION_TESTS.md )",
       "Bash(RUN_SERVICE_TESTS.md )",
-      "Bash(TESTING_QUICK_REFERENCE.md)"
+      "Bash(TESTING_QUICK_REFERENCE.md)",
+      "Bash(composer:*)"
     ],
     "deny": [],
     "ask": []

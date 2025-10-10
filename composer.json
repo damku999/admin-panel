@@ -22,6 +22,7 @@
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.13",
         "bennett-treptow/laravel-migration-generator": "^4.3",
+        "driftingly/rector-laravel": "^2.0",
         "fakerphp/faker": "^1.9.1",
         "laravel/boost": "^1.0",
         "laravel/pint": "^1.25",
@@ -125,6 +126,24 @@
             "@composer require laravel/pint --dev",
             "@composer require phpstan/phpstan --dev",
             "@composer require nunomaduro/larastan --dev"
+        ],
+        "refactor": [
+            "@php vendor/bin/rector process --dry-run"
+        ],
+        "refactor:apply": [
+            "@php vendor/bin/rector process"
+        ],
+        "refactor:clear": [
+            "@php vendor/bin/rector clear-cache"
+        ],
+        "refactor:sets": [
+            "@php vendor/bin/rector list-rules"
+        ],
+        "upgrade": [
+            "Composer\\Config::disableProcessTimeout",
+            "@composer refactor:clear",
+            "@composer refactor:apply",
+            "@composer fix"
         ]
     },
     "extra": {

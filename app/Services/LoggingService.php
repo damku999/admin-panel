@@ -33,7 +33,7 @@ class LoggingService
             'trace_id' => $this->generateTraceId(),
         ]);
 
-        Log::log($level, "Event: {$event}", $logData);
+        Log::log($level, 'Event: '.$event, $logData);
     }
 
     /**
@@ -41,7 +41,7 @@ class LoggingService
      */
     public function logUserActivity(string $action, ?int $userId = null, array $metadata = []): void
     {
-        $userId = $userId ?? auth()->id();
+        $userId ??= auth()->id();
 
         $logData = array_merge($this->contextData, [
             'activity' => $action,
@@ -54,7 +54,7 @@ class LoggingService
             'metadata' => $metadata,
         ]);
 
-        Log::info("User Activity: {$action}", $logData);
+        Log::info('User Activity: '.$action, $logData);
     }
 
     /**
@@ -71,7 +71,7 @@ class LoggingService
             'correlation_id' => $this->generateCorrelationId(),
         ]);
 
-        Log::info("Business Event: {$event}", $logData);
+        Log::info('Business Event: '.$event, $logData);
     }
 
     /**
@@ -88,7 +88,7 @@ class LoggingService
         ]);
 
         $level = $duration > 1000 ? 'warning' : 'info';
-        Log::log($level, "Performance: {$operation}", $logData);
+        Log::log($level, 'Performance: '.$operation, $logData);
     }
 
     /**
@@ -127,20 +127,20 @@ class LoggingService
             'security_data' => $securityData,
         ]);
 
-        Log::log($severity, "Security Event: {$event}", $logData);
+        Log::log($severity, 'Security Event: '.$event, $logData);
     }
 
     /**
      * Log errors with comprehensive context
      */
-    public function logError(Throwable $exception, array $context = []): void
+    public function logError(Throwable $throwable, array $context = []): void
     {
         $logData = array_merge($this->contextData, [
-            'exception' => get_class($exception),
-            'message' => $exception->getMessage(),
-            'file' => $exception->getFile(),
-            'line' => $exception->getLine(),
-            'trace' => $exception->getTraceAsString(),
+            'exception' => $throwable::class,
+            'message' => $throwable->getMessage(),
+            'file' => $throwable->getFile(),
+            'line' => $throwable->getLine(),
+            'trace' => $throwable->getTraceAsString(),
             'user_id' => auth()->id(),
             'url' => request()?->fullUrl(),
             'method' => request()?->method(),
@@ -148,7 +148,7 @@ class LoggingService
             'context' => $context,
         ]);
 
-        Log::error("Exception: {$exception->getMessage()}", $logData);
+        Log::error('Exception: '.$throwable->getMessage(), $logData);
     }
 
     /**
@@ -197,7 +197,7 @@ class LoggingService
             'value_size' => $value ? strlen(serialize($value)) : null,
         ]);
 
-        Log::debug("Cache: {$operation}", $logData);
+        Log::debug('Cache: '.$operation, $logData);
     }
 
     /**

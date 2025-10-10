@@ -3,13 +3,24 @@
 namespace App\Models;
 
 use App\Traits\TableRecordObserver;
+use Database\Factories\BranchFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\PersonalAccessToken;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -20,49 +31,57 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $email
  * @property string|null $mobile_number
  * @property int $status
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read Collection<int, Activity> $activities
  * @property-read int|null $activities_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomerInsurance> $customerInsurances
+ * @property-read Collection<int, CustomerInsurance> $customerInsurances
  * @property-read int|null $customer_insurances_count
- * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
+ * @property-read Collection<int, Permission> $permissions
  * @property-read int|null $permissions_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
+ * @property-read Collection<int, Role> $roles
  * @property-read int|null $roles_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ * @property-read Collection<int, PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
- * @method static \Database\Factories\BranchFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|Branch newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Branch newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Branch onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Branch permission($permissions)
- * @method static \Illuminate\Database\Eloquent\Builder|Branch query()
- * @method static \Illuminate\Database\Eloquent\Builder|Branch role($roles, $guard = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Branch whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Branch whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Branch whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Branch whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Branch whereEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Branch whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Branch whereMobileNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Branch whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Branch whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Branch whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Branch whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Branch withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Branch withoutTrashed()
- * @mixin \Eloquent
+ *
+ * @method static BranchFactory factory($count = null, $state = [])
+ * @method static Builder|Branch newModelQuery()
+ * @method static Builder|Branch newQuery()
+ * @method static Builder|Branch onlyTrashed()
+ * @method static Builder|Branch permission($permissions)
+ * @method static Builder|Branch query()
+ * @method static Builder|Branch role($roles, $guard = null)
+ * @method static Builder|Branch whereCreatedAt($value)
+ * @method static Builder|Branch whereCreatedBy($value)
+ * @method static Builder|Branch whereDeletedAt($value)
+ * @method static Builder|Branch whereDeletedBy($value)
+ * @method static Builder|Branch whereEmail($value)
+ * @method static Builder|Branch whereId($value)
+ * @method static Builder|Branch whereMobileNumber($value)
+ * @method static Builder|Branch whereName($value)
+ * @method static Builder|Branch whereStatus($value)
+ * @method static Builder|Branch whereUpdatedAt($value)
+ * @method static Builder|Branch whereUpdatedBy($value)
+ * @method static Builder|Branch withTrashed()
+ * @method static Builder|Branch withoutTrashed()
+ *
+ * @mixin Model
  */
 class Branch extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes, TableRecordObserver;
+    use HasApiTokens;
+    use HasFactory;
+    use HasRoles;
+    use LogsActivity;
+    use Notifiable;
+    use SoftDeletes;
+    use TableRecordObserver;
 
     protected $table = 'branches';
 

@@ -3,12 +3,17 @@
 namespace App\Models;
 
 use App\Traits\TableRecordObserver;
+use Database\Factories\QuotationFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -20,7 +25,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property string $make_model_variant
  * @property string $rto_location
  * @property string $manufacturing_year
- * @property \Illuminate\Support\Carbon|null $date_of_registration
+ * @property Carbon|null $date_of_registration
  * @property int $cubic_capacity_kw
  * @property int $seating_capacity
  * @property string $fuel_type
@@ -35,63 +40,68 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property string $policy_type
  * @property int $policy_tenure_years
  * @property string $status
- * @property \Illuminate\Support\Carbon|null $sent_at
+ * @property Carbon|null $sent_at
  * @property string|null $whatsapp_number
  * @property string|null $notes
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read Collection<int, Activity> $activities
  * @property-read int|null $activities_count
- * @property-read \App\Models\Customer|null $customer
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\QuotationCompany> $quotationCompanies
+ * @property-read Customer|null $customer
+ * @property-read Collection<int, QuotationCompany> $quotationCompanies
  * @property-read int|null $quotation_companies_count
- * @property-read \App\Models\QuotationStatus|null $quotationStatus
- * @method static \Database\Factories\QuotationFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation query()
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereAddonCovers($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereCubicCapacityKw($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereCustomerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereDateOfRegistration($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereFuelType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereIdvCngLpgKit($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereIdvElectricalAccessories($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereIdvNonElectricalAccessories($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereIdvTrailer($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereIdvVehicle($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereMakeModelVariant($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereManufacturingYear($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereNcbPercentage($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereNotes($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation wherePolicyTenureYears($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation wherePolicyType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereRtoLocation($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereSeatingCapacity($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereSentAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereTotalIdv($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereVehicleNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation whereWhatsappNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Quotation withoutTrashed()
- * @mixin \Eloquent
+ * @property-read QuotationStatus|null $quotationStatus
+ *
+ * @method static QuotationFactory factory($count = null, $state = [])
+ * @method static Builder|Quotation newModelQuery()
+ * @method static Builder|Quotation newQuery()
+ * @method static Builder|Quotation onlyTrashed()
+ * @method static Builder|Quotation query()
+ * @method static Builder|Quotation whereAddonCovers($value)
+ * @method static Builder|Quotation whereCreatedAt($value)
+ * @method static Builder|Quotation whereCreatedBy($value)
+ * @method static Builder|Quotation whereCubicCapacityKw($value)
+ * @method static Builder|Quotation whereCustomerId($value)
+ * @method static Builder|Quotation whereDateOfRegistration($value)
+ * @method static Builder|Quotation whereDeletedAt($value)
+ * @method static Builder|Quotation whereDeletedBy($value)
+ * @method static Builder|Quotation whereFuelType($value)
+ * @method static Builder|Quotation whereId($value)
+ * @method static Builder|Quotation whereIdvCngLpgKit($value)
+ * @method static Builder|Quotation whereIdvElectricalAccessories($value)
+ * @method static Builder|Quotation whereIdvNonElectricalAccessories($value)
+ * @method static Builder|Quotation whereIdvTrailer($value)
+ * @method static Builder|Quotation whereIdvVehicle($value)
+ * @method static Builder|Quotation whereMakeModelVariant($value)
+ * @method static Builder|Quotation whereManufacturingYear($value)
+ * @method static Builder|Quotation whereNcbPercentage($value)
+ * @method static Builder|Quotation whereNotes($value)
+ * @method static Builder|Quotation wherePolicyTenureYears($value)
+ * @method static Builder|Quotation wherePolicyType($value)
+ * @method static Builder|Quotation whereRtoLocation($value)
+ * @method static Builder|Quotation whereSeatingCapacity($value)
+ * @method static Builder|Quotation whereSentAt($value)
+ * @method static Builder|Quotation whereStatus($value)
+ * @method static Builder|Quotation whereTotalIdv($value)
+ * @method static Builder|Quotation whereUpdatedAt($value)
+ * @method static Builder|Quotation whereUpdatedBy($value)
+ * @method static Builder|Quotation whereVehicleNumber($value)
+ * @method static Builder|Quotation whereWhatsappNumber($value)
+ * @method static Builder|Quotation withTrashed()
+ * @method static Builder|Quotation withoutTrashed()
+ *
+ * @mixin Model
  */
 class Quotation extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes, TableRecordObserver;
+    use HasFactory;
+    use LogsActivity;
+    use SoftDeletes;
+    use TableRecordObserver;
 
     protected $fillable = [
         'customer_id',
@@ -141,16 +151,16 @@ class Quotation extends Model
     {
         parent::boot();
 
-        static::deleting(function (Quotation $quotation) {
+        static::deleting(static function (Quotation $quotation): void {
             // Delete all related quotation companies
             $quotation->quotationCompanies()->delete();
 
             // Clean up activity logs for this quotation and its companies
-            \Spatie\Activitylog\Models\Activity::where('subject_type', Quotation::class)
+            Activity::query()->where('subject_type', Quotation::class)
                 ->where('subject_id', $quotation->id)
                 ->delete();
 
-            \Spatie\Activitylog\Models\Activity::where('subject_type', \App\Models\QuotationCompany::class)
+            Activity::query()->where('subject_type', QuotationCompany::class)
                 ->whereIn('subject_id', $quotation->quotationCompanies()->pluck('id'))
                 ->delete();
         });

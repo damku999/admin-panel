@@ -3,21 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Services\HealthCheckService;
-use App\Services\LoggingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class HealthController extends Controller
 {
-    private HealthCheckService $healthService;
-
-    private LoggingService $logger;
-
-    public function __construct(HealthCheckService $healthService, LoggingService $logger)
-    {
-        $this->healthService = $healthService;
-        $this->logger = $logger;
-    }
+    public function __construct(private readonly HealthCheckService $healthCheckService) {}
 
     /**
      * Basic health check endpoint
@@ -38,7 +29,7 @@ class HealthController extends Controller
      */
     public function detailed(): JsonResponse
     {
-        $healthStatus = $this->healthService->runHealthChecks();
+        $healthStatus = $this->healthCheckService->runHealthChecks();
 
         $statusCode = $healthStatus['status'] === 'healthy' ? 200 :
                      ($healthStatus['status'] === 'warning' ? 200 : 503);
@@ -51,7 +42,7 @@ class HealthController extends Controller
      */
     public function metrics(): JsonResponse
     {
-        $metrics = $this->healthService->getSystemMetrics();
+        $metrics = $this->healthCheckService->getSystemMetrics();
 
         return response()->json($metrics);
     }
@@ -75,8 +66,8 @@ class HealthController extends Controller
     {
         // Check if application is ready to serve traffic
         $checks = [
-            'database' => $this->healthService->checkDatabase(),
-            'cache' => $this->healthService->checkCache(),
+            'database' => $this->healthCheckService->checkDatabase(),
+            'cache' => $this->healthCheckService->checkCache(),
         ];
 
         $isReady = true;

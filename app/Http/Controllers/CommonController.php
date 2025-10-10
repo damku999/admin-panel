@@ -21,12 +21,12 @@ class CommonController extends Controller
                 $record->delete();
 
                 return response()->json(['status' => 'success', 'message' => $request->display_title.' Has been deleted successfully.']);
-            } else {
-                return response()->json(['status' => 'error', 'message' => $request->display_title.' not found.']);
             }
-        } else {
-            return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);
+
+            return response()->json(['status' => 'error', 'message' => $request->display_title.' not found.']);
         }
+
+        return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);
     }
 
     public function activeInactiveCommon(Request $request)
@@ -47,22 +47,22 @@ class CommonController extends Controller
 
             if ($record->save()) {
                 return response()->json(['status' => 'success', 'message' => $request->display_title.$temp_label.' successfully.']);
-            } else {
-                return response()->json(['status' => 'error', 'message' => $request->display_title.$temp_label.' not found.']);
             }
-        } else {
-            return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);
+
+            return response()->json(['status' => 'error', 'message' => $request->display_title.$temp_label.' not found.']);
         }
+
+        return response()->json(['status' => 'error', 'message' => 'Something went wrong.']);
     }
 
-    public function getImage(Request $request, $file_path, $file_name)
+    public function getImage(Request $request, string $file_path, string $file_name)
     {
         $file = storage_path().DIRECTORY_SEPARATOR.$file_path.DIRECTORY_SEPARATOR.$file_name;
 
         return response()->file($file);
     }
 
-    public function getImage1(Request $request, $file_path1, $file_path2, $file_name)
+    public function getImage1(Request $request, string $file_path1, string $file_path2, string $file_name)
     {
         $file = storage_path().DIRECTORY_SEPARATOR.$file_path1.DIRECTORY_SEPARATOR.$file_path2.DIRECTORY_SEPARATOR.$file_name;
 

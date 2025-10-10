@@ -8,8 +8,10 @@ use App\Exports\AddonCoverExport;
 use App\Models\AddonCover;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Addon Cover Service
@@ -20,7 +22,7 @@ use Maatwebsite\Excel\Facades\Excel;
 class AddonCoverService extends BaseService implements AddonCoverServiceInterface
 {
     public function __construct(
-        private AddonCoverRepositoryInterface $addonCoverRepository
+        private readonly AddonCoverRepositoryInterface $addonCoverRepository
     ) {}
 
     public function getAddonCovers(Request $request): LengthAwarePaginator
@@ -31,32 +33,32 @@ class AddonCoverService extends BaseService implements AddonCoverServiceInterfac
     public function createAddonCover(array $data): AddonCover
     {
         return $this->createInTransaction(
-            fn () => $this->addonCoverRepository->create($data)
+            fn (): Model => $this->addonCoverRepository->create($data)
         );
     }
 
     public function updateAddonCover(AddonCover $addonCover, array $data): AddonCover
     {
         return $this->updateInTransaction(
-            fn () => $this->addonCoverRepository->update($addonCover, $data)
+            fn (): Model => $this->addonCoverRepository->update($addonCover, $data)
         );
     }
 
     public function deleteAddonCover(AddonCover $addonCover): bool
     {
         return $this->deleteInTransaction(
-            fn () => $this->addonCoverRepository->delete($addonCover)
+            fn (): bool => $this->addonCoverRepository->delete($addonCover)
         );
     }
 
     public function updateStatus(int $addonCoverId, int $status): bool
     {
         return $this->executeInTransaction(
-            fn () => $this->addonCoverRepository->updateStatus($addonCoverId, $status)
+            fn (): bool => $this->addonCoverRepository->updateStatus($addonCoverId, $status)
         );
     }
 
-    public function exportAddonCovers(): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    public function exportAddonCovers(): BinaryFileResponse
     {
         return Excel::download(new AddonCoverExport, 'addon_covers.xlsx');
     }

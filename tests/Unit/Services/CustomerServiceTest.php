@@ -13,7 +13,6 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 
 uses(RefreshDatabase::class);
 
@@ -376,7 +375,7 @@ test('delete operation uses transaction', function () {
 // ============================================
 
 test('gets paginated customers', function () {
-    $request = new \Illuminate\Http\Request();
+    $request = new \Illuminate\Http\Request;
     $paginatedResult = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10);
 
     $this->repository->shouldReceive('getPaginated')

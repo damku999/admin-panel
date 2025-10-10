@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
 use App\Models\CustomerDevice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,78 +22,78 @@ class CustomerDeviceController extends Controller
      */
     public function index(Request $request)
     {
-        $query = CustomerDevice::with('customer')
+        $builder = CustomerDevice::with('customer')
             ->orderBy('last_active_at', 'desc');
 
         // Filters
         if ($request->filled('customer_id')) {
-            $query->where('customer_id', $request->customer_id);
+            $builder->where('customer_id', $request->customer_id);
         }
 
         if ($request->filled('device_type')) {
-            $query->where('device_type', $request->device_type);
+            $builder->where('device_type', $request->device_type);
         }
 
         if ($request->filled('status')) {
             if ($request->status == 'active') {
-                $query->where('is_active', true);
+                $builder->where('is_active', true);
             } else {
-                $query->where('is_active', false);
+                $builder->where('is_active', false);
             }
         }
 
         // Search
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('device_name', 'like', "%{$search}%")
-                    ->orWhere('device_token', 'like', "%{$search}%")
-                    ->orWhereHas('customer', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%")
-                            ->orWhere('mobile_number', 'like', "%{$search}%");
+            $builder->where(static function ($q) use ($search): void {
+                $q->where('device_name', 'like', sprintf('%%%s%%', $search))
+                    ->orWhere('device_token', 'like', sprintf('%%%s%%', $search))
+                    ->orWhereHas('customer', static function ($q) use ($search): void {
+                        $q->where('name', 'like', sprintf('%%%s%%', $search))
+                            ->orWhere('mobile_number', 'like', sprintf('%%%s%%', $search));
                     });
             });
         }
 
-        $devices = $query->paginate(50);
+        $builder->paginate(50);
 
         // Statistics
         $stats = [
-            'total' => CustomerDevice::count(),
-            'active' => CustomerDevice::where('is_active', true)->count(),
-            'inactive' => CustomerDevice::where('is_active', false)->count(),
-            'android' => CustomerDevice::where('device_type', 'android')->where('is_active', true)->count(),
-            'ios' => CustomerDevice::where('device_type', 'ios')->where('is_active', true)->count(),
-            'web' => CustomerDevice::where('device_type', 'web')->where('is_active', true)->count(),
+            'total' => CustomerDevice::query()->count(),
+            'active' => CustomerDevice::query()->where('is_active', true)->count(),
+            'inactive' => CustomerDevice::query()->where('is_active', false)->count(),
+            'android' => CustomerDevice::query()->where('device_type', 'android')->where('is_active', true)->count(),
+            'ios' => CustomerDevice::query()->where('device_type', 'ios')->where('is_active', true)->count(),
+            'web' => CustomerDevice::query()->where('device_type', 'web')->where('is_active', true)->count(),
         ];
 
-        return view('admin.customer_devices.index', compact('devices', 'stats'));
+        return view('admin.customer_devices.index', ['devices' => $devices, 'stats' => $stats]);
     }
 
     /**
      * Show device details
      */
-    public function show(CustomerDevice $device)
+    public function show(CustomerDevice $customerDevice)
     {
-        $device->load('customer');
+        $customerDevice->load('customer');
 
         // Get notification logs for this device
         $notifications = DB::table('notification_logs')
             ->where('channel', 'push')
-            ->where('recipient', $device->device_token)
+            ->where('recipient', $customerDevice->device_token)
             ->orderBy('created_at', 'desc')
             ->limit(20)
             ->get();
 
-        return view('admin.customer_devices.show', compact('device', 'notifications'));
+        return view('admin.customer_devices.show', ['device' => $device, 'notifications' => $notifications]);
     }
 
     /**
      * Deactivate a device
      */
-    public function deactivate(CustomerDevice $device)
+    public function deactivate(CustomerDevice $customerDevice)
     {
-        $device->update(['is_active' => false]);
+        $customerDevice->update(['is_active' => false]);
 
         return back()->with('success', 'Device deactivated successfully');
     }
@@ -105,13 +104,13 @@ class CustomerDeviceController extends Controller
     public function cleanupInvalid(Request $request)
     {
         // Deactivate devices that haven't been active in 90 days
-        $count = CustomerDevice::where('is_active', true)
+        $count = CustomerDevice::query()->where('is_active', true)
             ->where('last_active_at', '<', now()->subDays(90))
             ->update(['is_active' => false]);
 
         return response()->json([
             'success' => true,
-            'message' => "Deactivated {$count} inactive devices",
+            'message' => sprintf('Deactivated %s inactive devices', $count),
         ]);
     }
 }

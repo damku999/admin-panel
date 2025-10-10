@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\NotificationLog
@@ -20,64 +23,67 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $message_content
  * @property array|null $variables_used
  * @property string $status
- * @property \Illuminate\Support\Carbon|null $sent_at
- * @property \Illuminate\Support\Carbon|null $delivered_at
- * @property \Illuminate\Support\Carbon|null $read_at
+ * @property Carbon|null $sent_at
+ * @property Carbon|null $delivered_at
+ * @property Carbon|null $read_at
  * @property string|null $error_message
  * @property array|null $api_response
  * @property int|null $sent_by
  * @property int $retry_count
- * @property \Illuminate\Support\Carbon|null $next_retry_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\NotificationDeliveryTracking> $deliveryTracking
+ * @property Carbon|null $next_retry_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @property-read Collection<int, NotificationDeliveryTracking> $deliveryTracking
  * @property-read int|null $delivery_tracking_count
  * @property-read string $channel_icon
  * @property-read string $status_color
- * @property-read Model|\Eloquent $notifiable
- * @property-read \App\Models\NotificationType|null $notificationType
- * @property-read \App\Models\User|null $sender
- * @property-read \App\Models\NotificationTemplate|null $template
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog channel($channel)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog delivered()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog failed()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog pending()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog query()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog readyToRetry()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog sent()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereApiResponse($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereChannel($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereDeliveredAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereErrorMessage($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereMessageContent($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereNextRetryAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereNotifiableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereNotifiableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereNotificationTypeId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereReadAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereRecipient($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereRetryCount($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereSentAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereSentBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereSubject($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereTemplateId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog whereVariablesUsed($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationLog withoutTrashed()
- * @mixin \Eloquent
+ * @property-read Model|Model $notifiable
+ * @property-read NotificationType|null $notificationType
+ * @property-read User|null $sender
+ * @property-read NotificationTemplate|null $template
+ *
+ * @method static Builder|NotificationLog channel($channel)
+ * @method static Builder|NotificationLog delivered()
+ * @method static Builder|NotificationLog failed()
+ * @method static Builder|NotificationLog newModelQuery()
+ * @method static Builder|NotificationLog newQuery()
+ * @method static Builder|NotificationLog onlyTrashed()
+ * @method static Builder|NotificationLog pending()
+ * @method static Builder|NotificationLog query()
+ * @method static Builder|NotificationLog readyToRetry()
+ * @method static Builder|NotificationLog sent()
+ * @method static Builder|NotificationLog whereApiResponse($value)
+ * @method static Builder|NotificationLog whereChannel($value)
+ * @method static Builder|NotificationLog whereCreatedAt($value)
+ * @method static Builder|NotificationLog whereDeletedAt($value)
+ * @method static Builder|NotificationLog whereDeliveredAt($value)
+ * @method static Builder|NotificationLog whereErrorMessage($value)
+ * @method static Builder|NotificationLog whereId($value)
+ * @method static Builder|NotificationLog whereMessageContent($value)
+ * @method static Builder|NotificationLog whereNextRetryAt($value)
+ * @method static Builder|NotificationLog whereNotifiableId($value)
+ * @method static Builder|NotificationLog whereNotifiableType($value)
+ * @method static Builder|NotificationLog whereNotificationTypeId($value)
+ * @method static Builder|NotificationLog whereReadAt($value)
+ * @method static Builder|NotificationLog whereRecipient($value)
+ * @method static Builder|NotificationLog whereRetryCount($value)
+ * @method static Builder|NotificationLog whereSentAt($value)
+ * @method static Builder|NotificationLog whereSentBy($value)
+ * @method static Builder|NotificationLog whereStatus($value)
+ * @method static Builder|NotificationLog whereSubject($value)
+ * @method static Builder|NotificationLog whereTemplateId($value)
+ * @method static Builder|NotificationLog whereUpdatedAt($value)
+ * @method static Builder|NotificationLog whereVariablesUsed($value)
+ * @method static Builder|NotificationLog withTrashed()
+ * @method static Builder|NotificationLog withoutTrashed()
+ *
+ * @mixin Model
  */
 class NotificationLog extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'notifiable_type',
@@ -153,7 +159,7 @@ class NotificationLog extends Model
     /**
      * Scope for pending notifications
      */
-    public function scopePending($query)
+    protected function scopePending($query)
     {
         return $query->where('status', 'pending');
     }
@@ -161,7 +167,7 @@ class NotificationLog extends Model
     /**
      * Scope for sent notifications
      */
-    public function scopeSent($query)
+    protected function scopeSent($query)
     {
         return $query->where('status', 'sent');
     }
@@ -169,7 +175,7 @@ class NotificationLog extends Model
     /**
      * Scope for failed notifications
      */
-    public function scopeFailed($query)
+    protected function scopeFailed($query)
     {
         return $query->where('status', 'failed');
     }
@@ -177,7 +183,7 @@ class NotificationLog extends Model
     /**
      * Scope for delivered notifications
      */
-    public function scopeDelivered($query)
+    protected function scopeDelivered($query)
     {
         return $query->where('status', 'delivered');
     }
@@ -185,7 +191,7 @@ class NotificationLog extends Model
     /**
      * Scope for a specific channel
      */
-    public function scopeChannel($query, $channel)
+    protected function scopeChannel($query, $channel)
     {
         return $query->where('channel', $channel);
     }
@@ -193,11 +199,11 @@ class NotificationLog extends Model
     /**
      * Scope for notifications ready to retry
      */
-    public function scopeReadyToRetry($query)
+    protected function scopeReadyToRetry($query)
     {
         return $query->where('status', 'failed')
             ->where('retry_count', '<', 3)
-            ->where(function ($q) {
+            ->where(static function ($q): void {
                 $q->whereNull('next_retry_at')
                     ->orWhere('next_retry_at', '<=', now());
             });
@@ -230,7 +236,7 @@ class NotificationLog extends Model
     /**
      * Get status badge color for UI
      */
-    public function getStatusColorAttribute(): string
+    protected function getStatusColorAttribute(): string
     {
         return match ($this->status) {
             'pending' => 'warning',
@@ -245,7 +251,7 @@ class NotificationLog extends Model
     /**
      * Get channel icon for UI
      */
-    public function getChannelIconAttribute(): string
+    protected function getChannelIconAttribute(): string
     {
         return match ($this->channel) {
             'whatsapp' => 'fab fa-whatsapp',

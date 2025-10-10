@@ -8,28 +8,23 @@ use Throwable;
 
 class ErrorTrackingService
 {
-    private LoggingService $logger;
-
     private array $criticalErrors = [];
 
     private const ALERT_THRESHOLD = 5; // errors in 5 minutes
 
     private const ALERT_WINDOW = 300; // 5 minutes in seconds
 
-    public function __construct(LoggingService $logger)
-    {
-        $this->logger = $logger;
-    }
+    public function __construct(private readonly LoggingService $loggingService) {}
 
     /**
      * Track and categorize errors with intelligent alerting
      */
-    public function trackError(Throwable $exception, array $context = []): void
+    public function trackError(Throwable $throwable, array $context = []): void
     {
-        $errorData = $this->analyzeError($exception, $context);
+        $errorData = $this->analyzeError($throwable);
 
         // Log the error with structured data
-        $this->logger->logError($exception, array_merge($context, [
+        $this->loggingService->logError($throwable, array_merge($context, [
             'error_category' => $errorData['category'],
             'severity' => $errorData['severity'],
             'fingerprint' => $errorData['fingerprint'],
@@ -39,11 +34,11 @@ class ErrorTrackingService
 
         // Handle critical errors
         if ($errorData['severity'] === 'critical') {
-            $this->handleCriticalError($exception, $errorData, $context);
+            $this->handleCriticalError($throwable, $errorData, $context);
         }
 
         // Check for error rate spikes
-        $this->checkErrorRateSpike($errorData);
+        $this->checkErrorRateSpike();
 
         // Update error statistics
         $this->updateErrorStatistics($errorData);
@@ -52,24 +47,24 @@ class ErrorTrackingService
     /**
      * Analyze error to determine category, severity, and patterns
      */
-    private function analyzeError(Throwable $exception, array $context): array
+    private function analyzeError(Throwable $throwable): array
     {
-        $errorClass = get_class($exception);
-        $message = $exception->getMessage();
-        $file = $exception->getFile();
-        $line = $exception->getLine();
+        $errorClass = $throwable::class;
+        $message = $throwable->getMessage();
+        $file = $throwable->getFile();
+        $line = $throwable->getLine();
 
         // Generate unique fingerprint for error grouping
         $fingerprint = $this->generateErrorFingerprint($errorClass, $file, $line, $message);
 
         // Determine error category
-        $category = $this->categorizeError($exception, $context);
+        $category = $this->categorizeError($throwable);
 
         // Determine severity
-        $severity = $this->determineSeverity($exception, $context, $category);
+        $severity = $this->determineSeverity($throwable, $category);
 
         // Check if this is a new error or recurring
-        $cacheKey = "error_tracking:{$fingerprint}";
+        $cacheKey = 'error_tracking:'.$fingerprint;
         $errorHistory = Cache::get($cacheKey, [
             'first_occurrence' => now()->toISOString(),
             'count' => 0,
@@ -95,10 +90,10 @@ class ErrorTrackingService
     /**
      * Categorize errors based on type and context
      */
-    private function categorizeError(Throwable $exception, array $context): string
+    private function categorizeError(Throwable $throwable): string
     {
-        $errorClass = get_class($exception);
-        $message = $exception->getMessage();
+        $errorClass = $throwable::class;
+        $message = $throwable->getMessage();
 
         // Database-related errors
         if (str_contains($errorClass, 'QueryException') ||
@@ -150,8 +145,8 @@ class ErrorTrackingService
         }
 
         // Business logic errors
-        if (str_contains($exception->getFile(), 'Services/') ||
-            str_contains($exception->getFile(), 'Jobs/')) {
+        if (str_contains($throwable->getFile(), 'Services/') ||
+            str_contains($throwable->getFile(), 'Jobs/')) {
             return 'business_logic';
         }
 
@@ -161,10 +156,10 @@ class ErrorTrackingService
     /**
      * Determine error severity based on multiple factors
      */
-    private function determineSeverity(Throwable $exception, array $context, string $category): string
+    private function determineSeverity(Throwable $throwable, string $category): string
     {
-        $errorClass = get_class($exception);
-        $message = $exception->getMessage();
+        $errorClass = $throwable::class;
+        $message = $throwable->getMessage();
 
         // Critical errors that require immediate attention
         if (str_contains($errorClass, 'FatalError') ||
@@ -200,7 +195,7 @@ class ErrorTrackingService
     {
         // Remove dynamic parts from message for better grouping
         $cleanMessage = preg_replace('/\d+/', 'N', $message);
-        $cleanMessage = preg_replace('/[\'"][^\'\"]*[\'"]/', 'STRING', $cleanMessage);
+        $cleanMessage = preg_replace('/[\'"][^\'\"]*[\'"]/', 'STRING', (string) $cleanMessage);
 
         return md5($class.$file.$line.$cleanMessage);
     }
@@ -208,16 +203,16 @@ class ErrorTrackingService
     /**
      * Handle critical errors with immediate alerts
      */
-    private function handleCriticalError(Throwable $exception, array $errorData, array $context): void
+    private function handleCriticalError(Throwable $throwable, array $errorData, array $context): void
     {
         $this->criticalErrors[] = $errorData;
 
         // Log critical error
-        $this->logger->logEvent('critical_error', [
-            'exception_class' => get_class($exception),
-            'message' => $exception->getMessage(),
-            'file' => $exception->getFile(),
-            'line' => $exception->getLine(),
+        $this->loggingService->logEvent('critical_error', [
+            'exception_class' => $throwable::class,
+            'message' => $throwable->getMessage(),
+            'file' => $throwable->getFile(),
+            'line' => $throwable->getLine(),
             'fingerprint' => $errorData['fingerprint'],
             'category' => $errorData['category'],
             'is_new' => $errorData['is_new'],
@@ -225,23 +220,21 @@ class ErrorTrackingService
         ], 'critical');
 
         // Send immediate alert (in production, this would send to Slack, email, PagerDuty, etc.)
-        $this->sendCriticalAlert($exception, $errorData, $context);
+        $this->sendCriticalAlert($throwable, $errorData, $context);
     }
 
     /**
      * Check for error rate spikes
      */
-    private function checkErrorRateSpike(array $errorData): void
+    private function checkErrorRateSpike(): void
     {
         $cacheKey = 'error_rate_'.now()->format('Y-m-d-H-i');
         $currentCount = Cache::get($cacheKey, 0);
         $newCount = $currentCount + 1;
-
         Cache::put($cacheKey, $newCount, now()->addMinutes(10));
-
         // Alert if error rate exceeds threshold
         if ($newCount >= self::ALERT_THRESHOLD) {
-            $this->logger->logEvent('error_rate_spike', [
+            $this->loggingService->logEvent('error_rate_spike', [
                 'error_count' => $newCount,
                 'threshold' => self::ALERT_THRESHOLD,
                 'window_minutes' => self::ALERT_WINDOW / 60,
@@ -258,7 +251,7 @@ class ErrorTrackingService
     private function updateErrorStatistics(array $errorData): void
     {
         $today = now()->format('Y-m-d');
-        $statsKey = "error_stats:{$today}";
+        $statsKey = 'error_stats:'.$today;
 
         $stats = Cache::get($statsKey, [
             'total_errors' => 0,
@@ -281,7 +274,7 @@ class ErrorTrackingService
     /**
      * Send critical error alert
      */
-    private function sendCriticalAlert(Throwable $exception, array $errorData, array $context): void
+    private function sendCriticalAlert(Throwable $throwable, array $errorData, array $context): void
     {
         // In production, this would integrate with:
         // - Slack webhooks
@@ -291,8 +284,8 @@ class ErrorTrackingService
         // - Discord webhooks
 
         Log::critical('CRITICAL ERROR ALERT', [
-            'exception' => get_class($exception),
-            'message' => $exception->getMessage(),
+            'exception' => $throwable::class,
+            'message' => $throwable->getMessage(),
             'fingerprint' => $errorData['fingerprint'],
             'category' => $errorData['category'],
             'environment' => app()->environment(),
@@ -327,7 +320,7 @@ class ErrorTrackingService
 
         for ($i = 0; $i < $days; $i++) {
             $date = now()->subDays($i)->format('Y-m-d');
-            $statsKey = "error_stats:{$date}";
+            $statsKey = 'error_stats:'.$date;
             $dayStats = Cache::get($statsKey, [
                 'total_errors' => 0,
                 'by_category' => [],
@@ -348,7 +341,7 @@ class ErrorTrackingService
     {
         for ($i = 0; $i < 30; $i++) {
             $date = now()->subDays($i)->format('Y-m-d');
-            Cache::forget("error_stats:{$date}");
+            Cache::forget('error_stats:'.$date);
         }
     }
 }

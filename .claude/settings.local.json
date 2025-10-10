@@ -32,7 +32,12 @@
       "Bash(TESTING_QUICK_REFERENCE.md)",
       "Bash(composer:*)",
       "Bash(php vendor/bin/rector process:*)",
-      "Bash(git add:*)"
+      "Bash(php artisan test:*)",
+      "Bash(if [ -f \"RECTOR_REFACTORING_COMPLETE.md\" ])",
+      "Bash(then mv RECTOR_REFACTORING_COMPLETE.md claudedocs/)",
+      "Bash(fi)",
+      "Bash(if [ -f \"DOCUMENTATION_ORGANIZATION_SUMMARY.md\" ])",
+      "Bash(then mv DOCUMENTATION_ORGANIZATION_SUMMARY.md claudedocs/)"
     ],
     "deny": [],
     "ask": []

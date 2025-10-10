@@ -2,18 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\NotificationLog;
 use App\Services\NotificationLoggerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class NotificationWebhookController extends Controller
 {
-    protected NotificationLoggerService $loggerService;
-
-    public function __construct(NotificationLoggerService $loggerService)
-    {
-        $this->loggerService = $loggerService;
-    }
+    public function __construct(protected NotificationLoggerService $loggerService) {}
 
     /**
      * Handle WhatsApp delivery status webhook
@@ -54,21 +51,21 @@ class NotificationWebhookController extends Controller
                 ]
             );
 
-            if ($log) {
+            if ($log instanceof NotificationLog) {
                 return response()->json([
                     'success' => true,
                     'message' => 'Status updated successfully',
                     'log_id' => $log->id,
                     'new_status' => $log->status,
                 ], 200);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Notification log not found',
-                ], 404);
             }
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Notification log not found',
+            ], 404);
+
+        } catch (ValidationException $e) {
             Log::warning('WhatsApp webhook validation failed', [
                 'errors' => $e->errors(),
                 'payload' => $request->all(),
@@ -141,21 +138,21 @@ class NotificationWebhookController extends Controller
                 ]
             );
 
-            if ($log) {
+            if ($log instanceof NotificationLog) {
                 return response()->json([
                     'success' => true,
                     'message' => 'Status updated successfully',
                     'log_id' => $log->id,
                     'new_status' => $log->status,
                 ], 200);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Notification log not found',
-                ], 404);
             }
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Notification log not found',
+            ], 404);
+
+        } catch (ValidationException $e) {
             Log::warning('Email webhook validation failed', [
                 'errors' => $e->errors(),
                 'payload' => $request->all(),

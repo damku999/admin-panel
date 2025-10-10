@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use Database\Factories\AuditLogFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\AuditLog
@@ -27,56 +30,58 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string|null $user_agent
  * @property string|null $session_id
  * @property string|null $request_id
- * @property \Illuminate\Support\Carbon $occurred_at
+ * @property Carbon $occurred_at
  * @property string $severity
  * @property int|null $risk_score
  * @property string|null $risk_level
  * @property array|null $risk_factors
  * @property bool $is_suspicious
  * @property string|null $category
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read Model|\Eloquent $actor
- * @property-read Model|\Eloquent $auditable
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Model|Model $actor
+ * @property-read Model|Model $auditable
  * @property-read string|null $formatted_location
  * @property-read string $risk_badge_class
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog byEventCategory(string $category)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog byRiskScore(int $minScore)
- * @method static \Database\Factories\AuditLogFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog highRisk()
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog query()
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog recentActivity(int $hours = 24)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog suspicious()
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereAction($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereActorId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereActorType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereAuditableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereAuditableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereCategory($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereEvent($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereEventCategory($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereIpAddress($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereIsSuspicious($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereMetadata($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereNewValues($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereOccurredAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereOldValues($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereProperties($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereRequestId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereRiskFactors($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereRiskLevel($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereRiskScore($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereSessionId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereSeverity($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereTargetId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereTargetType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AuditLog whereUserAgent($value)
- * @mixin \Eloquent
+ *
+ * @method static Builder|AuditLog byEventCategory(string $category)
+ * @method static Builder|AuditLog byRiskScore(int $minScore)
+ * @method static AuditLogFactory factory($count = null, $state = [])
+ * @method static Builder|AuditLog highRisk()
+ * @method static Builder|AuditLog newModelQuery()
+ * @method static Builder|AuditLog newQuery()
+ * @method static Builder|AuditLog query()
+ * @method static Builder|AuditLog recentActivity(int $hours = 24)
+ * @method static Builder|AuditLog suspicious()
+ * @method static Builder|AuditLog whereAction($value)
+ * @method static Builder|AuditLog whereActorId($value)
+ * @method static Builder|AuditLog whereActorType($value)
+ * @method static Builder|AuditLog whereAuditableId($value)
+ * @method static Builder|AuditLog whereAuditableType($value)
+ * @method static Builder|AuditLog whereCategory($value)
+ * @method static Builder|AuditLog whereCreatedAt($value)
+ * @method static Builder|AuditLog whereEvent($value)
+ * @method static Builder|AuditLog whereEventCategory($value)
+ * @method static Builder|AuditLog whereId($value)
+ * @method static Builder|AuditLog whereIpAddress($value)
+ * @method static Builder|AuditLog whereIsSuspicious($value)
+ * @method static Builder|AuditLog whereMetadata($value)
+ * @method static Builder|AuditLog whereNewValues($value)
+ * @method static Builder|AuditLog whereOccurredAt($value)
+ * @method static Builder|AuditLog whereOldValues($value)
+ * @method static Builder|AuditLog whereProperties($value)
+ * @method static Builder|AuditLog whereRequestId($value)
+ * @method static Builder|AuditLog whereRiskFactors($value)
+ * @method static Builder|AuditLog whereRiskLevel($value)
+ * @method static Builder|AuditLog whereRiskScore($value)
+ * @method static Builder|AuditLog whereSessionId($value)
+ * @method static Builder|AuditLog whereSeverity($value)
+ * @method static Builder|AuditLog whereTargetId($value)
+ * @method static Builder|AuditLog whereTargetType($value)
+ * @method static Builder|AuditLog whereUpdatedAt($value)
+ * @method static Builder|AuditLog whereUserAgent($value)
+ *
+ * @mixin Model
  */
 class AuditLog extends Model
 {
@@ -129,42 +134,42 @@ class AuditLog extends Model
         return $this->morphTo();
     }
 
-    public function scopeHighRisk($query)
+    protected function scopeHighRisk($query)
     {
         return $query->where('risk_level', 'high')
             ->orWhere('risk_level', 'critical');
     }
 
-    public function scopeSuspicious($query)
+    protected function scopeSuspicious($query)
     {
         return $query->where('is_suspicious', true);
     }
 
-    public function scopeByEventCategory($query, string $category)
+    protected function scopeByEventCategory($query, string $category)
     {
         return $query->where('event_category', $category);
     }
 
-    public function scopeByRiskScore($query, int $minScore)
+    protected function scopeByRiskScore($query, int $minScore)
     {
         return $query->where('risk_score', '>=', $minScore);
     }
 
-    public function scopeRecentActivity($query, int $hours = 24)
+    protected function scopeRecentActivity($query, int $hours = 24)
     {
         return $query->where('occurred_at', '>=', now()->subHours($hours));
     }
 
-    public function getFormattedLocationAttribute(): ?string
+    protected function getFormattedLocationAttribute(): ?string
     {
         if ($this->location_city && $this->location_country) {
-            return "{$this->location_city}, {$this->location_country}";
+            return sprintf('%s, %s', $this->location_city, $this->location_country);
         }
 
         return $this->location_country;
     }
 
-    public function getRiskBadgeClassAttribute(): string
+    protected function getRiskBadgeClassAttribute(): string
     {
         return match ($this->risk_level) {
             'critical' => 'badge-danger',

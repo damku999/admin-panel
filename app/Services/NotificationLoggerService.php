@@ -7,6 +7,7 @@ use App\Models\NotificationLog;
 use App\Models\NotificationTemplate;
 use App\Models\NotificationType;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -16,14 +17,14 @@ class NotificationLoggerService
     /**
      * Log a notification before sending
      *
-     * @param  Model  $notifiable  The entity being notified (Customer, Insurance, Quotation, Claim)
+     * @param  Model  $model  The entity being notified (Customer, Insurance, Quotation, Claim)
      * @param  string  $channel  Channel: whatsapp, email, sms
      * @param  string  $recipient  Phone number or email address
      * @param  string  $message  Message content
      * @param  array  $options  Additional options
      */
     public function logNotification(
-        Model $notifiable,
+        Model $model,
         string $channel,
         string $recipient,
         string $message,
@@ -35,20 +36,20 @@ class NotificationLoggerService
 
             // Get notification type if code provided
             if (isset($options['notification_type_code'])) {
-                $notificationType = NotificationType::where('code', $options['notification_type_code'])
+                $notificationType = NotificationType::query()->where('code', $options['notification_type_code'])
                     ->where('is_active', true)
                     ->first();
             }
 
             // Get template if ID provided
             if (isset($options['template_id'])) {
-                $template = NotificationTemplate::find($options['template_id']);
+                $template = NotificationTemplate::query()->find($options['template_id']);
             }
 
             // Create the log entry
-            $log = NotificationLog::create([
-                'notifiable_type' => get_class($notifiable),
-                'notifiable_id' => $notifiable->id,
+            $log = NotificationLog::query()->create([
+                'notifiable_type' => $model::class,
+                'notifiable_id' => $model->id,
                 'notification_type_id' => $notificationType?->id,
                 'template_id' => $template?->id,
                 'channel' => $channel,
@@ -65,18 +66,18 @@ class NotificationLoggerService
                 'log_id' => $log->id,
                 'channel' => $channel,
                 'recipient' => $recipient,
-                'notifiable' => get_class($notifiable).'#'.$notifiable->id,
+                'notifiable' => $model::class.'#'.$model->id,
             ]);
 
             return $log;
 
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Failed to log notification', [
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'channel' => $channel,
                 'recipient' => $recipient,
             ]);
-            throw $e;
+            throw $exception;
         }
     }
 
@@ -85,20 +86,20 @@ class NotificationLoggerService
      *
      * @param  array  $apiResponse  API provider response
      */
-    public function markAsSent(NotificationLog $log, array $apiResponse = []): NotificationLog
+    public function markAsSent(NotificationLog $notificationLog, array $apiResponse = []): NotificationLog
     {
-        DB::transaction(function () use ($log, $apiResponse) {
-            $log->update([
+        DB::transaction(function () use ($notificationLog, $apiResponse): void {
+            $notificationLog->update([
                 'status' => 'sent',
                 'sent_at' => now(),
                 'api_response' => $apiResponse,
             ]);
 
             // Create tracking record
-            $this->addDeliveryTracking($log, 'sent', $apiResponse);
+            $this->addDeliveryTracking($notificationLog, 'sent', $apiResponse);
         });
 
-        return $log->fresh();
+        return $notificationLog->fresh();
     }
 
     /**
@@ -106,19 +107,19 @@ class NotificationLoggerService
      *
      * @param  array  $providerStatus  Provider status data
      */
-    public function markAsDelivered(NotificationLog $log, array $providerStatus = []): NotificationLog
+    public function markAsDelivered(NotificationLog $notificationLog, array $providerStatus = []): NotificationLog
     {
-        DB::transaction(function () use ($log, $providerStatus) {
-            $log->update([
+        DB::transaction(function () use ($notificationLog, $providerStatus): void {
+            $notificationLog->update([
                 'status' => 'delivered',
                 'delivered_at' => now(),
             ]);
 
             // Create tracking record
-            $this->addDeliveryTracking($log, 'delivered', $providerStatus);
+            $this->addDeliveryTracking($notificationLog, 'delivered', $providerStatus);
         });
 
-        return $log->fresh();
+        return $notificationLog->fresh();
     }
 
     /**
@@ -126,19 +127,19 @@ class NotificationLoggerService
      *
      * @param  array  $providerStatus  Provider status data
      */
-    public function markAsRead(NotificationLog $log, array $providerStatus = []): NotificationLog
+    public function markAsRead(NotificationLog $notificationLog, array $providerStatus = []): NotificationLog
     {
-        DB::transaction(function () use ($log, $providerStatus) {
-            $log->update([
+        DB::transaction(function () use ($notificationLog, $providerStatus): void {
+            $notificationLog->update([
                 'status' => 'read',
                 'read_at' => now(),
             ]);
 
             // Create tracking record
-            $this->addDeliveryTracking($log, 'read', $providerStatus);
+            $this->addDeliveryTracking($notificationLog, 'read', $providerStatus);
         });
 
-        return $log->fresh();
+        return $notificationLog->fresh();
     }
 
     /**
@@ -147,13 +148,13 @@ class NotificationLoggerService
      * @param  string  $errorMessage  Error message
      * @param  array  $apiResponse  API response if available
      */
-    public function markAsFailed(NotificationLog $log, string $errorMessage, array $apiResponse = []): NotificationLog
+    public function markAsFailed(NotificationLog $notificationLog, string $errorMessage, array $apiResponse = []): NotificationLog
     {
-        DB::transaction(function () use ($log, $errorMessage, $apiResponse) {
-            $retryCount = $log->retry_count + 1;
+        DB::transaction(function () use ($notificationLog, $errorMessage, $apiResponse): void {
+            $retryCount = $notificationLog->retry_count + 1;
             $nextRetryAt = $this->calculateNextRetryTime($retryCount);
 
-            $log->update([
+            $notificationLog->update([
                 'status' => 'failed',
                 'error_message' => $errorMessage,
                 'api_response' => $apiResponse,
@@ -162,17 +163,17 @@ class NotificationLoggerService
             ]);
 
             // Create tracking record
-            $this->addDeliveryTracking($log, 'failed', $apiResponse);
+            $this->addDeliveryTracking($notificationLog, 'failed', $apiResponse);
 
             Log::warning('Notification marked as failed', [
-                'log_id' => $log->id,
+                'log_id' => $notificationLog->id,
                 'error' => $errorMessage,
                 'retry_count' => $retryCount,
                 'next_retry_at' => $nextRetryAt?->format('Y-m-d H:i:s'),
             ]);
         });
 
-        return $log->fresh();
+        return $notificationLog->fresh();
     }
 
     /**
@@ -184,7 +185,7 @@ class NotificationLoggerService
      */
     public function updateStatusFromWebhook(int $logId, string $status, array $providerData = []): ?NotificationLog
     {
-        $log = NotificationLog::find($logId);
+        $log = NotificationLog::query()->find($logId);
 
         if (! $log) {
             Log::warning('Notification log not found for webhook update', ['log_id' => $logId]);
@@ -212,12 +213,12 @@ class NotificationLoggerService
      * Get notification history for an entity
      *
      * @param  array  $filters  Optional filters
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
-    public function getNotificationHistory(Model $notifiable, array $filters = [])
+    public function getNotificationHistory(Model $model, array $filters = [])
     {
-        $query = NotificationLog::where('notifiable_type', get_class($notifiable))
-            ->where('notifiable_id', $notifiable->id)
+        $query = NotificationLog::query()->where('notifiable_type', $model::class)
+            ->where('notifiable_id', $model->id)
             ->with(['notificationType', 'template', 'sender', 'deliveryTracking'])
             ->orderBy('created_at', 'desc');
 
@@ -245,7 +246,7 @@ class NotificationLoggerService
      * Get failed notifications ready for retry
      *
      * @param  int  $limit  Maximum notifications to retrieve
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function getFailedNotifications(int $limit = 100)
     {
@@ -296,7 +297,7 @@ class NotificationLoggerService
         $failedCount = NotificationLog::failed()->count();
 
         // Get most used templates
-        $topTemplates = NotificationLog::select('template_id', DB::raw('count(*) as count'))
+        $topTemplates = NotificationLog::query()->select('template_id', DB::raw('count(*) as count'))
             ->whereNotNull('template_id')
             ->groupBy('template_id')
             ->orderBy('count', 'desc')
@@ -318,15 +319,15 @@ class NotificationLoggerService
     /**
      * Add delivery tracking record
      */
-    protected function addDeliveryTracking(NotificationLog $log, string $status, array $providerStatus = []): NotificationDeliveryTracking
+    protected function addDeliveryTracking(NotificationLog $notificationLog, string $status, array $providerStatus = []): NotificationDeliveryTracking
     {
-        return NotificationDeliveryTracking::create([
-            'notification_log_id' => $log->id,
+        return NotificationDeliveryTracking::query()->create([
+            'notification_log_id' => $notificationLog->id,
             'status' => $status,
             'tracked_at' => now(),
             'provider_status' => $providerStatus,
             'metadata' => [
-                'previous_status' => $log->status,
+                'previous_status' => $notificationLog->status,
                 'updated_by_webhook' => request()->ip() ?? 'system',
             ],
         ]);
@@ -351,13 +352,13 @@ class NotificationLoggerService
      *
      * @return bool Success status
      */
-    public function retryNotification(NotificationLog $log): bool
+    public function retryNotification(NotificationLog $notificationLog): bool
     {
-        if (! $log->canRetry()) {
+        if (! $notificationLog->canRetry()) {
             Log::warning('Notification cannot be retried', [
-                'log_id' => $log->id,
-                'retry_count' => $log->retry_count,
-                'status' => $log->status,
+                'log_id' => $notificationLog->id,
+                'retry_count' => $notificationLog->retry_count,
+                'status' => $notificationLog->status,
             ]);
 
             return false;
@@ -365,7 +366,7 @@ class NotificationLoggerService
 
         try {
             // Reset to pending for retry
-            $log->update([
+            $notificationLog->update([
                 'status' => 'pending',
                 'error_message' => null,
             ]);
@@ -374,16 +375,16 @@ class NotificationLoggerService
             // This will be handled by the respective services (WhatsApp, Email, etc.)
 
             Log::info('Notification queued for retry', [
-                'log_id' => $log->id,
-                'retry_count' => $log->retry_count,
+                'log_id' => $notificationLog->id,
+                'retry_count' => $notificationLog->retry_count,
             ]);
 
             return true;
 
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Failed to retry notification', [
-                'log_id' => $log->id,
-                'error' => $e->getMessage(),
+                'log_id' => $notificationLog->id,
+                'error' => $exception->getMessage(),
             ]);
 
             return false;
@@ -400,7 +401,7 @@ class NotificationLoggerService
     {
         $cutoffDate = now()->subDays($daysOld);
 
-        $count = NotificationLog::where('created_at', '<', $cutoffDate)
+        $count = NotificationLog::query()->where('created_at', '<', $cutoffDate)
             ->whereIn('status', ['sent', 'delivered', 'read'])
             ->delete();
 

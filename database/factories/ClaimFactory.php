@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Claim;
-use App\Models\Customer;
 use App\Models\CustomerInsurance;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

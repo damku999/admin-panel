@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\RedirectResponse;
+
 /**
  * Abstract Base CRUD Controller
  *
@@ -21,10 +24,10 @@ abstract class AbstractBaseCrudController extends Controller
     protected function setupPermissionMiddleware(string $entityName): void
     {
         $this->middleware('auth');
-        $this->middleware("permission:{$entityName}-list|{$entityName}-create|{$entityName}-edit|{$entityName}-delete", ['only' => ['index']]);
-        $this->middleware("permission:{$entityName}-create", ['only' => ['create', 'store', 'updateStatus']]);
-        $this->middleware("permission:{$entityName}-edit", ['only' => ['edit', 'update']]);
-        $this->middleware("permission:{$entityName}-delete", ['only' => ['delete']]);
+        $this->middleware(sprintf('permission:%s-list|%s-create|%s-edit|%s-delete', $entityName, $entityName, $entityName, $entityName), ['only' => ['index']]);
+        $this->middleware(sprintf('permission:%s-create', $entityName), ['only' => ['create', 'store', 'updateStatus']]);
+        $this->middleware(sprintf('permission:%s-edit', $entityName), ['only' => ['edit', 'update']]);
+        $this->middleware(sprintf('permission:%s-delete', $entityName), ['only' => ['delete']]);
     }
 
     /**
@@ -45,8 +48,8 @@ abstract class AbstractBaseCrudController extends Controller
     {
         $this->middleware('auth');
 
-        foreach ($permissions as $config) {
-            $this->middleware("permission:{$config['permission']}", $config['only'] ?? []);
+        foreach ($permissions as $permission) {
+            $this->middleware('permission:'.$permission['permission'], $permission['only'] ?? []);
         }
     }
 
@@ -78,7 +81,7 @@ abstract class AbstractBaseCrudController extends Controller
      */
     protected function getSuccessMessage(string $entityName, string $operation): string
     {
-        return "{$entityName} {$operation} successfully!";
+        return sprintf('%s %s successfully!', $entityName, $operation);
     }
 
     /**
@@ -89,7 +92,7 @@ abstract class AbstractBaseCrudController extends Controller
      */
     protected function getErrorMessage(string $entityName, string $operation): string
     {
-        return "Failed to {$operation} {$entityName}. Please try again.";
+        return sprintf('Failed to %s %s. Please try again.', $operation, $entityName);
     }
 
     /**
@@ -99,13 +102,13 @@ abstract class AbstractBaseCrudController extends Controller
      * @param  string  $message  The success message
      * @param  array  $routeParameters  Optional route parameters
      */
-    protected function redirectWithSuccess(?string $route, string $message, array $routeParameters = []): \Illuminate\Http\RedirectResponse
+    protected function redirectWithSuccess(?string $route, string $message, array $routeParameters = []): RedirectResponse
     {
         if ($route === null) {
             return redirect()->back()->with('success', $message);
         }
 
-        if (! empty($routeParameters)) {
+        if ($routeParameters !== []) {
             return redirect()->route($route, $routeParameters)->with('success', $message);
         }
 
@@ -117,7 +120,7 @@ abstract class AbstractBaseCrudController extends Controller
      *
      * @param  string  $message  The error message
      */
-    protected function redirectWithError(string $message): \Illuminate\Http\RedirectResponse
+    protected function redirectWithError(string $message): RedirectResponse
     {
         return redirect()->back()->with('error', $message);
     }
@@ -125,9 +128,9 @@ abstract class AbstractBaseCrudController extends Controller
     /**
      * Get redirect response with validation errors
      *
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator  The validator instance
+     * @param  Validator  $validator  The validator instance
      */
-    protected function redirectWithValidationErrors(\Illuminate\Contracts\Validation\Validator $validator): \Illuminate\Http\RedirectResponse
+    protected function redirectWithValidationErrors(Validator $validator): RedirectResponse
     {
         return redirect()->back()->withErrors($validator)->withInput();
     }

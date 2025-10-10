@@ -3,13 +3,21 @@
 namespace App\Models;
 
 use App\Traits\TableRecordObserver;
+use Database\Factories\ClaimDocumentFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\PersonalAccessToken;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -22,53 +30,60 @@ use Spatie\Permission\Traits\HasRoles;
  * @property bool $is_required
  * @property bool $is_submitted
  * @property string|null $document_path
- * @property \Illuminate\Support\Carbon|null $submitted_date
+ * @property Carbon|null $submitted_date
  * @property string|null $notes
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read Collection<int, Activity> $activities
  * @property-read int|null $activities_count
- * @property-read \App\Models\Claim|null $claim
+ * @property-read Claim|null $claim
  * @property-read string|null $submitted_date_formatted
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
+ * @property-read Collection<int, Permission> $permissions
  * @property-read int|null $permissions_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
+ * @property-read Collection<int, Role> $roles
  * @property-read int|null $roles_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ * @property-read Collection<int, PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
- * @method static \Database\Factories\ClaimDocumentFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument permission($permissions)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument query()
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument role($roles, $guard = null)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereClaimId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereDocumentName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereDocumentPath($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereIsRequired($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereIsSubmitted($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereNotes($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereSubmittedDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|ClaimDocument withoutTrashed()
- * @mixin \Eloquent
+ *
+ * @method static ClaimDocumentFactory factory($count = null, $state = [])
+ * @method static Builder|ClaimDocument newModelQuery()
+ * @method static Builder|ClaimDocument newQuery()
+ * @method static Builder|ClaimDocument onlyTrashed()
+ * @method static Builder|ClaimDocument permission($permissions)
+ * @method static Builder|ClaimDocument query()
+ * @method static Builder|ClaimDocument role($roles, $guard = null)
+ * @method static Builder|ClaimDocument whereClaimId($value)
+ * @method static Builder|ClaimDocument whereCreatedAt($value)
+ * @method static Builder|ClaimDocument whereCreatedBy($value)
+ * @method static Builder|ClaimDocument whereDeletedAt($value)
+ * @method static Builder|ClaimDocument whereDeletedBy($value)
+ * @method static Builder|ClaimDocument whereDescription($value)
+ * @method static Builder|ClaimDocument whereDocumentName($value)
+ * @method static Builder|ClaimDocument whereDocumentPath($value)
+ * @method static Builder|ClaimDocument whereId($value)
+ * @method static Builder|ClaimDocument whereIsRequired($value)
+ * @method static Builder|ClaimDocument whereIsSubmitted($value)
+ * @method static Builder|ClaimDocument whereNotes($value)
+ * @method static Builder|ClaimDocument whereSubmittedDate($value)
+ * @method static Builder|ClaimDocument whereUpdatedAt($value)
+ * @method static Builder|ClaimDocument whereUpdatedBy($value)
+ * @method static Builder|ClaimDocument withTrashed()
+ * @method static Builder|ClaimDocument withoutTrashed()
+ *
+ * @mixin Model
  */
 class ClaimDocument extends Model
 {
-    use HasApiTokens, HasFactory, HasRoles, LogsActivity, SoftDeletes, TableRecordObserver;
+    use HasApiTokens;
+    use HasFactory;
+    use HasRoles;
+    use LogsActivity;
+    use SoftDeletes;
+    use TableRecordObserver;
 
     protected $fillable = [
         'claim_id',
@@ -137,7 +152,7 @@ class ClaimDocument extends Model
     /**
      * Get formatted submitted date.
      */
-    public function getSubmittedDateFormattedAttribute(): ?string
+    protected function getSubmittedDateFormattedAttribute(): ?string
     {
         return $this->submitted_date ? formatDateForUi($this->submitted_date) : null;
     }

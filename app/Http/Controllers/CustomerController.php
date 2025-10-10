@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Traits\ExportableTrait;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 
 /**
@@ -41,12 +42,12 @@ class CustomerController extends AbstractBaseCrudController
             if ($request->ajax() || $request->has('ajax')) {
                 $search = $request->input('q', $request->input('search', ''));
 
-                $query = Customer::select('id', 'name');
+                $query = Customer::query()->select('id', 'name');
 
                 if ($search) {
-                    $query->where('name', 'LIKE', "%{$search}%")
-                        ->orWhere('email', 'LIKE', "%{$search}%")
-                        ->orWhere('mobile', 'LIKE', "%{$search}%");
+                    $query->where('name', 'LIKE', sprintf('%%%s%%', $search))
+                        ->orWhere('email', 'LIKE', sprintf('%%%s%%', $search))
+                        ->orWhere('mobile', 'LIKE', sprintf('%%%s%%', $search));
                 }
 
                 $customers = $query->orderBy('name', 'asc')
@@ -55,12 +56,10 @@ class CustomerController extends AbstractBaseCrudController
 
                 // Format for Select2
                 return response()->json([
-                    'results' => $customers->map(function ($customer) {
-                        return [
-                            'id' => $customer->id,
-                            'text' => $customer->name,
-                        ];
-                    }),
+                    'results' => $customers->map(fn ($customer): array => [
+                        'id' => $customer->id,
+                        'text' => $customer->name,
+                    ]),
                 ]);
             }
 
@@ -72,9 +71,9 @@ class CustomerController extends AbstractBaseCrudController
                 'sortOrder' => $request->input('sort_order', 'asc'),
                 'request' => $request->all(),
             ]);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             // Create empty paginated result to maintain view compatibility
-            $emptyPaginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $lengthAwarePaginator = new LengthAwarePaginator(
                 collect(), // empty collection
                 0, // total count
                 10, // per page (matches CustomerService default)
@@ -83,11 +82,11 @@ class CustomerController extends AbstractBaseCrudController
             );
 
             return view('customers.index', [
-                'customers' => $emptyPaginator,
+                'customers' => $lengthAwarePaginator,
                 'sortField' => 'name',
                 'sortOrder' => 'asc',
                 'request' => $request->all(),
-                'error' => 'Failed to load customers: '.$th->getMessage(),
+                'error' => 'Failed to load customers: '.$throwable->getMessage(),
             ]);
         }
     }
@@ -108,21 +107,21 @@ class CustomerController extends AbstractBaseCrudController
     /**
      * Store Customer
      *
-     * @param  Request  $request
+     * @param  Request  $storeCustomerRequest
      * @return View Customers
      *
      * @author Darshan Baraiya
      */
-    public function store(StoreCustomerRequest $request): RedirectResponse
+    public function store(StoreCustomerRequest $storeCustomerRequest): RedirectResponse
     {
         try {
-            $customer = $this->customerService->createCustomer($request);
+            $customer = $this->customerService->createCustomer($storeCustomerRequest);
 
             return $this->redirectWithSuccess('customers.index',
                 $this->getSuccessMessage('Customer', 'created'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Customer', 'create').': '.$th->getMessage())
+                $this->getErrorMessage('Customer', 'create').': '.$throwable->getMessage())
                 ->withInput();
         }
     }
@@ -145,9 +144,9 @@ class CustomerController extends AbstractBaseCrudController
             }
 
             return $this->redirectWithError('Failed to update customer status.');
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Customer status', 'update').': '.$th->getMessage());
+                $this->getErrorMessage('Customer status', 'update').': '.$throwable->getMessage());
         }
     }
 
@@ -170,15 +169,15 @@ class CustomerController extends AbstractBaseCrudController
     /**
      * Update Customer
      *
-     * @param  Request  $request,  Customer $customer
+     * @param  Request  $updateCustomerRequest  ,  Customer $customer
      * @return View Customers
      *
      * @author Darshan Baraiya
      */
-    public function update(UpdateCustomerRequest $request, Customer $customer): RedirectResponse
+    public function update(UpdateCustomerRequest $updateCustomerRequest, Customer $customer): RedirectResponse
     {
         try {
-            $updated = $this->customerService->updateCustomer($request, $customer);
+            $updated = $this->customerService->updateCustomer($updateCustomerRequest, $customer);
 
             if ($updated) {
                 return $this->redirectWithSuccess('customers.index',
@@ -186,9 +185,9 @@ class CustomerController extends AbstractBaseCrudController
             }
 
             return $this->redirectWithError('Failed to update customer.');
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Customer', 'update').': '.$th->getMessage())
+                $this->getErrorMessage('Customer', 'update').': '.$throwable->getMessage())
                 ->withInput();
         }
     }
@@ -211,9 +210,9 @@ class CustomerController extends AbstractBaseCrudController
             }
 
             return $this->redirectWithError('Failed to delete customer.');
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Customer', 'delete').': '.$th->getMessage());
+                $this->getErrorMessage('Customer', 'delete').': '.$throwable->getMessage());
         }
     }
 
@@ -248,17 +247,15 @@ class CustomerController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => $this->getExportOrderBy(),
             'headings' => ['ID', 'Name', 'Email', 'Mobile', 'Status', 'Family Group', 'Created Date'],
-            'mapping' => function ($customer) {
-                return [
-                    $customer->id,
-                    $customer->name,
-                    $customer->email,
-                    $customer->mobile_number,
-                    ucfirst($customer->status),
-                    $customer->familyGroup ? $customer->familyGroup->name : 'Individual',
-                    $customer->created_at->format('Y-m-d H:i:s'),
-                ];
-            },
+            'mapping' => fn ($customer): array => [
+                $customer->id,
+                $customer->name,
+                $customer->email,
+                $customer->mobile_number,
+                ucfirst((string) $customer->status),
+                $customer->familyGroup ? $customer->familyGroup->name : 'Individual',
+                $customer->created_at->format('Y-m-d H:i:s'),
+            ],
             'with_mapping' => true,
         ];
     }

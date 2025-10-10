@@ -2,22 +2,37 @@
 
 namespace App\Models;
 
+use App\Models\Customer\CustomerSecuritySettings;
+use App\Models\Customer\CustomerTrustedDevice;
+use App\Models\Customer\CustomerTwoFactorAuth;
 use App\Traits\Auditable;
 use App\Traits\Customer\HasCustomerTwoFactorAuth;
+use Database\Factories\CustomerFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\PersonalAccessToken;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -27,9 +42,9 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string $name
  * @property string|null $email
  * @property string|null $mobile_number
- * @property \Illuminate\Support\Carbon|null $date_of_birth
- * @property \Illuminate\Support\Carbon|null $wedding_anniversary_date
- * @property \Illuminate\Support\Carbon|null $engagement_anniversary_date
+ * @property Carbon|null $date_of_birth
+ * @property Carbon|null $wedding_anniversary_date
+ * @property Carbon|null $engagement_anniversary_date
  * @property string|null $type
  * @property bool|null $status
  * @property array|null $notification_preferences
@@ -41,104 +56,113 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read string|null $gst_path
  * @property int|null $family_group_id Family group this customer belongs to
  * @property string|null $password Password for customer login
- * @property \Illuminate\Support\Carbon|null $password_changed_at
+ * @property Carbon|null $password_changed_at
  * @property bool $must_change_password
- * @property \Illuminate\Support\Carbon|null $email_verified_at Email verification timestamp
+ * @property Carbon|null $email_verified_at Email verification timestamp
  * @property string|null $email_verification_token
- * @property \Illuminate\Support\Carbon|null $password_reset_sent_at
+ * @property Carbon|null $password_reset_sent_at
  * @property string|null $password_reset_token
- * @property \Illuminate\Support\Carbon|null $password_reset_expires_at
+ * @property Carbon|null $password_reset_expires_at
  * @property string|null $remember_token
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomerDevice> $activeDevices
+ * @property-read Collection<int, CustomerDevice> $activeDevices
  * @property-read int|null $active_devices_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read Collection<int, Activity> $activities
  * @property-read int|null $activities_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomerAuditLog> $auditLogs
+ * @property-read Collection<int, CustomerAuditLog> $auditLogs
  * @property-read int|null $audit_logs_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Claim> $claims
+ * @property-read Collection<int, Claim> $claims
  * @property-read int|null $claims_count
- * @property-read \App\Models\Customer\CustomerSecuritySettings|null $customerSecuritySettings
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Customer\CustomerTrustedDevice> $customerTrustedDevices
+ * @property-read CustomerSecuritySettings|null $customerSecuritySettings
+ * @property-read Collection<int, CustomerTrustedDevice> $customerTrustedDevices
  * @property-read int|null $customer_trusted_devices_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\TwoFactorAttempt> $customerTwoFactorAttempts
+ * @property-read Collection<int, TwoFactorAttempt> $customerTwoFactorAttempts
  * @property-read int|null $customer_two_factor_attempts_count
- * @property-read \App\Models\Customer\CustomerTwoFactorAuth|null $customerTwoFactorAuth
- * @property-read \App\Models\CustomerType|null $customerType
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomerDevice> $devices
+ * @property-read CustomerTwoFactorAuth|null $customerTwoFactorAuth
+ * @property-read CustomerType|null $customerType
+ * @property-read Collection<int, CustomerDevice> $devices
  * @property-read int|null $devices_count
- * @property-read \App\Models\FamilyGroup|null $familyGroup
- * @property-read \App\Models\FamilyMember|null $familyMember
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\FamilyMember> $familyMembers
+ * @property-read FamilyGroup|null $familyGroup
+ * @property-read FamilyMember|null $familyMember
+ * @property-read Collection<int, FamilyMember> $familyMembers
  * @property-read int|null $family_members_count
  * @property-read mixed $date_of_birth_formatted
  * @property-read mixed $engagement_anniversary_date_formatted
  * @property-read mixed $wedding_anniversary_date_formatted
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomerInsurance> $insurance
+ * @property-read Collection<int, CustomerInsurance> $insurance
  * @property-read int|null $insurance_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\NotificationLog> $notificationLogs
+ * @property-read Collection<int, NotificationLog> $notificationLogs
  * @property-read int|null $notification_logs_count
- * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
+ * @property-read Collection<int, Permission> $permissions
  * @property-read int|null $permissions_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Quotation> $quotations
+ * @property-read Collection<int, Quotation> $quotations
  * @property-read int|null $quotations_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
+ * @property-read Collection<int, Role> $roles
  * @property-read int|null $roles_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ * @property-read Collection<int, PersonalAccessToken> $tokens
  * @property-read int|null $tokens_count
- * @method static \Database\Factories\CustomerFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|Customer newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Customer newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|Customer onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Customer permission($permissions)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer query()
- * @method static \Illuminate\Database\Eloquent\Builder|Customer role($roles, $guard = null)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereAadharCardNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereAadharCardPath($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereDateOfBirth($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereEmailVerificationToken($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereEmailVerifiedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereEngagementAnniversaryDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereFamilyGroupId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereGstNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereGstPath($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereMobileNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereMustChangePassword($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereNotificationPreferences($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer wherePanCardNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer wherePanCardPath($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer wherePassword($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer wherePasswordChangedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer wherePasswordResetExpiresAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer wherePasswordResetSentAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer wherePasswordResetToken($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereRememberToken($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer whereWeddingAnniversaryDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|Customer withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|Customer withoutTrashed()
- * @mixin \Eloquent
+ *
+ * @method static CustomerFactory factory($count = null, $state = [])
+ * @method static Builder|Customer newModelQuery()
+ * @method static Builder|Customer newQuery()
+ * @method static Builder|Customer onlyTrashed()
+ * @method static Builder|Customer permission($permissions)
+ * @method static Builder|Customer query()
+ * @method static Builder|Customer role($roles, $guard = null)
+ * @method static Builder|Customer whereAadharCardNumber($value)
+ * @method static Builder|Customer whereAadharCardPath($value)
+ * @method static Builder|Customer whereCreatedAt($value)
+ * @method static Builder|Customer whereCreatedBy($value)
+ * @method static Builder|Customer whereDateOfBirth($value)
+ * @method static Builder|Customer whereDeletedAt($value)
+ * @method static Builder|Customer whereDeletedBy($value)
+ * @method static Builder|Customer whereEmail($value)
+ * @method static Builder|Customer whereEmailVerificationToken($value)
+ * @method static Builder|Customer whereEmailVerifiedAt($value)
+ * @method static Builder|Customer whereEngagementAnniversaryDate($value)
+ * @method static Builder|Customer whereFamilyGroupId($value)
+ * @method static Builder|Customer whereGstNumber($value)
+ * @method static Builder|Customer whereGstPath($value)
+ * @method static Builder|Customer whereId($value)
+ * @method static Builder|Customer whereMobileNumber($value)
+ * @method static Builder|Customer whereMustChangePassword($value)
+ * @method static Builder|Customer whereName($value)
+ * @method static Builder|Customer whereNotificationPreferences($value)
+ * @method static Builder|Customer wherePanCardNumber($value)
+ * @method static Builder|Customer wherePanCardPath($value)
+ * @method static Builder|Customer wherePassword($value)
+ * @method static Builder|Customer wherePasswordChangedAt($value)
+ * @method static Builder|Customer wherePasswordResetExpiresAt($value)
+ * @method static Builder|Customer wherePasswordResetSentAt($value)
+ * @method static Builder|Customer wherePasswordResetToken($value)
+ * @method static Builder|Customer whereRememberToken($value)
+ * @method static Builder|Customer whereStatus($value)
+ * @method static Builder|Customer whereType($value)
+ * @method static Builder|Customer whereUpdatedAt($value)
+ * @method static Builder|Customer whereUpdatedBy($value)
+ * @method static Builder|Customer whereWeddingAnniversaryDate($value)
+ * @method static Builder|Customer withTrashed()
+ * @method static Builder|Customer withoutTrashed()
+ *
+ * @mixin Model
  */
 class Customer extends Authenticatable
 {
-    use Auditable, HasApiTokens, HasCustomerTwoFactorAuth, HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes;
+    use Auditable;
+    use HasApiTokens;
+    use HasCustomerTwoFactorAuth;
+    use HasFactory;
+    use HasRoles;
+    use LogsActivity;
+    use Notifiable;
+    use SoftDeletes;
 
     protected static $logAttributes = ['*'];
 
@@ -207,7 +231,7 @@ class Customer extends Authenticatable
     {
         parent::boot();
 
-        static::creating(function ($model) {
+        static::creating(static function ($model): void {
             // Check both customer and web guards for created_by
             if (Auth::guard('customer')->check()) {
                 $model->created_by = Auth::guard('customer')->id();
@@ -221,7 +245,7 @@ class Customer extends Authenticatable
             }
         });
 
-        static::updating(function ($model) {
+        static::updating(static function ($model): void {
             // Check both customer and web guards for updated_by
             if (Auth::guard('customer')->check()) {
                 $model->updated_by = Auth::guard('customer')->id();
@@ -232,7 +256,7 @@ class Customer extends Authenticatable
             }
         });
 
-        static::deleting(function ($model) {
+        static::deleting(static function ($model): void {
             // Check both customer and web guards for deleted_by
             if (Auth::guard('customer')->check()) {
                 $model->deleted_by = Auth::guard('customer')->id();
@@ -241,6 +265,7 @@ class Customer extends Authenticatable
             } else {
                 $model->deleted_by = 0;
             }
+
             $model->save();
         });
     }
@@ -331,7 +356,7 @@ class Customer extends Authenticatable
         $familyGroupId = $this->validateFamilyGroupId($this->family_group_id);
 
         return $this->hasMany(CustomerInsurance::class, 'customer_id')
-            ->whereHas('customer', function ($query) use ($familyGroupId) {
+            ->whereHas('customer', static function ($query) use ($familyGroupId): void {
                 $query->where('family_group_id', '=', $familyGroupId);
             });
     }
@@ -366,13 +391,13 @@ class Customer extends Authenticatable
             $familyGroupId = $this->validateFamilyGroupId($this->family_group_id);
 
             // Family head can view all family insurance
-            return CustomerInsurance::whereHas('customer', function ($query) use ($familyGroupId) {
+            return CustomerInsurance::query()->whereHas('customer', static function ($query) use ($familyGroupId): void {
                 $query->where('family_group_id', '=', $familyGroupId);
             })->with(['customer', 'insuranceCompany', 'policyType', 'premiumType']);
-        } else {
-            // Regular members can only view their own insurance
-            return $this->insurance()->with(['insuranceCompany', 'policyType', 'premiumType']);
         }
+
+        // Regular members can only view their own insurance
+        return $this->insurance()->with(['insuranceCompany', 'policyType', 'premiumType']);
     }
 
     /**
@@ -407,7 +432,7 @@ class Customer extends Authenticatable
      */
     protected function maskEmail(?string $email): ?string
     {
-        if (! $email) {
+        if (in_array($email, [null, '', '0'], true)) {
             return null;
         }
 
@@ -431,7 +456,7 @@ class Customer extends Authenticatable
      */
     protected function maskMobile(?string $mobile): ?string
     {
-        if (! $mobile || strlen($mobile) < 4) {
+        if (in_array($mobile, [null, '', '0'], true) || strlen($mobile) < 4) {
             return $mobile;
         }
 
@@ -483,21 +508,21 @@ class Customer extends Authenticatable
     protected function panCardPath(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => $value ? asset('storage/'.$value) : null,
+            get: fn (?string $value) => $value !== null && $value !== '' && $value !== '0' ? asset('storage/'.$value) : null,
         );
     }
 
     protected function aadharCardPath(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => $value ? asset('storage/'.$value) : null,
+            get: fn (?string $value) => $value !== null && $value !== '' && $value !== '0' ? asset('storage/'.$value) : null,
         );
     }
 
     protected function gstPath(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value) => $value ? asset('storage/'.$value) : null,
+            get: fn (?string $value) => $value !== null && $value !== '' && $value !== '0' ? asset('storage/'.$value) : null,
         );
     }
 
@@ -684,7 +709,7 @@ class Customer extends Authenticatable
     /**
      * Validate and sanitize family group ID to prevent SQL injection.
      */
-    protected function validateFamilyGroupId($familyGroupId)
+    protected function validateFamilyGroupId($familyGroupId): int
     {
         // Check if family group ID is null
         if (is_null($familyGroupId)) {
@@ -704,7 +729,7 @@ class Customer extends Authenticatable
         }
 
         // Additional security: Verify the family group actually exists and is active
-        $familyGroupExists = \DB::table('family_groups')
+        $familyGroupExists = DB::table('family_groups')
             ->where('id', '=', $familyGroupId)
             ->where('status', '=', true)
             ->exists();
@@ -723,7 +748,7 @@ class Customer extends Authenticatable
     /**
      * Get date of birth in UI format (d/m/Y)
      */
-    public function getDateOfBirthFormattedAttribute()
+    protected function getDateOfBirthFormattedAttribute()
     {
         return formatDateForUi($this->date_of_birth);
     }
@@ -731,7 +756,7 @@ class Customer extends Authenticatable
     /**
      * Set date of birth from UI format (d/m/Y) to database format (Y-m-d)
      */
-    public function setDateOfBirthAttribute($value)
+    protected function setDateOfBirthAttribute($value)
     {
         $this->attributes['date_of_birth'] = formatDateForDatabase($value);
     }
@@ -739,7 +764,7 @@ class Customer extends Authenticatable
     /**
      * Get wedding anniversary date in UI format (d/m/Y)
      */
-    public function getWeddingAnniversaryDateFormattedAttribute()
+    protected function getWeddingAnniversaryDateFormattedAttribute()
     {
         return formatDateForUi($this->wedding_anniversary_date);
     }
@@ -747,7 +772,7 @@ class Customer extends Authenticatable
     /**
      * Set wedding anniversary date from UI format (d/m/Y) to database format (Y-m-d)
      */
-    public function setWeddingAnniversaryDateAttribute($value)
+    protected function setWeddingAnniversaryDateAttribute($value)
     {
         $this->attributes['wedding_anniversary_date'] = formatDateForDatabase($value);
     }
@@ -755,7 +780,7 @@ class Customer extends Authenticatable
     /**
      * Get engagement anniversary date in UI format (d/m/Y)
      */
-    public function getEngagementAnniversaryDateFormattedAttribute()
+    protected function getEngagementAnniversaryDateFormattedAttribute()
     {
         return formatDateForUi($this->engagement_anniversary_date);
     }
@@ -763,7 +788,7 @@ class Customer extends Authenticatable
     /**
      * Set engagement anniversary date from UI format (d/m/Y) to database format (Y-m-d)
      */
-    public function setEngagementAnniversaryDateAttribute($value)
+    protected function setEngagementAnniversaryDateAttribute($value)
     {
         $this->attributes['engagement_anniversary_date'] = formatDateForDatabase($value);
     }

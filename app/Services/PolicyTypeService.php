@@ -20,7 +20,7 @@ class PolicyTypeService extends BaseService
     public function createPolicyType(array $data): PolicyType
     {
         return $this->createInTransaction(
-            fn () => PolicyType::create($data)
+            fn () => PolicyType::query()->create($data)
         );
     }
 

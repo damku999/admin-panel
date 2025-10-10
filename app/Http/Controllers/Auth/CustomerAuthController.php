@@ -3,13 +3,22 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\CustomerEmailVerificationMail;
+use App\Mail\CustomerPasswordResetMail;
+use App\Models\Claim;
 use App\Models\Customer;
 use App\Models\CustomerAuditLog;
+use App\Models\CustomerInsurance;
+use App\Models\Quotation;
+use App\Services\CustomerTwoFactorAuthService;
+use App\Services\PdfGenerationService;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class CustomerAuthController extends Controller
 {
@@ -70,7 +79,7 @@ class CustomerAuthController extends Controller
     {
         $isHead = false;
 
-        return view('customer.auth.login', compact('isHead'));
+        return view('customer.auth.login', ['isHead' => $isHead]);
     }
 
     /**
@@ -98,9 +107,9 @@ class CustomerAuthController extends Controller
         }
 
         // Log failed login attempt
-        $customer = Customer::where('email', $request->email)->first();
+        $customer = Customer::query()->where('email', $request->email)->first();
         if ($customer) {
-            CustomerAuditLog::create([
+            CustomerAuditLog::query()->create([
                 'customer_id' => $customer->id,
                 'action' => 'login_failed',
                 'description' => 'Failed login attempt with incorrect password',
@@ -192,7 +201,7 @@ class CustomerAuthController extends Controller
                         'user_agent' => $request->userAgent(),
                     ]);
                 } catch (\Exception $e) {
-                    \Log::error('Failed to log 2FA challenge initiation', [
+                    Log::error('Failed to log 2FA challenge initiation', [
                         'error' => $e->getMessage(),
                         'customer_id' => $customer->id,
                     ]);
@@ -201,20 +210,19 @@ class CustomerAuthController extends Controller
                 // TEMPORARY FIX: Use admin's working 2FA route
                 return redirect()->route('two-factor.challenge')
                     ->with('info', 'Please enter your two-factor authentication code.');
-            } else {
-                // Device is trusted, log successful trusted login (with error handling)
-                try {
-                    CustomerAuditLog::logAction('trusted_device_login', 'Customer logged in using trusted device', [
-                        'device_trusted' => true,
-                        'ip_address' => $request->ip(),
-                        'user_agent' => $request->userAgent(),
-                    ]);
-                } catch (\Exception $e) {
-                    \Log::error('Failed to log trusted device login', [
-                        'error' => $e->getMessage(),
-                        'customer_id' => $customer->id,
-                    ]);
-                }
+            }
+            // Device is trusted, log successful trusted login (with error handling)
+            try {
+                CustomerAuditLog::logAction('trusted_device_login', 'Customer logged in using trusted device', [
+                    'device_trusted' => true,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Failed to log trusted device login', [
+                    'error' => $e->getMessage(),
+                    'customer_id' => $customer->id,
+                ]);
             }
         }
 
@@ -279,30 +287,30 @@ class CustomerAuthController extends Controller
                     ->get();
 
                 // For dashboard, show only active policies (not expired)
-                $familyPolicies = $allPolicies->filter(function ($policy) {
+                $familyPolicies = $allPolicies->filter(static function ($policy) {
                     if (! $policy->expired_date) {
                         return true; // No expiry date means active
                     }
 
-                    return \Carbon\Carbon::parse($policy->expired_date)->isFuture();
+                    return Carbon::parse($policy->expired_date)->isFuture();
                 });
 
                 // Get policies expiring in next 30 days
                 $thirtyDaysFromNow = now()->addDays(30);
-                $expiringPolicies = $allPolicies->filter(function ($policy) use ($thirtyDaysFromNow) {
+                $expiringPolicies = $allPolicies->filter(static function ($policy) use ($thirtyDaysFromNow): bool {
                     if (! $policy->expired_date) {
                         return false;
                     }
 
-                    $expiryDate = \Carbon\Carbon::parse($policy->expired_date);
+                    $expiryDate = Carbon::parse($policy->expired_date);
 
                     return $expiryDate->isFuture() && $expiryDate->lte($thirtyDaysFromNow);
                 });
 
                 // Get recent quotations
                 if ($customer->isFamilyHead()) {
-                    $recentQuotations = \App\Models\Quotation::with(['quotationCompanies.insuranceCompany'])
-                        ->whereHas('customer', function ($query) use ($customer) {
+                    $recentQuotations = Quotation::with(['quotationCompanies.insuranceCompany'])
+                        ->whereHas('customer', static function ($query) use ($customer): void {
                             $query->where('family_group_id', $customer->family_group_id);
                         })
                         ->orderBy('created_at', 'desc')
@@ -317,7 +325,7 @@ class CustomerAuthController extends Controller
                 }
             } catch (\InvalidArgumentException $e) {
                 // Log SQL injection attempt
-                CustomerAuditLog::create([
+                CustomerAuditLog::query()->create([
                     'customer_id' => $customer->id,
                     'action' => 'sql_injection_attempt',
                     'description' => 'Invalid family group ID detected in dashboard query',
@@ -369,7 +377,7 @@ class CustomerAuthController extends Controller
         $customer = Auth::guard('customer')->user();
 
         if (! $customer) {
-            \Log::warning('No authenticated customer found in change password form');
+            Log::warning('No authenticated customer found in change password form');
 
             return redirect()->route('customer.login')->with('error', 'Please login to change password.');
         }
@@ -409,7 +417,7 @@ class CustomerAuthController extends Controller
         $customer = Auth::guard('customer')->user();
         $isHead = $customer->isFamilyHead();
 
-        return view('customer.auth.verify-email', compact('customer', 'isHead'));
+        return view('customer.auth.verify-email', ['customer' => $customer, 'isHead' => $isHead]);
     }
 
     /**
@@ -417,7 +425,7 @@ class CustomerAuthController extends Controller
      */
     public function verifyEmail(Request $request, $token)
     {
-        $customer = Customer::where('email_verification_token', $token)->first();
+        $customer = Customer::query()->where('email_verification_token', $token)->first();
 
         if (! $customer) {
             return redirect()->route('customer.login')
@@ -450,9 +458,9 @@ class CustomerAuthController extends Controller
 
         // Send verification email
         try {
-            \Mail::to($customer->email)->send(new \App\Mail\CustomerEmailVerificationMail($customer, $token));
+            Mail::to($customer->email)->send(new CustomerEmailVerificationMail($customer, $token));
 
-            \Log::info('Email verification email sent successfully', [
+            Log::info('Email verification email sent successfully', [
                 'customer_id' => $customer->id,
                 'email' => $customer->email,
                 'token' => $token,
@@ -460,12 +468,12 @@ class CustomerAuthController extends Controller
             ]);
 
             return back()->with('success', 'Verification link sent to your email.');
-        } catch (\Exception $e) {
-            \Log::error('Failed to send email verification email', [
+        } catch (\Exception $exception) {
+            Log::error('Failed to send email verification email', [
                 'customer_id' => $customer->id,
                 'email' => $customer->email,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'error' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
             ]);
 
             return back()->withErrors(['email' => 'Failed to send verification email. Please try again later.']);
@@ -479,7 +487,7 @@ class CustomerAuthController extends Controller
     {
         $isHead = false;
 
-        return view('customer.auth.password-reset', compact('isHead'));
+        return view('customer.auth.password-reset', ['isHead' => $isHead]);
     }
 
     /**
@@ -489,7 +497,7 @@ class CustomerAuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $customer = Customer::where('email', $request->email)->first();
+        $customer = Customer::query()->where('email', $request->email)->first();
 
         if (! $customer) {
             return back()->withErrors(['email' => 'Email address not found.']);
@@ -499,9 +507,9 @@ class CustomerAuthController extends Controller
 
         // Send password reset email
         try {
-            \Mail::to($customer->email)->send(new \App\Mail\CustomerPasswordResetMail($customer, $token));
+            Mail::to($customer->email)->send(new CustomerPasswordResetMail($customer, $token));
 
-            \Log::info('Password reset email sent successfully', [
+            Log::info('Password reset email sent successfully', [
                 'customer_id' => $customer->id,
                 'email' => $customer->email,
                 'token' => $token,
@@ -509,12 +517,12 @@ class CustomerAuthController extends Controller
             ]);
 
             return back()->with('success', 'Password reset link sent to your email.');
-        } catch (\Exception $e) {
-            \Log::error('Failed to send password reset email', [
+        } catch (\Exception $exception) {
+            Log::error('Failed to send password reset email', [
                 'customer_id' => $customer->id,
                 'email' => $customer->email,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'error' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
             ]);
 
             return back()->withErrors(['email' => 'Failed to send password reset email. Please try again later.']);
@@ -526,7 +534,7 @@ class CustomerAuthController extends Controller
      */
     public function showPasswordResetFormWithToken($token)
     {
-        $customer = Customer::where('password_reset_token', $token)->first();
+        $customer = Customer::query()->where('password_reset_token', $token)->first();
 
         if (! $customer || ! $customer->verifyPasswordResetToken($token)) {
             return redirect()->route('customer.login')
@@ -535,7 +543,7 @@ class CustomerAuthController extends Controller
 
         $isHead = $customer->isFamilyHead();
 
-        return view('customer.auth.reset-password', compact('token', 'isHead'));
+        return view('customer.auth.reset-password', ['token' => $token, 'isHead' => $isHead]);
     }
 
     /**
@@ -548,10 +556,10 @@ class CustomerAuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $customer = Customer::where('password_reset_token', $request->token)->first();
+        $customer = Customer::query()->where('password_reset_token', $request->token)->first();
 
         if (! $customer || ! $customer->verifyPasswordResetToken($request->token)) {
-            CustomerAuditLog::create([
+            CustomerAuditLog::query()->create([
                 'customer_id' => $customer?->id,
                 'action' => 'password_reset_failed',
                 'description' => 'Failed password reset attempt with invalid or expired token',
@@ -576,7 +584,7 @@ class CustomerAuthController extends Controller
         $customer->changePassword($request->password);
 
         // Log successful password reset
-        CustomerAuditLog::create([
+        CustomerAuditLog::query()->create([
             'customer_id' => $customer->id,
             'action' => 'password_reset_success',
             'description' => 'Password reset successfully using valid token',
@@ -604,7 +612,7 @@ class CustomerAuthController extends Controller
         // Get all family members (Customer records) in the same family group
         $familyMembers = collect();
         if ($customer->familyGroup) {
-            $familyMembers = Customer::where('family_group_id', $customer->familyGroup->id)
+            $familyMembers = Customer::query()->where('family_group_id', $customer->familyGroup->id)
                 ->with('familyMember')  // Load the relationship info (relationship, is_head, etc.)
                 ->get();
         }
@@ -615,11 +623,11 @@ class CustomerAuthController extends Controller
 
         if ($customer->isFamilyHead()) {
             // Family head sees all family policies and quotations
-            $activePoliciesCount = \App\Models\CustomerInsurance::whereHas('customer', function ($query) use ($customer) {
+            $activePoliciesCount = CustomerInsurance::query()->whereHas('customer', static function ($query) use ($customer): void {
                 $query->where('family_group_id', $customer->family_group_id);
             })->where('status', 'active')->count();
 
-            $quotationsCount = \App\Models\Quotation::whereHas('customer', function ($query) use ($customer) {
+            $quotationsCount = Quotation::query()->whereHas('customer', static function ($query) use ($customer): void {
                 $query->where('family_group_id', $customer->family_group_id);
             })->count();
         } else {
@@ -735,7 +743,7 @@ class CustomerAuthController extends Controller
         ]);
 
         // Log the password change action
-        CustomerAuditLog::create([
+        CustomerAuditLog::query()->create([
             'customer_id' => $member->id,
             'action' => 'password_changed_by_family_head',
             'description' => 'Password changed by family head: '.$customer->name,
@@ -750,7 +758,7 @@ class CustomerAuthController extends Controller
         ]);
 
         // Also log in family head's audit log
-        CustomerAuditLog::create([
+        CustomerAuditLog::query()->create([
             'customer_id' => $customer->id,
             'action' => 'changed_family_member_password',
             'description' => 'Changed password for family member: '.$member->name,
@@ -814,7 +822,7 @@ class CustomerAuthController extends Controller
             }
 
             // Use the customer 2FA service
-            $customerTwoFactorService = app(\App\Services\CustomerTwoFactorAuthService::class);
+            $customerTwoFactorService = app(CustomerTwoFactorAuthService::class);
             $customerTwoFactorService->disableTwoFactor($member, '', true); // Skip password check for family head
 
             // Also revoke all trusted devices
@@ -834,12 +842,12 @@ class CustomerAuthController extends Controller
                 'message' => 'Two-Factor Authentication has been disabled for '.$member->name.'.',
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Failed to disable family member 2FA', [
                 'family_head_id' => $customer->id,
                 'member_id' => $member->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'error' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
             ]);
 
             return response()->json([
@@ -868,7 +876,7 @@ class CustomerAuthController extends Controller
                 $allPolicies = $customer->getViewableInsurance()->get();
             } catch (\InvalidArgumentException $e) {
                 // Log SQL injection attempt or data manipulation
-                CustomerAuditLog::create([
+                CustomerAuditLog::query()->create([
                     'customer_id' => $customer->id,
                     'action' => 'sql_injection_attempt',
                     'description' => 'Invalid family group ID detected in policy query',
@@ -896,20 +904,20 @@ class CustomerAuthController extends Controller
         ]);
 
         // Categorize policies by status
-        $activePolicies = $allPolicies->filter(function ($policy) {
+        $activePolicies = $allPolicies->filter(static function ($policy) {
             if (! $policy->expired_date) {
                 return true;
             }
 
-            return \Carbon\Carbon::parse($policy->expired_date)->isFuture();
+            return Carbon::parse($policy->expired_date)->isFuture();
         });
 
-        $expiredPolicies = $allPolicies->filter(function ($policy) {
+        $expiredPolicies = $allPolicies->filter(static function ($policy) {
             if (! $policy->expired_date) {
                 return false;
             }
 
-            return \Carbon\Carbon::parse($policy->expired_date)->isPast();
+            return Carbon::parse($policy->expired_date)->isPast();
         });
 
         return view('customer.policies', [
@@ -928,7 +936,7 @@ class CustomerAuthController extends Controller
         $customer = Auth::guard('customer')->user();
 
         // Get the policy and verify access
-        $policy = \App\Models\CustomerInsurance::with(['customer', 'insuranceCompany', 'policyType', 'premiumType'])
+        $policy = CustomerInsurance::with(['customer', 'insuranceCompany', 'policyType', 'premiumType'])
             ->findOrFail($policyId);
 
         // Check authorization - customer can only view policies from their family group
@@ -962,12 +970,12 @@ class CustomerAuthController extends Controller
         CustomerAuditLog::logPolicyAction('view_policy_detail', $policy);
 
         // Calculate policy status and renewal info
-        $isExpired = $policy->expired_date ? \Carbon\Carbon::parse($policy->expired_date)->isPast() : false;
+        $isExpired = $policy->expired_date && Carbon::parse($policy->expired_date)->isPast();
         $isExpiringSoon = false;
         $daysUntilExpiry = null;
 
         if ($policy->expired_date && ! $isExpired) {
-            $expiryDate = \Carbon\Carbon::parse($policy->expired_date);
+            $expiryDate = Carbon::parse($policy->expired_date);
             $daysUntilExpiry = now()->diffInDays($expiryDate, false);
             $isExpiringSoon = $daysUntilExpiry <= 30;
         }
@@ -990,7 +998,7 @@ class CustomerAuthController extends Controller
         $customer = Auth::guard('customer')->user();
 
         // Get the policy and verify access
-        $policy = \App\Models\CustomerInsurance::findOrFail($policyId);
+        $policy = CustomerInsurance::query()->findOrFail($policyId);
 
         // Check authorization - customer can only download policies from their family group
         $hasAccess = false;
@@ -1032,7 +1040,7 @@ class CustomerAuthController extends Controller
         $documentPath = ltrim($documentPath, '/\\');
 
         // Validate that the path only contains allowed characters (alphanumeric, dash, underscore, slash, dot)
-        if (! preg_match('/^[a-zA-Z0-9\/_\-\.]+$/', $documentPath)) {
+        if (in_array(preg_match('/^[a-zA-Z0-9\/_\-\.]+$/', $documentPath), [0, false], true)) {
             CustomerAuditLog::logFailure('download_policy', 'Invalid file path detected', [
                 'policy_id' => $policyId,
                 'policy_no' => $policy->policy_no,
@@ -1048,7 +1056,7 @@ class CustomerAuthController extends Controller
         $fullPath = realpath($allowedDirectory.$documentPath);
 
         // Verify the resolved path is within the allowed directory
-        if (! $fullPath || ! str_starts_with($fullPath, $allowedDirectory)) {
+        if (in_array($fullPath, ['', '0', false], true) || ! str_starts_with($fullPath, $allowedDirectory)) {
             CustomerAuditLog::logFailure('download_policy', 'Path traversal attack blocked', [
                 'policy_id' => $policyId,
                 'policy_no' => $policy->policy_no,
@@ -1113,8 +1121,8 @@ class CustomerAuthController extends Controller
             try {
                 if ($customer->isFamilyHead()) {
                     // Family head can view all quotations in their family group
-                    $allQuotations = \App\Models\Quotation::with(['quotationCompanies.insuranceCompany'])
-                        ->whereHas('customer', function ($query) use ($customer) {
+                    $allQuotations = Quotation::with(['quotationCompanies.insuranceCompany'])
+                        ->whereHas('customer', static function ($query) use ($customer): void {
                             $query->where('family_group_id', $customer->family_group_id);
                         })
                         ->orderBy('created_at', 'desc')
@@ -1128,7 +1136,7 @@ class CustomerAuthController extends Controller
                 }
             } catch (\InvalidArgumentException $e) {
                 // Log SQL injection attempt
-                CustomerAuditLog::create([
+                CustomerAuditLog::query()->create([
                     'customer_id' => $customer->id,
                     'action' => 'sql_injection_attempt',
                     'description' => 'Invalid family group ID detected in quotation query',
@@ -1177,7 +1185,7 @@ class CustomerAuthController extends Controller
         $customer = Auth::guard('customer')->user();
 
         // Get the quotation and verify access
-        $quotation = \App\Models\Quotation::with(['customer', 'quotationCompanies.insuranceCompany'])
+        $quotation = Quotation::with(['customer', 'quotationCompanies.insuranceCompany'])
             ->findOrFail($quotationId);
 
         // Check authorization - customer can only view quotations from their family group
@@ -1230,7 +1238,7 @@ class CustomerAuthController extends Controller
         $customer = Auth::guard('customer')->user();
 
         // Get the quotation and verify access
-        $quotation = \App\Models\Quotation::with(['customer', 'quotationCompanies.insuranceCompany'])
+        $quotation = Quotation::with(['customer', 'quotationCompanies.insuranceCompany'])
             ->findOrFail($quotationId);
 
         // Check authorization - customer can only download quotations from their family group
@@ -1277,17 +1285,17 @@ class CustomerAuthController extends Controller
             ]);
 
             // Use the same PDF service as admin
-            $pdfService = app(\App\Services\PdfGenerationService::class);
+            $pdfService = app(PdfGenerationService::class);
 
             return $pdfService->generateQuotationPdf($quotation);
 
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             CustomerAuditLog::logFailure('download_quotation', 'Failed to generate quotation PDF', [
                 'quotation_id' => $quotationId,
                 'quotation_reference' => $quotation->getQuoteReference(),
-                'error_message' => $e->getMessage(),
-                'error_file' => $e->getFile(),
-                'error_line' => $e->getLine(),
+                'error_message' => $throwable->getMessage(),
+                'error_file' => $throwable->getFile(),
+                'error_line' => $throwable->getLine(),
             ]);
 
             return redirect()->back()->with('error', 'Failed to generate PDF. Please try again later.');
@@ -1303,7 +1311,7 @@ class CustomerAuthController extends Controller
             $customer = auth('customer')->user();
 
             // Get all claims for customer and family members
-            $claimsQuery = \App\Models\Claim::with([
+            $claimsQuery = Claim::with([
                 'customer:id,name,email,mobile_number',
                 'customerInsurance:id,policy_no,registration_no,insurance_company_id',
                 'customerInsurance.insuranceCompany:id,name',
@@ -1327,13 +1335,13 @@ class CustomerAuthController extends Controller
                 'is_family_head' => $customer->isFamilyHead(),
             ]);
 
-            return view('customer.claims', compact('claims'));
+            return view('customer.claims', ['claims' => $claims]);
 
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             CustomerAuditLog::logFailure('view_claims', 'Failed to load customer claims list', [
-                'error_message' => $e->getMessage(),
-                'error_file' => $e->getFile(),
-                'error_line' => $e->getLine(),
+                'error_message' => $throwable->getMessage(),
+                'error_file' => $throwable->getFile(),
+                'error_line' => $throwable->getLine(),
             ]);
 
             return redirect()->route('customer.dashboard')
@@ -1344,7 +1352,7 @@ class CustomerAuthController extends Controller
     /**
      * Show specific claim detail.
      */
-    public function showClaimDetail(\App\Models\Claim $claim)
+    public function showClaimDetail(Claim $claim)
     {
         try {
             $customer = auth('customer')->user();
@@ -1391,7 +1399,7 @@ class CustomerAuthController extends Controller
                 'customerInsurance:id,policy_no,registration_no,insurance_company_id',
                 'customerInsurance.insuranceCompany:id,name',
                 'customerInsurance.policyType:id,policy_type',
-                'stages' => function ($query) {
+                'stages' => static function ($query): void {
                     $query->orderBy('created_at', 'desc');
                 },
                 'documents:id,claim_id,document_name,description,is_required,is_submitted,submitted_date',
@@ -1406,14 +1414,14 @@ class CustomerAuthController extends Controller
                 'is_own_claim' => $claim->customer_id === $customer->id,
             ]);
 
-            return view('customer.claim-detail', compact('claim'));
+            return view('customer.claim-detail', ['claim' => $claim]);
 
-        } catch (\Throwable $e) {
+        } catch (\Throwable $throwable) {
             CustomerAuditLog::logFailure('view_claim_detail', 'Failed to load claim detail', [
                 'claim_id' => $claim->id ?? null,
-                'error_message' => $e->getMessage(),
-                'error_file' => $e->getFile(),
-                'error_line' => $e->getLine(),
+                'error_message' => $throwable->getMessage(),
+                'error_file' => $throwable->getFile(),
+                'error_line' => $throwable->getLine(),
             ]);
 
             return redirect()->route('customer.claims')

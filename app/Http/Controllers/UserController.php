@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Contracts\Services\UserServiceInterface;
 use App\Models\User;
 use App\Traits\ExportableTrait;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 
 /**
  * User Controller
@@ -33,9 +35,9 @@ class UserController extends AbstractBaseCrudController
      */
     public function index(Request $request)
     {
-        $users = $this->userService->getUsers($request);
+        $lengthAwarePaginator = $this->userService->getUsers($request);
 
-        return view('users.index', ['users' => $users]);
+        return view('users.index', ['users' => $lengthAwarePaginator]);
     }
 
     /**
@@ -55,7 +57,7 @@ class UserController extends AbstractBaseCrudController
     /**
      * Store User
      *
-     * @return \Illuminate\View\View Users
+     * @return View Users
      *
      * @author Darshan Baraiya
      */
@@ -76,9 +78,9 @@ class UserController extends AbstractBaseCrudController
 
             return $this->redirectWithSuccess('users.index',
                 $this->getSuccessMessage('User', 'created'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('User', 'create').': '.$th->getMessage())
+                $this->getErrorMessage('User', 'create').': '.$throwable->getMessage())
                 ->withInput();
         }
     }
@@ -86,16 +88,14 @@ class UserController extends AbstractBaseCrudController
     /**
      * Update Status Of User
      *
-     * @param  int  $user_id
-     * @param  int  $status
-     * @return \Illuminate\Http\RedirectResponse Page With Success
+     * @return RedirectResponse Page With Success
      *
      * @author Darshan Baraiya
      */
-    public function updateStatus($user_id, $status)
+    public function updateStatus(int $user_id, int $status): RedirectResponse
     {
         // Validation
-        $validate = Validator::make([
+        $validator = Validator::make([
             'user_id' => $user_id,
             'status' => $status,
         ], [
@@ -104,8 +104,8 @@ class UserController extends AbstractBaseCrudController
         ]);
 
         // If Validations Fails
-        if ($validate->fails()) {
-            return $this->redirectWithError($validate->errors()->first());
+        if ($validator->fails()) {
+            return $this->redirectWithError($validator->errors()->first());
         }
 
         try {
@@ -114,9 +114,9 @@ class UserController extends AbstractBaseCrudController
 
             return $this->redirectWithSuccess('users.index',
                 $this->getSuccessMessage('User status', 'updated'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('User status', 'update').': '.$th->getMessage());
+                $this->getErrorMessage('User status', 'update').': '.$throwable->getMessage());
         }
     }
 
@@ -140,7 +140,7 @@ class UserController extends AbstractBaseCrudController
     /**
      * Update User
      *
-     * @return \Illuminate\View\View Users
+     * @return View Users
      *
      * @author Darshan Baraiya
      */
@@ -180,9 +180,9 @@ class UserController extends AbstractBaseCrudController
 
             return $this->redirectWithSuccess('users.index',
                 $this->getSuccessMessage('User', 'updated'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('User', 'update').': '.$th->getMessage())
+                $this->getErrorMessage('User', 'update').': '.$throwable->getMessage())
                 ->withInput();
         }
     }
@@ -190,11 +190,11 @@ class UserController extends AbstractBaseCrudController
     /**
      * Delete User
      *
-     * @return \Illuminate\Http\RedirectResponse Users
+     * @return RedirectResponse Users
      *
      * @author Darshan Baraiya
      */
-    public function delete(User $user)
+    public function delete(User $user): RedirectResponse
     {
         try {
             // Delete user through service
@@ -202,9 +202,9 @@ class UserController extends AbstractBaseCrudController
 
             return $this->redirectWithSuccess('users.index',
                 $this->getSuccessMessage('User', 'deleted'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('User', 'delete').': '.$th->getMessage());
+                $this->getErrorMessage('User', 'delete').': '.$throwable->getMessage());
         }
     }
 
@@ -228,18 +228,16 @@ class UserController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
             'headings' => ['ID', 'First Name', 'Last Name', 'Email', 'Mobile Number', 'Role', 'Status', 'Created Date'],
-            'mapping' => function ($model) {
-                return [
-                    $model->id,
-                    $model->first_name,
-                    $model->last_name ?? 'N/A',
-                    $model->email,
-                    $model->mobile_number ?? 'N/A',
-                    $model->roles->first()->name ?? 'N/A',
-                    $model->status ? 'Active' : 'Inactive',
-                    $model->created_at->format('Y-m-d H:i:s'),
-                ];
-            },
+            'mapping' => fn ($model): array => [
+                $model->id,
+                $model->first_name,
+                $model->last_name ?? 'N/A',
+                $model->email,
+                $model->mobile_number ?? 'N/A',
+                $model->roles->first()->name ?? 'N/A',
+                $model->status ? 'Active' : 'Inactive',
+                $model->created_at->format('Y-m-d H:i:s'),
+            ],
             'with_mapping' => true,
         ];
     }

@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use Database\Factories\AppSettingFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Crypt;
 
 /**
@@ -17,25 +20,27 @@ use Illuminate\Support\Facades\Crypt;
  * @property string|null $description
  * @property bool $is_encrypted
  * @property bool $is_active
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @method static \Illuminate\Database\Eloquent\Builder|AppSetting active()
- * @method static \Illuminate\Database\Eloquent\Builder|AppSetting category($category)
- * @method static \Database\Factories\AppSettingFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|AppSetting newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|AppSetting newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|AppSetting query()
- * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereCategory($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereDescription($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereIsActive($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereIsEncrypted($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereKey($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|AppSetting whereValue($value)
- * @mixin \Eloquent
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ *
+ * @method static Builder|AppSetting active()
+ * @method static Builder|AppSetting category($category)
+ * @method static AppSettingFactory factory($count = null, $state = [])
+ * @method static Builder|AppSetting newModelQuery()
+ * @method static Builder|AppSetting newQuery()
+ * @method static Builder|AppSetting query()
+ * @method static Builder|AppSetting whereCategory($value)
+ * @method static Builder|AppSetting whereCreatedAt($value)
+ * @method static Builder|AppSetting whereDescription($value)
+ * @method static Builder|AppSetting whereId($value)
+ * @method static Builder|AppSetting whereIsActive($value)
+ * @method static Builder|AppSetting whereIsEncrypted($value)
+ * @method static Builder|AppSetting whereKey($value)
+ * @method static Builder|AppSetting whereType($value)
+ * @method static Builder|AppSetting whereUpdatedAt($value)
+ * @method static Builder|AppSetting whereValue($value)
+ *
+ * @mixin Model
  */
 class AppSetting extends Model
 {
@@ -59,18 +64,18 @@ class AppSetting extends Model
     /**
      * Get the value attribute, decrypting if needed
      */
-    public function getValueAttribute($value)
+    protected function getValueAttribute($value)
     {
         if ($this->is_encrypted && $value) {
             try {
                 return Crypt::decrypt($value);
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 return $value; // Return original if decryption fails
             }
         }
 
         if ($this->type === 'json' && $value) {
-            return json_decode($value, true);
+            return json_decode((string) $value, true);
         }
 
         return $value;
@@ -79,7 +84,7 @@ class AppSetting extends Model
     /**
      * Set the value attribute, encrypting if needed
      */
-    public function setValueAttribute($value)
+    protected function setValueAttribute($value)
     {
         if ($this->is_encrypted) {
             $this->attributes['value'] = Crypt::encrypt($value);
@@ -93,7 +98,7 @@ class AppSetting extends Model
     /**
      * Scope for active settings
      */
-    public function scopeActive($query)
+    protected function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
@@ -101,7 +106,7 @@ class AppSetting extends Model
     /**
      * Scope for specific category
      */
-    public function scopeCategory($query, $category)
+    protected function scopeCategory($query, $category)
     {
         return $query->where('category', $category);
     }

@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\FamilyGroupFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -19,37 +24,40 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int|null $created_by Admin user who created this
  * @property int|null $updated_by Admin user who last updated this
  * @property int|null $deleted_by Admin user who deleted this
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property string|null $deleted_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read Collection<int, Activity> $activities
  * @property-read int|null $activities_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Customer> $customers
+ * @property-read Collection<int, Customer> $customers
  * @property-read int|null $customers_count
- * @property-read \App\Models\Customer|null $familyHead
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\FamilyMember> $familyMembers
+ * @property-read Customer|null $familyHead
+ * @property-read Collection<int, FamilyMember> $familyMembers
  * @property-read int|null $family_members_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\FamilyMember> $members
+ * @property-read Collection<int, FamilyMember> $members
  * @property-read int|null $members_count
- * @method static \Database\Factories\FamilyGroupFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|FamilyGroup newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|FamilyGroup newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|FamilyGroup query()
- * @method static \Illuminate\Database\Eloquent\Builder|FamilyGroup whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|FamilyGroup whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|FamilyGroup whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|FamilyGroup whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|FamilyGroup whereFamilyHeadId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|FamilyGroup whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|FamilyGroup whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|FamilyGroup whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|FamilyGroup whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|FamilyGroup whereUpdatedBy($value)
- * @mixin \Eloquent
+ *
+ * @method static FamilyGroupFactory factory($count = null, $state = [])
+ * @method static Builder|FamilyGroup newModelQuery()
+ * @method static Builder|FamilyGroup newQuery()
+ * @method static Builder|FamilyGroup query()
+ * @method static Builder|FamilyGroup whereCreatedAt($value)
+ * @method static Builder|FamilyGroup whereCreatedBy($value)
+ * @method static Builder|FamilyGroup whereDeletedAt($value)
+ * @method static Builder|FamilyGroup whereDeletedBy($value)
+ * @method static Builder|FamilyGroup whereFamilyHeadId($value)
+ * @method static Builder|FamilyGroup whereId($value)
+ * @method static Builder|FamilyGroup whereName($value)
+ * @method static Builder|FamilyGroup whereStatus($value)
+ * @method static Builder|FamilyGroup whereUpdatedAt($value)
+ * @method static Builder|FamilyGroup whereUpdatedBy($value)
+ *
+ * @mixin Model
  */
 class FamilyGroup extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory;
+    use LogsActivity;
 
     protected static $logAttributes = ['*'];
 

@@ -3,6 +3,11 @@
 namespace App\Services;
 
 use App\Mail\TemplatedNotification;
+use App\Models\AppSetting;
+use App\Models\Claim;
+use App\Models\Customer;
+use App\Models\CustomerInsurance;
+use App\Models\Quotation;
 use App\Services\Notification\NotificationContext;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -37,14 +42,14 @@ class EmailService
      *
      * @param  string  $to  Recipient email address
      * @param  string  $notificationTypeCode  Notification type code (e.g., 'customer_welcome', 'policy_created')
-     * @param  NotificationContext  $context  Context with customer, insurance, quotation, claim, and settings
+     * @param  NotificationContext  $notificationContext  Context with customer, insurance, quotation, claim, and settings
      * @param  array  $attachments  Optional file paths to attach (e.g., policy PDFs, quotation documents)
-     * @return bool  True on successful send, false on validation failure or sending error
+     * @return bool True on successful send, false on validation failure or sending error
      */
     public function sendTemplatedEmail(
         string $to,
         string $notificationTypeCode,
-        NotificationContext $context,
+        NotificationContext $notificationContext,
         array $attachments = []
     ): bool {
         try {
@@ -69,13 +74,13 @@ class EmailService
             }
 
             // Render email content from template
-            $htmlContent = $this->templateService->render($notificationTypeCode, 'email', $context);
+            $htmlContent = $this->templateService->render($notificationTypeCode, 'email', $notificationContext);
 
             // If template not found, try fallback
-            if (! $htmlContent) {
-                $htmlContent = $this->getFallbackMessage($notificationTypeCode, $context);
+            if (in_array($htmlContent, [null, '', '0'], true)) {
+                $htmlContent = $this->getFallbackMessage($notificationTypeCode, $notificationContext);
 
-                if (! $htmlContent) {
+                if (in_array($htmlContent, [null, '', '0'], true)) {
                     Log::warning('No email template or fallback found', [
                         'notification_type' => $notificationTypeCode,
                         'to' => $to,
@@ -90,7 +95,7 @@ class EmailService
             }
 
             // Get subject from context or use default
-            $subject = $this->getEmailSubject($notificationTypeCode, $context);
+            $subject = $this->getEmailSubject($notificationTypeCode, $notificationContext);
 
             // Convert markdown-style formatting to HTML
             $htmlContent = $this->formatEmailContent($htmlContent);
@@ -111,12 +116,12 @@ class EmailService
 
             return true;
 
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Email sending failed', [
                 'to' => $to,
                 'notification_type' => $notificationTypeCode,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'error' => $exception->getMessage(),
+                'trace' => $exception->getTraceAsString(),
             ]);
 
             return false;
@@ -134,9 +139,9 @@ class EmailService
      * general communications not tied to specific policies or claims.
      *
      * @param  string  $notificationTypeCode  Notification type code
-     * @param  \App\Models\Customer  $customer  Customer instance with email
+     * @param  Customer  $customer  Customer instance with email
      * @param  array  $attachments  Optional file paths to attach
-     * @return bool  True on successful send, false if no email or sending fails
+     * @return bool True on successful send, false if no email or sending fails
      */
     public function sendFromCustomer(string $notificationTypeCode, $customer, array $attachments = []): bool
     {
@@ -155,11 +160,11 @@ class EmailService
 
             return $this->sendTemplatedEmail($customer->email, $notificationTypeCode, $context, $attachments);
 
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Email from customer failed', [
                 'customer_id' => $customer->id,
                 'notification_type' => $notificationTypeCode,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return false;
@@ -177,9 +182,9 @@ class EmailService
      * renewal reminders, policy document delivery, premium updates.
      *
      * @param  string  $notificationTypeCode  Notification type code
-     * @param  \App\Models\CustomerInsurance  $insurance  Insurance instance with customer
+     * @param  CustomerInsurance  $insurance  Insurance instance with customer
      * @param  array  $attachments  Optional file paths to attach (e.g., policy document PDF)
-     * @return bool  True on successful send, false if no email or sending fails
+     * @return bool True on successful send, false if no email or sending fails
      */
     public function sendFromInsurance(string $notificationTypeCode, $insurance, array $attachments = []): bool
     {
@@ -201,11 +206,11 @@ class EmailService
 
             return $this->sendTemplatedEmail($customer->email, $notificationTypeCode, $context, $attachments);
 
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Email from insurance failed', [
                 'insurance_id' => $insurance->id,
                 'notification_type' => $notificationTypeCode,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return false;
@@ -226,9 +231,9 @@ class EmailService
      * comparison reports, follow-ups.
      *
      * @param  string  $notificationTypeCode  Notification type code
-     * @param  \App\Models\Quotation  $quotation  Quotation instance with customer
+     * @param  Quotation  $quotation  Quotation instance with customer
      * @param  array  $attachments  Optional file paths to attach (e.g., quotation PDF)
-     * @return bool  True on successful send, false if no email or sending fails
+     * @return bool True on successful send, false if no email or sending fails
      */
     public function sendFromQuotation(string $notificationTypeCode, $quotation, array $attachments = []): bool
     {
@@ -253,11 +258,11 @@ class EmailService
 
             return $this->sendTemplatedEmail($email, $notificationTypeCode, $context, $attachments);
 
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Email from quotation failed', [
                 'quotation_id' => $quotation->id,
                 'notification_type' => $notificationTypeCode,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return false;
@@ -275,9 +280,9 @@ class EmailService
      * status updates, approval/rejection notifications, settlement confirmations.
      *
      * @param  string  $notificationTypeCode  Notification type code
-     * @param  \App\Models\Claim  $claim  Claim instance with customer
+     * @param  Claim  $claim  Claim instance with customer
      * @param  array  $attachments  Optional file paths to attach
-     * @return bool  True on successful send, false if no email or sending fails
+     * @return bool True on successful send, false if no email or sending fails
      */
     public function sendFromClaim(string $notificationTypeCode, $claim, array $attachments = []): bool
     {
@@ -299,11 +304,11 @@ class EmailService
 
             return $this->sendTemplatedEmail($customer->email, $notificationTypeCode, $context, $attachments);
 
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Email from claim failed', [
                 'claim_id' => $claim->id,
                 'notification_type' => $notificationTypeCode,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return false;
@@ -324,24 +329,21 @@ class EmailService
      * when available, providing clear email identification for customers.
      *
      * @param  string  $notificationTypeCode  Notification type code
-     * @param  NotificationContext  $context  Context with insurance, quotation, claim data
-     * @return string  Formatted email subject line
+     * @param  NotificationContext  $notificationContext  Context with insurance, quotation, claim data
+     * @return string Formatted email subject line
      */
-    protected function getEmailSubject(string $notificationTypeCode, NotificationContext $context): string
+    protected function getEmailSubject(string $notificationTypeCode, NotificationContext $notificationContext): string
     {
-        // Try to get subject from template variables
-        $subjectVar = '{{email_subject}}';
-
         // Default subjects based on notification type
         return match ($notificationTypeCode) {
             'customer_welcome' => 'Welcome to '.company_name(),
-            'policy_created' => 'Your Insurance Policy Document - '.($context->insurance?->policy_no ?? 'Policy'),
-            'quotation_ready' => 'Your Insurance Quotation - '.($context->quotation?->quotation_number ?? 'Quote'),
-            'renewal_30_days', 'renewal_15_days', 'renewal_7_days' => 'Insurance Renewal Reminder - '.($context->insurance?->policy_no ?? 'Policy'),
+            'policy_created' => 'Your Insurance Policy Document - '.($notificationContext->insurance?->policy_no ?? 'Policy'),
+            'quotation_ready' => 'Your Insurance Quotation - '.($notificationContext->quotation?->quotation_number ?? 'Quote'),
+            'renewal_30_days', 'renewal_15_days', 'renewal_7_days' => 'Insurance Renewal Reminder - '.($notificationContext->insurance?->policy_no ?? 'Policy'),
             'renewal_expired' => 'Insurance Policy Expired - Immediate Renewal Required',
-            'claim_submitted' => 'Claim Submitted Successfully - '.($context->claim?->claim_number ?? 'Claim'),
-            'claim_approved' => 'Claim Approved - '.($context->claim?->claim_number ?? 'Claim'),
-            'claim_rejected' => 'Claim Status Update - '.($context->claim?->claim_number ?? 'Claim'),
+            'claim_submitted' => 'Claim Submitted Successfully - '.($notificationContext->claim?->claim_number ?? 'Claim'),
+            'claim_approved' => 'Claim Approved - '.($notificationContext->claim?->claim_number ?? 'Claim'),
+            'claim_rejected' => 'Claim Status Update - '.($notificationContext->claim?->claim_number ?? 'Claim'),
             default => company_name().' - Notification',
         };
     }
@@ -358,7 +360,7 @@ class EmailService
      * as properly formatted HTML emails.
      *
      * @param  string  $content  Plain text content with markdown-style formatting
-     * @return string  HTML-formatted content ready for email body
+     * @return string HTML-formatted content ready for email body
      */
     protected function formatEmailContent(string $content): string
     {
@@ -366,7 +368,7 @@ class EmailService
         $content = preg_replace('/\*([^\*]+)\*/', '<strong>$1</strong>', $content);
 
         // Convert line breaks to <br>
-        $content = nl2br($content);
+        $content = nl2br((string) $content);
 
         // Convert URLs to links
         $content = preg_replace(
@@ -392,14 +394,14 @@ class EmailService
      * - renewal_*: Urgency-based renewal reminders
      *
      * @param  string  $notificationTypeCode  Notification type code
-     * @param  NotificationContext  $context  Context for variable extraction
-     * @return string|null  Fallback message content or null if no fallback exists
+     * @param  NotificationContext  $notificationContext  Context for variable extraction
+     * @return string|null Fallback message content or null if no fallback exists
      */
-    protected function getFallbackMessage(string $notificationTypeCode, NotificationContext $context): ?string
+    protected function getFallbackMessage(string $notificationTypeCode, NotificationContext $notificationContext): ?string
     {
-        $customer = $context->customer;
-        $insurance = $context->insurance;
-        $quotation = $context->quotation;
+        $customer = $notificationContext->customer;
+        $insurance = $notificationContext->insurance;
+        $quotation = $notificationContext->quotation;
 
         return match ($notificationTypeCode) {
             'customer_welcome' => $this->getFallbackWelcomeMessage($customer),
@@ -422,8 +424,8 @@ class EmailService
      *
      * Used when customer_welcome template not found.
      *
-     * @param  \App\Models\Customer  $customer  Customer to welcome
-     * @return string  Formatted welcome message
+     * @param  Customer  $customer  Customer to welcome
+     * @return string Formatted welcome message
      */
     protected function getFallbackWelcomeMessage($customer): string
     {
@@ -456,12 +458,12 @@ Best regards,
      * Uses markdown *bold* syntax for key details (policy number, dates).
      * Used when policy_created template not found.
      *
-     * @param  \App\Models\CustomerInsurance  $insurance  Insurance policy with customer
-     * @return string  Formatted policy creation message
+     * @param  CustomerInsurance  $insurance  Insurance policy with customer
+     * @return string Formatted policy creation message
      */
     protected function getFallbackPolicyCreatedMessage($insurance): string
     {
-        $expiredDate = $insurance->expired_date ? date('d-m-Y', strtotime($insurance->expired_date)) : 'N/A';
+        $expiredDate = $insurance->expired_date ? date('d-m-Y', strtotime((string) $insurance->expired_date)) : 'N/A';
         $policyDetail = trim(($insurance->premiumType?->name ?? '').' '.($insurance->registration_no ?? ''));
 
         return "Dear {$insurance->customer->name},
@@ -489,8 +491,8 @@ Best regards,
      *
      * Used when quotation_ready template not found.
      *
-     * @param  \App\Models\Quotation  $quotation  Quotation with customer
-     * @return string  Formatted quotation delivery message
+     * @param  Quotation  $quotation  Quotation with customer
+     * @return string Formatted quotation delivery message
      */
     protected function getFallbackQuotationMessage($quotation): string
     {
@@ -528,13 +530,13 @@ Best regards,
      * Uses markdown *bold* syntax for emphasis on key details.
      * Used when renewal template not found.
      *
-     * @param  \App\Models\CustomerInsurance  $insurance  Insurance policy with expiry date
+     * @param  CustomerInsurance  $insurance  Insurance policy with expiry date
      * @param  string  $notificationTypeCode  Specific renewal notification type
-     * @return string  Formatted renewal reminder message
+     * @return string Formatted renewal reminder message
      */
     protected function getFallbackRenewalMessage($insurance, $notificationTypeCode): string
     {
-        $expiredDate = $insurance->expired_date ? date('d-m-Y', strtotime($insurance->expired_date)) : 'N/A';
+        $expiredDate = $insurance->expired_date ? date('d-m-Y', strtotime((string) $insurance->expired_date)) : 'N/A';
         $customerName = $insurance->customer->name;
         $premiumType = $insurance->premiumType?->name ?? 'Insurance';
         $policyNo = $insurance->policy_no;
@@ -573,19 +575,19 @@ Best regards,
      *
      * Enables template variables like {{company.name}}, {{company.phone}}.
      *
-     * @return array  Hierarchical settings array indexed by category and key
+     * @return array Hierarchical settings array indexed by category and key
      */
     protected function loadSettings(): array
     {
-        $settings = \App\Models\AppSetting::where('is_active', true)->get();
+        $settings = AppSetting::query()->where('is_active', true)->get();
 
         $structured = [];
         foreach ($settings as $setting) {
             $key = $setting->key;
             $categoryPrefix = $setting->category.'_';
 
-            if (str_starts_with($key, $categoryPrefix)) {
-                $key = substr($key, strlen($categoryPrefix));
+            if (str_starts_with((string) $key, $categoryPrefix)) {
+                $key = substr((string) $key, strlen($categoryPrefix));
             }
 
             $structured[$setting->category][$key] = $setting->value;

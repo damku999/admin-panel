@@ -2,33 +2,31 @@
 
 declare(strict_types=1);
 
-use Rector\Config\RectorConfig;
-use RectorLaravel\Set\LaravelSetList;
-use Rector\Set\ValueObject\SetList;
-use Rector\TypeDeclaration\Rector\ClassMethod\AddVoidReturnTypeWhereNoReturnRector;
 use Rector\CodeQuality\Rector\Class_\InlineConstructorDefaultToPropertyRector;
 use Rector\CodingStyle\Rector\Closure\StaticClosureRector;
+use Rector\Config\RectorConfig;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPrivateMethodRector;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPromotedPropertyRector;
-use Rector\Php74\Rector\Property\RestoreDefaultNullToNullableTypePropertyRector;
 use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
 use Rector\Php81\Rector\Property\ReadOnlyPropertyRector;
-use Rector\Transform\Rector\StaticCall\StaticCallToMethodCallRector;
+use Rector\Set\ValueObject\SetList;
+use Rector\TypeDeclaration\Rector\ClassMethod\AddVoidReturnTypeWhereNoReturnRector;
+use RectorLaravel\Set\LaravelSetList;
 
 return RectorConfig::configure()
     ->withPaths([
-        __DIR__ . '/app',
-        __DIR__ . '/config',
-        __DIR__ . '/database',
-        __DIR__ . '/routes',
-        __DIR__ . '/tests',
+        __DIR__.'/app',
+        __DIR__.'/config',
+        __DIR__.'/database',
+        __DIR__.'/routes',
+        __DIR__.'/tests',
     ])
     ->withSkip([
         // Skip vendor and storage directories
-        __DIR__ . '/vendor',
-        __DIR__ . '/storage',
-        __DIR__ . '/bootstrap/cache',
-        __DIR__ . '/node_modules',
+        __DIR__.'/vendor',
+        __DIR__.'/storage',
+        __DIR__.'/bootstrap/cache',
+        __DIR__.'/node_modules',
 
         // Skip specific files if needed
         // __DIR__ . '/app/Http/Middleware/SomeMiddleware.php',

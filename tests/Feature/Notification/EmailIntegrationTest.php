@@ -87,7 +87,7 @@ class EmailIntegrationTest extends TestCase
         $insurance = CustomerInsurance::factory()->create(['customer_id' => $customer->id]);
 
         $channelManager = app(ChannelManager::class);
-        $context = new NotificationContext();
+        $context = new NotificationContext;
         $context->insurance = $insurance;
         $context->customer = $customer;
 
@@ -103,7 +103,7 @@ class EmailIntegrationTest extends TestCase
         $insurance = CustomerInsurance::factory()->create(['customer_id' => $customer->id]);
 
         $channelManager = app(ChannelManager::class);
-        $context = new NotificationContext();
+        $context = new NotificationContext;
         $context->insurance = $insurance;
         $context->customer = $customer;
 
@@ -123,7 +123,7 @@ class EmailIntegrationTest extends TestCase
         $insurance = CustomerInsurance::factory()->create(['customer_id' => $customer->id]);
 
         $channelManager = app(ChannelManager::class);
-        $context = new NotificationContext();
+        $context = new NotificationContext;
         $context->insurance = $insurance;
         $context->customer = $customer;
 
@@ -147,7 +147,7 @@ class EmailIntegrationTest extends TestCase
         $customer = Customer::factory()->create(['email' => 'customer@test.com']);
 
         $channelManager = app(ChannelManager::class);
-        $context = new NotificationContext();
+        $context = new NotificationContext;
         $context->setCustomer($customer);
 
         $result = $channelManager->sendToChannel('email', 'policy_created', $context, $customer);

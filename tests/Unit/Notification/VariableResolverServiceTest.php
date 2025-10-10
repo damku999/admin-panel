@@ -320,7 +320,7 @@ class VariableResolverServiceTest extends TestCase
     {
         // Freeze time to ensure consistent calculation
         Carbon::setTestNow('2025-10-09 00:00:00');
-        
+
         $futureDate = Carbon::now()->addDays(30);
         $insurance = CustomerInsurance::factory()->create([
             'expired_date' => $futureDate->format('Y-m-d'),
@@ -330,7 +330,7 @@ class VariableResolverServiceTest extends TestCase
         $result = $this->resolver->resolveVariable('days_remaining', $context);
 
         $this->assertEquals('30', $result);
-        
+
         // Reset time
         Carbon::setTestNow();
     }

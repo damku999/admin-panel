@@ -150,7 +150,7 @@ test('gets paginated quotations', function () {
         'customer_id' => $this->customer->id,
     ]);
 
-    $request = new Request();
+    $request = new Request;
     $result = $this->service->getQuotations($request);
 
     expect($result)->toBeInstanceOf(\Illuminate\Contracts\Pagination\LengthAwarePaginator::class);

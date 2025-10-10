@@ -3,10 +3,15 @@
 namespace App\Models;
 
 use App\Traits\TableRecordObserver;
+use Database\Factories\QuotationCompanyFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -43,62 +48,66 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int|null $ranking
  * @property string|null $benefits
  * @property string|null $exclusions
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property string|null $deleted_at
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read Collection<int, Activity> $activities
  * @property-read int|null $activities_count
- * @property-read \App\Models\InsuranceCompany|null $insuranceCompany
- * @property-read \App\Models\Quotation|null $quotation
- * @method static \Database\Factories\QuotationCompanyFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany query()
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereAddonCoversBreakdown($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereBasicOdPremium($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereBenefits($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereCgstAmount($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereCngLpgPremium($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereExclusions($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereFinalPremium($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereIdvCngLpgKit($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereIdvElectricalAccessories($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereIdvNonElectricalAccessories($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereIdvTrailer($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereIdvVehicle($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereInsuranceCompanyId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereIsRecommended($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereNcbPercentage($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereNetPremium($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany wherePlanName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany wherePolicyTenureYears($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany wherePolicyType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereQuotationId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereQuoteNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereRanking($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereRecommendationNote($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereRoadsideAssistance($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereSgstAmount($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereTotalAddonPremium($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereTotalIdv($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereTotalOdPremium($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereTotalPremium($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereTpPremium($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|QuotationCompany whereUpdatedBy($value)
- * @mixin \Eloquent
+ * @property-read InsuranceCompany|null $insuranceCompany
+ * @property-read Quotation|null $quotation
+ *
+ * @method static QuotationCompanyFactory factory($count = null, $state = [])
+ * @method static Builder|QuotationCompany newModelQuery()
+ * @method static Builder|QuotationCompany newQuery()
+ * @method static Builder|QuotationCompany query()
+ * @method static Builder|QuotationCompany whereAddonCoversBreakdown($value)
+ * @method static Builder|QuotationCompany whereBasicOdPremium($value)
+ * @method static Builder|QuotationCompany whereBenefits($value)
+ * @method static Builder|QuotationCompany whereCgstAmount($value)
+ * @method static Builder|QuotationCompany whereCngLpgPremium($value)
+ * @method static Builder|QuotationCompany whereCreatedAt($value)
+ * @method static Builder|QuotationCompany whereCreatedBy($value)
+ * @method static Builder|QuotationCompany whereDeletedAt($value)
+ * @method static Builder|QuotationCompany whereDeletedBy($value)
+ * @method static Builder|QuotationCompany whereExclusions($value)
+ * @method static Builder|QuotationCompany whereFinalPremium($value)
+ * @method static Builder|QuotationCompany whereId($value)
+ * @method static Builder|QuotationCompany whereIdvCngLpgKit($value)
+ * @method static Builder|QuotationCompany whereIdvElectricalAccessories($value)
+ * @method static Builder|QuotationCompany whereIdvNonElectricalAccessories($value)
+ * @method static Builder|QuotationCompany whereIdvTrailer($value)
+ * @method static Builder|QuotationCompany whereIdvVehicle($value)
+ * @method static Builder|QuotationCompany whereInsuranceCompanyId($value)
+ * @method static Builder|QuotationCompany whereIsRecommended($value)
+ * @method static Builder|QuotationCompany whereNcbPercentage($value)
+ * @method static Builder|QuotationCompany whereNetPremium($value)
+ * @method static Builder|QuotationCompany wherePlanName($value)
+ * @method static Builder|QuotationCompany wherePolicyTenureYears($value)
+ * @method static Builder|QuotationCompany wherePolicyType($value)
+ * @method static Builder|QuotationCompany whereQuotationId($value)
+ * @method static Builder|QuotationCompany whereQuoteNumber($value)
+ * @method static Builder|QuotationCompany whereRanking($value)
+ * @method static Builder|QuotationCompany whereRecommendationNote($value)
+ * @method static Builder|QuotationCompany whereRoadsideAssistance($value)
+ * @method static Builder|QuotationCompany whereSgstAmount($value)
+ * @method static Builder|QuotationCompany whereTotalAddonPremium($value)
+ * @method static Builder|QuotationCompany whereTotalIdv($value)
+ * @method static Builder|QuotationCompany whereTotalOdPremium($value)
+ * @method static Builder|QuotationCompany whereTotalPremium($value)
+ * @method static Builder|QuotationCompany whereTpPremium($value)
+ * @method static Builder|QuotationCompany whereUpdatedAt($value)
+ * @method static Builder|QuotationCompany whereUpdatedBy($value)
+ *
+ * @mixin Model
  */
 class QuotationCompany extends Model
 {
-    use HasFactory, LogsActivity, TableRecordObserver;
+    use HasFactory;
+    use LogsActivity;
+    use TableRecordObserver;
 
     protected $fillable = [
         'quotation_id',
@@ -176,13 +185,13 @@ class QuotationCompany extends Model
         return LogOptions::defaults();
     }
 
-    public function calculateSavings(?QuotationCompany $compareWith = null): float
+    public function calculateSavings(?QuotationCompany $quotationCompany = null): float
     {
-        if (! $compareWith) {
+        if (! $quotationCompany instanceof \App\Models\QuotationCompany) {
             return 0;
         }
 
-        return $compareWith->final_premium - $this->final_premium;
+        return $quotationCompany->final_premium - $this->final_premium;
     }
 
     public function getFormattedPremium(): string

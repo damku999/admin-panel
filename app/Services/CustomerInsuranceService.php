@@ -18,10 +18,15 @@ use App\Models\RelationshipManager;
 use App\Traits\WhatsAppApiTrait;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CustomerInsuranceService extends BaseService implements CustomerInsuranceServiceInterface
 {
@@ -47,11 +52,11 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      * need to be visible.
      *
      * @param  Request  $request  HTTP request with filter parameters
-     * @return LengthAwarePaginator  Paginated insurance policies with joined relationship data
+     * @return LengthAwarePaginator Paginated insurance policies with joined relationship data
      */
     public function getCustomerInsurances(Request $request): LengthAwarePaginator
     {
-        $query = CustomerInsurance::select([
+        $query = CustomerInsurance::query()->select([
             'customer_insurances.*',
             'customers.name as customer_name',
             'branches.name as branch_name',
@@ -67,8 +72,8 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
 
         // Apply search filter
         if (! empty($request->search)) {
-            $search = trim($request->search);
-            $query->where(function ($q) use ($search) {
+            $search = trim((string) $request->search);
+            $query->where(static function ($q) use ($search): void {
                 $q->where('registration_no', 'LIKE', '%'.$search.'%')
                     ->orWhere('policy_no', 'LIKE', '%'.$search.'%')
                     ->orWhere('customers.name', 'LIKE', '%'.$search.'%')
@@ -95,6 +100,7 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
         if (! empty($request->already_renewed_this_month)) {
             $query->where('customer_insurances.is_renewed', 1);
         }
+
         if (! empty($request->pending_renewal_this_month)) {
             $query->where('customer_insurances.is_renewed', 0);
         }
@@ -128,20 +134,20 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      * customers, brokers, insurance companies, policy types, fuel types, and
      * life insurance payment modes from configuration.
      *
-     * @return array  Associative array with dropdown options for all form fields
+     * @return array Associative array with dropdown options for all form fields
      */
     public function getFormData(): array
     {
         return [
-            'customers' => Customer::select(['id', 'name'])->get(),
-            'brokers' => Broker::select(['id', 'name'])->get(),
-            'relationship_managers' => RelationshipManager::select(['id', 'name'])->get(),
-            'branches' => Branch::select(['id', 'name'])->get(),
-            'insurance_companies' => InsuranceCompany::select(['id', 'name'])->get(),
-            'policy_type' => PolicyType::select(['id', 'name'])->get(),
-            'fuel_type' => FuelType::select(['id', 'name'])->get(),
-            'premium_types' => PremiumType::select(['id', 'name', 'is_vehicle', 'is_life_insurance_policies'])->get(),
-            'reference_by_user' => ReferenceUser::select(['id', 'name'])->get(),
+            'customers' => Customer::query()->select(['id', 'name'])->get(),
+            'brokers' => Broker::query()->select(['id', 'name'])->get(),
+            'relationship_managers' => RelationshipManager::query()->select(['id', 'name'])->get(),
+            'branches' => Branch::query()->select(['id', 'name'])->get(),
+            'insurance_companies' => InsuranceCompany::query()->select(['id', 'name'])->get(),
+            'policy_type' => PolicyType::query()->select(['id', 'name'])->get(),
+            'fuel_type' => FuelType::query()->select(['id', 'name'])->get(),
+            'premium_types' => PremiumType::query()->select(['id', 'name', 'is_vehicle', 'is_life_insurance_policies'])->get(),
+            'reference_by_user' => ReferenceUser::query()->select(['id', 'name'])->get(),
             'life_insurance_payment_mode' => config('constants.LIFE_INSURANCE_PAYMENT_MODE'),
         ];
     }
@@ -157,7 +163,7 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      * - Vehicle-specific: registration number, make/model, fuel type, NCB
      * - Life insurance: plan name, premium paying term, maturity amount
      *
-     * @return array  Validation rules array for Laravel validator
+     * @return array Validation rules array for Laravel validator
      */
     public function getStoreValidationRules(): array
     {
@@ -219,7 +225,7 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      * are permitted for updates, ensuring policy records can be corrected
      * or enhanced throughout their lifecycle.
      *
-     * @return array  Array of field names permitted for updates
+     * @return array Array of field names permitted for updates
      */
     public function getUpdateValidationRules(): array
     {
@@ -283,7 +289,7 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      * policy record with updated dates and premium information while marking
      * the original policy as renewed.
      *
-     * @return array  Validation rules array (identical to store rules)
+     * @return array Validation rules array (identical to store rules)
      */
     public function getRenewalValidationRules(): array
     {
@@ -303,7 +309,7 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      * data reaches the database layer.
      *
      * @param  Request  $request  Validated HTTP request with policy data
-     * @return array  Sanitized data array ready for database insertion
+     * @return array Sanitized data array ready for database insertion
      */
     public function prepareStorageData(Request $request): array
     {
@@ -374,9 +380,9 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
             'premium_paying_term', 'policy_term',
         ];
 
-        foreach ($numericFields as $field) {
-            if (array_key_exists($field, $data_to_store)) {
-                $data_to_store[$field] = $data_to_store[$field] === '' ? null : $data_to_store[$field];
+        foreach ($numericFields as $numericField) {
+            if (array_key_exists($numericField, $data_to_store)) {
+                $data_to_store[$numericField] = $data_to_store[$numericField] === '' ? null : $data_to_store[$numericField];
             }
         }
 
@@ -395,13 +401,13 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      * Transaction ensures commission calculations and policy creation are atomic.
      *
      * @param  array  $data  Prepared policy data from prepareStorageData()
-     * @return CustomerInsurance  Newly created policy instance
+     * @return CustomerInsurance Newly created policy instance
      *
-     * @throws \Illuminate\Database\QueryException  On database constraint violations
+     * @throws QueryException On database constraint violations
      */
     public function createCustomerInsurance(array $data): CustomerInsurance
     {
-        return $this->createInTransaction(function () use ($data) {
+        return $this->createInTransaction(function () use ($data): Model {
             // Calculate commission breakdown
             $data = $this->calculateCommissionFields($data);
 
@@ -422,24 +428,24 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      *
      * @param  CustomerInsurance  $customerInsurance  Policy instance to update
      * @param  array  $data  Updated policy data (may include policy_document)
-     * @return CustomerInsurance  Updated policy instance with fresh relationships
+     * @return CustomerInsurance Updated policy instance with fresh relationships
      *
-     * @throws \Illuminate\Database\QueryException  On database constraint violations
+     * @throws QueryException On database constraint violations
      */
     public function updateCustomerInsurance(CustomerInsurance $customerInsurance, array $data): CustomerInsurance
     {
-        return $this->updateInTransaction(function () use ($customerInsurance, $data) {
+        return $this->updateInTransaction(function () use ($customerInsurance, $data): Model {
             // Calculate commission breakdown
             $data = $this->calculateCommissionFields($data);
 
-            $updatedCustomerInsurance = $this->customerInsuranceRepository->update($customerInsurance, $data);
+            $model = $this->customerInsuranceRepository->update($customerInsurance, $data);
 
             // Handle policy document upload if present
             if (isset($data['policy_document']) && $data['policy_document']) {
-                $this->handlePolicyDocument($updatedCustomerInsurance, $data['policy_document']);
+                $this->handlePolicyDocument($model, $data['policy_document']);
             }
 
-            return $updatedCustomerInsurance;
+            return $model;
         });
     }
 
@@ -454,13 +460,13 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      * preventing orphaned database records or storage files.
      *
      * @param  CustomerInsurance  $customerInsurance  Policy instance to delete
-     * @return bool  True on successful deletion
+     * @return bool True on successful deletion
      *
-     * @throws \Illuminate\Database\QueryException  On database constraint violations
+     * @throws QueryException On database constraint violations
      */
     public function deleteCustomerInsurance(CustomerInsurance $customerInsurance): bool
     {
-        return $this->deleteInTransaction(function () use ($customerInsurance) {
+        return $this->deleteInTransaction(function () use ($customerInsurance): bool {
             // Delete policy document if exists
             if ($customerInsurance->policy_document_path && Storage::exists($customerInsurance->policy_document_path)) {
                 Storage::delete($customerInsurance->policy_document_path);
@@ -479,12 +485,12 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      *
      * @param  int  $customerInsuranceId  Policy ID to update
      * @param  int  $status  New status (0 or 1)
-     * @return bool  True on successful update
+     * @return bool True on successful update
      */
     public function updateStatus(int $customerInsuranceId, int $status): bool
     {
         return $this->executeInTransaction(
-            fn () => $this->customerInsuranceRepository->updateStatus($customerInsuranceId, $status)
+            fn (): bool => $this->customerInsuranceRepository->updateStatus($customerInsuranceId, $status)
         );
     }
 
@@ -503,7 +509,6 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      *
      * @param  Request  $request  HTTP request containing policy_document_path file
      * @param  CustomerInsurance  $customerInsurance  Policy instance to attach document to
-     * @return void
      */
     public function handleFileUpload(Request $request, CustomerInsurance $customerInsurance): void
     {
@@ -556,13 +561,13 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      * after policy creation or updates.
      *
      * @param  CustomerInsurance  $customerInsurance  Policy with customer and document
-     * @return bool  True on successful send
+     * @return bool True on successful send
      *
-     * @throws \Exception  If document file not found or WhatsApp API fails
+     * @throws \Exception If document file not found or WhatsApp API fails
      */
     public function sendWhatsAppDocument(CustomerInsurance $customerInsurance): bool
     {
-        \Log::info('Starting WhatsApp document send', [
+        Log::info('Starting WhatsApp document send', [
             'customer_insurance_id' => $customerInsurance->id,
             'policy_no' => $customerInsurance->policy_no,
             'customer_name' => $customerInsurance->customer->name ?? 'N/A',
@@ -572,7 +577,7 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
         ]);
 
         if (empty($customerInsurance->policy_document_path)) {
-            \Log::warning('WhatsApp document send skipped - no document path', [
+            Log::warning('WhatsApp document send skipped - no document path', [
                 'customer_insurance_id' => $customerInsurance->id,
                 'policy_no' => $customerInsurance->policy_no,
             ]);
@@ -582,7 +587,7 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
 
         try {
             // Try to get message from template, fallback to hardcoded
-            $templateService = app(\App\Services\TemplateService::class);
+            $templateService = app(TemplateService::class);
             $message = $templateService->renderFromInsurance('policy_created', 'whatsapp', $customerInsurance);
 
             if (! $message) {
@@ -593,12 +598,12 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
             $filePath = Storage::path('public'.DIRECTORY_SEPARATOR.$customerInsurance->policy_document_path);
 
             if (! file_exists($filePath)) {
-                throw new \Exception("Policy document file not found: {$filePath}");
+                throw new \Exception('Policy document file not found: '.$filePath);
             }
 
             $response = $this->whatsAppSendMessageWithAttachment($message, $customerInsurance->customer->mobile_number, $filePath);
 
-            \Log::info('WhatsApp document sent successfully', [
+            Log::info('WhatsApp document sent successfully', [
                 'customer_insurance_id' => $customerInsurance->id,
                 'policy_no' => $customerInsurance->policy_no,
                 'mobile_number' => $customerInsurance->customer->mobile_number,
@@ -608,19 +613,19 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
 
             return true;
 
-        } catch (\Exception $e) {
-            \Log::error('WhatsApp document send failed', [
+        } catch (\Exception $exception) {
+            Log::error('WhatsApp document send failed', [
                 'customer_insurance_id' => $customerInsurance->id,
                 'policy_no' => $customerInsurance->policy_no,
                 'customer_name' => $customerInsurance->customer->name ?? 'N/A',
                 'mobile_number' => $customerInsurance->customer->mobile_number,
                 'document_path' => $customerInsurance->policy_document_path,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'user_id' => auth()->user()->id ?? 'System',
-                'trace' => $e->getTraceAsString(),
+                'trace' => $exception->getTraceAsString(),
             ]);
 
-            throw $e; // Re-throw to maintain the error flow
+            throw $exception; // Re-throw to maintain the error flow
         }
     }
 
@@ -637,13 +642,13 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      * providing customers with digital copies via their preferred channels.
      *
      * @param  CustomerInsurance  $customerInsurance  Policy with customer and document
-     * @return bool  True on successful send
+     * @return bool True on successful send
      *
-     * @throws \Exception  If document file not found or email sending fails
+     * @throws \Exception If document file not found or email sending fails
      */
     public function sendPolicyDocumentEmail(CustomerInsurance $customerInsurance): bool
     {
-        \Log::info('Starting email policy document send', [
+        Log::info('Starting email policy document send', [
             'customer_insurance_id' => $customerInsurance->id,
             'policy_no' => $customerInsurance->policy_no,
             'customer_name' => $customerInsurance->customer->name ?? 'N/A',
@@ -652,7 +657,7 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
         ]);
 
         if (empty($customerInsurance->policy_document_path)) {
-            \Log::warning('Email document send skipped - no document path', [
+            Log::warning('Email document send skipped - no document path', [
                 'customer_insurance_id' => $customerInsurance->id,
                 'policy_no' => $customerInsurance->policy_no,
             ]);
@@ -664,14 +669,14 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
             $filePath = Storage::path('public'.DIRECTORY_SEPARATOR.$customerInsurance->policy_document_path);
 
             if (! file_exists($filePath)) {
-                throw new \Exception("Policy document file not found: {$filePath}");
+                throw new \Exception('Policy document file not found: '.$filePath);
             }
 
-            $emailService = app(\App\Services\EmailService::class);
+            $emailService = app(EmailService::class);
             $sent = $emailService->sendFromInsurance('policy_created', $customerInsurance, [$filePath]);
 
             if ($sent) {
-                \Log::info('Email document sent successfully', [
+                Log::info('Email document sent successfully', [
                     'customer_insurance_id' => $customerInsurance->id,
                     'policy_no' => $customerInsurance->policy_no,
                     'email' => $customerInsurance->customer->email,
@@ -681,19 +686,19 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
 
             return $sent;
 
-        } catch (\Exception $e) {
-            \Log::error('Email document send failed', [
+        } catch (\Exception $exception) {
+            Log::error('Email document send failed', [
                 'customer_insurance_id' => $customerInsurance->id,
                 'policy_no' => $customerInsurance->policy_no,
                 'customer_name' => $customerInsurance->customer->name ?? 'N/A',
                 'email' => $customerInsurance->customer->email,
                 'document_path' => $customerInsurance->policy_document_path,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'user_id' => auth()->user()->id ?? 'System',
-                'trace' => $e->getTraceAsString(),
+                'trace' => $exception->getTraceAsString(),
             ]);
 
-            throw $e; // Re-throw to maintain the error flow
+            throw $exception; // Re-throw to maintain the error flow
         }
     }
 
@@ -715,13 +720,13 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      * expiry timeline, maximizing renewal conversion rates.
      *
      * @param  CustomerInsurance  $customerInsurance  Policy with expiry date and customer
-     * @return bool  True on successful send
+     * @return bool True on successful send
      *
-     * @throws \Exception  If WhatsApp API fails
+     * @throws \Exception If WhatsApp API fails
      */
     public function sendRenewalReminderWhatsApp(CustomerInsurance $customerInsurance): bool
     {
-        \Log::info('Starting WhatsApp renewal reminder send', [
+        Log::info('Starting WhatsApp renewal reminder send', [
             'customer_insurance_id' => $customerInsurance->id,
             'policy_no' => $customerInsurance->policy_no,
             'customer_name' => $customerInsurance->customer->name ?? 'N/A',
@@ -746,7 +751,7 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
             }
 
             // Try to get message from template, fallback to hardcoded
-            $templateService = app(\App\Services\TemplateService::class);
+            $templateService = app(TemplateService::class);
             $messageText = $templateService->renderFromInsurance($notificationTypeCode, 'whatsapp', $customerInsurance);
 
             if (! $messageText) {
@@ -759,7 +764,7 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
             $receiverId = $customerInsurance->customer->mobile_number;
             $response = $this->whatsAppSendMessage($messageText, $receiverId);
 
-            \Log::info('WhatsApp renewal reminder sent successfully', [
+            Log::info('WhatsApp renewal reminder sent successfully', [
                 'customer_insurance_id' => $customerInsurance->id,
                 'policy_no' => $customerInsurance->policy_no,
                 'mobile_number' => $receiverId,
@@ -769,19 +774,19 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
 
             return true;
 
-        } catch (\Exception $e) {
-            \Log::error('WhatsApp renewal reminder send failed', [
+        } catch (\Exception $exception) {
+            Log::error('WhatsApp renewal reminder send failed', [
                 'customer_insurance_id' => $customerInsurance->id,
                 'policy_no' => $customerInsurance->policy_no,
                 'customer_name' => $customerInsurance->customer->name ?? 'N/A',
                 'mobile_number' => $customerInsurance->customer->mobile_number,
                 'expired_date' => $customerInsurance->expired_date,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'user_id' => auth()->user()->id ?? 'System',
-                'trace' => $e->getTraceAsString(),
+                'trace' => $exception->getTraceAsString(),
             ]);
 
-            throw $e; // Re-throw to maintain the error flow
+            throw $exception; // Re-throw to maintain the error flow
         }
     }
 
@@ -803,29 +808,29 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      *
      * @param  CustomerInsurance  $customerInsurance  Original policy to renew
      * @param  array  $data  New policy data for renewal (dates, premiums, etc.)
-     * @return CustomerInsurance  Newly created renewal policy instance
+     * @return CustomerInsurance Newly created renewal policy instance
      *
-     * @throws \Illuminate\Database\QueryException  On database constraint violations
+     * @throws QueryException On database constraint violations
      */
     public function renewPolicy(CustomerInsurance $customerInsurance, array $data): CustomerInsurance
     {
-        return $this->executeInTransaction(function () use ($customerInsurance, $data) {
+        return $this->executeInTransaction(function () use ($customerInsurance, $data): Model {
             // Calculate commission breakdown for renewal data
             $data = $this->calculateCommissionFields($data);
 
             // Create new policy record for renewal
             $renewalData = $this->prepareRenewalStorageData($data);
-            $newPolicy = $this->customerInsuranceRepository->create($renewalData);
+            $model = $this->customerInsuranceRepository->create($renewalData);
 
             // Mark original policy as renewed
             $this->customerInsuranceRepository->update($customerInsurance, [
                 'status' => 0,
                 'is_renewed' => 1,
                 'renewed_date' => Carbon::now(),
-                'new_insurance_id' => $newPolicy->id,
+                'new_insurance_id' => $model->id,
             ]);
 
-            return $newPolicy;
+            return $model;
         });
     }
 
@@ -838,9 +843,9 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      *
      * Supports data analysis, reporting, and backup workflows.
      *
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse  Excel file download response
+     * @return BinaryFileResponse Excel file download response
      */
-    public function exportCustomerInsurances(): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    public function exportCustomerInsurances(): BinaryFileResponse
     {
         return Excel::download(new CustomerInsurancesExport, 'customer_insurances.xlsx');
     }
@@ -853,7 +858,7 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      * cross-selling opportunities.
      *
      * @param  int  $customerId  Customer ID to fetch policies for
-     * @return Collection  All policies belonging to the customer
+     * @return Collection All policies belonging to the customer
      */
     public function getCustomerPolicies(int $customerId): Collection
     {
@@ -874,15 +879,15 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      *
      * @param  int  $customerInsuranceId  Policy ID to send
      * @param  string  $whatsappNumber  Destination WhatsApp number
-     * @return array  WhatsApp API response (decoded JSON or raw response)
+     * @return array WhatsApp API response (decoded JSON or raw response)
      *
-     * @throws \Exception  If policy not found or document missing
+     * @throws \Exception If policy not found or document missing
      */
     public function sendPolicyWhatsApp(int $customerInsuranceId, string $whatsappNumber): array
     {
         $customerInsurance = $this->customerInsuranceRepository->findWithRelations($customerInsuranceId);
 
-        if (! $customerInsurance) {
+        if (! $customerInsurance instanceof CustomerInsurance) {
             throw new \Exception('Customer Insurance not found');
         }
 
@@ -891,11 +896,11 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
         }
 
         $documentPath = Storage::path('public'.DIRECTORY_SEPARATOR.$customerInsurance->policy_document_path);
-        $message = "Dear {$customerInsurance->customer->name}, Please find your policy document for Policy No: {$customerInsurance->policy_no}";
+        $message = sprintf('Dear %s, Please find your policy document for Policy No: %s', $customerInsurance->customer->name, $customerInsurance->policy_no);
 
         $response = $this->whatsAppSendMessageWithAttachment($message, $whatsappNumber, $documentPath);
 
-        return json_decode($response, true) ?: ['response' => $response];
+        return json_decode((string) $response, true) ?: ['response' => $response];
     }
 
     /**
@@ -906,7 +911,7 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      * renewal conversion rates through timely customer engagement.
      *
      * @param  int  $days  Number of days to look ahead (default: 30)
-     * @return Collection  Policies expiring within the specified timeframe
+     * @return Collection Policies expiring within the specified timeframe
      */
     public function getExpiringPolicies(int $days = 30): Collection
     {
@@ -932,7 +937,7 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
      * for profitability analysis and commission reconciliation.
      *
      * @param  CustomerInsurance  $customerInsurance  Policy with commission fields
-     * @return array  Commission breakdown with base_premium, all commission types, and actual_earnings
+     * @return array Commission breakdown with base_premium, all commission types, and actual_earnings
      */
     public function calculateCommissionBreakdown(CustomerInsurance $customerInsurance): array
     {
@@ -994,7 +999,7 @@ class CustomerInsuranceService extends BaseService implements CustomerInsuranceS
     /**
      * Handle policy document upload for an existing customer insurance.
      *
-     * @param  \Illuminate\Http\UploadedFile  $policyDocument
+     * @param  UploadedFile  $policyDocument
      */
     private function handlePolicyDocument(CustomerInsurance $customerInsurance, $policyDocument): void
     {

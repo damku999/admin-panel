@@ -4,6 +4,7 @@ namespace App\Services\Notification;
 
 use App\Models\AppSetting;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Variable Resolver Service
@@ -20,21 +21,21 @@ class VariableResolverService
      * Resolve all variables in template
      *
      * @param  string  $template  Template content with {{variables}}
-     * @param  NotificationContext  $context  Context with customer, insurance, etc.
+     * @param  NotificationContext  $notificationContext  Context with customer, insurance, etc.
      * @return string Template with variables replaced
      */
-    public function resolveTemplate(string $template, NotificationContext $context): string
+    public function resolveTemplate(string $template, NotificationContext $notificationContext): string
     {
         // Extract all variables from template
         $variables = $this->registry->extractVariablesFromTemplate($template);
 
         // Resolve each variable
         $resolved = $template;
-        foreach ($variables as $varKey) {
-            $value = $this->resolveVariable($varKey, $context);
+        foreach ($variables as $variable) {
+            $value = $this->resolveVariable($variable, $notificationContext);
 
             // Replace in template (support both {{var}} format)
-            $resolved = str_replace('{{'.$varKey.'}}', $value ?? '', $resolved);
+            $resolved = str_replace('{{'.$variable.'}}', $value ?? '', $resolved);
         }
 
         return $resolved;
@@ -44,25 +45,25 @@ class VariableResolverService
      * Resolve single variable to its value
      *
      * @param  string  $variableKey  Variable key (e.g., 'customer_name')
-     * @param  NotificationContext  $context  Context with data
+     * @param  NotificationContext  $notificationContext  Context with data
      * @return mixed Resolved value or null
      */
-    public function resolveVariable(string $variableKey, NotificationContext $context): mixed
+    public function resolveVariable(string $variableKey, NotificationContext $notificationContext): mixed
     {
         // Get variable metadata from registry
         $metadata = $this->registry->getVariableMetadata($variableKey);
 
-        if (! $metadata) {
+        if ($metadata === null || $metadata === []) {
             // Unknown variable, return placeholder with double braces
-            return "{{{$variableKey}}}";
+            return sprintf('{{%s}}', $variableKey);
         }
 
         // Resolve based on source
-        $value = $this->resolveBySource($metadata['source'], $context, $metadata);
+        $value = $this->resolveBySource($metadata['source'], $notificationContext, $metadata);
 
         // Format value if needed
         if ($value !== null && isset($metadata['format'])) {
-            $value = $this->formatValue($value, $metadata['format'], $metadata['type']);
+            return $this->formatValue($value, $metadata['format'], $metadata['type']);
         }
 
         return $value;
@@ -72,35 +73,35 @@ class VariableResolverService
      * Resolve value by source definition
      *
      * @param  string  $source  Source definition from config
-     * @param  NotificationContext  $context  Context with data
+     * @param  NotificationContext  $notificationContext  Context with data
      * @param  array  $metadata  Variable metadata
      */
-    protected function resolveBySource(string $source, NotificationContext $context, array $metadata): mixed
+    protected function resolveBySource(string $source, NotificationContext $notificationContext, array $metadata): mixed
     {
         // Parse source type
         if (str_starts_with($source, 'setting:')) {
-            return $this->resolveFromSettings($source, $context);
+            return $this->resolveFromSettings($source, $notificationContext);
         }
 
         if (str_starts_with($source, 'computed:')) {
-            return $this->resolveComputed($source, $context, $metadata);
+            return $this->resolveComputed($source, $notificationContext, $metadata);
         }
 
         if (str_starts_with($source, 'system:')) {
-            return $this->resolveSystem($source, $context);
+            return $this->resolveSystem($source, $notificationContext);
         }
 
         // Regular entity.property format
-        return $this->resolveFromEntity($source, $context);
+        return $this->resolveFromEntity($source, $notificationContext);
     }
 
     /**
      * Resolve from entity property (e.g., 'customer.name')
      *
      * @param  string  $source  Source path
-     * @param  NotificationContext  $context  Context
+     * @param  NotificationContext  $notificationContext  Context
      */
-    protected function resolveFromEntity(string $source, NotificationContext $context): mixed
+    protected function resolveFromEntity(string $source, NotificationContext $notificationContext): mixed
     {
         $parts = explode('.', $source);
 
@@ -113,14 +114,14 @@ class VariableResolverService
 
         // Get entity from context
         $entity = match ($entityName) {
-            'customer' => $context->customer,
-            'insurance' => $context->insurance,
-            'quotation' => $context->quotation,
-            'claim' => $context->claim,
+            'customer' => $notificationContext->customer,
+            'insurance' => $notificationContext->insurance,
+            'quotation' => $notificationContext->quotation,
+            'claim' => $notificationContext->claim,
             default => null,
         };
 
-        if (! $entity) {
+        if ($entity === null) {
             return null;
         }
 
@@ -129,7 +130,7 @@ class VariableResolverService
         foreach ($propertyPath as $property) {
             if (is_object($value)) {
                 // For Laravel models, try direct access first (uses __get magic method)
-                if ($value instanceof \Illuminate\Database\Eloquent\Model) {
+                if ($value instanceof Model) {
                     // Try attribute access
                     if (isset($value->$property)) {
                         $value = $value->$property;
@@ -139,15 +140,13 @@ class VariableResolverService
                     } else {
                         return null;
                     }
-                } else {
+                } elseif (property_exists($value, $property)) {
                     // For regular objects
-                    if (property_exists($value, $property)) {
-                        $value = $value->$property;
-                    } elseif (method_exists($value, $property)) {
-                        $value = $value->$property;
-                    } else {
-                        return null;
-                    }
+                    $value = $value->$property;
+                } elseif (method_exists($value, $property)) {
+                    $value = $value->$property;
+                } else {
+                    return null;
                 }
             } elseif (is_array($value)) {
                 $value = $value[$property] ?? null;
@@ -163,15 +162,15 @@ class VariableResolverService
      * Resolve from app settings
      *
      * @param  string  $source  Source definition (e.g., 'setting:company.name')
-     * @param  NotificationContext  $context  Context
+     * @param  NotificationContext  $notificationContext  Context
      */
-    protected function resolveFromSettings(string $source, NotificationContext $context): mixed
+    protected function resolveFromSettings(string $source, NotificationContext $notificationContext): mixed
     {
         // Remove 'setting:' prefix
         $settingKey = substr($source, 8);
 
         // Check if already loaded in context
-        $value = $context->getSetting($settingKey);
+        $value = $notificationContext->getSetting($settingKey);
 
         if ($value !== null) {
             return $value;
@@ -181,7 +180,7 @@ class VariableResolverService
         // Format: category.key (e.g., 'company.name')
         [$category, $key] = explode('.', $settingKey, 2);
 
-        $setting = AppSetting::where('category', $category)
+        $setting = AppSetting::query()->where('category', $category)
             ->where('key', $key)
             ->where('is_active', true)
             ->first();
@@ -193,21 +192,21 @@ class VariableResolverService
      * Resolve computed values
      *
      * @param  string  $source  Source definition (e.g., 'computed:days_remaining')
-     * @param  NotificationContext  $context  Context
+     * @param  NotificationContext  $notificationContext  Context
      * @param  array  $metadata  Variable metadata
      */
-    protected function resolveComputed(string $source, NotificationContext $context, array $metadata): mixed
+    protected function resolveComputed(string $source, NotificationContext $notificationContext, array $metadata): mixed
     {
         // Remove 'computed:' prefix
         $computation = substr($source, 9);
 
         return match ($computation) {
-            'days_remaining' => $this->computeDaysRemaining($context),
-            'policy_tenure' => $this->computePolicyTenure($context),
-            'best_company' => $this->computeBestCompany($context),
-            'best_premium' => $this->computeBestPremium($context),
-            'comparison_list' => $this->computeComparisonList($context),
-            'pending_documents' => $this->computePendingDocuments($context),
+            'days_remaining' => $this->computeDaysRemaining($notificationContext),
+            'policy_tenure' => $this->computePolicyTenure($notificationContext),
+            'best_company' => $this->computeBestCompany($notificationContext),
+            'best_premium' => $this->computeBestPremium($notificationContext),
+            'comparison_list' => $this->computeComparisonList($notificationContext),
+            'pending_documents' => $this->computePendingDocuments($notificationContext),
             default => null,
         };
     }
@@ -216,9 +215,9 @@ class VariableResolverService
      * Resolve system values
      *
      * @param  string  $source  Source definition (e.g., 'system:current_date')
-     * @param  NotificationContext  $context  Context
+     * @param  NotificationContext  $notificationContext  Context
      */
-    protected function resolveSystem(string $source, NotificationContext $context): mixed
+    protected function resolveSystem(string $source, NotificationContext $notificationContext): mixed
     {
         // Remove 'system:' prefix
         $systemKey = substr($source, 7);
@@ -269,7 +268,7 @@ class VariableResolverService
         if (is_string($value)) {
             try {
                 return Carbon::parse($value)->format($format);
-            } catch (\Exception $e) {
+            } catch (\Exception) {
                 return $value;
             }
         }
@@ -292,17 +291,14 @@ class VariableResolverService
 
         // Format using Indian numbering system (lakhs and crores)
         if ($number < 0) {
-            return '-₹' . $this->formatIndianNumber(abs($number));
+            return '-₹'.$this->formatIndianNumber(abs($number));
         }
 
-        return '₹' . $this->formatIndianNumber($number);
+        return '₹'.$this->formatIndianNumber($number);
     }
 
     /**
      * Format number in Indian numbering system
-     *
-     * @param float $number
-     * @return string
      */
     protected function formatIndianNumber(float $number): string
     {
@@ -321,8 +317,8 @@ class VariableResolverService
 
         // Remaining digits in groups of 2
         $remaining = substr($numStr, 3);
-        if ($remaining) {
-            $result .= ',' . implode(',', str_split($remaining, 2));
+        if ($remaining !== '' && $remaining !== '0') {
+            $result .= ','.implode(',', str_split($remaining, 2));
         }
 
         // Reverse back
@@ -350,13 +346,13 @@ class VariableResolverService
     /**
      * Compute days remaining until policy expiry
      */
-    protected function computeDaysRemaining(NotificationContext $context): ?string
+    protected function computeDaysRemaining(NotificationContext $notificationContext): ?string
     {
-        if (! $context->hasInsurance() || ! $context->insurance->expired_date) {
+        if (! $notificationContext->hasInsurance() || ! $notificationContext->insurance->expired_date) {
             return null;
         }
 
-        $expiry = Carbon::parse($context->insurance->expired_date);
+        $expiry = Carbon::parse($notificationContext->insurance->expired_date);
         $now = Carbon::now();
 
         if ($expiry < $now) {
@@ -369,16 +365,16 @@ class VariableResolverService
     /**
      * Compute policy tenure in years
      */
-    protected function computePolicyTenure(NotificationContext $context): ?string
+    protected function computePolicyTenure(NotificationContext $notificationContext): ?string
     {
-        if (! $context->hasInsurance() ||
-            ! $context->insurance->start_date ||
-            ! $context->insurance->expired_date) {
+        if (! $notificationContext->hasInsurance() ||
+            ! $notificationContext->insurance->start_date ||
+            ! $notificationContext->insurance->expired_date) {
             return null;
         }
 
-        $start = Carbon::parse($context->insurance->start_date);
-        $end = Carbon::parse($context->insurance->expired_date);
+        $start = Carbon::parse($notificationContext->insurance->start_date);
+        $end = Carbon::parse($notificationContext->insurance->expired_date);
 
         $years = $start->diffInYears($end);
 
@@ -386,19 +382,19 @@ class VariableResolverService
             return '1 Year';
         }
 
-        return "{$years} Years";
+        return $years.' Years';
     }
 
     /**
      * Compute best company from quotation
      */
-    protected function computeBestCompany(NotificationContext $context): ?string
+    protected function computeBestCompany(NotificationContext $notificationContext): ?string
     {
-        if (! $context->hasQuotation() || ! $context->quotation->quotationCompanies) {
+        if (! $notificationContext->hasQuotation() || ! $notificationContext->quotation->quotationCompanies) {
             return null;
         }
 
-        $bestQuote = $context->quotation->quotationCompanies
+        $bestQuote = $notificationContext->quotation->quotationCompanies
             ->sortBy('final_premium')
             ->first();
 
@@ -408,13 +404,13 @@ class VariableResolverService
     /**
      * Compute best premium from quotation (returns formatted currency string)
      */
-    protected function computeBestPremium(NotificationContext $context): ?string
+    protected function computeBestPremium(NotificationContext $notificationContext): ?string
     {
-        if (! $context->hasQuotation() || ! $context->quotation->quotationCompanies) {
+        if (! $notificationContext->hasQuotation() || ! $notificationContext->quotation->quotationCompanies) {
             return null;
         }
 
-        $bestQuote = $context->quotation->quotationCompanies
+        $bestQuote = $notificationContext->quotation->quotationCompanies
             ->sortBy('final_premium')
             ->first();
 
@@ -426,13 +422,13 @@ class VariableResolverService
     /**
      * Compute comparison list from quotation
      */
-    protected function computeComparisonList(NotificationContext $context): ?string
+    protected function computeComparisonList(NotificationContext $notificationContext): ?string
     {
-        if (! $context->hasQuotation() || ! $context->quotation->quotationCompanies) {
+        if (! $notificationContext->hasQuotation() || ! $notificationContext->quotation->quotationCompanies) {
             return null;
         }
 
-        $quotes = $context->quotation->quotationCompanies
+        $quotes = $notificationContext->quotation->quotationCompanies
             ->sortBy('final_premium');
 
         $lines = [];
@@ -441,7 +437,7 @@ class VariableResolverService
         foreach ($quotes as $quote) {
             $company = $quote->insuranceCompany?->name ?? 'Unknown';
             $premium = $this->formatCurrency($quote->final_premium ?? 0);
-            $lines[] = "{$index}. {$company} - {$premium}";
+            $lines[] = sprintf('%d. %s - %s', $index, $company, $premium);
             $index++;
         }
 
@@ -451,14 +447,14 @@ class VariableResolverService
     /**
      * Compute pending documents list from claim
      */
-    protected function computePendingDocuments(NotificationContext $context): ?string
+    protected function computePendingDocuments(NotificationContext $notificationContext): ?string
     {
-        if (! $context->hasClaim()) {
+        if (! $notificationContext->hasClaim()) {
             return null;
         }
 
         // Get pending documents from claim->documents relationship
-        $pendingDocuments = $context->claim->documents()
+        $pendingDocuments = $notificationContext->claim->documents()
             ->where('is_submitted', false)
             ->get();
 
@@ -469,8 +465,8 @@ class VariableResolverService
         // Build numbered list of pending documents
         $lines = [];
         $counter = 1;
-        foreach ($pendingDocuments as $document) {
-            $lines[] = $counter.'. '.$document->document_name;
+        foreach ($pendingDocuments as $pendingDocument) {
+            $lines[] = $counter.'. '.$pendingDocument->document_name;
             $counter++;
         }
 
@@ -480,11 +476,11 @@ class VariableResolverService
     /**
      * Resolve all variables and return as array
      *
-     * @param  NotificationContext  $context  Context
+     * @param  NotificationContext  $notificationContext  Context
      * @param  array|null  $variableKeys  Specific variables to resolve, or null for all
      * @return array Associative array of variable => value
      */
-    public function resolveAllVariables(NotificationContext $context, ?array $variableKeys = null): array
+    public function resolveAllVariables(NotificationContext $notificationContext, ?array $variableKeys = null): array
     {
         if ($variableKeys === null) {
             $variableKeys = $this->registry->getAllVariables()->pluck('key')->toArray();
@@ -492,8 +488,8 @@ class VariableResolverService
 
         $resolved = [];
 
-        foreach ($variableKeys as $varKey) {
-            $resolved[$varKey] = $this->resolveVariable($varKey, $context);
+        foreach ($variableKeys as $variableKey) {
+            $resolved[$variableKey] = $this->resolveVariable($variableKey, $notificationContext);
         }
 
         return $resolved;
@@ -503,25 +499,25 @@ class VariableResolverService
      * Validate if all required variables can be resolved
      *
      * @param  string  $template  Template content
-     * @param  NotificationContext  $context  Context
+     * @param  NotificationContext  $notificationContext  Context
      * @return array ['valid' => bool, 'unresolved' => array]
      */
-    public function validateTemplateResolution(string $template, NotificationContext $context): array
+    public function validateTemplateResolution(string $template, NotificationContext $notificationContext): array
     {
         $variables = $this->registry->extractVariablesFromTemplate($template);
         $unresolved = [];
 
-        foreach ($variables as $varKey) {
-            $value = $this->resolveVariable($varKey, $context);
+        foreach ($variables as $variable) {
+            $value = $this->resolveVariable($variable, $notificationContext);
 
             // Check if variable was actually resolved (not null or placeholder)
-            if ($value === null || $value === "{{{$varKey}}}") {
-                $unresolved[] = $varKey;
+            if ($value === null || $value === sprintf('{{%s}}', $variable)) {
+                $unresolved[] = $variable;
             }
         }
 
         return [
-            'valid' => empty($unresolved),
+            'valid' => $unresolved === [],
             'unresolved' => $unresolved,
         ];
     }

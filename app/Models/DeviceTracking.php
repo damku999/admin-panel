@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Database\Factories\DeviceTrackingFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\DeviceTracking
@@ -27,66 +30,68 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property array $fingerprint_data
  * @property int $trust_score
  * @property bool $is_trusted
- * @property \Illuminate\Support\Carbon $first_seen_at
- * @property \Illuminate\Support\Carbon $last_seen_at
- * @property \Illuminate\Support\Carbon|null $trusted_at
- * @property \Illuminate\Support\Carbon|null $trust_expires_at
+ * @property Carbon $first_seen_at
+ * @property Carbon $last_seen_at
+ * @property Carbon|null $trusted_at
+ * @property Carbon|null $trust_expires_at
  * @property array|null $location_history
  * @property array|null $ip_history
  * @property int $login_count
  * @property int $failed_login_attempts
- * @property \Illuminate\Support\Carbon|null $last_failed_login_at
+ * @property Carbon|null $last_failed_login_at
  * @property bool $is_blocked
  * @property string|null $blocked_reason
- * @property \Illuminate\Support\Carbon|null $blocked_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $blocked_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read string $display_name
  * @property-read string|null $last_ip
  * @property-read array|null $last_location
- * @property-read Model|\Eloquent $trackable
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking active(int $days = 30)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking blocked()
- * @method static \Database\Factories\DeviceTrackingFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking highRisk(int $threshold = 70)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking query()
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking suspicious()
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking trusted()
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking untrusted()
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereBlockedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereBlockedReason($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereBrowser($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereBrowserVersion($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereDeviceId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereDeviceName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereDeviceType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereFailedLoginAttempts($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereFingerprintData($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereFirstSeenAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereHardwareInfo($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereIpHistory($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereIsBlocked($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereIsTrusted($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereLastFailedLoginAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereLastSeenAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereLocationHistory($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereLoginCount($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereOperatingSystem($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereOsVersion($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking wherePlatform($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereScreenResolution($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereTrackableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereTrackableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereTrustExpiresAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereTrustScore($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereTrustedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|DeviceTracking whereUserAgent($value)
- * @mixin \Eloquent
+ * @property-read Model|Model $trackable
+ *
+ * @method static Builder|DeviceTracking active(int $days = 30)
+ * @method static Builder|DeviceTracking blocked()
+ * @method static DeviceTrackingFactory factory($count = null, $state = [])
+ * @method static Builder|DeviceTracking highRisk(int $threshold = 70)
+ * @method static Builder|DeviceTracking newModelQuery()
+ * @method static Builder|DeviceTracking newQuery()
+ * @method static Builder|DeviceTracking query()
+ * @method static Builder|DeviceTracking suspicious()
+ * @method static Builder|DeviceTracking trusted()
+ * @method static Builder|DeviceTracking untrusted()
+ * @method static Builder|DeviceTracking whereBlockedAt($value)
+ * @method static Builder|DeviceTracking whereBlockedReason($value)
+ * @method static Builder|DeviceTracking whereBrowser($value)
+ * @method static Builder|DeviceTracking whereBrowserVersion($value)
+ * @method static Builder|DeviceTracking whereCreatedAt($value)
+ * @method static Builder|DeviceTracking whereDeviceId($value)
+ * @method static Builder|DeviceTracking whereDeviceName($value)
+ * @method static Builder|DeviceTracking whereDeviceType($value)
+ * @method static Builder|DeviceTracking whereFailedLoginAttempts($value)
+ * @method static Builder|DeviceTracking whereFingerprintData($value)
+ * @method static Builder|DeviceTracking whereFirstSeenAt($value)
+ * @method static Builder|DeviceTracking whereHardwareInfo($value)
+ * @method static Builder|DeviceTracking whereId($value)
+ * @method static Builder|DeviceTracking whereIpHistory($value)
+ * @method static Builder|DeviceTracking whereIsBlocked($value)
+ * @method static Builder|DeviceTracking whereIsTrusted($value)
+ * @method static Builder|DeviceTracking whereLastFailedLoginAt($value)
+ * @method static Builder|DeviceTracking whereLastSeenAt($value)
+ * @method static Builder|DeviceTracking whereLocationHistory($value)
+ * @method static Builder|DeviceTracking whereLoginCount($value)
+ * @method static Builder|DeviceTracking whereOperatingSystem($value)
+ * @method static Builder|DeviceTracking whereOsVersion($value)
+ * @method static Builder|DeviceTracking wherePlatform($value)
+ * @method static Builder|DeviceTracking whereScreenResolution($value)
+ * @method static Builder|DeviceTracking whereTrackableId($value)
+ * @method static Builder|DeviceTracking whereTrackableType($value)
+ * @method static Builder|DeviceTracking whereTrustExpiresAt($value)
+ * @method static Builder|DeviceTracking whereTrustScore($value)
+ * @method static Builder|DeviceTracking whereTrustedAt($value)
+ * @method static Builder|DeviceTracking whereUpdatedAt($value)
+ * @method static Builder|DeviceTracking whereUserAgent($value)
+ *
+ * @mixin Model
  */
 class DeviceTracking extends Model
 {
@@ -159,41 +164,41 @@ class DeviceTracking extends Model
         return $this->hasMany(DeviceSecurityEvent::class);
     }
 
-    public function scopeTrusted($query)
+    protected function scopeTrusted($query)
     {
         return $query->where('is_trusted', true)
-            ->where(function ($q) {
+            ->where(static function ($q): void {
                 $q->whereNull('trust_expires_at')
                     ->orWhere('trust_expires_at', '>', now());
             });
     }
 
-    public function scopeUntrusted($query)
+    protected function scopeUntrusted($query)
     {
         return $query->where('is_trusted', false);
     }
 
-    public function scopeBlocked($query)
+    protected function scopeBlocked($query)
     {
         return $query->where('is_blocked', true);
     }
 
-    public function scopeActive($query, int $days = 30)
+    protected function scopeActive($query, int $days = 30)
     {
         return $query->where('last_seen_at', '>=', now()->subDays($days));
     }
 
-    public function scopeHighRisk($query, int $threshold = 70)
+    protected function scopeHighRisk($query, int $threshold = 70)
     {
         return $query->where('trust_score', '<', $threshold);
     }
 
-    public function scopeSuspicious($query)
+    protected function scopeSuspicious($query)
     {
-        return $query->where(function ($q) {
+        return $query->where(static function ($q): void {
             $q->where('failed_login_attempts', '>=', 3)
                 ->orWhere('trust_score', '<', 30)
-                ->orWhereHas('securityEvents', function ($eventQuery) {
+                ->orWhereHas('securityEvents', static function ($eventQuery): void {
                     $eventQuery->where('event_severity', 'high')
                         ->orWhere('event_severity', 'critical')
                         ->where('is_resolved', false);
@@ -253,7 +258,7 @@ class DeviceTracking extends Model
             'blocked_at' => now(),
         ]);
 
-        $this->logSecurityEvent('device_blocked', 'high', "Device blocked: {$reason}");
+        $this->logSecurityEvent('device_blocked', 'high', 'Device blocked: '.$reason);
     }
 
     public function unblockDevice(?string $reason = null): void
@@ -292,7 +297,7 @@ class DeviceTracking extends Model
 
         $this->updateIpHistory($ip);
 
-        $this->logSecurityEvent('failed_login', 'medium', "Failed login: {$reason}");
+        $this->logSecurityEvent('failed_login', 'medium', 'Failed login: '.$reason);
 
         // Auto-block after too many failures
         if ($this->failed_login_attempts >= 5) {
@@ -350,23 +355,23 @@ class DeviceTracking extends Model
         }
     }
 
-    public function getDisplayNameAttribute(): string
+    protected function getDisplayNameAttribute(): string
     {
         if ($this->device_name) {
             return $this->device_name;
         }
 
-        return "{$this->browser} on {$this->operating_system}";
+        return sprintf('%s on %s', $this->browser, $this->operating_system);
     }
 
-    public function getLastLocationAttribute(): ?array
+    protected function getLastLocationAttribute(): ?array
     {
         $history = $this->location_history ?? [];
 
         return end($history) ?: null;
     }
 
-    public function getLastIpAttribute(): ?string
+    protected function getLastIpAttribute(): ?string
     {
         $history = $this->ip_history ?? [];
 
@@ -412,7 +417,7 @@ class DeviceTracking extends Model
 
     protected function updateLocationHistory(?array $location = null): void
     {
-        if (! $location) {
+        if ($location === null || $location === []) {
             return;
         }
 

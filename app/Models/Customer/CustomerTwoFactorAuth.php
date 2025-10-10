@@ -3,10 +3,14 @@
 namespace App\Models\Customer;
 
 use App\Models\Customer;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Log;
 
 /**
  * App\Models\Customer\CustomerTwoFactorAuth
@@ -16,31 +20,33 @@ use Illuminate\Support\Facades\Crypt;
  * @property int $authenticatable_id
  * @property string|null $secret
  * @property array|null $recovery_codes
- * @property \Illuminate\Support\Carbon|null $enabled_at
- * @property \Illuminate\Support\Carbon|null $confirmed_at
+ * @property Carbon|null $enabled_at
+ * @property Carbon|null $confirmed_at
  * @property bool $is_active
  * @property string|null $backup_method
  * @property string|null $backup_destination
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read Model|\Eloquent $authenticatable
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth customersOnly()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth query()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereAuthenticatableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereAuthenticatableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereBackupDestination($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereBackupMethod($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereConfirmedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereEnabledAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereIsActive($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereRecoveryCodes($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereSecret($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTwoFactorAuth whereUpdatedAt($value)
- * @mixin \Eloquent
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Model|Model $authenticatable
+ *
+ * @method static Builder|CustomerTwoFactorAuth customersOnly()
+ * @method static Builder|CustomerTwoFactorAuth newModelQuery()
+ * @method static Builder|CustomerTwoFactorAuth newQuery()
+ * @method static Builder|CustomerTwoFactorAuth query()
+ * @method static Builder|CustomerTwoFactorAuth whereAuthenticatableId($value)
+ * @method static Builder|CustomerTwoFactorAuth whereAuthenticatableType($value)
+ * @method static Builder|CustomerTwoFactorAuth whereBackupDestination($value)
+ * @method static Builder|CustomerTwoFactorAuth whereBackupMethod($value)
+ * @method static Builder|CustomerTwoFactorAuth whereConfirmedAt($value)
+ * @method static Builder|CustomerTwoFactorAuth whereCreatedAt($value)
+ * @method static Builder|CustomerTwoFactorAuth whereEnabledAt($value)
+ * @method static Builder|CustomerTwoFactorAuth whereId($value)
+ * @method static Builder|CustomerTwoFactorAuth whereIsActive($value)
+ * @method static Builder|CustomerTwoFactorAuth whereRecoveryCodes($value)
+ * @method static Builder|CustomerTwoFactorAuth whereSecret($value)
+ * @method static Builder|CustomerTwoFactorAuth whereUpdatedAt($value)
+ *
+ * @mixin Model
  */
 class CustomerTwoFactorAuth extends Model
 {
@@ -81,7 +87,7 @@ class CustomerTwoFactorAuth extends Model
     /**
      * Scope to only customer records
      */
-    public function scopeCustomersOnly($query)
+    protected function scopeCustomersOnly($query)
     {
         return $query->where('authenticatable_type', Customer::class);
     }
@@ -94,15 +100,15 @@ class CustomerTwoFactorAuth extends Model
         return Attribute::make(
             get: function ($value) {
                 if (! $value) {
-                    return null;
+                    return;
                 }
 
                 // Handle legacy unencrypted secrets (backwards compatibility)
                 try {
                     return Crypt::decryptString($value);
-                } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                } catch (DecryptException) {
                     // If decryption fails, assume it's an old unencrypted secret
-                    \Log::warning('Found legacy unencrypted customer 2FA secret', [
+                    Log::warning('Found legacy unencrypted customer 2FA secret', [
                         'customer_id' => $this->authenticatable_id,
                         'secret_preview' => substr($value, 0, 8).'...',
                     ]);
@@ -120,18 +126,20 @@ class CustomerTwoFactorAuth extends Model
     protected function recoveryCodes(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
+            get: static function ($value): ?array {
                 if (! $value) {
                     return null;
                 }
+
                 $codes = json_decode($value, true);
 
                 return array_map(fn ($code) => Crypt::decryptString($code), $codes);
             },
-            set: function ($value) {
+            set: static function ($value) {
                 if (! $value) {
-                    return null;
+                    return;
                 }
+
                 $encryptedCodes = array_map(fn ($code) => Crypt::encryptString($code), $value);
 
                 return json_encode($encryptedCodes);
@@ -194,16 +202,16 @@ class CustomerTwoFactorAuth extends Model
         $upperCode = strtoupper($code);
 
         // Debug logging for customer recovery codes
-        \Log::debug('Customer recovery code verification attempt', [
+        Log::debug('Customer recovery code verification attempt', [
             'input_code' => $code,
             'upper_code' => $upperCode,
             'stored_codes' => $this->recovery_codes,
             'codes_exist' => is_array($this->recovery_codes),
-            'code_in_array' => is_array($this->recovery_codes) ? in_array($upperCode, $this->recovery_codes) : false,
+            'code_in_array' => is_array($this->recovery_codes) && in_array($upperCode, $this->recovery_codes),
         ]);
 
         if (! is_array($this->recovery_codes)) {
-            \Log::warning('Customer recovery code verification failed - no codes stored', [
+            Log::warning('Customer recovery code verification failed - no codes stored', [
                 'input_code' => $code,
                 'recovery_codes_type' => gettype($this->recovery_codes),
             ]);
@@ -211,14 +219,14 @@ class CustomerTwoFactorAuth extends Model
             return false;
         }
 
-        $codeIndex = array_search($upperCode, $this->recovery_codes);
+        $codeIndex = array_search($upperCode, $this->recovery_codes, true);
         if ($codeIndex !== false) {
             $codes = $this->recovery_codes;
             unset($codes[$codeIndex]);
             $this->recovery_codes = array_values($codes);
             $this->save();
 
-            \Log::info('Customer recovery code used successfully', [
+            Log::info('Customer recovery code used successfully', [
                 'used_code' => $upperCode,
                 'remaining_codes' => count($this->recovery_codes),
             ]);
@@ -226,7 +234,7 @@ class CustomerTwoFactorAuth extends Model
             return true;
         }
 
-        \Log::warning('Customer recovery code verification failed', [
+        Log::warning('Customer recovery code verification failed', [
             'input_code' => $code,
             'available_codes_count' => count($this->recovery_codes),
         ]);

@@ -4,8 +4,6 @@ namespace Tests\Unit\Notification;
 
 use App\Services\EmailService;
 use App\Services\Notification\NotificationContext;
-use App\Services\TemplateService;
-use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 /**
@@ -37,7 +35,7 @@ class EmailServiceIntegrationTest extends TestCase
     /** @test */
     public function notification_context_can_be_created_and_used()
     {
-        $context = new NotificationContext();
+        $context = new NotificationContext;
 
         $this->assertInstanceOf(NotificationContext::class, $context);
 

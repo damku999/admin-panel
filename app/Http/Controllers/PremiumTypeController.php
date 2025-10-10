@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PremiumType;
 use App\Services\PremiumTypeService;
 use App\Traits\ExportableTrait;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -34,12 +35,12 @@ class PremiumTypeController extends AbstractBaseCrudController
      */
     public function index(Request $request)
     {
-        $premium_type_obj = PremiumType::select('*');
+        $builder = PremiumType::query()->select('*');
         if (! empty($request->search)) {
-            $premium_type_obj->where('name', 'LIKE', '%'.trim($request->search).'%');
+            $builder->where('name', 'LIKE', '%'.trim((string) $request->search).'%');
         }
 
-        $premium_type = $premium_type_obj->paginate(config('app.pagination_default', 15));
+        $premium_type = $builder->paginate(config('app.pagination_default', 15));
 
         return view('premium_type.index', ['premium_type' => $premium_type]);
     }
@@ -90,15 +91,14 @@ class PremiumTypeController extends AbstractBaseCrudController
     /**
      * Update Status Of PremiumType
      *
-     * @param  int  $status
      * @return List Page With Success
      *
      * @author Darshan Baraiya
      */
-    public function updateStatus($premium_type_id, $status)
+    public function updateStatus(int $premium_type_id, int $status): RedirectResponse
     {
         // Validation
-        $validate = Validator::make([
+        $validator = Validator::make([
             'premium_type_id' => $premium_type_id,
             'status' => $status,
         ], [
@@ -107,31 +107,31 @@ class PremiumTypeController extends AbstractBaseCrudController
         ]);
 
         // If Validations Fails
-        if ($validate->fails()) {
-            return $this->redirectWithError($validate->errors()->first());
+        if ($validator->fails()) {
+            return $this->redirectWithError($validator->errors()->first());
         }
 
         try {
             $this->premiumTypeService->updateStatus($premium_type_id, $status);
 
             return $this->redirectWithSuccess('premium_type.index', $this->getSuccessMessage('Premium Type Status', 'updated'));
-        } catch (\Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Premium Type Status', 'update').': '.$th->getMessage());
+        } catch (\Throwable $throwable) {
+            return $this->redirectWithError($this->getErrorMessage('Premium Type Status', 'update').': '.$throwable->getMessage());
         }
     }
 
     /**
      * Edit PremiumType
      *
-     * @param  int  $premium_type
+     * @param  int  $premiumType
      * @return Collection $premium_type
      *
      * @author Darshan Baraiya
      */
-    public function edit(PremiumType $premium_type)
+    public function edit(PremiumType $premiumType)
     {
         return view('premium_type.edit')->with([
-            'premium_type' => $premium_type,
+            'premium_type' => $premiumType,
         ]);
     }
 
@@ -143,11 +143,11 @@ class PremiumTypeController extends AbstractBaseCrudController
      *
      * @author Darshan Baraiya
      */
-    public function update(Request $request, PremiumType $premium_type)
+    public function update(Request $request, PremiumType $premiumType)
     {
         // Validations
         $validation_array = [
-            'name' => 'required|unique:premium_types,name,'.$premium_type->id,
+            'name' => 'required|unique:premium_types,name,'.$premiumType->id,
             'is_vehicle' => 'required|boolean',
             'is_life_insurance_policies' => 'required|boolean',
         ];
@@ -155,7 +155,7 @@ class PremiumTypeController extends AbstractBaseCrudController
         $validated = $request->validate($validation_array);
 
         try {
-            $this->premiumTypeService->updatePremiumType($premium_type, $validated);
+            $this->premiumTypeService->updatePremiumType($premiumType, $validated);
 
             return $this->redirectWithSuccess('premium_type.index', $this->getSuccessMessage('Premium Type', 'updated'));
         } catch (\InvalidArgumentException $e) {
@@ -174,14 +174,14 @@ class PremiumTypeController extends AbstractBaseCrudController
      *
      * @author Darshan Baraiya
      */
-    public function delete(PremiumType $premium_type)
+    public function delete(PremiumType $premiumType): RedirectResponse
     {
         try {
-            $this->premiumTypeService->deletePremiumType($premium_type);
+            $this->premiumTypeService->deletePremiumType($premiumType);
 
             return $this->redirectWithSuccess('premium_type.index', $this->getSuccessMessage('Premium Type', 'deleted'));
-        } catch (\Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Premium Type', 'delete').': '.$th->getMessage());
+        } catch (\Throwable $throwable) {
+            return $this->redirectWithError($this->getErrorMessage('Premium Type', 'delete').': '.$throwable->getMessage());
         }
     }
 
@@ -216,16 +216,14 @@ class PremiumTypeController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
             'headings' => ['ID', 'Name', 'Is Vehicle', 'Is Life Insurance', 'Status', 'Created Date'],
-            'mapping' => function ($model) {
-                return [
-                    $model->id,
-                    $model->name ?? 'N/A',
-                    $model->is_vehicle ? 'Yes' : 'No',
-                    $model->is_life_insurance_policies ? 'Yes' : 'No',
-                    $model->status ? 'Active' : 'Inactive',
-                    $model->created_at->format('Y-m-d H:i:s'),
-                ];
-            },
+            'mapping' => fn ($model): array => [
+                $model->id,
+                $model->name ?? 'N/A',
+                $model->is_vehicle ? 'Yes' : 'No',
+                $model->is_life_insurance_policies ? 'Yes' : 'No',
+                $model->status ? 'Active' : 'Inactive',
+                $model->created_at->format('Y-m-d H:i:s'),
+            ],
             'with_mapping' => true,
         ];
     }

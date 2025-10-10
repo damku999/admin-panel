@@ -18,8 +18,8 @@ class AppSettingService
     {
         $cacheKey = self::CACHE_PREFIX.$key;
 
-        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($key, $default) {
-            $setting = AppSetting::where('key', $key)
+        return Cache::remember($cacheKey, self::CACHE_TTL, static function () use ($key, $default) {
+            $setting = AppSetting::query()->where('key', $key)
                 ->where('is_active', true)
                 ->first();
 
@@ -35,7 +35,7 @@ class AppSettingService
         $isEncrypted = $options['is_encrypted'] ?? false;
 
         // Find or create the setting
-        $setting = AppSetting::firstOrNew(['key' => $key]);
+        $setting = AppSetting::query()->firstOrNew(['key' => $key]);
 
         // Set metadata first (before value, so mutator can check is_encrypted)
         $setting->type = $options['type'] ?? self::detectType($value);
@@ -72,8 +72,8 @@ class AppSettingService
     {
         $cacheKey = self::CACHE_PREFIX.'category_'.$category;
 
-        return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($category) {
-            $settings = AppSetting::where('category', $category)
+        return Cache::remember($cacheKey, self::CACHE_TTL, static function () use ($category): array {
+            $settings = AppSetting::query()->where('category', $category)
                 ->where('is_active', true)
                 ->get();
 
@@ -105,7 +105,7 @@ class AppSettingService
      */
     public static function delete(string $key): bool
     {
-        $setting = AppSetting::where('key', $key)->first();
+        $setting = AppSetting::query()->where('key', $key)->first();
 
         if ($setting) {
             $setting->delete();
@@ -122,7 +122,7 @@ class AppSettingService
      */
     public static function toggle(string $key): bool
     {
-        $setting = AppSetting::where('key', $key)->first();
+        $setting = AppSetting::query()->where('key', $key)->first();
 
         if ($setting) {
             $setting->is_active = ! $setting->is_active;

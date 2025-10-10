@@ -2,8 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\AppSetting;
+use App\Models\Claim;
+use App\Models\Customer;
+use App\Models\CustomerInsurance;
 use App\Models\NotificationTemplate;
 use App\Models\NotificationType;
+use App\Models\Quotation;
 use App\Services\Notification\NotificationContext;
 use App\Services\Notification\VariableResolverService;
 use Illuminate\Support\Facades\Log;
@@ -32,30 +37,30 @@ class TemplateService
      * @param  string  $notificationTypeCode  Notification type code (e.g., 'customer_welcome', 'renewal_7_days')
      * @param  string  $channel  Template channel to render
      * @param  array|NotificationContext  $data  Template variables (new: NotificationContext, legacy: array)
-     * @return string|null  Rendered template content or null if type/template not found
+     * @return string|null Rendered template content or null if type/template not found
      */
     public function render(string $notificationTypeCode, string $channel, array|NotificationContext $data): ?string
     {
         try {
             // Find notification type by code
-            $notificationType = NotificationType::where('code', $notificationTypeCode)
+            $notificationType = NotificationType::query()->where('code', $notificationTypeCode)
                 ->where('is_active', true)
                 ->first();
 
             if (! $notificationType) {
-                Log::warning("Notification type not found: {$notificationTypeCode}");
+                Log::warning('Notification type not found: '.$notificationTypeCode);
 
                 return null;
             }
 
             // Find active template for this type and channel
-            $template = NotificationTemplate::where('notification_type_id', $notificationType->id)
+            $template = NotificationTemplate::query()->where('notification_type_id', $notificationType->id)
                 ->where('channel', $channel)
                 ->where('is_active', true)
                 ->first();
 
             if (! $template) {
-                Log::info("No active template found for {$notificationTypeCode} ({$channel})");
+                Log::info(sprintf('No active template found for %s (%s)', $notificationTypeCode, $channel));
 
                 return null;
             }
@@ -65,15 +70,15 @@ class TemplateService
                 $resolver = app(VariableResolverService::class);
 
                 return $resolver->resolveTemplate($template->template_content, $data);
-            } else {
-                // Legacy array-based replacement
-                return $this->replaceVariables($template->template_content, $data);
             }
 
-        } catch (\Exception $e) {
-            Log::error("Template rendering failed for {$notificationTypeCode}", [
+            // Legacy array-based replacement
+            return $this->replaceVariables($template->template_content, $data);
+
+        } catch (\Exception $exception) {
+            Log::error('Template rendering failed for '.$notificationTypeCode, [
                 'channel' => $channel,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return null;
@@ -98,7 +103,7 @@ class TemplateService
      *
      * @param  string  $template  Template content with variable placeholders
      * @param  array  $data  Associative array of variable names → values
-     * @return string  Template with all variables replaced by values
+     * @return string Template with all variables replaced by values
      */
     protected function replaceVariables(string $template, array $data): string
     {
@@ -139,17 +144,17 @@ class TemplateService
      *
      * @param  string  $notificationTypeCode  Notification type code
      * @param  string  $channel  Template channel
-     * @return array|null  Array of available variable names or null if not found
+     * @return array|null Array of available variable names or null if not found
      */
     public function getAvailableVariables(string $notificationTypeCode, string $channel): ?array
     {
-        $notificationType = NotificationType::where('code', $notificationTypeCode)->first();
+        $notificationType = NotificationType::query()->where('code', $notificationTypeCode)->first();
 
         if (! $notificationType) {
             return null;
         }
 
-        $template = NotificationTemplate::where('notification_type_id', $notificationType->id)
+        $template = NotificationTemplate::query()->where('notification_type_id', $notificationType->id)
             ->where('channel', $channel)
             ->first();
 
@@ -173,7 +178,7 @@ class TemplateService
      *
      * @param  string  $templateContent  Template content to preview (not saved)
      * @param  array  $data  Sample variable values for preview
-     * @return string  Rendered template with sample data
+     * @return string Rendered template with sample data
      */
     public function preview(string $templateContent, array $data): string
     {
@@ -196,8 +201,8 @@ class TemplateService
      *
      * @param  string  $notificationTypeCode  Notification type code
      * @param  string  $channel  Template channel ('whatsapp', 'email', 'sms', 'push')
-     * @param  \App\Models\CustomerInsurance  $insurance  Insurance policy with customer
-     * @return string|null  Rendered template or null on failure
+     * @param  CustomerInsurance  $insurance  Insurance policy with customer
+     * @return string|null Rendered template or null on failure
      */
     public function renderFromInsurance(string $notificationTypeCode, string $channel, $insurance): ?string
     {
@@ -206,11 +211,11 @@ class TemplateService
             $context->settings = $this->loadSettings();
 
             return $this->render($notificationTypeCode, $channel, $context);
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Template rendering from insurance failed', [
                 'notification_type' => $notificationTypeCode,
                 'insurance_id' => $insurance->id,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return null;
@@ -232,8 +237,8 @@ class TemplateService
      *
      * @param  string  $notificationTypeCode  Notification type code
      * @param  string  $channel  Template channel ('whatsapp', 'email', 'sms', 'push')
-     * @param  \App\Models\Customer  $customer  Customer instance
-     * @return string|null  Rendered template or null on failure
+     * @param  Customer  $customer  Customer instance
+     * @return string|null Rendered template or null on failure
      */
     public function renderFromCustomer(string $notificationTypeCode, string $channel, $customer): ?string
     {
@@ -242,11 +247,11 @@ class TemplateService
             $context->settings = $this->loadSettings();
 
             return $this->render($notificationTypeCode, $channel, $context);
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Template rendering from customer failed', [
                 'notification_type' => $notificationTypeCode,
                 'customer_id' => $customer->id,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return null;
@@ -269,8 +274,8 @@ class TemplateService
      *
      * @param  string  $notificationTypeCode  Notification type code
      * @param  string  $channel  Template channel ('whatsapp', 'email', 'sms', 'push')
-     * @param  \App\Models\Quotation  $quotation  Quotation instance with customer
-     * @return string|null  Rendered template or null on failure
+     * @param  Quotation  $quotation  Quotation instance with customer
+     * @return string|null Rendered template or null on failure
      */
     public function renderFromQuotation(string $notificationTypeCode, string $channel, $quotation): ?string
     {
@@ -279,11 +284,11 @@ class TemplateService
             $context->settings = $this->loadSettings();
 
             return $this->render($notificationTypeCode, $channel, $context);
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Template rendering from quotation failed', [
                 'notification_type' => $notificationTypeCode,
                 'quotation_id' => $quotation->id,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return null;
@@ -308,8 +313,8 @@ class TemplateService
      *
      * @param  string  $notificationTypeCode  Notification type code
      * @param  string  $channel  Template channel ('whatsapp', 'email', 'sms', 'push')
-     * @param  \App\Models\Claim  $claim  Claim instance with insurance and customer
-     * @return string|null  Rendered template or null on failure
+     * @param  Claim  $claim  Claim instance with insurance and customer
+     * @return string|null Rendered template or null on failure
      */
     public function renderFromClaim(string $notificationTypeCode, string $channel, $claim): ?string
     {
@@ -322,11 +327,11 @@ class TemplateService
             $context->settings = $this->loadSettings();
 
             return $this->render($notificationTypeCode, $channel, $context);
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Template rendering from claim failed', [
                 'notification_type' => $notificationTypeCode,
                 'claim_id' => $claim->id,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return null;
@@ -349,11 +354,11 @@ class TemplateService
      * - {{company.phone}} → Company phone
      * - {{company.advisor_name}} → Advisor name
      *
-     * @return array  Hierarchical settings array indexed by category and key
+     * @return array Hierarchical settings array indexed by category and key
      */
     protected function loadSettings(): array
     {
-        $settings = \App\Models\AppSetting::where('is_active', true)->get();
+        $settings = AppSetting::query()->where('is_active', true)->get();
 
         $structured = [];
         foreach ($settings as $setting) {
@@ -362,8 +367,8 @@ class TemplateService
             $key = $setting->key;
             $categoryPrefix = $setting->category.'_';
 
-            if (str_starts_with($key, $categoryPrefix)) {
-                $key = substr($key, strlen($categoryPrefix));
+            if (str_starts_with((string) $key, $categoryPrefix)) {
+                $key = substr((string) $key, strlen($categoryPrefix));
             }
 
             $structured[$setting->category][$key] = $setting->value;

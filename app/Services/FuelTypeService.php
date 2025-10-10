@@ -20,7 +20,7 @@ class FuelTypeService extends BaseService
     public function createFuelType(array $data): FuelType
     {
         return $this->createInTransaction(
-            fn () => FuelType::create($data)
+            fn () => FuelType::query()->create($data)
         );
     }
 

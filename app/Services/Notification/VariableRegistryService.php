@@ -31,9 +31,7 @@ class VariableRegistryService
     {
         $variables = $this->config['variables'] ?? [];
 
-        $this->variables = collect($variables)->map(function ($metadata, $key) {
-            return array_merge($metadata, ['key' => $key]);
-        });
+        $this->variables = collect($variables)->map(fn ($metadata, $key): array => array_merge($metadata, ['key' => $key]));
     }
 
     /**
@@ -43,9 +41,7 @@ class VariableRegistryService
     {
         $categories = $this->config['categories'] ?? [];
 
-        $this->categories = collect($categories)->map(function ($metadata, $key) {
-            return array_merge($metadata, ['key' => $key]);
-        })->sortBy('order');
+        $this->categories = collect($categories)->map(fn ($metadata, $key): array => array_merge($metadata, ['key' => $key]))->sortBy('order');
     }
 
     /**
@@ -71,9 +67,7 @@ class VariableRegistryService
      */
     public function getVariablesByCategory(string $category): Collection
     {
-        return $this->variables->filter(function ($variable) use ($category) {
-            return $variable['category'] === $category;
-        });
+        return $this->variables->filter(fn (array $variable): bool => $variable['category'] === $category);
     }
 
     /**
@@ -83,7 +77,7 @@ class VariableRegistryService
      */
     public function getVariablesByNotificationType(?string $notificationType = null): Collection
     {
-        if (! $notificationType) {
+        if (in_array($notificationType, [null, '', '0'], true)) {
             // Return all variables if no type specified
             return $this->variables;
         }
@@ -104,18 +98,14 @@ class VariableRegistryService
         }
 
         // Return suggested variables + variables that don't require specific context
-        return $this->variables->filter(function ($variable) use ($suggestedKeys) {
+        return $this->variables->filter(static function (array $variable) use ($suggestedKeys): bool {
             // Include if in suggested list
             if (in_array($variable['key'], $suggestedKeys)) {
                 return true;
             }
 
             // Include if requires no specific context (system variables like current_date, company info)
-            if (empty($variable['requires']) || $variable['requires'] === []) {
-                return true;
-            }
-
-            return false;
+            return empty($variable['requires']) || $variable['requires'] === [];
         });
     }
 
@@ -139,7 +129,7 @@ class VariableRegistryService
     {
         $variables = $this->getVariablesByNotificationType($notificationType);
 
-        return $variables->groupBy('category')->map(function ($categoryVariables, $categoryKey) {
+        return $variables->groupBy('category')->map(function ($categoryVariables, $categoryKey): array {
             $categoryMeta = $this->categories->firstWhere('key', $categoryKey);
 
             return [
@@ -194,9 +184,7 @@ class VariableRegistryService
      */
     public function getAttachmentVariables(): Collection
     {
-        return $this->variables->filter(function ($variable) {
-            return $variable['type'] === 'attachment';
-        });
+        return $this->variables->filter(fn (array $variable): bool => $variable['type'] === 'attachment');
     }
 
     /**
@@ -204,9 +192,7 @@ class VariableRegistryService
      */
     public function getComputedVariables(): Collection
     {
-        return $this->variables->filter(function ($variable) {
-            return $variable['type'] === 'computed';
-        });
+        return $this->variables->filter(fn (array $variable): bool => $variable['type'] === 'computed');
     }
 
     /**
@@ -214,9 +200,7 @@ class VariableRegistryService
      */
     public function getSystemVariables(): Collection
     {
-        return $this->variables->filter(function ($variable) {
-            return $variable['type'] === 'system';
-        });
+        return $this->variables->filter(fn (array $variable): bool => $variable['type'] === 'system');
     }
 
     /**
@@ -224,9 +208,7 @@ class VariableRegistryService
      */
     public function getSettingVariables(): Collection
     {
-        return $this->variables->filter(function ($variable) {
-            return $variable['type'] === 'setting';
-        });
+        return $this->variables->filter(fn (array $variable): bool => $variable['type'] === 'setting');
     }
 
     /**
@@ -265,7 +247,7 @@ class VariableRegistryService
         $missing = array_diff($suggested, $extracted);
 
         return [
-            'valid' => empty($unknown),
+            'valid' => $unknown === [],
             'missing' => array_values($missing), // Suggested but not used (warning)
             'unknown' => array_values($unknown), // Used but not registered (error)
             'used' => $extracted,
@@ -282,7 +264,7 @@ class VariableRegistryService
     {
         $metadata = $this->getVariableMetadata($variableKey);
 
-        if (! $metadata) {
+        if ($metadata === null || $metadata === []) {
             return [];
         }
 
@@ -310,8 +292,6 @@ class VariableRegistryService
     {
         $variables = $this->getVariablesByNotificationType($notificationType);
 
-        return $variables->map(function ($metadata) {
-            return $this->getVariableForUI($metadata['key']);
-        });
+        return $variables->map(fn (array $metadata): array => $this->getVariableForUI($metadata['key']));
     }
 }

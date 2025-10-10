@@ -13,6 +13,8 @@ use App\Traits\WhatsAppApiTrait;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerService extends BaseService implements CustomerServiceInterface
@@ -43,78 +45,78 @@ class CustomerService extends BaseService implements CustomerServiceInterface
      * the welcome email notification. If email sending fails, the entire
      * transaction is rolled back to maintain data consistency.
      *
-     * @param  StoreCustomerRequest  $request  Validated customer registration data including personal info and documents
+     * @param  StoreCustomerRequest  $storeCustomerRequest  Validated customer registration data including personal info and documents
      * @return Customer The newly created customer instance with relationships loaded
      *
      * @throws \Exception If email already exists in the system
      * @throws \Exception If email sending fails, triggering transaction rollback with user-friendly message
      */
-    public function createCustomer(StoreCustomerRequest $request): Customer
+    public function createCustomer(StoreCustomerRequest $storeCustomerRequest): Customer
     {
         // Check for existing email first to provide better error message
-        if ($this->findByEmail($request->email)) {
+        if ($this->findByEmail($storeCustomerRequest->email) instanceof Customer) {
             throw new \Exception('A customer with this email address already exists. Please use a different email address.');
         }
 
-        return $this->createInTransaction(function () use ($request) {
+        return $this->createInTransaction(function () use ($storeCustomerRequest) {
             // Create customer with validated data
-            /** @var Customer $customer */
-            $customer = $this->customerRepository->create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'mobile_number' => $request->mobile_number,
-                'status' => $request->status,
-                'wedding_anniversary_date' => $request->wedding_anniversary_date,
-                'engagement_anniversary_date' => $request->engagement_anniversary_date,
-                'date_of_birth' => $request->date_of_birth,
-                'type' => $request->type,
-                'pan_card_number' => $request->pan_card_number,
-                'aadhar_card_number' => $request->aadhar_card_number,
-                'gst_number' => $request->gst_number,
+            /** @var Customer $model */
+            $model = $this->customerRepository->create([
+                'name' => $storeCustomerRequest->name,
+                'email' => $storeCustomerRequest->email,
+                'mobile_number' => $storeCustomerRequest->mobile_number,
+                'status' => $storeCustomerRequest->status,
+                'wedding_anniversary_date' => $storeCustomerRequest->wedding_anniversary_date,
+                'engagement_anniversary_date' => $storeCustomerRequest->engagement_anniversary_date,
+                'date_of_birth' => $storeCustomerRequest->date_of_birth,
+                'type' => $storeCustomerRequest->type,
+                'pan_card_number' => $storeCustomerRequest->pan_card_number,
+                'aadhar_card_number' => $storeCustomerRequest->aadhar_card_number,
+                'gst_number' => $storeCustomerRequest->gst_number,
             ]);
 
             // Handle document uploads
-            $this->handleCustomerDocuments($request, $customer);
+            $this->handleCustomerDocuments($storeCustomerRequest, $model);
 
             // Send welcome email synchronously within transaction
             // This will cause rollback if email sending fails
             try {
-                $this->sendWelcomeEmailSync($customer);
-            } catch (\Throwable $emailError) {
+                $this->sendWelcomeEmailSync($model);
+            } catch (\Throwable $throwable) {
                 // Log the email error but continue with transaction rollback
-                \Log::error('Customer welcome email failed during creation', [
-                    'customer_id' => $customer->id,
-                    'customer_email' => $customer->email,
-                    'error' => $emailError->getMessage(),
+                Log::error('Customer welcome email failed during creation', [
+                    'customer_id' => $model->id,
+                    'customer_email' => $model->email,
+                    'error' => $throwable->getMessage(),
                 ]);
 
                 // Delete the customer record if it was created
-                $customer->delete();
+                $model->delete();
 
                 // Re-throw to trigger transaction rollback
-                throw new \Exception('Customer registration failed: Unable to send welcome email to '.$customer->email.'. Please verify the email address and try again.');
+                throw new \Exception('Customer registration failed: Unable to send welcome email to '.$model->email.'. Please verify the email address and try again.', $throwable->getCode(), $throwable);
             }
 
             // Fire other events for async processing (audit logs, admin notifications)
             // These are non-critical and won't rollback the transaction
             try {
                 CustomerRegistered::dispatch(
-                    $customer,
+                    $model,
                     [
-                        'request_data' => $request->only(['type', 'status']),
-                        'has_documents' => $request->hasFile('documents'),
+                        'request_data' => $storeCustomerRequest->only(['type', 'status']),
+                        'has_documents' => $storeCustomerRequest->hasFile('documents'),
                     ],
                     'admin'
                 );
-            } catch (\Throwable $eventError) {
+            } catch (\Throwable $throwable) {
                 // Log but don't rollback - customer was successfully created
-                \Log::warning('Post-creation events failed', [
-                    'customer_id' => $customer->id,
-                    'error' => $eventError->getMessage(),
+                Log::warning('Post-creation events failed', [
+                    'customer_id' => $model->id,
+                    'error' => $throwable->getMessage(),
                 ]);
             }
 
-            return $customer;
+            return $model;
         });
     }
 
@@ -125,13 +127,13 @@ class CustomerService extends BaseService implements CustomerServiceInterface
      * and dispatches CustomerProfileUpdated event for changed fields to enable
      * audit logging and notifications.
      *
-     * @param  UpdateCustomerRequest  $request  Validated update data with personal info and optional documents
+     * @param  UpdateCustomerRequest  $updateCustomerRequest  Validated update data with personal info and optional documents
      * @param  Customer  $customer  The customer instance to update
      * @return bool True if update successful, false otherwise
      */
-    public function updateCustomer(UpdateCustomerRequest $request, Customer $customer): bool
+    public function updateCustomer(UpdateCustomerRequest $updateCustomerRequest, Customer $customer): bool
     {
-        return $this->updateInTransaction(function () use ($request, $customer) {
+        return $this->updateInTransaction(function () use ($updateCustomerRequest, $customer): bool {
             // Capture original values for change tracking
             $originalValues = $customer->only([
                 'name', 'email', 'mobile_number', 'status', 'type',
@@ -139,25 +141,25 @@ class CustomerService extends BaseService implements CustomerServiceInterface
             ]);
 
             $newValues = [
-                'name' => $request->name,
-                'email' => $request->email,
-                'mobile_number' => $request->mobile_number,
-                'status' => $request->status,
-                'wedding_anniversary_date' => $request->wedding_anniversary_date,
-                'engagement_anniversary_date' => $request->engagement_anniversary_date,
-                'date_of_birth' => $request->date_of_birth,
-                'type' => $request->type,
-                'pan_card_number' => $request->pan_card_number,
-                'aadhar_card_number' => $request->aadhar_card_number,
-                'gst_number' => $request->gst_number,
+                'name' => $updateCustomerRequest->name,
+                'email' => $updateCustomerRequest->email,
+                'mobile_number' => $updateCustomerRequest->mobile_number,
+                'status' => $updateCustomerRequest->status,
+                'wedding_anniversary_date' => $updateCustomerRequest->wedding_anniversary_date,
+                'engagement_anniversary_date' => $updateCustomerRequest->engagement_anniversary_date,
+                'date_of_birth' => $updateCustomerRequest->date_of_birth,
+                'type' => $updateCustomerRequest->type,
+                'pan_card_number' => $updateCustomerRequest->pan_card_number,
+                'aadhar_card_number' => $updateCustomerRequest->aadhar_card_number,
+                'gst_number' => $updateCustomerRequest->gst_number,
             ];
 
             // Update customer data
-            $updated = $this->customerRepository->update($customer, $newValues);
+            $model = $this->customerRepository->update($customer, $newValues);
 
-            if ($updated) {
+            if ($model) {
                 // Handle document uploads
-                $this->handleCustomerDocuments($request, $customer);
+                $this->handleCustomerDocuments($updateCustomerRequest, $customer);
 
                 // Identify changed fields
                 $changedFields = [];
@@ -168,7 +170,7 @@ class CustomerService extends BaseService implements CustomerServiceInterface
                 }
 
                 // Fire CustomerProfileUpdated event if there are changes
-                if (! empty($changedFields)) {
+                if ($changedFields !== []) {
                     CustomerProfileUpdated::dispatch(
                         $customer->fresh(),
                         $changedFields,
@@ -198,7 +200,7 @@ class CustomerService extends BaseService implements CustomerServiceInterface
     public function updateCustomerStatus(int $customerId, int $status): bool
     {
         // Validate input
-        $validate = Validator::make([
+        $validator = Validator::make([
             'customer_id' => $customerId,
             'status' => $status,
         ], [
@@ -206,12 +208,12 @@ class CustomerService extends BaseService implements CustomerServiceInterface
             'status' => 'required|in:0,1',
         ]);
 
-        if ($validate->fails()) {
-            throw new \InvalidArgumentException($validate->errors()->first());
+        if ($validator->fails()) {
+            throw new \InvalidArgumentException($validator->errors()->first());
         }
 
         return $this->executeInTransaction(
-            fn () => $this->customerRepository->updateStatus($customerId, $status)
+            fn (): bool => $this->customerRepository->updateStatus($customerId, $status)
         );
     }
 
@@ -224,7 +226,7 @@ class CustomerService extends BaseService implements CustomerServiceInterface
     public function deleteCustomer(Customer $customer): bool
     {
         return $this->deleteInTransaction(
-            fn () => $this->customerRepository->delete($customer)
+            fn (): bool => $this->customerRepository->delete($customer)
         );
     }
 
@@ -298,11 +300,11 @@ class CustomerService extends BaseService implements CustomerServiceInterface
             $message = $this->generateOnboardingMessage($customer);
 
             return $this->whatsAppSendMessage($message, $customer->mobile_number);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             // Log the error but don't fail the customer creation
-            \Log::warning('Failed to send onboarding WhatsApp message', [
+            Log::warning('Failed to send onboarding WhatsApp message', [
                 'customer_id' => $customer->id,
-                'error' => $th->getMessage(),
+                'error' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -321,13 +323,13 @@ class CustomerService extends BaseService implements CustomerServiceInterface
     public function sendOnboardingEmail(Customer $customer): bool
     {
         try {
-            $emailService = app(\App\Services\EmailService::class);
+            $emailService = app(EmailService::class);
 
             return $emailService->sendFromCustomer('customer_welcome', $customer);
-        } catch (\Throwable $th) {
-            \Log::warning('Failed to send onboarding email', [
+        } catch (\Throwable $throwable) {
+            Log::warning('Failed to send onboarding email', [
                 'customer_id' => $customer->id,
-                'error' => $th->getMessage(),
+                'error' => $throwable->getMessage(),
             ]);
 
             return false;
@@ -458,7 +460,7 @@ class CustomerService extends BaseService implements CustomerServiceInterface
     private function generateOnboardingMessage(Customer $customer): string
     {
         // Try to get message from template, fallback to hardcoded
-        $templateService = app(\App\Services\TemplateService::class);
+        $templateService = app(TemplateService::class);
         $message = $templateService->renderFromCustomer('customer_welcome', 'whatsapp', $customer);
 
         if (! $message) {
@@ -478,7 +480,7 @@ class CustomerService extends BaseService implements CustomerServiceInterface
         try {
             // Check if email notifications are enabled
             if (! is_email_notification_enabled()) {
-                \Log::info('Welcome email skipped (disabled in settings)', [
+                Log::info('Welcome email skipped (disabled in settings)', [
                     'customer_id' => $customer->id,
                 ]);
 
@@ -486,34 +488,34 @@ class CustomerService extends BaseService implements CustomerServiceInterface
             }
 
             // Use Mail facade to send email synchronously
-            \Mail::send('emails.customer.welcome', [
+            Mail::send('emails.customer.welcome', [
                 'customer_name' => $customer->name,
                 'customer_email' => $customer->email,
                 'customer_type' => $customer->type,
                 'portal_url' => config('app.url').'/customer',
                 'support_email' => config('mail.from.address'),
                 'company_name' => config('app.name'),
-            ], function ($message) use ($customer) {
+            ], static function ($message) use ($customer): void {
                 $message->to($customer->email, $customer->name)
                     ->subject('Welcome to '.config('app.name').' - Your Customer Account is Ready!');
                 $message->from(config('mail.from.address'), config('app.name'));
             });
 
-            \Log::info('Welcome email sent successfully', [
+            Log::info('Welcome email sent successfully', [
                 'customer_id' => $customer->id,
                 'customer_email' => $customer->email,
             ]);
 
-        } catch (\Throwable $e) {
-            \Log::error('Failed to send welcome email', [
+        } catch (\Throwable $throwable) {
+            Log::error('Failed to send welcome email', [
                 'customer_id' => $customer->id,
                 'customer_email' => $customer->email,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
+                'error' => $throwable->getMessage(),
+                'trace' => $throwable->getTraceAsString(),
             ]);
 
             // Re-throw with user-friendly message
-            throw new \Exception('Unable to send welcome email to '.$customer->email.'. Please verify the email address and try again.');
+            throw new \Exception('Unable to send welcome email to '.$customer->email.'. Please verify the email address and try again.', $throwable->getCode(), $throwable);
         }
     }
 }

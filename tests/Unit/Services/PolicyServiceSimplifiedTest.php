@@ -115,7 +115,7 @@ test('gets paginated policies', function () {
         'customer_id' => $this->customer->id,
     ]);
 
-    $request = new Request();
+    $request = new Request;
     $result = $this->service->getPolicies($request);
 
     expect($result)->toBeInstanceOf(\Illuminate\Contracts\Pagination\LengthAwarePaginator::class);

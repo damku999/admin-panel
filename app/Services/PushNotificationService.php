@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Models\Customer;
 use App\Models\CustomerDevice;
+use App\Models\NotificationType;
 use App\Services\Notification\NotificationContext;
 use App\Traits\PushNotificationTrait;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 
 class PushNotificationService
@@ -38,7 +40,7 @@ class PushNotificationService
      * @param  string  $notificationTypeCode  Notification type code
      * @param  NotificationContext|array  $context  Context for template variables
      * @param  int|null  $customerId  Optional customer ID for logging
-     * @return array  Response with ['success' => bool, 'message' => string, 'sent' => int, 'failed' => int]
+     * @return array Response with ['success' => bool, 'message' => string, 'sent' => int, 'failed' => int]
      */
     public function sendTemplatedPush(
         string|array $deviceToken,
@@ -53,12 +55,12 @@ class PushNotificationService
             // Render body template (use push or fallback to SMS/WhatsApp)
             $body = $this->templateService->render($notificationTypeCode, 'push', $context);
 
-            if (! $body) {
+            if (in_array($body, [null, '', '0'], true)) {
                 // Fallback to SMS template if push template not found
                 $body = $this->templateService->render($notificationTypeCode, 'sms', $context);
             }
 
-            if (! $body) {
+            if (in_array($body, [null, '', '0'], true)) {
                 Log::warning('Push template not found', [
                     'notification_type' => $notificationTypeCode,
                     'channel' => 'push',
@@ -68,7 +70,7 @@ class PushNotificationService
             }
 
             // Use default title if not specified
-            if (! $title) {
+            if (in_array($title, [null, '', '0'], true)) {
                 $title = $this->getDefaultTitle($notificationTypeCode);
             }
 
@@ -85,24 +87,24 @@ class PushNotificationService
                     $customerId,
                     $notificationTypeCode
                 );
-            } else {
-                return $this->sendPushToDevice(
-                    $deviceToken,
-                    $title,
-                    $body,
-                    $data,
-                    $customerId,
-                    $notificationTypeCode
-                );
             }
 
-        } catch (\Exception $e) {
+            return $this->sendPushToDevice(
+                $deviceToken,
+                $title,
+                $body,
+                $data,
+                $customerId,
+                $notificationTypeCode
+            );
+
+        } catch (\Exception $exception) {
             Log::error('Templated push notification failed', [
                 'notification_type' => $notificationTypeCode,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
-            return ['success' => false, 'message' => $e->getMessage()];
+            return ['success' => false, 'message' => $exception->getMessage()];
         }
     }
 
@@ -123,7 +125,7 @@ class PushNotificationService
      * @param  Customer  $customer  Customer with devices and preferences
      * @param  string  $notificationTypeCode  Notification type code
      * @param  NotificationContext|array  $context  Context for template variables
-     * @return array  Response with total/sent/failed counts and success status
+     * @return array Response with total/sent/failed counts and success status
      */
     public function sendToCustomer(
         Customer $customer,
@@ -147,7 +149,7 @@ class PushNotificationService
         }
 
         // Get all active devices
-        $devices = CustomerDevice::where('customer_id', $customer->id)
+        $devices = CustomerDevice::query()->where('customer_id', $customer->id)
             ->where('is_active', true)
             ->get();
 
@@ -171,11 +173,11 @@ class PushNotificationService
         $title = $this->templateService->render($notificationTypeCode, 'push_title', $context);
         $body = $this->templateService->render($notificationTypeCode, 'push', $context);
 
-        if (! $body) {
+        if (in_array($body, [null, '', '0'], true)) {
             $body = $this->templateService->render($notificationTypeCode, 'sms', $context);
         }
 
-        if (! $title) {
+        if (in_array($title, [null, '', '0'], true)) {
             $title = $this->getDefaultTitle($notificationTypeCode);
         }
 
@@ -213,7 +215,7 @@ class PushNotificationService
      * @param  string  $imageUrl  HTTPS image URL to display
      * @param  array  $data  Additional custom data payload
      * @param  int|null  $customerId  Optional customer ID for logging
-     * @return array  Response with success status and delivery counts
+     * @return array Response with success status and delivery counts
      */
     public function sendRichPush(
         string|array $deviceToken,
@@ -228,9 +230,9 @@ class PushNotificationService
 
         if (is_array($deviceToken)) {
             return $this->sendPushToMultipleDevices($deviceToken, $title, $body, $data, $customerId);
-        } else {
-            return $this->sendPushToDevice($deviceToken, $title, $body, $data, $customerId);
         }
+
+        return $this->sendPushToDevice($deviceToken, $title, $body, $data, $customerId);
     }
 
     /**
@@ -257,7 +259,7 @@ class PushNotificationService
      * @param  array  $actions  Action button definitions (action + title pairs)
      * @param  array  $data  Additional custom data payload
      * @param  int|null  $customerId  Optional customer ID for logging
-     * @return array  Response with success status and delivery counts
+     * @return array Response with success status and delivery counts
      */
     public function sendPushWithActions(
         string|array $deviceToken,
@@ -272,9 +274,9 @@ class PushNotificationService
 
         if (is_array($deviceToken)) {
             return $this->sendPushToMultipleDevices($deviceToken, $title, $body, $data, $customerId);
-        } else {
-            return $this->sendPushToDevice($deviceToken, $title, $body, $data, $customerId);
         }
+
+        return $this->sendPushToDevice($deviceToken, $title, $body, $data, $customerId);
     }
 
     /**
@@ -298,24 +300,20 @@ class PushNotificationService
      *
      * @param  Customer  $customer  Customer with notification_preferences JSON field
      * @param  string  $notificationTypeCode  Notification type to check
-     * @return bool  True if push allowed, false if blocked by preferences
+     * @return bool True if push allowed, false if blocked by preferences
      */
     protected function canSendPushToCustomer(Customer $customer, string $notificationTypeCode): bool
     {
         $preferences = $customer->notification_preferences ?? [];
 
         // Check if push channel is enabled
-        if (isset($preferences['channels']) && is_array($preferences['channels'])) {
-            if (! in_array('push', $preferences['channels'])) {
-                return false;
-            }
+        if (isset($preferences['channels']) && is_array($preferences['channels']) && ! in_array('push', $preferences['channels'])) {
+            return false;
         }
 
         // Check opt-out types
-        if (isset($preferences['opt_out_types']) && is_array($preferences['opt_out_types'])) {
-            if (in_array($notificationTypeCode, $preferences['opt_out_types'])) {
-                return false;
-            }
+        if (isset($preferences['opt_out_types']) && is_array($preferences['opt_out_types']) && in_array($notificationTypeCode, $preferences['opt_out_types'])) {
+            return false;
         }
 
         // Check quiet hours
@@ -356,7 +354,7 @@ class PushNotificationService
      *
      * @param  NotificationContext|array  $context  Context with insurance/quotation/claim
      * @param  string  $notificationTypeCode  Notification type code
-     * @return array  Data payload with notification type and deep links
+     * @return array Data payload with notification type and deep links
      */
     protected function buildDataPayload(
         NotificationContext|array $context,
@@ -369,13 +367,13 @@ class PushNotificationService
         // Add deep link based on notification type
         if ($context instanceof NotificationContext) {
             if ($context->hasInsurance()) {
-                $data['deep_link'] = "app://insurance/{$context->insurance->id}";
+                $data['deep_link'] = 'app://insurance/'.$context->insurance->id;
                 $data['insurance_id'] = (string) $context->insurance->id;
             } elseif ($context->hasQuotation()) {
-                $data['deep_link'] = "app://quotation/{$context->quotation->id}";
+                $data['deep_link'] = 'app://quotation/'.$context->quotation->id;
                 $data['quotation_id'] = (string) $context->quotation->id;
             } elseif ($context->hasClaim()) {
-                $data['deep_link'] = "app://claim/{$context->claim->id}";
+                $data['deep_link'] = 'app://claim/'.$context->claim->id;
                 $data['claim_id'] = (string) $context->claim->id;
             }
         }
@@ -397,12 +395,12 @@ class PushNotificationService
      * Used when push_title template channel is empty or not found.
      *
      * @param  string  $notificationTypeCode  Notification type code
-     * @return string  Human-readable notification title
+     * @return string Human-readable notification title
      */
     protected function getDefaultTitle(string $notificationTypeCode): string
     {
         // Get from NotificationType model
-        $notificationType = \App\Models\NotificationType::where('code', $notificationTypeCode)->first();
+        $notificationType = NotificationType::query()->where('code', $notificationTypeCode)->first();
 
         if ($notificationType) {
             return $notificationType->name;
@@ -433,7 +431,7 @@ class PushNotificationService
      * @param  string  $deviceToken  FCM device token from client
      * @param  string  $deviceType  Device platform (android/ios/web)
      * @param  array  $deviceInfo  Optional device metadata
-     * @return CustomerDevice  Created or updated device record
+     * @return CustomerDevice Created or updated device record
      */
     public function registerDevice(
         int $customerId,
@@ -457,11 +455,11 @@ class PushNotificationService
      * and no historical value in keeping old tokens.
      *
      * @param  string  $deviceToken  FCM device token to unregister
-     * @return bool  True if device found and deleted, false if not found
+     * @return bool True if device found and deleted, false if not found
      */
     public function unregisterDevice(string $deviceToken): bool
     {
-        return CustomerDevice::where('device_token', $deviceToken)->delete();
+        return CustomerDevice::query()->where('device_token', $deviceToken)->delete();
     }
 
     /**
@@ -477,11 +475,11 @@ class PushNotificationService
      * Active devices receive push notifications when sendToCustomer() is called.
      *
      * @param  int  $customerId  Customer ID to fetch devices for
-     * @return \Illuminate\Database\Eloquent\Collection  Active device records
+     * @return Collection Active device records
      */
     public function getCustomerDevices(int $customerId)
     {
-        return CustomerDevice::where('customer_id', $customerId)
+        return CustomerDevice::query()->where('customer_id', $customerId)
             ->where('is_active', true)
             ->get();
     }

@@ -2,12 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppSetting;
+use App\Models\Customer;
+use App\Models\CustomerInsurance;
 use App\Models\NotificationTemplate;
 use App\Models\NotificationType;
+use App\Models\Quotation;
 use App\Services\Notification\NotificationContext;
+use App\Services\Notification\VariableRegistryService;
 use App\Services\Notification\VariableResolverService;
+use App\Traits\WhatsAppApiTrait;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 /**
@@ -17,7 +26,7 @@ use Illuminate\View\View;
  */
 class NotificationTemplateController extends AbstractBaseCrudController
 {
-    use \App\Traits\WhatsAppApiTrait;
+    use WhatsAppApiTrait;
 
     public function __construct()
     {
@@ -29,35 +38,35 @@ class NotificationTemplateController extends AbstractBaseCrudController
      */
     public function index(Request $request): View
     {
-        $query = NotificationTemplate::with('notificationType');
+        $builder = NotificationTemplate::with('notificationType');
 
         // Search filter
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('subject', 'LIKE', "%{$search}%")
-                    ->orWhere('template_content', 'LIKE', "%{$search}%")
-                    ->orWhereHas('notificationType', function ($nq) use ($search) {
-                        $nq->where('name', 'LIKE', "%{$search}%");
+            $builder->where(static function ($q) use ($search): void {
+                $q->where('subject', 'LIKE', sprintf('%%%s%%', $search))
+                    ->orWhere('template_content', 'LIKE', sprintf('%%%s%%', $search))
+                    ->orWhereHas('notificationType', static function ($nq) use ($search): void {
+                        $nq->where('name', 'LIKE', sprintf('%%%s%%', $search));
                     });
             });
         }
 
         // Category filter
         if ($request->filled('category')) {
-            $query->whereHas('notificationType', function ($q) use ($request) {
+            $builder->whereHas('notificationType', static function ($q) use ($request): void {
                 $q->where('category', $request->category);
             });
         }
 
         // Channel filter
         if ($request->filled('channel')) {
-            $query->where('channel', $request->channel);
+            $builder->where('channel', $request->channel);
         }
 
         // Status filter
         if ($request->filled('status')) {
-            $query->where('is_active', $request->status);
+            $builder->where('is_active', $request->status);
         }
 
         // Sorting
@@ -75,19 +84,19 @@ class NotificationTemplateController extends AbstractBaseCrudController
             $sortOrder = 'asc';
         }
 
-        $query->orderBy($sortBy, $sortOrder);
+        $builder->orderBy($sortBy, $sortOrder);
 
-        $templates = $query->paginate(config('app.pagination_default', 15));
-        $templates->appends($request->except('page'));
+        $lengthAwarePaginator = $builder->paginate(config('app.pagination_default', 15));
+        $lengthAwarePaginator->appends($request->except('page'));
 
         // Get unique categories for filter
-        $categories = \DB::table('notification_types')
+        $categories = DB::table('notification_types')
             ->select('category')
             ->distinct()
             ->orderBy('category')
             ->pluck('category', 'category');
 
-        return view('admin.notification_templates.index', compact('templates', 'categories'));
+        return view('admin.notification_templates.index', ['templates' => $templates, 'categories' => $categories]);
     }
 
     /**
@@ -95,18 +104,18 @@ class NotificationTemplateController extends AbstractBaseCrudController
      */
     public function create(): View
     {
-        $notificationTypes = NotificationType::where('is_active', true)
+        $notificationTypes = NotificationType::query()->where('is_active', true)
             ->orderBy('category')
             ->orderBy('order_no')
             ->get();
 
         // Load all customers for preview dropdown
-        $customers = \App\Models\Customer::select('id', 'name', 'mobile_number', 'email')
+        $customers = Customer::query()->select('id', 'name', 'mobile_number', 'email')
             ->orderBy('name', 'asc')
             ->get();
 
         // Policies and quotations will be loaded dynamically when customer is selected
-        return view('admin.notification_templates.create', compact('notificationTypes', 'customers'));
+        return view('admin.notification_templates.create', ['notificationTypes' => $notificationTypes, 'customers' => $customers]);
     }
 
     /**
@@ -124,7 +133,7 @@ class NotificationTemplateController extends AbstractBaseCrudController
         ]);
 
         try {
-            NotificationTemplate::create([
+            NotificationTemplate::query()->create([
                 'notification_type_id' => $request->notification_type_id,
                 'channel' => $request->channel,
                 'subject' => $request->subject,
@@ -136,9 +145,9 @@ class NotificationTemplateController extends AbstractBaseCrudController
 
             return $this->redirectWithSuccess('notification-templates.index',
                 $this->getSuccessMessage('Notification Template', 'created'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Notification Template', 'create').': '.$th->getMessage())
+                $this->getErrorMessage('Notification Template', 'create').': '.$throwable->getMessage())
                 ->withInput();
         }
     }
@@ -146,26 +155,26 @@ class NotificationTemplateController extends AbstractBaseCrudController
     /**
      * Show the form for editing the specified template
      */
-    public function edit(NotificationTemplate $template): View
+    public function edit(NotificationTemplate $notificationTemplate): View
     {
-        $template->load('notificationType');
-        $notificationTypes = NotificationType::where('is_active', true)
+        $notificationTemplate->load('notificationType');
+        $notificationTypes = NotificationType::query()->where('is_active', true)
             ->orderBy('category')
             ->orderBy('order_no')
             ->get();
 
         // Load all customers for preview dropdown
-        $customers = \App\Models\Customer::select('id', 'name', 'mobile_number', 'email')
+        $customers = Customer::query()->select('id', 'name', 'mobile_number', 'email')
             ->orderBy('name', 'asc')
             ->get();
 
-        return view('admin.notification_templates.edit', compact('template', 'notificationTypes', 'customers'));
+        return view('admin.notification_templates.edit', ['template' => $template, 'notificationTypes' => $notificationTypes, 'customers' => $customers]);
     }
 
     /**
      * Update the specified template
      */
-    public function update(Request $request, NotificationTemplate $template): RedirectResponse
+    public function update(Request $request, NotificationTemplate $notificationTemplate): RedirectResponse
     {
         $request->validate([
             'notification_type_id' => 'required|exists:notification_types,id',
@@ -177,7 +186,7 @@ class NotificationTemplateController extends AbstractBaseCrudController
         ]);
 
         try {
-            $template->update([
+            $notificationTemplate->update([
                 'notification_type_id' => $request->notification_type_id,
                 'channel' => $request->channel,
                 'subject' => $request->subject,
@@ -189,9 +198,9 @@ class NotificationTemplateController extends AbstractBaseCrudController
 
             return $this->redirectWithSuccess('notification-templates.index',
                 $this->getSuccessMessage('Notification Template', 'updated'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Notification Template', 'update').': '.$th->getMessage())
+                $this->getErrorMessage('Notification Template', 'update').': '.$throwable->getMessage())
                 ->withInput();
         }
     }
@@ -199,16 +208,16 @@ class NotificationTemplateController extends AbstractBaseCrudController
     /**
      * Remove the specified template
      */
-    public function delete(NotificationTemplate $template): RedirectResponse
+    public function delete(NotificationTemplate $notificationTemplate): RedirectResponse
     {
         try {
-            $template->delete();
+            $notificationTemplate->delete();
 
             return $this->redirectWithSuccess('notification-templates.index',
                 $this->getSuccessMessage('Notification Template', 'deleted'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Notification Template', 'delete').': '.$th->getMessage());
+                $this->getErrorMessage('Notification Template', 'delete').': '.$throwable->getMessage());
         }
     }
 
@@ -246,12 +255,12 @@ class NotificationTemplateController extends AbstractBaseCrudController
                     'insurance' => $context->insurance?->policy_no,
                 ],
             ]);
-        } catch (\Exception $e) {
-            \Log::error('Preview failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+        } catch (\Exception $exception) {
+            Log::error('Preview failed', ['error' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
 
             return response()->json([
                 'success' => false,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ], 400);
         }
     }
@@ -271,13 +280,13 @@ class NotificationTemplateController extends AbstractBaseCrudController
         }
 
         // Get customer's policies (all statuses)
-        $policies = \App\Models\CustomerInsurance::where('customer_id', $customerId)
+        $policies = CustomerInsurance::query()->where('customer_id', $customerId)
             ->select('id', 'policy_no', 'registration_no', 'status')
             ->orderBy('created_at', 'desc')
             ->get();
 
         // Get customer's quotations
-        $quotations = \App\Models\Quotation::where('customer_id', $customerId)
+        $quotations = Quotation::query()->where('customer_id', $customerId)
             ->select('id', 'vehicle_number', 'make_model_variant')
             ->orderBy('created_at', 'desc')
             ->get();
@@ -296,7 +305,7 @@ class NotificationTemplateController extends AbstractBaseCrudController
     {
         $notificationType = $request->input('notification_type');
 
-        $registry = app(\App\Services\Notification\VariableRegistryService::class);
+        $registry = app(VariableRegistryService::class);
 
         // Get variables grouped by category
         $groupedVariables = $registry->getVariablesGroupedByCategory($notificationType);
@@ -318,13 +327,13 @@ class NotificationTemplateController extends AbstractBaseCrudController
     {
         $context = new NotificationContext;
 
-        if ($customerId) {
+        if ($customerId !== null && $customerId !== 0) {
             // Use specified customer
             $context = NotificationContext::fromCustomerId($customerId, $insuranceId);
-        } elseif ($insuranceId) {
+        } elseif ($insuranceId !== null && $insuranceId !== 0) {
             // Use specified insurance (loads customer automatically)
             $context = NotificationContext::fromInsuranceId($insuranceId);
-        } elseif ($quotationId) {
+        } elseif ($quotationId !== null && $quotationId !== 0) {
             // Use specified quotation (loads customer automatically)
             $context = NotificationContext::fromQuotationId($quotationId);
         } else {
@@ -343,7 +352,7 @@ class NotificationTemplateController extends AbstractBaseCrudController
      */
     protected function loadSettings(): array
     {
-        $settings = \App\Models\AppSetting::where('is_active', true)->get();
+        $settings = AppSetting::query()->where('is_active', true)->get();
 
         $structured = [];
         foreach ($settings as $setting) {
@@ -352,8 +361,8 @@ class NotificationTemplateController extends AbstractBaseCrudController
             $key = $setting->key;
             $categoryPrefix = $setting->category.'_';
 
-            if (str_starts_with($key, $categoryPrefix)) {
-                $key = substr($key, strlen($categoryPrefix));
+            if (str_starts_with((string) $key, $categoryPrefix)) {
+                $key = substr((string) $key, strlen($categoryPrefix));
             }
 
             $structured[$setting->category][$key] = $setting->value;
@@ -415,19 +424,19 @@ class NotificationTemplateController extends AbstractBaseCrudController
                     'success' => true,
                     'message' => 'Test message sent successfully to '.$recipient,
                 ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => $result['message'] ?? 'Failed to send test message',
-                ], 400);
             }
-
-        } catch (\Exception $e) {
-            \Log::error('Send test failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error: '.$e->getMessage(),
+                'message' => $result['message'] ?? 'Failed to send test message',
+            ], 400);
+
+        } catch (\Exception $exception) {
+            Log::error('Send test failed', ['error' => $exception->getMessage(), 'trace' => $exception->getTraceAsString()]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: '.$exception->getMessage(),
             ], 500);
         }
     }
@@ -441,13 +450,13 @@ class NotificationTemplateController extends AbstractBaseCrudController
             // Use the same WhatsAppApiTrait method that works for onboarding
             $response = $this->whatsAppSendMessage($message, $phoneNumber);
 
-            \Log::info('WhatsApp Test - Response', [
+            Log::info('WhatsApp Test - Response', [
                 'phone' => $phoneNumber,
                 'response' => $response,
             ]);
 
             // The trait method returns JSON string response
-            $responseData = json_decode($response, true);
+            $responseData = json_decode((string) $response, true);
 
             // Check if response indicates success
             if (is_array($responseData)) {
@@ -466,15 +475,15 @@ class NotificationTemplateController extends AbstractBaseCrudController
                 'message' => 'WhatsApp message sent',
             ];
 
-        } catch (\Exception $e) {
-            \Log::error('WhatsApp test exception', [
-                'error' => $e->getMessage(),
+        } catch (\Exception $exception) {
+            Log::error('WhatsApp test exception', [
+                'error' => $exception->getMessage(),
                 'phone' => $phoneNumber,
             ]);
 
             return [
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => $exception->getMessage(),
             ];
         }
     }
@@ -485,16 +494,16 @@ class NotificationTemplateController extends AbstractBaseCrudController
     private function sendEmailTest(string $email, string $subject, string $message): array
     {
         try {
-            \Mail::raw($message, function ($mail) use ($email, $subject) {
+            Mail::raw($message, static function ($mail) use ($email, $subject): void {
                 $mail->to($email)
                     ->subject($subject);
             });
 
             return ['success' => true, 'message' => 'Email sent'];
-        } catch (\Exception $e) {
-            \Log::error('Email test failed', ['error' => $e->getMessage()]);
+        } catch (\Exception $exception) {
+            Log::error('Email test failed', ['error' => $exception->getMessage()]);
 
-            return ['success' => false, 'message' => 'Email error: '.$e->getMessage()];
+            return ['success' => false, 'message' => 'Email error: '.$exception->getMessage()];
         }
     }
 }

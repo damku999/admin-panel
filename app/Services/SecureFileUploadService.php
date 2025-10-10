@@ -10,15 +10,15 @@ use Illuminate\Support\Str;
 
 class SecureFileUploadService
 {
-    private array $allowedMimeTypes;
+    private readonly array $allowedMimeTypes;
 
-    private array $allowedExtensions;
+    private readonly array $allowedExtensions;
 
-    private int $maxFileSize;
+    private readonly int $maxFileSize;
 
-    private string $uploadPath;
+    private readonly string $uploadPath;
 
-    private bool $scanForMalware;
+    private readonly bool $scanForMalware;
 
     public function __construct()
     {
@@ -43,14 +43,14 @@ class SecureFileUploadService
     /**
      * Upload a file with comprehensive security checks
      */
-    public function upload(UploadedFile $file, string $category = 'general', ?int $userId = null): array
+    public function upload(UploadedFile $uploadedFile, string $category = 'general', ?int $userId = null): array
     {
         try {
             // Basic validation
-            $this->validateFile($file);
+            $this->validateFile($uploadedFile);
 
             // Generate secure filename
-            $filename = $this->generateSecureFilename($file);
+            $filename = $this->generateSecureFilename($uploadedFile);
 
             // Create directory structure
             $directory = $this->createSecureDirectory($category, $userId);
@@ -59,10 +59,10 @@ class SecureFileUploadService
             $fullPath = $directory.'/'.$filename;
 
             // Additional security checks
-            $this->performSecurityChecks($file);
+            $this->performSecurityChecks($uploadedFile);
 
             // Store the file
-            $storedPath = Storage::disk('local')->putFileAs($directory, $file, $filename);
+            $storedPath = Storage::disk('local')->putFileAs($directory, $uploadedFile, $filename);
 
             if (! $storedPath) {
                 throw new Exception('Failed to store file');
@@ -73,9 +73,9 @@ class SecureFileUploadService
 
             // Log successful upload
             $this->logFileOperation('upload_success', $filename, $userId, [
-                'original_name' => $file->getClientOriginalName(),
-                'size' => $file->getSize(),
-                'mime_type' => $file->getMimeType(),
+                'original_name' => $uploadedFile->getClientOriginalName(),
+                'size' => $uploadedFile->getSize(),
+                'mime_type' => $uploadedFile->getMimeType(),
                 'category' => $category,
             ]);
 
@@ -83,21 +83,21 @@ class SecureFileUploadService
                 'success' => true,
                 'filename' => $filename,
                 'path' => $storedPath,
-                'original_name' => $file->getClientOriginalName(),
-                'size' => $file->getSize(),
-                'mime_type' => $file->getMimeType(),
+                'original_name' => $uploadedFile->getClientOriginalName(),
+                'size' => $uploadedFile->getSize(),
+                'mime_type' => $uploadedFile->getMimeType(),
                 'hash' => hash_file('sha256', Storage::disk('local')->path($storedPath)),
             ];
 
-        } catch (Exception $e) {
-            $this->logFileOperation('upload_failure', $file->getClientOriginalName(), $userId, [
-                'error' => $e->getMessage(),
+        } catch (Exception $exception) {
+            $this->logFileOperation('upload_failure', $uploadedFile->getClientOriginalName(), $userId, [
+                'error' => $exception->getMessage(),
                 'category' => $category,
             ]);
 
             return [
                 'success' => false,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ];
         }
     }
@@ -105,26 +105,26 @@ class SecureFileUploadService
     /**
      * Validate file against security rules
      */
-    private function validateFile(UploadedFile $file): void
+    private function validateFile(UploadedFile $uploadedFile): void
     {
         // Check if file is valid
-        if (! $file->isValid()) {
+        if (! $uploadedFile->isValid()) {
             throw new Exception('Invalid file upload');
         }
 
         // Check file size
-        if ($file->getSize() > $this->maxFileSize) {
+        if ($uploadedFile->getSize() > $this->maxFileSize) {
             throw new Exception('File size exceeds maximum allowed size of '.($this->maxFileSize / 1024).' KB');
         }
 
         // Check MIME type
-        $mimeType = $file->getMimeType();
+        $mimeType = $uploadedFile->getMimeType();
         if (! in_array($mimeType, $this->allowedMimeTypes)) {
             throw new Exception('File type not allowed: '.$mimeType);
         }
 
         // Check extension
-        $extension = strtolower($file->getClientOriginalExtension());
+        $extension = strtolower($uploadedFile->getClientOriginalExtension());
         if (! in_array($extension, $this->allowedExtensions)) {
             throw new Exception('File extension not allowed: '.$extension);
         }
@@ -156,13 +156,13 @@ class SecureFileUploadService
     /**
      * Generate a secure filename
      */
-    private function generateSecureFilename(UploadedFile $file): string
+    private function generateSecureFilename(UploadedFile $uploadedFile): string
     {
-        $extension = strtolower($file->getClientOriginalExtension());
+        $extension = strtolower($uploadedFile->getClientOriginalExtension());
         $timestamp = now()->format('Y-m-d_H-i-s');
         $randomString = Str::random(8);
 
-        return "secure_{$timestamp}_{$randomString}.{$extension}";
+        return sprintf('secure_%s_%s.%s', $timestamp, $randomString, $extension);
     }
 
     /**
@@ -174,10 +174,10 @@ class SecureFileUploadService
         $year = date('Y');
         $month = date('m');
 
-        $directory = "{$basePath}/{$category}/{$year}/{$month}";
+        $directory = sprintf('%s/%s/%s/%s', $basePath, $category, $year, $month);
 
-        if ($userId) {
-            $directory .= "/user_{$userId}";
+        if ($userId !== null && $userId !== 0) {
+            $directory .= '/user_'.$userId;
         }
 
         // Create directory if it doesn't exist
@@ -195,26 +195,26 @@ class SecureFileUploadService
     /**
      * Perform additional security checks
      */
-    private function performSecurityChecks(UploadedFile $file): void
+    private function performSecurityChecks(UploadedFile $uploadedFile): void
     {
         // Check for executable code in file content
-        $this->scanFileContent($file);
+        $this->scanFileContent($uploadedFile);
 
         // Virus scan if enabled
         if ($this->scanForMalware) {
-            $this->scanForVirus($file);
+            $this->scanForVirus($uploadedFile);
         }
 
         // Check for suspicious file headers
-        $this->validateFileHeaders($file);
+        $this->validateFileHeaders($uploadedFile);
     }
 
     /**
      * Scan file content for suspicious patterns
      */
-    private function scanFileContent(UploadedFile $file): void
+    private function scanFileContent(UploadedFile $uploadedFile): void
     {
-        $content = file_get_contents($file->getRealPath());
+        $content = file_get_contents($uploadedFile->getRealPath());
 
         // Patterns that indicate potentially malicious content
         $suspiciousPatterns = [
@@ -230,8 +230,8 @@ class SecureFileUploadService
             '/base64_decode/i',
         ];
 
-        foreach ($suspiciousPatterns as $pattern) {
-            if (preg_match($pattern, $content)) {
+        foreach ($suspiciousPatterns as $suspiciouPattern) {
+            if (preg_match($suspiciouPattern, $content)) {
                 throw new Exception('File contains potentially malicious content');
             }
         }
@@ -240,9 +240,9 @@ class SecureFileUploadService
     /**
      * Validate file headers match expected type
      */
-    private function validateFileHeaders(UploadedFile $file): void
+    private function validateFileHeaders(UploadedFile $uploadedFile): void
     {
-        $filePath = $file->getRealPath();
+        $filePath = $uploadedFile->getRealPath();
         $fileHandle = fopen($filePath, 'rb');
 
         if (! $fileHandle) {
@@ -252,7 +252,7 @@ class SecureFileUploadService
         $header = fread($fileHandle, 16);
         fclose($fileHandle);
 
-        $mimeType = $file->getMimeType();
+        $mimeType = $uploadedFile->getMimeType();
 
         // Check file signatures
         $validHeaders = [
@@ -265,7 +265,7 @@ class SecureFileUploadService
         if (isset($validHeaders[$mimeType])) {
             $headerFound = false;
             foreach ($validHeaders[$mimeType] as $validHeader) {
-                if (strpos($header, $validHeader) === 0) {
+                if (str_starts_with($header, $validHeader)) {
                     $headerFound = true;
                     break;
                 }
@@ -280,11 +280,11 @@ class SecureFileUploadService
     /**
      * Scan for viruses (requires ClamAV or similar)
      */
-    private function scanForVirus(UploadedFile $file): void
+    private function scanForVirus(UploadedFile $uploadedFile): void
     {
         // This would integrate with ClamAV or similar antivirus
         // For now, we'll just log that scanning was requested
-        Log::info('Virus scan requested for file: '.$file->getClientOriginalName());
+        Log::info('Virus scan requested for file: '.$uploadedFile->getClientOriginalName());
 
         // Example integration:
         // $result = shell_exec("clamscan " . escapeshellarg($file->getRealPath()));
@@ -321,9 +321,9 @@ class SecureFileUploadService
             }
 
             // Find the file
-            $filePath = $this->findFile($filename, $userId);
+            $filePath = $this->findFile($filename);
 
-            if (! $filePath) {
+            if (in_array($filePath, [null, '', '0'], true)) {
                 throw new Exception('File not found');
             }
 
@@ -340,14 +340,14 @@ class SecureFileUploadService
                 'hash' => hash_file('sha256', $fullPath),
             ];
 
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             $this->logFileOperation('retrieval_failure', $filename, $userId, [
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return [
                 'success' => false,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ];
         }
     }
@@ -363,14 +363,14 @@ class SecureFileUploadService
     /**
      * Find file in directory structure
      */
-    private function findFile(string $filename, ?int $userId = null): ?string
+    private function findFile(string $filename): ?string
     {
         $searchPaths = [
             $this->uploadPath.'/**/'.$filename,
         ];
 
-        foreach ($searchPaths as $pattern) {
-            $files = Storage::disk('local')->glob($pattern);
+        foreach ($searchPaths as $searchPath) {
+            $files = Storage::disk('local')->glob($searchPath);
             if (! empty($files)) {
                 return $files[0];
             }
@@ -385,9 +385,9 @@ class SecureFileUploadService
     public function deleteFile(string $filename, ?int $userId = null): array
     {
         try {
-            $filePath = $this->findFile($filename, $userId);
+            $filePath = $this->findFile($filename);
 
-            if (! $filePath) {
+            if (in_array($filePath, [null, '', '0'], true)) {
                 throw new Exception('File not found');
             }
 
@@ -399,18 +399,16 @@ class SecureFileUploadService
                     'success' => true,
                     'message' => 'File deleted successfully',
                 ];
-            } else {
-                throw new Exception('Failed to delete file');
             }
-
-        } catch (Exception $e) {
+            throw new Exception('Failed to delete file');
+        } catch (Exception $exception) {
             $this->logFileOperation('deletion_failure', $filename, $userId, [
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return [
                 'success' => false,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ];
         }
     }
@@ -420,7 +418,7 @@ class SecureFileUploadService
      */
     private function logFileOperation(string $operation, string $filename, ?int $userId = null, array $context = []): void
     {
-        Log::channel('security')->info("File Operation: {$operation}", [
+        Log::channel('security')->info('File Operation: '.$operation, [
             'operation' => $operation,
             'filename' => $filename,
             'user_id' => $userId,

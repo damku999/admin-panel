@@ -19,9 +19,9 @@ class ExcelExportService
         $config = array_merge($this->getDefaultConfig(), $config);
         $collection = $this->resolveDataSource($data, $config);
         $filename = $this->generateFilename($config);
-        $export = new GenericExport($collection, $config);
+        $genericExport = new GenericExport($collection, $config);
 
-        return Excel::download($export, $filename);
+        return Excel::download($genericExport, $filename);
     }
 
     /**
@@ -45,7 +45,7 @@ class ExcelExportService
     public function quickExport(string $modelClass, array $columns = [], array $config = [])
     {
         $model = app($modelClass);
-        $columns = $columns ?: $this->getDefaultColumns($model);
+        $columns = $columns !== [] ? $columns : $this->getDefaultColumns($model);
 
         $config = array_merge($config, [
             'columns' => $columns,
@@ -80,7 +80,7 @@ class ExcelExportService
             if (is_array($value)) {
                 $query->whereIn($field, $value);
             } elseif (! empty($value)) {
-                $query->where($field, 'like', "%{$value}%");
+                $query->where($field, 'like', sprintf('%%%s%%', $value));
             }
         }
 
@@ -97,7 +97,7 @@ class ExcelExportService
             ->orderBy($dateField, 'desc');
 
         $config = array_merge($config, [
-            'filename_suffix' => date('Y_m_d', strtotime($startDate)).'_to_'.date('Y_m_d', strtotime($endDate)),
+            'filename_suffix' => date('Y_m_d', strtotime((string) $startDate)).'_to_'.date('Y_m_d', strtotime((string) $endDate)),
         ]);
 
         return $this->export($query, $config);
@@ -160,7 +160,7 @@ class ExcelExportService
         $suffix = $config['filename_suffix'] ?? date('Y_m_d_H_i_s');
         $extension = $config['format'] ?? 'xlsx';
 
-        return "{$base}_{$suffix}.{$extension}";
+        return sprintf('%s_%s.%s', $base, $suffix, $extension);
     }
 
     private function getDefaultConfig(): array
@@ -193,9 +193,7 @@ class ExcelExportService
 
     private function generateHeadingsFromColumns(array $columns): array
     {
-        return array_map(function ($column) {
-            return ucwords(str_replace(['_', 'id'], [' ', 'ID'], $column));
-        }, $columns);
+        return array_map(fn ($column): string => ucwords(str_replace(['_', 'id'], [' ', 'ID'], $column)), $columns);
     }
 
     /**
@@ -208,16 +206,14 @@ class ExcelExportService
                 'filename' => 'customers',
                 'relations' => ['familyGroup'],
                 'headings' => ['ID', 'Name', 'Email', 'Mobile', 'Status', 'Created Date'],
-                'mapping' => function ($customer) {
-                    return [
-                        $customer->id,
-                        $customer->name,
-                        $customer->email,
-                        $customer->mobile_number,
-                        ucfirst($customer->status),
-                        $customer->created_at->format('Y-m-d H:i:s'),
-                    ];
-                },
+                'mapping' => fn ($customer): array => [
+                    $customer->id,
+                    $customer->name,
+                    $customer->email,
+                    $customer->mobile_number,
+                    ucfirst((string) $customer->status),
+                    $customer->created_at->format('Y-m-d H:i:s'),
+                ],
                 'with_headings' => true,
                 'with_mapping' => true,
             ],

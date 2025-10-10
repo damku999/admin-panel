@@ -99,7 +99,7 @@ class PdfGenerationService
         $sanitized = preg_replace('/\s+/', '_', $sanitized);
 
         // Remove leading/trailing dots and spaces
-        $sanitized = trim($sanitized, '. ');
+        $sanitized = trim((string) $sanitized, '. ');
 
         // Limit length to avoid filesystem issues
         return substr($sanitized, 0, 100);

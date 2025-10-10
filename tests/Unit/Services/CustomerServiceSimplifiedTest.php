@@ -187,7 +187,7 @@ test('handles multiple customers with same type', function () {
 test('gets paginated customers with request', function () {
     Customer::factory()->count(25)->create();
 
-    $request = new Request();
+    $request = new Request;
     $result = $this->service->getCustomers($request);
 
     expect($result)->toBeInstanceOf(\Illuminate\Contracts\Pagination\LengthAwarePaginator::class);

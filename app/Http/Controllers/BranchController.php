@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Contracts\Repositories\BranchRepositoryInterface;
 use App\Models\Branch;
 use App\Traits\ExportableTrait;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -19,14 +20,11 @@ class BranchController extends AbstractBaseCrudController
 {
     use ExportableTrait;
 
-    /**
+    public function __construct(/**
      * Branch Repository instance
      */
-    private BranchRepositoryInterface $branchRepository;
-
-    public function __construct(BranchRepositoryInterface $branchRepository)
+        private BranchRepositoryInterface $branchRepository)
     {
-        $this->branchRepository = $branchRepository;
         $this->setupPermissionMiddleware('branch');
     }
 
@@ -35,9 +33,9 @@ class BranchController extends AbstractBaseCrudController
      */
     public function index(Request $request): View
     {
-        $branches = $this->branchRepository->getBranchesWithFilters($request, 10);
+        $lengthAwarePaginator = $this->branchRepository->getBranchesWithFilters($request, 10);
 
-        return view('branches.index', ['branches' => $branches, 'request' => $request->all()]);
+        return view('branches.index', ['branches' => $lengthAwarePaginator, 'request' => $request->all()]);
     }
 
     /**
@@ -73,7 +71,7 @@ class BranchController extends AbstractBaseCrudController
      */
     public function edit(Branch $branch): View
     {
-        return view('branches.edit', compact('branch'));
+        return view('branches.edit', ['branch' => $branch]);
     }
 
     /**
@@ -98,14 +96,13 @@ class BranchController extends AbstractBaseCrudController
     /**
      * Update Branch Status
      *
-     * @param  int  $branch_id
      * @param  int  $status
      */
-    public function updateStatus($branch_id, $status): RedirectResponse
+    public function updateStatus(int $branch_id, $status): RedirectResponse
     {
         $branch = $this->branchRepository->findById($branch_id);
 
-        if (! $branch) {
+        if (! $branch instanceof Model) {
             return $this->redirectWithError('Branch not found.');
         }
 
@@ -139,14 +136,12 @@ class BranchController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
             'headings' => ['ID', 'Name', 'Status', 'Created Date'],
-            'mapping' => function ($model) {
-                return [
-                    $model->id,
-                    $model->name,
-                    $model->status ? 'Active' : 'Inactive',
-                    $model->created_at->format('Y-m-d H:i:s'),
-                ];
-            },
+            'mapping' => fn ($model): array => [
+                $model->id,
+                $model->name,
+                $model->status ? 'Active' : 'Inactive',
+                $model->created_at->format('Y-m-d H:i:s'),
+            ],
             'with_mapping' => true,
         ];
     }

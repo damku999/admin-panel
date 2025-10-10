@@ -11,6 +11,8 @@ use App\Traits\ExportableTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 /**
@@ -50,9 +52,9 @@ class ClaimController extends AbstractBaseCrudController
                 'sortOrder' => $request->input('sort_order', 'desc'),
                 'request' => $request->all(),
             ]);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             // Create empty paginated result to maintain view compatibility
-            $emptyPaginator = new \Illuminate\Pagination\LengthAwarePaginator(
+            $lengthAwarePaginator = new LengthAwarePaginator(
                 collect(), // empty collection
                 0, // total count
                 15, // per page
@@ -61,11 +63,11 @@ class ClaimController extends AbstractBaseCrudController
             );
 
             return view('claims.index', [
-                'claims' => $emptyPaginator,
+                'claims' => $lengthAwarePaginator,
                 'sortField' => 'created_at',
                 'sortOrder' => 'desc',
                 'request' => $request->all(),
-                'error' => 'Failed to load claims: '.$th->getMessage(),
+                'error' => 'Failed to load claims: '.$throwable->getMessage(),
             ]);
         }
     }
@@ -76,23 +78,23 @@ class ClaimController extends AbstractBaseCrudController
     public function create(): View
     {
         // Get customer insurances using repository
-        $customerInsurances = $this->customerInsuranceRepository->getActiveCustomerInsurances();
+        $this->customerInsuranceRepository->getActiveCustomerInsurances();
 
-        return view('claims.create', compact('customerInsurances'));
+        return view('claims.create', ['customerInsurances' => $customerInsurances]);
     }
 
     /**
      * Store a newly created claim in storage.
      */
-    public function store(StoreClaimRequest $request): RedirectResponse
+    public function store(StoreClaimRequest $storeClaimRequest): RedirectResponse
     {
         try {
-            $claim = $this->claimService->createClaim($request);
+            $claim = $this->claimService->createClaim($storeClaimRequest);
 
             return $this->redirectWithSuccess('claims.index',
                 'Claim created successfully. Claim Number: '.$claim->claim_number);
-        } catch (\Throwable $th) {
-            return $this->redirectWithError('Failed to create claim: '.$th->getMessage())
+        } catch (\Throwable $throwable) {
+            return $this->redirectWithError('Failed to create claim: '.$throwable->getMessage())
                 ->withInput();
         }
     }
@@ -106,14 +108,14 @@ class ClaimController extends AbstractBaseCrudController
             'customer',
             'customerInsurance.insuranceCompany',
             'customerInsurance.policyType',
-            'stages' => function ($query) {
+            'stages' => static function ($query): void {
                 $query->orderBy('created_at', 'desc');
             },
             'documents',
             'liabilityDetail',
         ]);
 
-        return view('claims.show', compact('claim'));
+        return view('claims.show', ['claim' => $claim]);
     }
 
     /**
@@ -123,16 +125,16 @@ class ClaimController extends AbstractBaseCrudController
     {
         $claim->load(['customer', 'customerInsurance']);
 
-        return view('claims.edit', compact('claim'));
+        return view('claims.edit', ['claim' => $claim]);
     }
 
     /**
      * Update the specified claim in storage.
      */
-    public function update(UpdateClaimRequest $request, Claim $claim): RedirectResponse
+    public function update(UpdateClaimRequest $updateClaimRequest, Claim $claim): RedirectResponse
     {
         try {
-            $updated = $this->claimService->updateClaim($request, $claim);
+            $updated = $this->claimService->updateClaim($updateClaimRequest, $claim);
 
             if ($updated) {
                 return $this->redirectWithSuccess('claims.index',
@@ -140,8 +142,8 @@ class ClaimController extends AbstractBaseCrudController
             }
 
             return $this->redirectWithError($this->getErrorMessage('Claim', 'update'));
-        } catch (\Throwable $th) {
-            return $this->redirectWithError('Failed to update claim: '.$th->getMessage())
+        } catch (\Throwable $throwable) {
+            return $this->redirectWithError('Failed to update claim: '.$throwable->getMessage())
                 ->withInput();
         }
     }
@@ -159,8 +161,8 @@ class ClaimController extends AbstractBaseCrudController
             }
 
             return $this->redirectWithError($this->getErrorMessage('Claim Status', 'update'));
-        } catch (\Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Claim Status', 'update').': '.$th->getMessage());
+        } catch (\Throwable $throwable) {
+            return $this->redirectWithError($this->getErrorMessage('Claim Status', 'update').': '.$throwable->getMessage());
         }
     }
 
@@ -177,8 +179,8 @@ class ClaimController extends AbstractBaseCrudController
             }
 
             return $this->redirectWithError($this->getErrorMessage('Claim', 'delete'));
-        } catch (\Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Claim', 'delete').': '.$th->getMessage());
+        } catch (\Throwable $throwable) {
+            return $this->redirectWithError($this->getErrorMessage('Claim', 'delete').': '.$throwable->getMessage());
         }
     }
 
@@ -202,18 +204,16 @@ class ClaimController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
             'headings' => ['ID', 'Claim Number', 'Customer', 'Insurance Type', 'Claim Type', 'Status', 'Claim Date', 'Created Date'],
-            'mapping' => function ($claim) {
-                return [
-                    $claim->id,
-                    $claim->claim_number ?? 'Pending',
-                    $claim->customer->name ?? 'N/A',
-                    $claim->insurance_type ?? 'N/A',
-                    $claim->claim_type ?? 'N/A',
-                    $claim->status ? 'Active' : 'Inactive',
-                    $claim->claim_date ? $claim->claim_date->format('Y-m-d') : 'N/A',
-                    $claim->created_at->format('Y-m-d H:i:s'),
-                ];
-            },
+            'mapping' => fn ($claim): array => [
+                $claim->id,
+                $claim->claim_number ?? 'Pending',
+                $claim->customer->name ?? 'N/A',
+                $claim->insurance_type ?? 'N/A',
+                $claim->claim_type ?? 'N/A',
+                $claim->status ? 'Active' : 'Inactive',
+                $claim->claim_date ? $claim->claim_date->format('Y-m-d') : 'N/A',
+                $claim->created_at->format('Y-m-d H:i:s'),
+            ],
             'with_mapping' => true,
         ];
     }
@@ -227,12 +227,12 @@ class ClaimController extends AbstractBaseCrudController
             $searchTerm = $request->input('search', '');
 
             // Debug logging
-            \Log::info('Search Policies Request', [
+            Log::info('Search Policies Request', [
                 'search_term' => $searchTerm,
-                'search_length' => strlen($searchTerm),
+                'search_length' => strlen((string) $searchTerm),
             ]);
 
-            if (strlen($searchTerm) < 3) {
+            if (strlen((string) $searchTerm) < 3) {
                 return response()->json([
                     'results' => [],
                 ]);
@@ -240,7 +240,7 @@ class ClaimController extends AbstractBaseCrudController
 
             $policies = $this->claimService->searchPolicies($searchTerm);
 
-            \Log::info('Search Policies Results', [
+            Log::info('Search Policies Results', [
                 'search_term' => $searchTerm,
                 'results_count' => count($policies),
             ]);
@@ -248,9 +248,9 @@ class ClaimController extends AbstractBaseCrudController
             return response()->json([
                 'results' => $policies,
             ]);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return response()->json([
-                'error' => 'Failed to search policies: '.$th->getMessage(),
+                'error' => 'Failed to search policies: '.$throwable->getMessage(),
             ], 500);
         }
     }
@@ -267,10 +267,10 @@ class ClaimController extends AbstractBaseCrudController
                 'success' => true,
                 'data' => $statistics,
             ]);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return response()->json([
                 'success' => false,
-                'error' => 'Failed to get statistics: '.$th->getMessage(),
+                'error' => 'Failed to get statistics: '.$throwable->getMessage(),
             ], 500);
         }
     }
@@ -290,10 +290,10 @@ class ClaimController extends AbstractBaseCrudController
                     ? $claim->getHealthInsuranceDocumentListMessage()
                     : $claim->getVehicleInsuranceDocumentListMessage(),
             ]);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to send WhatsApp message: '.$th->getMessage(),
+                'message' => 'Failed to send WhatsApp message: '.$throwable->getMessage(),
             ], 500);
         }
     }
@@ -311,10 +311,10 @@ class ClaimController extends AbstractBaseCrudController
                 'message' => $result['message'],
                 'preview' => $claim->getPendingDocumentsMessage(),
             ]);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to send WhatsApp message: '.$th->getMessage(),
+                'message' => 'Failed to send WhatsApp message: '.$throwable->getMessage(),
             ], 500);
         }
     }
@@ -332,10 +332,10 @@ class ClaimController extends AbstractBaseCrudController
                 'message' => $result['message'],
                 'preview' => $claim->getClaimNumberNotificationMessage(),
             ]);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to send WhatsApp message: '.$th->getMessage(),
+                'message' => 'Failed to send WhatsApp message: '.$throwable->getMessage(),
             ], 500);
         }
     }
@@ -372,10 +372,10 @@ class ClaimController extends AbstractBaseCrudController
                 'preview' => $preview,
                 'whatsapp_number' => $claim->getWhatsAppNumber(),
             ]);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to get message preview: '.$th->getMessage(),
+                'message' => 'Failed to get message preview: '.$throwable->getMessage(),
             ], 500);
         }
     }
@@ -401,10 +401,10 @@ class ClaimController extends AbstractBaseCrudController
                 'document_completion' => $claim->getDocumentCompletionPercentage(),
                 'required_completion' => $claim->getRequiredDocumentCompletionPercentage(),
             ]);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update document status: '.$th->getMessage(),
+                'message' => 'Failed to update document status: '.$throwable->getMessage(),
             ], 500);
         }
     }
@@ -450,10 +450,10 @@ class ClaimController extends AbstractBaseCrudController
                 'stage' => $stage,
                 'whatsapp_result' => $whatsappResult,
             ]);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to add stage: '.$th->getMessage(),
+                'message' => 'Failed to add stage: '.$throwable->getMessage(),
             ], 500);
         }
     }
@@ -487,10 +487,10 @@ class ClaimController extends AbstractBaseCrudController
                 'message' => 'Claim number updated successfully',
                 'whatsapp_result' => $whatsappResult,
             ]);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update claim number: '.$th->getMessage(),
+                'message' => 'Failed to update claim number: '.$throwable->getMessage(),
             ], 500);
         }
     }
@@ -522,10 +522,10 @@ class ClaimController extends AbstractBaseCrudController
                 'message' => 'Liability details updated successfully',
                 'liability_detail' => $liabilityDetail->fresh(),
             ]);
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update liability details: '.$th->getMessage(),
+                'message' => 'Failed to update liability details: '.$throwable->getMessage(),
             ], 500);
         }
     }

@@ -9,14 +9,7 @@ use Throwable;
 
 class HealthCheckService
 {
-    private LoggingService $logger;
-
-    private array $checks = [];
-
-    public function __construct(LoggingService $logger)
-    {
-        $this->logger = $logger;
-    }
+    public function __construct(private readonly LoggingService $loggingService) {}
 
     /**
      * Run all system health checks
@@ -47,7 +40,7 @@ class HealthCheckService
         $healthStatus['status'] = $this->determineOverallStatus($healthStatus['checks']);
 
         // Log health check results
-        $this->logger->logSystemHealth($healthStatus);
+        $this->loggingService->logSystemHealth($healthStatus);
 
         return $healthStatus;
     }
@@ -78,10 +71,10 @@ class HealthCheckService
                 'slow_queries_count' => $slowQueries,
                 'message' => 'Database connection successful',
             ];
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             return [
                 'status' => 'unhealthy',
-                'error' => $e->getMessage(),
+                'error' => $throwable->getMessage(),
                 'message' => 'Database connection failed',
             ];
         }
@@ -118,10 +111,10 @@ class HealthCheckService
                 'driver' => config('cache.default'),
                 'message' => 'Cache system operational',
             ];
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             return [
                 'status' => 'unhealthy',
-                'error' => $e->getMessage(),
+                'error' => $throwable->getMessage(),
                 'message' => 'Cache system failure',
             ];
         }
@@ -158,10 +151,10 @@ class HealthCheckService
                 'driver' => config('filesystems.default'),
                 'message' => 'Storage system operational',
             ];
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             return [
                 'status' => 'unhealthy',
-                'error' => $e->getMessage(),
+                'error' => $throwable->getMessage(),
                 'message' => 'Storage system failure',
             ];
         }
@@ -182,10 +175,10 @@ class HealthCheckService
                 'pending_jobs' => $queueSize,
                 'message' => 'Queue system operational',
             ];
-        } catch (Throwable $e) {
+        } catch (Throwable $throwable) {
             return [
                 'status' => 'unhealthy',
-                'error' => $e->getMessage(),
+                'error' => $throwable->getMessage(),
                 'message' => 'Queue system failure',
             ];
         }
@@ -216,7 +209,7 @@ class HealthCheckService
             'peak_mb' => round($peakMemory / 1024 / 1024, 2),
             'limit_mb' => $memoryLimit > 0 ? round($memoryLimit / 1024 / 1024, 2) : 'unlimited',
             'usage_percentage' => round($usagePercentage, 2),
-            'message' => "Memory usage at {$usagePercentage}%",
+            'message' => sprintf('Memory usage at %s%%', $usagePercentage),
         ];
     }
 
@@ -245,7 +238,7 @@ class HealthCheckService
             'used_gb' => round($usedBytes / 1024 / 1024 / 1024, 2),
             'total_gb' => round($totalBytes / 1024 / 1024 / 1024, 2),
             'usage_percentage' => round($usagePercentage, 2),
-            'message' => "Disk usage at {$usagePercentage}%",
+            'message' => sprintf('Disk usage at %s%%', $usagePercentage),
         ];
     }
 
@@ -263,16 +256,12 @@ class HealthCheckService
         $unit = strtolower(substr($memoryLimit, -1));
         $value = (int) $memoryLimit;
 
-        switch ($unit) {
-            case 'g':
-                return $value * 1024 * 1024 * 1024;
-            case 'm':
-                return $value * 1024 * 1024;
-            case 'k':
-                return $value * 1024;
-            default:
-                return $value;
-        }
+        return match ($unit) {
+            'g' => $value * 1024 * 1024 * 1024,
+            'm' => $value * 1024 * 1024,
+            'k' => $value * 1024,
+            default => $value,
+        };
     }
 
     /**
@@ -292,10 +281,11 @@ class HealthCheckService
                 }
             }
         }
-
         if ($hasUnhealthy) {
             return 'unhealthy';
-        } elseif ($hasWarning) {
+        }
+
+        if ($hasWarning) {
             return 'warning';
         }
 

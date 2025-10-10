@@ -20,7 +20,7 @@ class ReferenceUserService extends BaseService
     public function createReferenceUser(array $data): ReferenceUser
     {
         return $this->createInTransaction(
-            fn () => ReferenceUser::create($data)
+            fn () => ReferenceUser::query()->create($data)
         );
     }
 

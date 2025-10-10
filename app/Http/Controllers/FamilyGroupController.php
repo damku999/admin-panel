@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Repositories\CustomerRepositoryInterface;
 use App\Contracts\Services\FamilyGroupServiceInterface;
-use App\Models\Customer;
 use App\Models\FamilyGroup;
 use App\Models\FamilyMember;
 use App\Traits\ExportableTrait;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -15,22 +15,16 @@ class FamilyGroupController extends AbstractBaseCrudController
 {
     use ExportableTrait;
 
-    /**
-     * Family Group Service instance
-     */
-    private FamilyGroupServiceInterface $familyGroupService;
-
-    /**
-     * Customer Repository instance
-     */
-    private CustomerRepositoryInterface $customerRepository;
-
     public function __construct(
-        FamilyGroupServiceInterface $familyGroupService,
-        CustomerRepositoryInterface $customerRepository
+        /**
+         * Family Group Service instance
+         */
+        private FamilyGroupServiceInterface $familyGroupService,
+        /**
+         * Customer Repository instance
+         */
+        private CustomerRepositoryInterface $customerRepository
     ) {
-        $this->familyGroupService = $familyGroupService;
-        $this->customerRepository = $customerRepository;
         $this->setupPermissionMiddleware('family-group');
     }
 
@@ -39,9 +33,9 @@ class FamilyGroupController extends AbstractBaseCrudController
      */
     public function index(Request $request)
     {
-        $familyGroups = $this->familyGroupService->getFamilyGroups($request);
+        $this->familyGroupService->getFamilyGroups($request);
 
-        return view('admin.family_groups.index', compact('familyGroups'));
+        return view('admin.family_groups.index', ['familyGroups' => $familyGroups]);
     }
 
     /**
@@ -54,7 +48,7 @@ class FamilyGroupController extends AbstractBaseCrudController
 
         $availableCustomers = $this->familyGroupService->getAvailableCustomers();
 
-        return view('admin.family_groups.create', compact('availableCustomers'));
+        return view('admin.family_groups.create', ['availableCustomers' => $availableCustomers]);
     }
 
     /**
@@ -83,8 +77,8 @@ class FamilyGroupController extends AbstractBaseCrudController
 
             return $this->redirectWithSuccess('family_groups.index', 'Family group created successfully. Login credentials sent to family head only. Family head will manage family member access.');
 
-        } catch (\Exception $e) {
-            return $this->redirectWithError('Error creating family group: '.$e->getMessage())
+        } catch (\Exception $exception) {
+            return $this->redirectWithError('Error creating family group: '.$exception->getMessage())
                 ->withInput();
         }
     }
@@ -96,7 +90,7 @@ class FamilyGroupController extends AbstractBaseCrudController
     {
         $familyGroup = $this->familyGroupService->getFamilyGroupWithMembers($familyGroup->id);
 
-        return view('admin.family_groups.show', compact('familyGroup'));
+        return view('admin.family_groups.show', ['familyGroup' => $familyGroup]);
     }
 
     /**
@@ -111,7 +105,7 @@ class FamilyGroupController extends AbstractBaseCrudController
 
         $availableCustomers = $this->familyGroupService->getAvailableCustomers($familyGroup->id);
 
-        return view('admin.family_groups.edit', compact('familyGroup', 'availableCustomers'));
+        return view('admin.family_groups.edit', ['familyGroup' => $familyGroup, 'availableCustomers' => $availableCustomers]);
     }
 
     /**
@@ -145,13 +139,13 @@ class FamilyGroupController extends AbstractBaseCrudController
                 }
 
                 return $this->redirectWithSuccess('family_groups.index', $message);
-            } else {
-                return $this->redirectWithError('Failed to update family group.')
-                    ->withInput();
             }
 
-        } catch (\Exception $e) {
-            return $this->redirectWithError('Error updating family group: '.$e->getMessage())
+            return $this->redirectWithError('Failed to update family group.')
+                ->withInput();
+
+        } catch (\Exception $exception) {
+            return $this->redirectWithError('Error updating family group: '.$exception->getMessage())
                 ->withInput();
         }
     }
@@ -159,7 +153,7 @@ class FamilyGroupController extends AbstractBaseCrudController
     /**
      * Remove the specified family group.
      */
-    public function destroy(FamilyGroup $familyGroup)
+    public function destroy(FamilyGroup $familyGroup): RedirectResponse
     {
         try {
             $familyName = $familyGroup->name;
@@ -171,40 +165,39 @@ class FamilyGroupController extends AbstractBaseCrudController
                 if (request()->expectsJson()) {
                     return response()->json([
                         'status' => 'success',
-                        'message' => "Family group '{$familyName}' deleted successfully.",
+                        'message' => sprintf("Family group '%s' deleted successfully.", $familyName),
                     ]);
                 }
 
-                return $this->redirectWithSuccess('family_groups.index', "Family group '{$familyName}' deleted successfully.");
-            } else {
-                // Return JSON response for AJAX requests
-                if (request()->expectsJson()) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Failed to delete family group.',
-                    ], 500);
-                }
-
-                return $this->redirectWithError('Failed to delete family group.');
+                return $this->redirectWithSuccess('family_groups.index', sprintf("Family group '%s' deleted successfully.", $familyName));
             }
-
-        } catch (\Exception $e) {
             // Return JSON response for AJAX requests
             if (request()->expectsJson()) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Error deleting family group: '.$e->getMessage(),
+                    'message' => 'Failed to delete family group.',
                 ], 500);
             }
 
-            return $this->redirectWithError('Error deleting family group: '.$e->getMessage());
+            return $this->redirectWithError('Failed to delete family group.');
+
+        } catch (\Exception $exception) {
+            // Return JSON response for AJAX requests
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Error deleting family group: '.$exception->getMessage(),
+                ], 500);
+            }
+
+            return $this->redirectWithError('Error deleting family group: '.$exception->getMessage());
         }
     }
 
     /**
      * Update family group status.
      */
-    public function updateStatus($familyGroupId, $status)
+    public function updateStatus(int $familyGroupId, $status): RedirectResponse
     {
         try {
             $result = $this->familyGroupService->updateFamilyGroupStatus($familyGroupId, $status);
@@ -213,12 +206,12 @@ class FamilyGroupController extends AbstractBaseCrudController
                 $message = $status ? 'Family group activated successfully.' : 'Family group deactivated successfully.';
 
                 return $this->redirectWithSuccess(null, $message);
-            } else {
-                return $this->redirectWithError('Failed to update family group status.');
             }
 
-        } catch (\Exception $e) {
-            return $this->redirectWithError('Error updating family group status: '.$e->getMessage());
+            return $this->redirectWithError('Failed to update family group status.');
+
+        } catch (\Exception $exception) {
+            return $this->redirectWithError('Error updating family group status: '.$exception->getMessage());
         }
     }
 
@@ -234,21 +227,21 @@ class FamilyGroupController extends AbstractBaseCrudController
             $filename = 'family_groups_'.date('Y_m_d_H_i_s').'.csv';
             $headers = [
                 'Content-Type' => 'text/csv',
-                'Content-Disposition' => "attachment; filename=\"$filename\"",
+                'Content-Disposition' => sprintf('attachment; filename="%s"', $filename),
             ];
 
-            $callback = function () use ($familyGroups) {
+            $callback = static function () use ($familyGroups): void {
                 $file = fopen('php://output', 'w');
                 fputcsv($file, ['ID', 'Family Name', 'Family Head', 'Members Count', 'Status', 'Created Date']);
 
-                foreach ($familyGroups as $group) {
+                foreach ($familyGroups as $familyGroup) {
                     fputcsv($file, [
-                        $group->id,
-                        $group->name,
-                        $group->familyHead->name ?? 'N/A',
-                        $group->familyMembers->count(),
-                        $group->status ? 'Active' : 'Inactive',
-                        $group->created_at->format('Y-m-d H:i:s'),
+                        $familyGroup->id,
+                        $familyGroup->name,
+                        $familyGroup->familyHead->name ?? 'N/A',
+                        $familyGroup->familyMembers->count(),
+                        $familyGroup->status ? 'Active' : 'Inactive',
+                        $familyGroup->created_at->format('Y-m-d H:i:s'),
                     ]);
                 }
 
@@ -257,15 +250,15 @@ class FamilyGroupController extends AbstractBaseCrudController
 
             return response()->stream($callback, 200, $headers);
 
-        } catch (\Exception $e) {
-            return $this->redirectWithError('Error exporting family groups: '.$e->getMessage());
+        } catch (\Exception $exception) {
+            return $this->redirectWithError('Error exporting family groups: '.$exception->getMessage());
         }
     }
 
     /**
      * Remove a specific family member from their family group.
      */
-    public function removeMember(FamilyMember $familyMember)
+    public function removeMember(FamilyMember $familyMember): RedirectResponse
     {
         try {
             $familyGroupName = $familyMember->familyGroup->name ?? 'Unknown';
@@ -278,33 +271,32 @@ class FamilyGroupController extends AbstractBaseCrudController
                 if (request()->expectsJson()) {
                     return response()->json([
                         'status' => 'success',
-                        'message' => "'{$customerName}' has been removed from '{$familyGroupName}' successfully.",
+                        'message' => sprintf("'%s' has been removed from '%s' successfully.", $customerName, $familyGroupName),
                     ]);
                 }
 
-                return $this->redirectWithSuccess(null, "'{$customerName}' has been removed from '{$familyGroupName}' successfully.");
-            } else {
-                // Return JSON response for AJAX requests
-                if (request()->expectsJson()) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Failed to remove family member.',
-                    ], 500);
-                }
-
-                return $this->redirectWithError('Failed to remove family member.');
+                return $this->redirectWithSuccess(null, sprintf("'%s' has been removed from '%s' successfully.", $customerName, $familyGroupName));
             }
-
-        } catch (\Exception $e) {
             // Return JSON response for AJAX requests
             if (request()->expectsJson()) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Error removing family member: '.$e->getMessage(),
+                    'message' => 'Failed to remove family member.',
                 ], 500);
             }
 
-            return $this->redirectWithError('Error removing family member: '.$e->getMessage());
+            return $this->redirectWithError('Failed to remove family member.');
+
+        } catch (\Exception $exception) {
+            // Return JSON response for AJAX requests
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Error removing family member: '.$exception->getMessage(),
+                ], 500);
+            }
+
+            return $this->redirectWithError('Error removing family member: '.$exception->getMessage());
         }
     }
 
@@ -328,16 +320,14 @@ class FamilyGroupController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
             'headings' => ['ID', 'Family Name', 'Family Head', 'Members Count', 'Status', 'Created Date'],
-            'mapping' => function ($model) {
-                return [
-                    $model->id,
-                    $model->name,
-                    $model->familyHead->name ?? 'N/A',
-                    $model->familyMembers->count(),
-                    $model->status ? 'Active' : 'Inactive',
-                    $model->created_at->format('Y-m-d H:i:s'),
-                ];
-            },
+            'mapping' => fn ($model): array => [
+                $model->id,
+                $model->name,
+                $model->familyHead->name ?? 'N/A',
+                $model->familyMembers->count(),
+                $model->status ? 'Active' : 'Inactive',
+                $model->created_at->format('Y-m-d H:i:s'),
+            ],
             'with_mapping' => true,
         ];
     }

@@ -28,7 +28,7 @@ class ResetPasswordController extends Controller
      */
     protected $redirectTo = RouteServiceProvider::HOME;
 
-    protected function rules()
+    protected function rules(): array
     {
         return [
             'token' => 'required',

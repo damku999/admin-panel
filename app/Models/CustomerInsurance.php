@@ -3,10 +3,15 @@
 namespace App\Models;
 
 use App\Traits\TableRecordObserver;
+use Database\Factories\CustomerInsuranceFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
@@ -67,103 +72,108 @@ use Spatie\Activitylog\Traits\LogsActivity;
  * @property int $is_renewed
  * @property string|null $renewed_date
  * @property int|null $new_insurance_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read Collection<int, Activity> $activities
  * @property-read int|null $activities_count
- * @property-read \App\Models\Branch|null $branch
- * @property-read \App\Models\Broker|null $broker
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Claim> $claims
+ * @property-read Branch|null $branch
+ * @property-read Broker|null $broker
+ * @property-read Collection<int, Claim> $claims
  * @property-read int|null $claims_count
- * @property-read \App\Models\CommissionType|null $commissionType
- * @property-read \App\Models\Customer|null $customer
- * @property-read \App\Models\FuelType|null $fuelType
+ * @property-read CommissionType|null $commissionType
+ * @property-read Customer|null $customer
+ * @property-read FuelType|null $fuelType
  * @property-read mixed $expired_date_formatted
  * @property-read mixed $issue_date_formatted
  * @property-read mixed $maturity_date_formatted
  * @property-read mixed $start_date_formatted
  * @property-read mixed $tp_expiry_date_formatted
- * @property-read \App\Models\InsuranceCompany|null $insuranceCompany
- * @property-read \App\Models\PolicyType|null $policyType
- * @property-read \App\Models\PremiumType|null $premiumType
- * @property-read \App\Models\RelationshipManager|null $relationshipManager
- * @method static \Database\Factories\CustomerInsuranceFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance query()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereActualEarnings($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereApproxMaturityAmount($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereBranchId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereBrokerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereCgst1($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereCgst2($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereChequeNo($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereCommissionOn($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereCustomerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereExpiredDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereFinalPremiumWithGst($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereFuelTypeId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereGrossVehicleWeight($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereGst($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereInsuranceCompanyId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereIsRenewed($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereIssueDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereLifeInsurancePaymentMode($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereMakeModel($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereMaturityDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereMfgYear($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereModeOfPayment($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereMyCommissionAmount($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereMyCommissionPercentage($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereNcbPercentage($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereNetPremium($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereNewInsuranceId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereOdPremium($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance wherePensionAmountYearly($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance wherePlanName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance wherePolicyDocumentPath($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance wherePolicyNo($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance wherePolicyTerm($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance wherePolicyTypeId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance wherePremiumAmount($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance wherePremiumPayingTerm($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance wherePremiumTypeId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereReferenceBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereReferenceCommissionAmount($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereReferenceCommissionPercentage($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereRegistrationNo($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereRelationshipManagerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereRemarks($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereRenewedDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereRto($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereSgst1($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereSgst2($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereStartDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereSumInsured($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereTpExpiryDate($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereTpPremium($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereTransferCommissionAmount($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereTransferCommissionPercentage($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerInsurance withoutTrashed()
- * @mixin \Eloquent
+ * @property-read InsuranceCompany|null $insuranceCompany
+ * @property-read PolicyType|null $policyType
+ * @property-read PremiumType|null $premiumType
+ * @property-read RelationshipManager|null $relationshipManager
+ *
+ * @method static CustomerInsuranceFactory factory($count = null, $state = [])
+ * @method static Builder|CustomerInsurance newModelQuery()
+ * @method static Builder|CustomerInsurance newQuery()
+ * @method static Builder|CustomerInsurance onlyTrashed()
+ * @method static Builder|CustomerInsurance query()
+ * @method static Builder|CustomerInsurance whereActualEarnings($value)
+ * @method static Builder|CustomerInsurance whereApproxMaturityAmount($value)
+ * @method static Builder|CustomerInsurance whereBranchId($value)
+ * @method static Builder|CustomerInsurance whereBrokerId($value)
+ * @method static Builder|CustomerInsurance whereCgst1($value)
+ * @method static Builder|CustomerInsurance whereCgst2($value)
+ * @method static Builder|CustomerInsurance whereChequeNo($value)
+ * @method static Builder|CustomerInsurance whereCommissionOn($value)
+ * @method static Builder|CustomerInsurance whereCreatedAt($value)
+ * @method static Builder|CustomerInsurance whereCreatedBy($value)
+ * @method static Builder|CustomerInsurance whereCustomerId($value)
+ * @method static Builder|CustomerInsurance whereDeletedAt($value)
+ * @method static Builder|CustomerInsurance whereDeletedBy($value)
+ * @method static Builder|CustomerInsurance whereExpiredDate($value)
+ * @method static Builder|CustomerInsurance whereFinalPremiumWithGst($value)
+ * @method static Builder|CustomerInsurance whereFuelTypeId($value)
+ * @method static Builder|CustomerInsurance whereGrossVehicleWeight($value)
+ * @method static Builder|CustomerInsurance whereGst($value)
+ * @method static Builder|CustomerInsurance whereId($value)
+ * @method static Builder|CustomerInsurance whereInsuranceCompanyId($value)
+ * @method static Builder|CustomerInsurance whereIsRenewed($value)
+ * @method static Builder|CustomerInsurance whereIssueDate($value)
+ * @method static Builder|CustomerInsurance whereLifeInsurancePaymentMode($value)
+ * @method static Builder|CustomerInsurance whereMakeModel($value)
+ * @method static Builder|CustomerInsurance whereMaturityDate($value)
+ * @method static Builder|CustomerInsurance whereMfgYear($value)
+ * @method static Builder|CustomerInsurance whereModeOfPayment($value)
+ * @method static Builder|CustomerInsurance whereMyCommissionAmount($value)
+ * @method static Builder|CustomerInsurance whereMyCommissionPercentage($value)
+ * @method static Builder|CustomerInsurance whereNcbPercentage($value)
+ * @method static Builder|CustomerInsurance whereNetPremium($value)
+ * @method static Builder|CustomerInsurance whereNewInsuranceId($value)
+ * @method static Builder|CustomerInsurance whereOdPremium($value)
+ * @method static Builder|CustomerInsurance wherePensionAmountYearly($value)
+ * @method static Builder|CustomerInsurance wherePlanName($value)
+ * @method static Builder|CustomerInsurance wherePolicyDocumentPath($value)
+ * @method static Builder|CustomerInsurance wherePolicyNo($value)
+ * @method static Builder|CustomerInsurance wherePolicyTerm($value)
+ * @method static Builder|CustomerInsurance wherePolicyTypeId($value)
+ * @method static Builder|CustomerInsurance wherePremiumAmount($value)
+ * @method static Builder|CustomerInsurance wherePremiumPayingTerm($value)
+ * @method static Builder|CustomerInsurance wherePremiumTypeId($value)
+ * @method static Builder|CustomerInsurance whereReferenceBy($value)
+ * @method static Builder|CustomerInsurance whereReferenceCommissionAmount($value)
+ * @method static Builder|CustomerInsurance whereReferenceCommissionPercentage($value)
+ * @method static Builder|CustomerInsurance whereRegistrationNo($value)
+ * @method static Builder|CustomerInsurance whereRelationshipManagerId($value)
+ * @method static Builder|CustomerInsurance whereRemarks($value)
+ * @method static Builder|CustomerInsurance whereRenewedDate($value)
+ * @method static Builder|CustomerInsurance whereRto($value)
+ * @method static Builder|CustomerInsurance whereSgst1($value)
+ * @method static Builder|CustomerInsurance whereSgst2($value)
+ * @method static Builder|CustomerInsurance whereStartDate($value)
+ * @method static Builder|CustomerInsurance whereStatus($value)
+ * @method static Builder|CustomerInsurance whereSumInsured($value)
+ * @method static Builder|CustomerInsurance whereTpExpiryDate($value)
+ * @method static Builder|CustomerInsurance whereTpPremium($value)
+ * @method static Builder|CustomerInsurance whereTransferCommissionAmount($value)
+ * @method static Builder|CustomerInsurance whereTransferCommissionPercentage($value)
+ * @method static Builder|CustomerInsurance whereUpdatedAt($value)
+ * @method static Builder|CustomerInsurance whereUpdatedBy($value)
+ * @method static Builder|CustomerInsurance withTrashed()
+ * @method static Builder|CustomerInsurance withoutTrashed()
+ *
+ * @mixin Model
  */
 class CustomerInsurance extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes, TableRecordObserver;
+    use HasFactory;
+    use LogsActivity;
+    use SoftDeletes;
+    use TableRecordObserver;
 
     /**
      * The attributes that are mass assignable.
@@ -295,7 +305,7 @@ class CustomerInsurance extends Model
     /**
      * Get issue date in UI format (d/m/Y)
      */
-    public function getIssueDateFormattedAttribute()
+    protected function getIssueDateFormattedAttribute()
     {
         return formatDateForUi($this->issue_date);
     }
@@ -303,7 +313,7 @@ class CustomerInsurance extends Model
     /**
      * Set issue date from UI format (d/m/Y) to database format (Y-m-d)
      */
-    public function setIssueDateAttribute($value)
+    protected function setIssueDateAttribute($value)
     {
         $this->attributes['issue_date'] = formatDateForDatabase($value);
     }
@@ -311,7 +321,7 @@ class CustomerInsurance extends Model
     /**
      * Get start date in UI format (d/m/Y)
      */
-    public function getStartDateFormattedAttribute()
+    protected function getStartDateFormattedAttribute()
     {
         return formatDateForUi($this->start_date);
     }
@@ -319,7 +329,7 @@ class CustomerInsurance extends Model
     /**
      * Set start date from UI format (d/m/Y) to database format (Y-m-d)
      */
-    public function setStartDateAttribute($value)
+    protected function setStartDateAttribute($value)
     {
         $this->attributes['start_date'] = formatDateForDatabase($value);
     }
@@ -327,7 +337,7 @@ class CustomerInsurance extends Model
     /**
      * Get expired date in UI format (d/m/Y)
      */
-    public function getExpiredDateFormattedAttribute()
+    protected function getExpiredDateFormattedAttribute()
     {
         return formatDateForUi($this->expired_date);
     }
@@ -335,7 +345,7 @@ class CustomerInsurance extends Model
     /**
      * Set expired date from UI format (d/m/Y) to database format (Y-m-d)
      */
-    public function setExpiredDateAttribute($value)
+    protected function setExpiredDateAttribute($value)
     {
         $this->attributes['expired_date'] = formatDateForDatabase($value);
     }
@@ -343,7 +353,7 @@ class CustomerInsurance extends Model
     /**
      * Get TP expiry date in UI format (d/m/Y)
      */
-    public function getTpExpiryDateFormattedAttribute()
+    protected function getTpExpiryDateFormattedAttribute()
     {
         return formatDateForUi($this->tp_expiry_date);
     }
@@ -351,7 +361,7 @@ class CustomerInsurance extends Model
     /**
      * Set TP expiry date from UI format (d/m/Y) to database format (Y-m-d)
      */
-    public function setTpExpiryDateAttribute($value)
+    protected function setTpExpiryDateAttribute($value)
     {
         $this->attributes['tp_expiry_date'] = formatDateForDatabase($value);
     }
@@ -359,7 +369,7 @@ class CustomerInsurance extends Model
     /**
      * Get maturity date in UI format (d/m/Y)
      */
-    public function getMaturityDateFormattedAttribute()
+    protected function getMaturityDateFormattedAttribute()
     {
         return formatDateForUi($this->maturity_date);
     }
@@ -367,7 +377,7 @@ class CustomerInsurance extends Model
     /**
      * Set maturity date from UI format (d/m/Y) to database format (Y-m-d)
      */
-    public function setMaturityDateAttribute($value)
+    protected function setMaturityDateAttribute($value)
     {
         $this->attributes['maturity_date'] = formatDateForDatabase($value);
     }

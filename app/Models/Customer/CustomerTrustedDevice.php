@@ -3,8 +3,10 @@
 namespace App\Models\Customer;
 
 use App\Models\Customer;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\Customer\CustomerTrustedDevice
@@ -19,35 +21,37 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string|null $platform
  * @property string $ip_address
  * @property string $user_agent
- * @property \Illuminate\Support\Carbon|null $last_used_at
- * @property \Illuminate\Support\Carbon $trusted_at
- * @property \Illuminate\Support\Carbon|null $expires_at
+ * @property Carbon|null $last_used_at
+ * @property Carbon $trusted_at
+ * @property Carbon|null $expires_at
  * @property bool $is_active
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read Model|\Eloquent $authenticatable
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice active()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice customersOnly()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice query()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice whereAuthenticatableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice whereAuthenticatableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice whereBrowser($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice whereDeviceId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice whereDeviceName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice whereDeviceType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice whereExpiresAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice whereIpAddress($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice whereIsActive($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice whereLastUsedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice wherePlatform($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice whereTrustedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerTrustedDevice whereUserAgent($value)
- * @mixin \Eloquent
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Model|Model $authenticatable
+ *
+ * @method static Builder|CustomerTrustedDevice active()
+ * @method static Builder|CustomerTrustedDevice customersOnly()
+ * @method static Builder|CustomerTrustedDevice newModelQuery()
+ * @method static Builder|CustomerTrustedDevice newQuery()
+ * @method static Builder|CustomerTrustedDevice query()
+ * @method static Builder|CustomerTrustedDevice whereAuthenticatableId($value)
+ * @method static Builder|CustomerTrustedDevice whereAuthenticatableType($value)
+ * @method static Builder|CustomerTrustedDevice whereBrowser($value)
+ * @method static Builder|CustomerTrustedDevice whereCreatedAt($value)
+ * @method static Builder|CustomerTrustedDevice whereDeviceId($value)
+ * @method static Builder|CustomerTrustedDevice whereDeviceName($value)
+ * @method static Builder|CustomerTrustedDevice whereDeviceType($value)
+ * @method static Builder|CustomerTrustedDevice whereExpiresAt($value)
+ * @method static Builder|CustomerTrustedDevice whereId($value)
+ * @method static Builder|CustomerTrustedDevice whereIpAddress($value)
+ * @method static Builder|CustomerTrustedDevice whereIsActive($value)
+ * @method static Builder|CustomerTrustedDevice whereLastUsedAt($value)
+ * @method static Builder|CustomerTrustedDevice wherePlatform($value)
+ * @method static Builder|CustomerTrustedDevice whereTrustedAt($value)
+ * @method static Builder|CustomerTrustedDevice whereUpdatedAt($value)
+ * @method static Builder|CustomerTrustedDevice whereUserAgent($value)
+ *
+ * @mixin Model
  */
 class CustomerTrustedDevice extends Model
 {
@@ -87,7 +91,7 @@ class CustomerTrustedDevice extends Model
     /**
      * Scope to only customer records
      */
-    public function scopeCustomersOnly($query)
+    protected function scopeCustomersOnly($query)
     {
         return $query->where('authenticatable_type', Customer::class);
     }
@@ -95,7 +99,7 @@ class CustomerTrustedDevice extends Model
     /**
      * Scope to only active devices
      */
-    public function scopeActive($query)
+    protected function scopeActive($query)
     {
         return $query->where('is_active', true)
             ->where('expires_at', '>', now());

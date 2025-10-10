@@ -3,8 +3,10 @@
 namespace App\Models\Customer;
 
 use App\Models\Customer;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\Customer\CustomerSecuritySettings
@@ -19,26 +21,28 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property int $session_timeout
  * @property int $device_trust_duration
  * @property array|null $notification_preferences
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read Model|\Eloquent $settingable
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings customersOnly()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings query()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereDeviceTrackingEnabled($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereDeviceTrustDuration($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereLoginNotifications($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereNotificationPreferences($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereSecurityAlerts($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereSessionTimeout($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereSettingableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereSettingableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereTwoFactorEnabled($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerSecuritySettings whereUpdatedAt($value)
- * @mixin \Eloquent
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Model|Model $settingable
+ *
+ * @method static Builder|CustomerSecuritySettings customersOnly()
+ * @method static Builder|CustomerSecuritySettings newModelQuery()
+ * @method static Builder|CustomerSecuritySettings newQuery()
+ * @method static Builder|CustomerSecuritySettings query()
+ * @method static Builder|CustomerSecuritySettings whereCreatedAt($value)
+ * @method static Builder|CustomerSecuritySettings whereDeviceTrackingEnabled($value)
+ * @method static Builder|CustomerSecuritySettings whereDeviceTrustDuration($value)
+ * @method static Builder|CustomerSecuritySettings whereId($value)
+ * @method static Builder|CustomerSecuritySettings whereLoginNotifications($value)
+ * @method static Builder|CustomerSecuritySettings whereNotificationPreferences($value)
+ * @method static Builder|CustomerSecuritySettings whereSecurityAlerts($value)
+ * @method static Builder|CustomerSecuritySettings whereSessionTimeout($value)
+ * @method static Builder|CustomerSecuritySettings whereSettingableId($value)
+ * @method static Builder|CustomerSecuritySettings whereSettingableType($value)
+ * @method static Builder|CustomerSecuritySettings whereTwoFactorEnabled($value)
+ * @method static Builder|CustomerSecuritySettings whereUpdatedAt($value)
+ *
+ * @mixin Model
  */
 class CustomerSecuritySettings extends Model
 {
@@ -77,7 +81,7 @@ class CustomerSecuritySettings extends Model
     /**
      * Scope to only customer records
      */
-    public function scopeCustomersOnly($query)
+    protected function scopeCustomersOnly($query)
     {
         return $query->where('settingable_type', Customer::class);
     }

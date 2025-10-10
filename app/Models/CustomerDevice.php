@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\CustomerDevice
@@ -16,29 +18,31 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $device_model
  * @property string|null $os_version
  * @property string|null $app_version
- * @property \Illuminate\Support\Carbon|null $last_active_at
+ * @property Carbon|null $last_active_at
  * @property bool $is_active
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Customer|null $customer
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice active()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice ofType(string $type)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice query()
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereAppVersion($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereCustomerId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereDeviceModel($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereDeviceName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereDeviceToken($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereDeviceType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereIsActive($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereLastActiveAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereOsVersion($value)
- * @method static \Illuminate\Database\Eloquent\Builder|CustomerDevice whereUpdatedAt($value)
- * @mixin \Eloquent
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Customer|null $customer
+ *
+ * @method static Builder|CustomerDevice active()
+ * @method static Builder|CustomerDevice newModelQuery()
+ * @method static Builder|CustomerDevice newQuery()
+ * @method static Builder|CustomerDevice ofType(string $type)
+ * @method static Builder|CustomerDevice query()
+ * @method static Builder|CustomerDevice whereAppVersion($value)
+ * @method static Builder|CustomerDevice whereCreatedAt($value)
+ * @method static Builder|CustomerDevice whereCustomerId($value)
+ * @method static Builder|CustomerDevice whereDeviceModel($value)
+ * @method static Builder|CustomerDevice whereDeviceName($value)
+ * @method static Builder|CustomerDevice whereDeviceToken($value)
+ * @method static Builder|CustomerDevice whereDeviceType($value)
+ * @method static Builder|CustomerDevice whereId($value)
+ * @method static Builder|CustomerDevice whereIsActive($value)
+ * @method static Builder|CustomerDevice whereLastActiveAt($value)
+ * @method static Builder|CustomerDevice whereOsVersion($value)
+ * @method static Builder|CustomerDevice whereUpdatedAt($value)
+ *
+ * @mixin Model
  */
 class CustomerDevice extends Model
 {
@@ -72,7 +76,7 @@ class CustomerDevice extends Model
     /**
      * Scope for active devices only
      */
-    public function scopeActive($query)
+    protected function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
@@ -80,7 +84,7 @@ class CustomerDevice extends Model
     /**
      * Scope for specific device type
      */
-    public function scopeOfType($query, string $type)
+    protected function scopeOfType($query, string $type)
     {
         return $query->where('device_type', $type);
     }
@@ -88,7 +92,7 @@ class CustomerDevice extends Model
     /**
      * Update last active timestamp
      */
-    public function markActive()
+    public function markActive(): void
     {
         $this->last_active_at = now();
         $this->save();
@@ -97,7 +101,7 @@ class CustomerDevice extends Model
     /**
      * Deactivate this device
      */
-    public function deactivate()
+    public function deactivate(): void
     {
         $this->is_active = false;
         $this->save();

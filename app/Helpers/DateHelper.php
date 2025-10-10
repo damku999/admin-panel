@@ -15,7 +15,7 @@ class DateHelper
     public static function toUiFormat($date)
     {
         if (empty($date)) {
-            return null;
+            return;
         }
 
         try {
@@ -39,7 +39,7 @@ class DateHelper
     public static function toDatabaseFormat($date)
     {
         if (empty($date)) {
-            return null;
+            return;
         }
 
         try {
@@ -63,7 +63,7 @@ class DateHelper
     public static function toUiDateTimeFormat($datetime)
     {
         if (empty($datetime)) {
-            return null;
+            return;
         }
 
         try {

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\Repositories\QuotationRepositoryInterface;
 use App\Contracts\Services\QuotationServiceInterface;
 use App\Events\Quotation\QuotationGenerated;
+use App\Models\AddonCover;
 use App\Models\Customer;
 use App\Models\InsuranceCompany;
 use App\Models\Quotation;
@@ -12,13 +13,16 @@ use App\Models\QuotationCompany;
 use App\Traits\WhatsAppApiTrait;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class QuotationService extends BaseService implements QuotationServiceInterface
 {
     use WhatsAppApiTrait;
 
     public function __construct(
-        private PdfGenerationService $pdfService,
+        private PdfGenerationService $pdfGenerationService,
         private QuotationRepositoryInterface $quotationRepository
     ) {}
 
@@ -47,7 +51,7 @@ class QuotationService extends BaseService implements QuotationServiceInterface
             $companies = $data['companies'] ?? [];
             unset($data['companies']);
 
-            $quotation = Quotation::create($data);
+            $quotation = Quotation::query()->create($data);
 
             // Create company quotes manually
             if (! empty($companies)) {
@@ -73,7 +77,7 @@ class QuotationService extends BaseService implements QuotationServiceInterface
      */
     public function generateCompanyQuotes(Quotation $quotation): void
     {
-        $companies = InsuranceCompany::where('status', 1)
+        $companies = InsuranceCompany::query()->where('status', 1)
             ->limit(5) // Maximum 5 companies as requested
             ->get();
 
@@ -97,7 +101,7 @@ class QuotationService extends BaseService implements QuotationServiceInterface
      */
     public function generateQuotesForSelectedCompanies(Quotation $quotation, array $companyIds): void
     {
-        $companies = InsuranceCompany::whereIn('id', $companyIds)
+        $companies = InsuranceCompany::query()->whereIn('id', $companyIds)
             ->where('status', 1)
             ->get();
 
@@ -118,25 +122,25 @@ class QuotationService extends BaseService implements QuotationServiceInterface
      * quote includes unique quote number, benefits, and exclusions.
      *
      * @param  Quotation  $quotation  Parent quotation with vehicle details
-     * @param  InsuranceCompany  $company  Insurance company to generate quote for
+     * @param  InsuranceCompany  $insuranceCompany  Insurance company to generate quote for
      * @return QuotationCompany Created company quote with full premium breakdown
      */
-    private function generateCompanyQuote(Quotation $quotation, InsuranceCompany $company): QuotationCompany
+    private function generateCompanyQuote(Quotation $quotation, InsuranceCompany $insuranceCompany): QuotationCompany
     {
-        $baseData = $this->calculateBasePremium($quotation, $company);
-        $addonData = $this->calculateAddonPremiums($quotation, $company);
+        $baseData = $this->calculateBasePremium($quotation, $insuranceCompany);
+        $addonData = $this->calculateAddonPremiums($quotation, $insuranceCompany);
 
         $netPremium = $baseData['total_od_premium'] + $addonData['total_addon_premium'];
         $sgstAmount = $netPremium * 0.09; // 9% SGST
         $cgstAmount = $netPremium * 0.09; // 9% CGST
         $totalPremium = $netPremium + $sgstAmount + $cgstAmount;
-        $roadsideAssistance = $this->calculateRoadsideAssistance($company);
+        $roadsideAssistance = $this->calculateRoadsideAssistance();
         $finalPremium = $totalPremium + $roadsideAssistance;
 
-        return QuotationCompany::create([
+        return QuotationCompany::query()->create([
             'quotation_id' => $quotation->id,
-            'insurance_company_id' => $company->id,
-            'quote_number' => $this->generateQuoteNumber($quotation, $company),
+            'insurance_company_id' => $insuranceCompany->id,
+            'quote_number' => $this->generateQuoteNumber($quotation, $insuranceCompany),
             'basic_od_premium' => $baseData['basic_od_premium'],
             'cng_lpg_premium' => $baseData['cng_lpg_premium'],
             'total_od_premium' => $baseData['total_od_premium'],
@@ -148,8 +152,8 @@ class QuotationService extends BaseService implements QuotationServiceInterface
             'total_premium' => $totalPremium,
             'roadside_assistance' => $roadsideAssistance,
             'final_premium' => $finalPremium,
-            'benefits' => $this->getCompanyBenefits($company),
-            'exclusions' => $this->getCompanyExclusions($company),
+            'benefits' => $this->getCompanyBenefits(),
+            'exclusions' => $this->getCompanyExclusions(),
         ]);
     }
 
@@ -162,14 +166,14 @@ class QuotationService extends BaseService implements QuotationServiceInterface
      * premium at 5% of kit IDV for hybrid/CNG fuel types.
      *
      * @param  Quotation  $quotation  Quotation with vehicle details and IDV
-     * @param  InsuranceCompany  $company  Insurance company for rating factor
+     * @param  InsuranceCompany  $insuranceCompany  Insurance company for rating factor
      * @return array Array with 'basic_od_premium', 'cng_lpg_premium', and 'total_od_premium'
      */
-    private function calculateBasePremium(Quotation $quotation, InsuranceCompany $company): array
+    private function calculateBasePremium(Quotation $quotation, InsuranceCompany $insuranceCompany): array
     {
         // Base premium calculation based on IDV and company factors
         $idv = $quotation->total_idv;
-        $companyFactor = $this->getCompanyRatingFactor($company);
+        $companyFactor = $this->getCompanyRatingFactor($insuranceCompany);
 
         // Basic OD premium calculation (simplified)
         $basicRate = $this->getBasicOdRate($quotation);
@@ -198,17 +202,17 @@ class QuotationService extends BaseService implements QuotationServiceInterface
      * like Road Side Assistance (₹180), Key Replacement (₹425), Personal Accident (₹450).
      *
      * @param  Quotation  $quotation  Quotation with addon covers array
-     * @param  InsuranceCompany  $company  Insurance company for addon rates
+     * @param  InsuranceCompany  $insuranceCompany  Insurance company for addon rates
      * @return array Array with 'breakdown' (addon name => premium) and 'total_addon_premium'
      */
-    private function calculateAddonPremiums(Quotation $quotation, InsuranceCompany $company): array
+    private function calculateAddonPremiums(Quotation $quotation, InsuranceCompany $insuranceCompany): array
     {
         $addons = $quotation->addon_covers ?? [];
         $breakdown = [];
         $totalAddonPremium = 0;
-        $companyFactor = $this->getCompanyRatingFactor($company);
+        $companyFactor = $this->getCompanyRatingFactor($insuranceCompany);
 
-        $addonRates = $this->getAddonRates($company);
+        $addonRates = $this->getAddonRates();
 
         foreach ($addons as $addon) {
             $premium = $this->calculateAddonPremium($addon, $quotation, $addonRates, $companyFactor);
@@ -295,7 +299,7 @@ class QuotationService extends BaseService implements QuotationServiceInterface
      */
     public function sendQuotationViaWhatsApp(Quotation $quotation): void
     {
-        \Log::info('Starting WhatsApp quotation send', [
+        Log::info('Starting WhatsApp quotation send', [
             'quotation_id' => $quotation->id,
             'quotation_number' => $quotation->quotation_number,
             'customer_name' => $quotation->customer->name ?? 'N/A',
@@ -304,12 +308,12 @@ class QuotationService extends BaseService implements QuotationServiceInterface
         ]);
 
         $message = $this->generateWhatsAppMessageWithAttachment($quotation);
-        $pdfPath = $this->pdfService->generateQuotationPdfForWhatsApp($quotation);
+        $pdfPath = $this->pdfGenerationService->generateQuotationPdfForWhatsApp($quotation);
 
         try {
             $response = $this->whatsAppSendMessageWithAttachment($message, $quotation->whatsapp_number, $pdfPath);
 
-            \Log::info('WhatsApp quotation sent successfully', [
+            Log::info('WhatsApp quotation sent successfully', [
                 'quotation_id' => $quotation->id,
                 'quotation_number' => $quotation->quotation_number,
                 'whatsapp_number' => $quotation->whatsapp_number,
@@ -321,23 +325,23 @@ class QuotationService extends BaseService implements QuotationServiceInterface
                 'status' => 'Sent',
                 'sent_at' => now(),
             ]);
-        } catch (\Exception $e) {
-            \Log::error('WhatsApp quotation send failed', [
+        } catch (\Exception $exception) {
+            Log::error('WhatsApp quotation send failed', [
                 'quotation_id' => $quotation->id,
                 'quotation_number' => $quotation->quotation_number,
                 'customer_name' => $quotation->customer->name ?? 'N/A',
                 'whatsapp_number' => $quotation->whatsapp_number,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'user_id' => auth()->user()->id ?? 'System',
-                'trace' => $e->getTraceAsString(),
+                'trace' => $exception->getTraceAsString(),
             ]);
 
-            throw $e; // Re-throw to maintain the error flow
+            throw $exception; // Re-throw to maintain the error flow
         } finally {
             // Clean up temporary PDF file
             if (file_exists($pdfPath)) {
                 unlink($pdfPath);
-                \Log::debug('Temporary PDF file cleaned up', ['path' => $pdfPath]);
+                Log::debug('Temporary PDF file cleaned up', ['path' => $pdfPath]);
             }
         }
     }
@@ -363,16 +367,17 @@ class QuotationService extends BaseService implements QuotationServiceInterface
         $comparisonList = '';
         foreach ($quotes as $index => $quote) {
             $icon = $quote->is_recommended ? '⭐' : ($index + 1);
-            $ranking = is_numeric($icon) ? "{$icon}." : $icon;
-            $comparisonList .= "{$ranking} *{$quote->insuranceCompany->name}*: {$quote->getFormattedPremium()}";
+            $ranking = is_numeric($icon) ? $icon.'.' : $icon;
+            $comparisonList .= sprintf('%s *%s*: %s', $ranking, $quote->insuranceCompany->name, $quote->getFormattedPremium());
             if ($quote->is_recommended) {
                 $comparisonList .= ' _(Recommended)_';
             }
+
             $comparisonList .= "\n";
         }
 
         // Try to get message from template, fallback to hardcoded
-        $templateService = app(\App\Services\TemplateService::class);
+        $templateService = app(TemplateService::class);
         $message = $templateService->renderFromQuotation('quotation_ready', 'whatsapp', $quotation);
 
         if ($message) {
@@ -393,7 +398,7 @@ class QuotationService extends BaseService implements QuotationServiceInterface
         if ($bestQuote) {
             $message .= "💰 *Best Premium:*\n";
             $message .= "• *{$bestQuote->insuranceCompany->name}*\n";
-            $message .= "• Premium: *{$bestQuote->getFormattedPremium()}*";
+            $message .= sprintf('• Premium: *%s*', $bestQuote->getFormattedPremium());
             $message .= "\n\n";
         }
 
@@ -415,9 +420,8 @@ class QuotationService extends BaseService implements QuotationServiceInterface
         $message .= "\n".company_advisor_name();
         $message .= "\n".company_website();
         $message .= "\n".company_title();
-        $message .= "\n\"".company_tagline().'"';
 
-        return $message;
+        return $message.("\n\"".company_tagline().'"');
     }
 
     /**
@@ -434,7 +438,7 @@ class QuotationService extends BaseService implements QuotationServiceInterface
      */
     public function sendQuotationViaEmail(Quotation $quotation): void
     {
-        \Log::info('Starting email quotation send', [
+        Log::info('Starting email quotation send', [
             'quotation_id' => $quotation->id,
             'quotation_number' => $quotation->quotation_number,
             'customer_name' => $quotation->customer->name ?? 'N/A',
@@ -442,14 +446,14 @@ class QuotationService extends BaseService implements QuotationServiceInterface
             'user_id' => auth()->user()->id ?? 'System',
         ]);
 
-        $pdfPath = $this->pdfService->generateQuotationPdfForWhatsApp($quotation);
+        $pdfPath = $this->pdfGenerationService->generateQuotationPdfForWhatsApp($quotation);
 
         try {
-            $emailService = app(\App\Services\EmailService::class);
+            $emailService = app(EmailService::class);
             $sent = $emailService->sendFromQuotation('quotation_ready', $quotation, [$pdfPath]);
 
             if ($sent) {
-                \Log::info('Email quotation sent successfully', [
+                Log::info('Email quotation sent successfully', [
                     'quotation_id' => $quotation->id,
                     'quotation_number' => $quotation->quotation_number,
                     'email' => $quotation->email ?? $quotation->customer->email,
@@ -464,23 +468,23 @@ class QuotationService extends BaseService implements QuotationServiceInterface
                     ]);
                 }
             }
-        } catch (\Exception $e) {
-            \Log::error('Email quotation send failed', [
+        } catch (\Exception $exception) {
+            Log::error('Email quotation send failed', [
                 'quotation_id' => $quotation->id,
                 'quotation_number' => $quotation->quotation_number,
                 'customer_name' => $quotation->customer->name ?? 'N/A',
                 'email' => $quotation->email ?? $quotation->customer->email,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'user_id' => auth()->user()->id ?? 'System',
-                'trace' => $e->getTraceAsString(),
+                'trace' => $exception->getTraceAsString(),
             ]);
 
-            throw $e; // Re-throw to maintain the error flow
+            throw $exception; // Re-throw to maintain the error flow
         } finally {
             // Clean up temporary PDF file
             if (file_exists($pdfPath)) {
                 unlink($pdfPath);
-                \Log::debug('Temporary PDF file cleaned up', ['path' => $pdfPath]);
+                Log::debug('Temporary PDF file cleaned up', ['path' => $pdfPath]);
             }
         }
     }
@@ -493,11 +497,11 @@ class QuotationService extends BaseService implements QuotationServiceInterface
      * company comparison table, premium breakdowns, and terms & conditions.
      *
      * @param  Quotation  $quotation  Quotation to generate PDF for
-     * @return \Illuminate\Http\Response PDF response for browser
+     * @return Response PDF response for browser
      */
     public function generatePdf(Quotation $quotation)
     {
-        return $this->pdfService->generateQuotationPdf($quotation);
+        return $this->pdfGenerationService->generateQuotationPdf($quotation);
     }
 
     /**
@@ -554,13 +558,13 @@ class QuotationService extends BaseService implements QuotationServiceInterface
      * pricing, while higher factors (1.05) indicate premium pricing. Default factor
      * is 1.0 for neutral pricing.
      *
-     * @param  InsuranceCompany  $company  Insurance company instance
+     * @param  InsuranceCompany  $insuranceCompany  Insurance company instance
      * @return float Rating factor between 0.92 and 1.05
      */
-    private function getCompanyRatingFactor(InsuranceCompany $company): float
+    private function getCompanyRatingFactor(InsuranceCompany $insuranceCompany): float
     {
         // Different companies have different rating factors
-        return match ($company->name) {
+        return match ($insuranceCompany->name) {
             'TATA AIG' => 1.0,
             'HDFC ERGO' => 0.95,
             'ICICI Lombard' => 1.05,
@@ -588,9 +592,11 @@ class QuotationService extends BaseService implements QuotationServiceInterface
         if ($vehicleAge <= 1) {
             return 1.2;
         }
+
         if ($vehicleAge <= 3) {
             return 1.8;
         }
+
         if ($vehicleAge <= 5) {
             return 2.4;
         }
@@ -606,10 +612,9 @@ class QuotationService extends BaseService implements QuotationServiceInterface
      * Protection (0.1%), Consumables (0.06%), Tyre Protection (0.18%), Return to
      * Invoice (0.23%).
      *
-     * @param  InsuranceCompany  $company  Insurance company instance
      * @return array Addon rates keyed by addon type
      */
-    private function getAddonRates(InsuranceCompany $company): array
+    private function getAddonRates(): array
     {
         // Company-specific addon rates
         return [
@@ -628,12 +633,12 @@ class QuotationService extends BaseService implements QuotationServiceInterface
      * emergency services like towing, flat tire assistance, battery jump-start,
      * and fuel delivery within specified limits.
      *
-     * @param  InsuranceCompany  $company  Insurance company instance
      * @return float Roadside assistance premium (₹136.88)
      */
-    private function calculateRoadsideAssistance(InsuranceCompany $company): float
+    private function calculateRoadsideAssistance(): float
     {
-        return 136.88; // Standard rate
+        return 136.88;
+        // Standard rate
     }
 
     /**
@@ -643,10 +648,9 @@ class QuotationService extends BaseService implements QuotationServiceInterface
      * coverage details, customer support availability, claim settlement process, and
      * service network information.
      *
-     * @param  InsuranceCompany  $company  Insurance company instance
      * @return string Formatted benefits description
      */
-    private function getCompanyBenefits(InsuranceCompany $company): string
+    private function getCompanyBenefits(): string
     {
         return 'Comprehensive coverage with add-on benefits, 24/7 customer support, quick claim settlement, nationwide network of garages.';
     }
@@ -658,10 +662,9 @@ class QuotationService extends BaseService implements QuotationServiceInterface
      * pre-existing damage, normal wear and tear, consequential losses, intoxicated
      * driving, and commercial use (for private car policies).
      *
-     * @param  InsuranceCompany  $company  Insurance company instance
      * @return string Formatted exclusions description
      */
-    private function getCompanyExclusions(InsuranceCompany $company): string
+    private function getCompanyExclusions(): string
     {
         return 'Pre-existing damages, wear and tear, consequential damages, driving under influence, use for commercial purposes.';
     }
@@ -692,6 +695,7 @@ class QuotationService extends BaseService implements QuotationServiceInterface
             if (in_array($quoteKey, $processedQuotes)) {
                 continue;
             }
+
             $processedQuotes[] = $quoteKey;
 
             // Process addon breakdown to calculate total if needed
@@ -765,15 +769,16 @@ class QuotationService extends BaseService implements QuotationServiceInterface
                     ];
                 }
             }
+
             $data['addon_covers_breakdown'] = $addonBreakdown;
         } else {
             // Fallback: Process individual addon fields into breakdown
             $addonBreakdown = [];
-            $addonCovers = \App\Models\AddonCover::getOrdered(1);
+            $addonCovers = AddonCover::getOrdered(1);
 
             foreach ($addonCovers as $addonCover) {
-                $slug = \Str::slug($addonCover->name, '_');
-                $field = "addon_{$slug}";
+                $slug = Str::slug($addonCover->name, '_');
+                $field = 'addon_'.$slug;
                 $noteField = $field.'_note';
                 $selectedField = $field.'_selected';
 
@@ -794,7 +799,7 @@ class QuotationService extends BaseService implements QuotationServiceInterface
             $data['addon_covers_breakdown'] = $addonBreakdown;
         }
 
-        return QuotationCompany::create([
+        return QuotationCompany::query()->create([
             'quotation_id' => $quotation->id,
             'insurance_company_id' => $data['insurance_company_id'],
             'quote_number' => $data['quote_number'] ?? $this->generateQuoteNumber($quotation, $data['insurance_company_id']),
@@ -906,7 +911,7 @@ class QuotationService extends BaseService implements QuotationServiceInterface
     public function deleteQuotation(Quotation $quotation): bool
     {
         return $this->deleteInTransaction(
-            fn () => $this->quotationRepository->delete($quotation)
+            fn (): bool => $this->quotationRepository->delete($quotation)
         );
     }
 
@@ -936,9 +941,9 @@ class QuotationService extends BaseService implements QuotationServiceInterface
     public function getQuotationFormData(): array
     {
         return [
-            'customers' => Customer::where('status', 1)->orderBy('name')->get(),
-            'insuranceCompanies' => InsuranceCompany::where('status', 1)->orderBy('name')->get(),
-            'addonCovers' => \App\Models\AddonCover::getOrdered(1),
+            'customers' => Customer::query()->where('status', 1)->orderBy('name')->get(),
+            'insuranceCompanies' => InsuranceCompany::query()->where('status', 1)->orderBy('name')->get(),
+            'addonCovers' => AddonCover::getOrdered(1),
         ];
     }
 }

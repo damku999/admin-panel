@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FuelType;
 use App\Services\FuelTypeService;
 use App\Traits\ExportableTrait;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -34,12 +35,12 @@ class FuelTypeController extends AbstractBaseCrudController
      */
     public function index(Request $request)
     {
-        $fuel_type_obj = FuelType::select('*');
+        $builder = FuelType::query()->select('*');
         if (! empty($request->search)) {
-            $fuel_type_obj->where('name', 'LIKE', '%'.trim($request->search).'%');
+            $builder->where('name', 'LIKE', '%'.trim((string) $request->search).'%');
         }
 
-        $fuel_type = $fuel_type_obj->paginate(config('app.pagination_default', 15));
+        $fuel_type = $builder->paginate(config('app.pagination_default', 15));
 
         return view('fuel_type.index', ['fuel_type' => $fuel_type, 'request' => $request->all()]);
     }
@@ -77,8 +78,8 @@ class FuelTypeController extends AbstractBaseCrudController
             $this->fuelTypeService->createFuelType($validated);
 
             return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type', 'created'));
-        } catch (\Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'create').': '.$th->getMessage())
+        } catch (\Throwable $throwable) {
+            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'create').': '.$throwable->getMessage())
                 ->withInput();
         }
     }
@@ -86,15 +87,14 @@ class FuelTypeController extends AbstractBaseCrudController
     /**
      * Update Status Of FuelType
      *
-     * @param  int  $status
      * @return List Page With Success
      *
      * @author Darshan Baraiya
      */
-    public function updateStatus($fuel_type_id, $status)
+    public function updateStatus(int $fuel_type_id, int $status): RedirectResponse
     {
         // Validation
-        $validate = Validator::make([
+        $validator = Validator::make([
             'fuel_type_id' => $fuel_type_id,
             'status' => $status,
         ], [
@@ -103,31 +103,31 @@ class FuelTypeController extends AbstractBaseCrudController
         ]);
 
         // If Validations Fails
-        if ($validate->fails()) {
-            return $this->redirectWithError($validate->errors()->first());
+        if ($validator->fails()) {
+            return $this->redirectWithError($validator->errors()->first());
         }
 
         try {
             $this->fuelTypeService->updateStatus($fuel_type_id, $status);
 
             return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type Status', 'updated'));
-        } catch (\Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Fuel Type Status', 'update').': '.$th->getMessage());
+        } catch (\Throwable $throwable) {
+            return $this->redirectWithError($this->getErrorMessage('Fuel Type Status', 'update').': '.$throwable->getMessage());
         }
     }
 
     /**
      * Edit FuelType
      *
-     * @param  int  $fuel_type
+     * @param  int  $fuelType
      * @return Collection $fuel_type
      *
      * @author Darshan Baraiya
      */
-    public function edit(FuelType $fuel_type)
+    public function edit(FuelType $fuelType)
     {
         return view('fuel_type.edit')->with([
-            'fuel_type' => $fuel_type,
+            'fuel_type' => $fuelType,
         ]);
     }
 
@@ -139,7 +139,7 @@ class FuelTypeController extends AbstractBaseCrudController
      *
      * @author Darshan Baraiya
      */
-    public function update(Request $request, FuelType $fuel_type)
+    public function update(Request $request, FuelType $fuelType)
     {
         $validation_array = [
             'name' => 'required',
@@ -148,11 +148,11 @@ class FuelTypeController extends AbstractBaseCrudController
         $validated = $request->validate($validation_array);
 
         try {
-            $this->fuelTypeService->updateFuelType($fuel_type, $validated);
+            $this->fuelTypeService->updateFuelType($fuelType, $validated);
 
             return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type', 'updated'));
-        } catch (\Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'update').': '.$th->getMessage())
+        } catch (\Throwable $throwable) {
+            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'update').': '.$throwable->getMessage())
                 ->withInput();
         }
     }
@@ -164,14 +164,14 @@ class FuelTypeController extends AbstractBaseCrudController
      *
      * @author Darshan Baraiya
      */
-    public function delete(FuelType $fuel_type)
+    public function delete(FuelType $fuelType): RedirectResponse
     {
         try {
-            $this->fuelTypeService->deleteFuelType($fuel_type);
+            $this->fuelTypeService->deleteFuelType($fuelType);
 
             return $this->redirectWithSuccess('fuel_type.index', $this->getSuccessMessage('Fuel Type', 'deleted'));
-        } catch (\Throwable $th) {
-            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'delete').': '.$th->getMessage());
+        } catch (\Throwable $throwable) {
+            return $this->redirectWithError($this->getErrorMessage('Fuel Type', 'delete').': '.$throwable->getMessage());
         }
     }
 
@@ -206,14 +206,12 @@ class FuelTypeController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
             'headings' => ['ID', 'Name', 'Status', 'Created Date'],
-            'mapping' => function ($model) {
-                return [
-                    $model->id,
-                    $model->name,
-                    $model->status ? 'Active' : 'Inactive',
-                    $model->created_at->format('Y-m-d H:i:s'),
-                ];
-            },
+            'mapping' => fn ($model): array => [
+                $model->id,
+                $model->name,
+                $model->status ? 'Active' : 'Inactive',
+                $model->created_at->format('Y-m-d H:i:s'),
+            ],
             'with_mapping' => true,
         ];
     }

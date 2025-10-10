@@ -20,7 +20,7 @@ class RelationshipManagerService extends BaseService
     public function createRelationshipManager(array $data): RelationshipManager
     {
         return $this->createInTransaction(
-            fn () => RelationshipManager::create($data)
+            fn () => RelationshipManager::query()->create($data)
         );
     }
 

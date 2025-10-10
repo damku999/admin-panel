@@ -2,10 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Customer;
 use App\Models\TrustedDevice;
+use App\Models\TwoFactorAttempt;
 use App\Models\TwoFactorAuth;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -17,7 +16,7 @@ class TwoFactorAuthService extends BaseService
      */
     public function enableTwoFactor($user): array
     {
-        return $this->createInTransaction(function () use ($user) {
+        return $this->createInTransaction(function () use ($user): array {
             // Check if already enabled
             if ($user->hasTwoFactorEnabled()) {
                 throw new \Exception('Two-factor authentication is already enabled.');
@@ -27,7 +26,7 @@ class TwoFactorAuthService extends BaseService
             $twoFactor = $user->enableTwoFactor();
 
             Log::info('2FA setup started', [
-                'user_type' => get_class($user),
+                'user_type' => $user::class,
                 'user_id' => $user->id,
                 'email' => $user->email ?? 'N/A',
             ]);
@@ -51,7 +50,7 @@ class TwoFactorAuthService extends BaseService
      */
     public function confirmTwoFactor($user, string $code, Request $request): bool
     {
-        return $this->updateInTransaction(function () use ($user, $code, $request) {
+        return $this->updateInTransaction(static function () use ($user, $code, $request): bool {
             // Rate limiting check
             if ($user->isTwoFactorRateLimited()) {
                 $user->logTwoFactorAttempt('totp', false, $request, 'Rate limited');
@@ -68,7 +67,7 @@ class TwoFactorAuthService extends BaseService
             $user->logTwoFactorAttempt('totp', true, $request);
 
             Log::info('2FA confirmed and enabled', [
-                'user_type' => get_class($user),
+                'user_type' => $user::class,
                 'user_id' => $user->id,
                 'email' => $user->email ?? 'N/A',
                 'ip_address' => $request->ip(),
@@ -83,19 +82,17 @@ class TwoFactorAuthService extends BaseService
      */
     public function disableTwoFactor($user, ?string $currentPassword = null): bool
     {
-        return $this->updateInTransaction(function () use ($user, $currentPassword) {
+        return $this->updateInTransaction(static function () use ($user, $currentPassword): bool {
             // Verify current password if provided (for security)
-            if ($currentPassword && method_exists($user, 'checkPassword')) {
-                if (! $user->checkPassword($currentPassword)) {
-                    throw new \Exception('Current password is incorrect.');
-                }
+            if ($currentPassword && method_exists($user, 'checkPassword') && ! $user->checkPassword($currentPassword)) {
+                throw new \Exception('Current password is incorrect.');
             }
 
             // Disable 2FA
             $user->disableTwoFactor();
 
             Log::info('2FA disabled', [
-                'user_type' => get_class($user),
+                'user_type' => $user::class,
                 'user_id' => $user->id,
                 'email' => $user->email ?? 'N/A',
             ]);
@@ -109,26 +106,18 @@ class TwoFactorAuthService extends BaseService
      */
     public function verifyTwoFactorLogin($user, string $code, string $codeType, Request $request): bool
     {
-        return $this->executeInTransaction(function () use ($user, $code, $codeType, $request) {
+        return $this->executeInTransaction(static function () use ($user, $code, $codeType, $request): bool {
             // Rate limiting check
             if ($user->isTwoFactorRateLimited()) {
                 $user->logTwoFactorAttempt($codeType, false, $request, 'Rate limited');
                 throw new \Exception('Too many failed attempts. Please try again later.');
             }
-
-            $isValid = false;
-
             // Verify based on code type
-            switch ($codeType) {
-                case 'totp':
-                    $isValid = $user->verifyTwoFactorCode($code);
-                    break;
-                case 'recovery':
-                    $isValid = $user->verifyRecoveryCode($code);
-                    break;
-                default:
-                    throw new \Exception('Invalid code type.');
-            }
+            $isValid = match ($codeType) {
+                'totp' => $user->verifyTwoFactorCode($code),
+                'recovery' => $user->verifyRecoveryCode($code),
+                default => throw new \Exception('Invalid code type.'),
+            };
 
             // Log the attempt
             $user->logTwoFactorAttempt(
@@ -141,13 +130,12 @@ class TwoFactorAuthService extends BaseService
             if (! $isValid) {
                 if ($codeType === 'recovery') {
                     throw new \Exception('Invalid recovery code. This code may have already been used or is not valid.');
-                } else {
-                    throw new \Exception('Invalid verification code.');
                 }
+                throw new \Exception('Invalid verification code.');
             }
 
             Log::info('2FA login verification successful', [
-                'user_type' => get_class($user),
+                'user_type' => $user::class,
                 'user_id' => $user->id,
                 'code_type' => $codeType,
                 'ip_address' => $request->ip(),
@@ -162,13 +150,13 @@ class TwoFactorAuthService extends BaseService
      */
     public function trustDevice($user, Request $request, ?string $deviceName = null): array
     {
-        return $this->createInTransaction(function () use ($user, $request, $deviceName) {
+        return $this->createInTransaction(static function () use ($user, $request, $deviceName): array {
             $userAgent = $request->userAgent() ?? '';
             $ipAddress = $request->ip();
-            $deviceId = \App\Models\TrustedDevice::generateDeviceId($userAgent, $ipAddress);
+            $deviceId = TrustedDevice::generateDeviceId($userAgent, $ipAddress);
 
             // Check if device already exists and is active
-            $existingDevice = \App\Models\TrustedDevice::where('authenticatable_type', get_class($user))
+            $existingDevice = TrustedDevice::query()->where('authenticatable_type', $user::class)
                 ->where('authenticatable_id', $user->id)
                 ->where('device_id', $deviceId)
                 ->where('is_active', true)
@@ -178,7 +166,7 @@ class TwoFactorAuthService extends BaseService
             $device = $user->trustDevice($request, $deviceName);
 
             Log::info('Device trusted', [
-                'user_type' => get_class($user),
+                'user_type' => $user::class,
                 'user_id' => $user->id,
                 'device_id' => $device->device_id,
                 'device_name' => $device->device_name,
@@ -198,12 +186,12 @@ class TwoFactorAuthService extends BaseService
      */
     public function revokeDeviceTrust($user, int $deviceId): bool
     {
-        return $this->updateInTransaction(function () use ($user, $deviceId) {
+        return $this->updateInTransaction(static function () use ($user, $deviceId) {
             $success = $user->revokeDeviceTrust($deviceId);
 
             if ($success) {
                 Log::info('Device trust revoked', [
-                    'user_type' => get_class($user),
+                    'user_type' => $user::class,
                     'user_id' => $user->id,
                     'device_id' => $deviceId,
                 ]);
@@ -218,7 +206,7 @@ class TwoFactorAuthService extends BaseService
      */
     public function generateNewRecoveryCodes($user): array
     {
-        return $this->updateInTransaction(function () use ($user) {
+        return $this->updateInTransaction(static function () use ($user) {
             if (! $user->hasTwoFactorEnabled()) {
                 throw new \Exception('Two-factor authentication is not enabled.');
             }
@@ -226,7 +214,7 @@ class TwoFactorAuthService extends BaseService
             $codes = $user->twoFactorAuth->generateRecoveryCodes();
 
             Log::info('New recovery codes generated', [
-                'user_type' => get_class($user),
+                'user_type' => $user::class,
                 'user_id' => $user->id,
                 'codes_count' => count($codes),
             ]);
@@ -265,20 +253,18 @@ class TwoFactorAuthService extends BaseService
      */
     public function getTrustedDevices($user): array
     {
-        return $user->getActiveTrustedDevices()->map(function ($device) {
-            return [
-                'id' => $device->id,
-                'device_name' => $device->device_name,
-                'display_name' => $device->getDisplayName(),
-                'device_type' => $device->device_type,
-                'browser' => $device->browser,
-                'platform' => $device->platform,
-                'ip_address' => $device->ip_address,
-                'last_used_at' => $device->last_used_at,
-                'trusted_at' => $device->trusted_at,
-                'expires_at' => $device->expires_at,
-            ];
-        })->toArray();
+        return $user->getActiveTrustedDevices()->map(fn ($device): array => [
+            'id' => $device->id,
+            'device_name' => $device->device_name,
+            'display_name' => $device->getDisplayName(),
+            'device_type' => $device->device_type,
+            'browser' => $device->browser,
+            'platform' => $device->platform,
+            'ip_address' => $device->ip_address,
+            'last_used_at' => $device->last_used_at,
+            'trusted_at' => $device->trusted_at,
+            'expires_at' => $device->expires_at,
+        ])->toArray();
     }
 
     /**
@@ -305,20 +291,20 @@ class TwoFactorAuthService extends BaseService
      */
     public function cleanupExpiredData(): int
     {
-        return $this->executeInTransaction(function () {
-            $expiredDevices = TrustedDevice::where('expires_at', '<', now())
+        return $this->executeInTransaction(static function (): float|int|array {
+            $expiredDevices = TrustedDevice::query()->where('expires_at', '<', now())
                 ->where('is_active', true)
                 ->count();
 
             // Deactivate expired devices
-            TrustedDevice::where('expires_at', '<', now())
+            TrustedDevice::query()->where('expires_at', '<', now())
                 ->update(['is_active' => false]);
 
             // Delete old 2FA attempts (keep last 30 days)
-            $oldAttempts = \App\Models\TwoFactorAttempt::where('attempted_at', '<', now()->subDays(30))
+            $oldAttempts = TwoFactorAttempt::query()->where('attempted_at', '<', now()->subDays(30))
                 ->count();
 
-            \App\Models\TwoFactorAttempt::where('attempted_at', '<', now()->subDays(30))
+            TwoFactorAttempt::query()->where('attempted_at', '<', now()->subDays(30))
                 ->delete();
 
             Log::info('2FA cleanup completed', [
@@ -336,13 +322,13 @@ class TwoFactorAuthService extends BaseService
     public function getStatistics(): array
     {
         return [
-            'total_users_with_2fa' => TwoFactorAuth::where('is_active', true)->count(),
+            'total_users_with_2fa' => TwoFactorAuth::query()->where('is_active', true)->count(),
             'total_trusted_devices' => TrustedDevice::valid()->count(),
-            'recent_2fa_attempts' => \App\Models\TwoFactorAttempt::where('attempted_at', '>=', now()->subDay())->count(),
-            'successful_2fa_attempts_today' => \App\Models\TwoFactorAttempt::where('attempted_at', '>=', now()->startOfDay())
+            'recent_2fa_attempts' => TwoFactorAttempt::query()->where('attempted_at', '>=', now()->subDay())->count(),
+            'successful_2fa_attempts_today' => TwoFactorAttempt::query()->where('attempted_at', '>=', now()->startOfDay())
                 ->where('successful', true)
                 ->count(),
-            'failed_2fa_attempts_today' => \App\Models\TwoFactorAttempt::where('attempted_at', '>=', now()->startOfDay())
+            'failed_2fa_attempts_today' => TwoFactorAttempt::query()->where('attempted_at', '>=', now()->startOfDay())
                 ->where('successful', false)
                 ->count(),
         ];

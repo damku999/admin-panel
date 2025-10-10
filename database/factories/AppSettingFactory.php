@@ -19,7 +19,7 @@ class AppSettingFactory extends Factory
 
         // Generate unique key using timestamp + counter to avoid database duplicates
         self::$keyCounter++;
-        $uniqueKey = 'test_setting_' . time() . '_' . self::$keyCounter . '_' . $this->faker->unique()->numberBetween(1000, 9999);
+        $uniqueKey = 'test_setting_'.time().'_'.self::$keyCounter.'_'.$this->faker->unique()->numberBetween(1000, 9999);
 
         return [
             'key' => $uniqueKey,

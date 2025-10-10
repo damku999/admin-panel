@@ -3,12 +3,22 @@
 namespace App\Models;
 
 use App\Traits\TableRecordObserver;
+use Database\Factories\ReferenceUserFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -19,47 +29,54 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $email
  * @property string|null $mobile_number
  * @property int $status
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property int|null $deleted_by
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Activitylog\Models\Activity> $activities
+ * @property-read Collection<int, Activity> $activities
  * @property-read int|null $activities_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CustomerInsurance> $customerInsurances
+ * @property-read Collection<int, CustomerInsurance> $customerInsurances
  * @property-read int|null $customer_insurances_count
- * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
+ * @property-read Collection<int, Permission> $permissions
  * @property-read int|null $permissions_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
+ * @property-read Collection<int, Role> $roles
  * @property-read int|null $roles_count
- * @method static \Database\Factories\ReferenceUserFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser permission($permissions)
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser query()
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser role($roles, $guard = null)
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser whereCreatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser whereDeletedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser whereDeletedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser whereEmail($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser whereMobileNumber($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser whereName($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser whereUpdatedBy($value)
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser withTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|ReferenceUser withoutTrashed()
- * @mixin \Eloquent
+ *
+ * @method static ReferenceUserFactory factory($count = null, $state = [])
+ * @method static Builder|ReferenceUser newModelQuery()
+ * @method static Builder|ReferenceUser newQuery()
+ * @method static Builder|ReferenceUser onlyTrashed()
+ * @method static Builder|ReferenceUser permission($permissions)
+ * @method static Builder|ReferenceUser query()
+ * @method static Builder|ReferenceUser role($roles, $guard = null)
+ * @method static Builder|ReferenceUser whereCreatedAt($value)
+ * @method static Builder|ReferenceUser whereCreatedBy($value)
+ * @method static Builder|ReferenceUser whereDeletedAt($value)
+ * @method static Builder|ReferenceUser whereDeletedBy($value)
+ * @method static Builder|ReferenceUser whereEmail($value)
+ * @method static Builder|ReferenceUser whereId($value)
+ * @method static Builder|ReferenceUser whereMobileNumber($value)
+ * @method static Builder|ReferenceUser whereName($value)
+ * @method static Builder|ReferenceUser whereStatus($value)
+ * @method static Builder|ReferenceUser whereUpdatedAt($value)
+ * @method static Builder|ReferenceUser whereUpdatedBy($value)
+ * @method static Builder|ReferenceUser withTrashed()
+ * @method static Builder|ReferenceUser withoutTrashed()
+ *
+ * @mixin Model
  */
 class ReferenceUser extends Authenticatable
 {
-    use HasFactory, HasRoles, LogsActivity, Notifiable, SoftDeletes, TableRecordObserver;
+    use HasFactory;
+    use HasRoles;
+    use LogsActivity;
+    use Notifiable;
+    use SoftDeletes;
+    use TableRecordObserver;
 
     protected static $logAttributes = ['*'];
 

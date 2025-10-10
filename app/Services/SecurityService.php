@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Log;
+
 class SecurityService
 {
     public function getContentSecurityPolicy(): array
@@ -54,6 +56,6 @@ class SecurityService
 
     public function logSecurityEvent(string $event, array $context = []): void
     {
-        \Illuminate\Support\Facades\Log::channel('security')->warning($event, $context);
+        Log::channel('security')->warning($event, $context);
     }
 }

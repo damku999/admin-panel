@@ -31,9 +31,9 @@ abstract class BaseService
             DB::commit();
 
             return $result;
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             DB::rollBack();
-            throw $th;
+            throw $throwable;
         }
     }
 
@@ -95,7 +95,7 @@ abstract class BaseService
      */
     protected function executeMultipleInTransaction(array $callbacks): array
     {
-        return $this->executeInTransaction(function () use ($callbacks) {
+        return $this->executeInTransaction(static function () use ($callbacks) {
             $results = [];
             foreach ($callbacks as $callback) {
                 $results[] = $callback();

@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Contracts\Services\InsuranceCompanyServiceInterface;
 use App\Models\InsuranceCompany;
 use App\Traits\ExportableTrait;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\View\View;
 
 /**
  * Insurance Company Controller
@@ -33,9 +36,9 @@ class InsuranceCompanyController extends AbstractBaseCrudController
      */
     public function index(Request $request)
     {
-        $insurance_companies = $this->insuranceCompanyService->getInsuranceCompanies($request);
+        $lengthAwarePaginator = $this->insuranceCompanyService->getInsuranceCompanies($request);
 
-        return view('insurance_companies.index', ['insurance_companies' => $insurance_companies, 'request' => $request->all()]);
+        return view('insurance_companies.index', ['insurance_companies' => $lengthAwarePaginator, 'request' => $request->all()]);
     }
 
     /**
@@ -54,7 +57,7 @@ class InsuranceCompanyController extends AbstractBaseCrudController
     /**
      * Store InsuranceCompany
      *
-     * @return \Illuminate\View\View InsuranceCompanys
+     * @return View InsuranceCompanys
      *
      * @author Darshan Baraiya
      */
@@ -73,9 +76,9 @@ class InsuranceCompanyController extends AbstractBaseCrudController
 
             return $this->redirectWithSuccess('insurance_companies.index',
                 $this->getSuccessMessage('Insurance Company', 'created'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Insurance Company', 'create').': '.$th->getMessage())
+                $this->getErrorMessage('Insurance Company', 'create').': '.$throwable->getMessage())
                 ->withInput();
         }
     }
@@ -83,54 +86,53 @@ class InsuranceCompanyController extends AbstractBaseCrudController
     /**
      * Update Status Of InsuranceCompany
      *
-     * @param  int  $status
-     * @return \Illuminate\Http\RedirectResponse Page With Success
+     * @return RedirectResponse Page With Success
      *
      * @author Darshan Baraiya
      */
-    public function updateStatus($insurance_company_id, $status)
+    public function updateStatus(int $insurance_company_id, int $status): RedirectResponse
     {
         try {
             $this->insuranceCompanyService->updateStatus($insurance_company_id, $status);
 
             return $this->redirectWithSuccess('insurance_companies.index',
                 $this->getSuccessMessage('Insurance Company status', 'updated'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Insurance Company status', 'update').': '.$th->getMessage());
+                $this->getErrorMessage('Insurance Company status', 'update').': '.$throwable->getMessage());
         }
     }
 
     /**
      * Edit InsuranceCompany
      *
-     * @param  int  $insurance_company
-     * @return \Illuminate\Support\Collection $insurance_company
+     * @param  int  $insuranceCompany
+     * @return Collection $insurance_company
      *
      * @author Darshan Baraiya
      */
-    public function edit(InsuranceCompany $insurance_company)
+    public function edit(InsuranceCompany $insuranceCompany)
     {
         return view('insurance_companies.edit')->with([
-            'insurance_company' => $insurance_company,
+            'insurance_company' => $insuranceCompany,
         ]);
     }
 
     /**
      * Update InsuranceCompany
      *
-     * @return \Illuminate\View\View InsuranceCompanys
+     * @return View InsuranceCompanys
      *
      * @author Darshan Baraiya
      */
-    public function update(Request $request, InsuranceCompany $insurance_company)
+    public function update(Request $request, InsuranceCompany $insuranceCompany)
     {
         $request->validate([
             'name' => 'required',
         ]);
 
         try {
-            $this->insuranceCompanyService->updateInsuranceCompany($insurance_company, [
+            $this->insuranceCompanyService->updateInsuranceCompany($insuranceCompany, [
                 'name' => $request->name,
                 'email' => $request->email,
                 'mobile_number' => $request->mobile_number,
@@ -138,9 +140,9 @@ class InsuranceCompanyController extends AbstractBaseCrudController
 
             return $this->redirectWithSuccess('insurance_companies.index',
                 $this->getSuccessMessage('Insurance Company', 'updated'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Insurance Company', 'update').': '.$th->getMessage())
+                $this->getErrorMessage('Insurance Company', 'update').': '.$throwable->getMessage())
                 ->withInput();
         }
     }
@@ -148,20 +150,20 @@ class InsuranceCompanyController extends AbstractBaseCrudController
     /**
      * Delete InsuranceCompany
      *
-     * @return \Illuminate\Http\RedirectResponse InsuranceCompanys
+     * @return RedirectResponse InsuranceCompanys
      *
      * @author Darshan Baraiya
      */
-    public function delete(InsuranceCompany $insurance_company)
+    public function delete(InsuranceCompany $insuranceCompany): RedirectResponse
     {
         try {
-            $this->insuranceCompanyService->deleteInsuranceCompany($insurance_company);
+            $this->insuranceCompanyService->deleteInsuranceCompany($insuranceCompany);
 
             return $this->redirectWithSuccess('insurance_companies.index',
                 $this->getSuccessMessage('Insurance Company', 'deleted'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Insurance Company', 'delete').': '.$th->getMessage());
+                $this->getErrorMessage('Insurance Company', 'delete').': '.$throwable->getMessage());
         }
     }
 
@@ -185,16 +187,14 @@ class InsuranceCompanyController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
             'headings' => ['ID', 'Name', 'Email', 'Mobile Number', 'Status', 'Created Date'],
-            'mapping' => function ($model) {
-                return [
-                    $model->id,
-                    $model->name,
-                    $model->email ?? 'N/A',
-                    $model->mobile_number ?? 'N/A',
-                    $model->status ? 'Active' : 'Inactive',
-                    $model->created_at->format('Y-m-d H:i:s'),
-                ];
-            },
+            'mapping' => fn ($model): array => [
+                $model->id,
+                $model->name,
+                $model->email ?? 'N/A',
+                $model->mobile_number ?? 'N/A',
+                $model->status ? 'Active' : 'Inactive',
+                $model->created_at->format('Y-m-d H:i:s'),
+            ],
             'with_mapping' => true,
         ];
     }

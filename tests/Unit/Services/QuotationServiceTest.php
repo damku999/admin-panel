@@ -132,7 +132,7 @@ test('creates manual company quotes during quotation creation', function () {
 
     QuotationCompany::shouldReceive('create')
         ->twice()
-        ->andReturn(new QuotationCompany());
+        ->andReturn(new QuotationCompany);
 
     $result = $this->service->createQuotation($quotationData);
 
@@ -188,7 +188,7 @@ test('updates quotation with companies successfully', function () {
 
     QuotationCompany::shouldReceive('create')
         ->once()
-        ->andReturn(new QuotationCompany());
+        ->andReturn(new QuotationCompany);
 
     $this->service->updateQuotationWithCompanies($quotation, $updateData);
 
@@ -542,7 +542,7 @@ test('generates company quotes for selected companies', function () {
 
     QuotationCompany::shouldReceive('create')
         ->twice()
-        ->andReturn(new QuotationCompany());
+        ->andReturn(new QuotationCompany);
 
     $quotation->shouldReceive('quotationCompanies->orderBy->get')
         ->andReturn(collect([
@@ -595,7 +595,7 @@ test('processes addon breakdown correctly', function () {
             return isset($data['addon_covers_breakdown']) &&
                    count($data['addon_covers_breakdown']) === 3;
         }))
-        ->andReturn(new QuotationCompany());
+        ->andReturn(new QuotationCompany);
 
     $result = $this->service->createQuotation($quotationData);
 
@@ -649,7 +649,7 @@ test('handles null addon covers breakdown', function () {
 
     QuotationCompany::shouldReceive('create')
         ->once()
-        ->andReturn(new QuotationCompany());
+        ->andReturn(new QuotationCompany);
 
     $result = $this->service->createQuotation($quotationData);
 
@@ -686,7 +686,7 @@ test('handles duplicate company quotes in array', function () {
     // Should only create once due to duplicate detection
     QuotationCompany::shouldReceive('create')
         ->once()
-        ->andReturn(new QuotationCompany());
+        ->andReturn(new QuotationCompany);
 
     $result = $this->service->createQuotation($quotationData);
 
@@ -728,7 +728,7 @@ test('calculates company rating factor correctly', function () {
             // HDFC ERGO has 0.95 factor, premium should reflect that
             return $data['insurance_company_id'] === 1;
         }))
-        ->andReturn(new QuotationCompany());
+        ->andReturn(new QuotationCompany);
 
     $quotation->shouldReceive('quotationCompanies->orderBy->get')
         ->andReturn(collect([

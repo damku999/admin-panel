@@ -11,11 +11,8 @@ use Illuminate\Support\Facades\Log;
 
 class NotificationLogController extends Controller
 {
-    protected NotificationLoggerService $loggerService;
-
-    public function __construct(NotificationLoggerService $loggerService)
+    public function __construct(protected NotificationLoggerService $loggerService)
     {
-        $this->loggerService = $loggerService;
         $this->middleware('auth');
         $this->middleware('permission:notification-log-list')->only(['index']);
         $this->middleware('permission:notification-log-view')->only(['show']);
@@ -28,81 +25,81 @@ class NotificationLogController extends Controller
      */
     public function index(Request $request)
     {
-        $query = NotificationLog::with(['notificationType', 'template', 'sender'])
+        $builder = NotificationLog::with(['notificationType', 'template', 'sender'])
             ->orderBy('created_at', 'desc');
 
         // Apply filters
         if ($request->filled('channel')) {
-            $query->where('channel', $request->channel);
+            $builder->where('channel', $request->channel);
         }
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $builder->where('status', $request->status);
         }
 
         if ($request->filled('notifiable_type')) {
-            $query->where('notifiable_type', $request->notifiable_type);
+            $builder->where('notifiable_type', $request->notifiable_type);
         }
 
         if ($request->filled('from_date')) {
-            $query->whereDate('created_at', '>=', $request->from_date);
+            $builder->whereDate('created_at', '>=', $request->from_date);
         }
 
         if ($request->filled('to_date')) {
-            $query->whereDate('created_at', '<=', $request->to_date);
+            $builder->whereDate('created_at', '<=', $request->to_date);
         }
 
         if ($request->filled('search')) {
-            $query->where(function ($q) use ($request) {
+            $builder->where(static function ($q) use ($request): void {
                 $q->where('recipient', 'like', '%'.$request->search.'%')
                     ->orWhere('message_content', 'like', '%'.$request->search.'%');
             });
         }
 
-        $logs = $query->paginate(25);
+        $builder->paginate(25);
 
-        $notificationTypes = NotificationType::where('is_active', true)
+        $notificationTypes = NotificationType::query()->where('is_active', true)
             ->orderBy('name')
             ->get();
 
-        return view('admin.notification_logs.index', compact('logs', 'notificationTypes'));
+        return view('admin.notification_logs.index', ['logs' => $logs, 'notificationTypes' => $notificationTypes]);
     }
 
     /**
      * Show notification log details
      */
-    public function show(NotificationLog $log)
+    public function show(NotificationLog $notificationLog)
     {
-        $log->load(['notificationType', 'template', 'sender', 'deliveryTracking', 'notifiable']);
+        $notificationLog->load(['notificationType', 'template', 'sender', 'deliveryTracking', 'notifiable']);
 
-        return view('admin.notification_logs.show', compact('log'));
+        return view('admin.notification_logs.show', ['log' => $log]);
     }
 
     /**
      * Resend a failed notification
      */
-    public function resend(NotificationLog $log)
+    public function resend(NotificationLog $notificationLog)
     {
         try {
-            if (! $log->canRetry()) {
+            if (! $notificationLog->canRetry()) {
                 return back()->with('error', 'This notification cannot be retried (max attempts reached or not in failed status).');
             }
 
-            $success = $this->loggerService->retryNotification($log);
+            $success = $this->loggerService->retryNotification($notificationLog);
 
             if ($success) {
                 return back()->with('success', 'Notification queued for resending.');
-            } else {
-                return back()->with('error', 'Failed to queue notification for resending.');
             }
 
-        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to queue notification for resending.');
+
+        } catch (\Exception $exception) {
             Log::error('Failed to resend notification', [
-                'log_id' => $log->id,
-                'error' => $e->getMessage(),
+                'log_id' => $notificationLog->id,
+                'error' => $exception->getMessage(),
             ]);
 
-            return back()->with('error', 'Error: '.$e->getMessage());
+            return back()->with('error', 'Error: '.$exception->getMessage());
         }
     }
 
@@ -117,7 +114,7 @@ class NotificationLogController extends Controller
         ]);
 
         try {
-            $logs = NotificationLog::whereIn('id', $request->log_ids)->get();
+            $logs = NotificationLog::query()->whereIn('id', $request->log_ids)->get();
             $queued = 0;
             $skipped = 0;
 
@@ -130,19 +127,19 @@ class NotificationLogController extends Controller
                 }
             }
 
-            $message = "Queued {$queued} notification(s) for resending.";
+            $message = sprintf('Queued %d notification(s) for resending.', $queued);
             if ($skipped > 0) {
-                $message .= " Skipped {$skipped} notification(s) (max retries or invalid status).";
+                $message .= sprintf(' Skipped %d notification(s) (max retries or invalid status).', $skipped);
             }
 
             return back()->with('success', $message);
 
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Failed to bulk resend notifications', [
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
-            return back()->with('error', 'Error: '.$e->getMessage());
+            return back()->with('error', 'Error: '.$exception->getMessage());
         }
     }
 
@@ -166,14 +163,14 @@ class NotificationLogController extends Controller
         ]);
 
         // Get daily volume for chart
-        $dailyVolume = NotificationLog::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+        $dailyVolume = NotificationLog::query()->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->whereBetween('created_at', [$fromDate, $toDate])
             ->groupBy('date')
             ->orderBy('date')
             ->get();
 
         // Get channel performance
-        $channelPerformance = NotificationLog::selectRaw('channel, status, COUNT(*) as count')
+        $channelPerformance = NotificationLog::query()->selectRaw('channel, status, COUNT(*) as count')
             ->whereBetween('created_at', [$fromDate, $toDate])
             ->groupBy('channel', 'status')
             ->get()
@@ -187,14 +184,7 @@ class NotificationLogController extends Controller
             ->limit(10)
             ->get();
 
-        return view('admin.notification_logs.analytics', compact(
-            'statistics',
-            'dailyVolume',
-            'channelPerformance',
-            'failedNotifications',
-            'fromDate',
-            'toDate'
-        ));
+        return view('admin.notification_logs.analytics', ['statistics' => $statistics, 'dailyVolume' => $dailyVolume, 'channelPerformance' => $channelPerformance, 'failedNotifications' => $failedNotifications, 'fromDate' => $fromDate, 'toDate' => $toDate]);
     }
 
     /**
@@ -209,14 +199,14 @@ class NotificationLogController extends Controller
         try {
             $count = $this->loggerService->archiveOldLogs($request->days_old);
 
-            return back()->with('success', "Archived {$count} old notification log(s).");
+            return back()->with('success', sprintf('Archived %d old notification log(s).', $count));
 
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Failed to cleanup notification logs', [
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
-            return back()->with('error', 'Error: '.$e->getMessage());
+            return back()->with('error', 'Error: '.$exception->getMessage());
         }
     }
 }

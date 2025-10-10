@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Services\AuditService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,7 +12,7 @@ use Illuminate\View\View;
 class SecurityController extends Controller
 {
     public function __construct(
-        private AuditService $auditService
+        private readonly AuditService $auditService
     ) {
         $this->middleware('auth');
         $this->middleware('permission:security.monitor')->except(['dashboard']);
@@ -26,7 +27,7 @@ class SecurityController extends Controller
         $recentActivity = $this->auditService->getRecentActivity(24, 20);
         $suspiciousActivity = $this->auditService->getSuspiciousActivity(7);
 
-        return view('security.dashboard', compact('metrics', 'recentActivity', 'suspiciousActivity'));
+        return view('security.dashboard', ['metrics' => $metrics, 'recentActivity' => $recentActivity, 'suspiciousActivity' => $suspiciousActivity]);
     }
 
     /**
@@ -39,9 +40,9 @@ class SecurityController extends Controller
             'ip_address', 'actor_id', 'actor_type', 'date_from', 'date_to', 'search',
         ]);
 
-        $logs = $this->auditService->searchLogs($filters, 25);
+        $this->auditService->searchLogs($filters, 25);
 
-        return view('security.audit-logs', compact('logs', 'filters'));
+        return view('security.audit-logs', ['logs' => $logs, 'filters' => $filters]);
     }
 
     /**
@@ -95,7 +96,7 @@ class SecurityController extends Controller
      */
     public function userActivity(Request $request, $userId): JsonResponse
     {
-        $userType = $request->input('user_type', 'App\\Models\\User');
+        $userType = $request->input('user_type', User::class);
         $days = $request->input('days', 30);
 
         $activity = $this->auditService->getActivityByUser($userId, $userType, $days);
@@ -161,7 +162,7 @@ class SecurityController extends Controller
 
         return response($data, 200, [
             'Content-Type' => $contentType,
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Content-Disposition' => sprintf('attachment; filename="%s"', $filename),
         ]);
     }
 

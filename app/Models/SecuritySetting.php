@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use Database\Factories\SecuritySettingFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\SecuritySetting
@@ -19,26 +22,28 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property int $session_timeout
  * @property int $device_trust_duration
  * @property array|null $notification_preferences
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read Model|\Eloquent $settingable
- * @method static \Database\Factories\SecuritySettingFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting query()
- * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereDeviceTrackingEnabled($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereDeviceTrustDuration($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereLoginNotifications($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereNotificationPreferences($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereSecurityAlerts($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereSessionTimeout($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereSettingableId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereSettingableType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereTwoFactorEnabled($value)
- * @method static \Illuminate\Database\Eloquent\Builder|SecuritySetting whereUpdatedAt($value)
- * @mixin \Eloquent
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Model|Model $settingable
+ *
+ * @method static SecuritySettingFactory factory($count = null, $state = [])
+ * @method static Builder|SecuritySetting newModelQuery()
+ * @method static Builder|SecuritySetting newQuery()
+ * @method static Builder|SecuritySetting query()
+ * @method static Builder|SecuritySetting whereCreatedAt($value)
+ * @method static Builder|SecuritySetting whereDeviceTrackingEnabled($value)
+ * @method static Builder|SecuritySetting whereDeviceTrustDuration($value)
+ * @method static Builder|SecuritySetting whereId($value)
+ * @method static Builder|SecuritySetting whereLoginNotifications($value)
+ * @method static Builder|SecuritySetting whereNotificationPreferences($value)
+ * @method static Builder|SecuritySetting whereSecurityAlerts($value)
+ * @method static Builder|SecuritySetting whereSessionTimeout($value)
+ * @method static Builder|SecuritySetting whereSettingableId($value)
+ * @method static Builder|SecuritySetting whereSettingableType($value)
+ * @method static Builder|SecuritySetting whereTwoFactorEnabled($value)
+ * @method static Builder|SecuritySetting whereUpdatedAt($value)
+ *
+ * @mixin Model
  */
 class SecuritySetting extends Model
 {

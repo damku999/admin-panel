@@ -63,7 +63,7 @@ class NotificationContext
      */
     public function hasCustomer(): bool
     {
-        return $this->customer !== null;
+        return $this->customer instanceof Customer;
     }
 
     /**
@@ -71,7 +71,7 @@ class NotificationContext
      */
     public function hasInsurance(): bool
     {
-        return $this->insurance !== null;
+        return $this->insurance instanceof CustomerInsurance;
     }
 
     /**
@@ -79,7 +79,7 @@ class NotificationContext
      */
     public function hasQuotation(): bool
     {
-        return $this->quotation !== null;
+        return $this->quotation instanceof Quotation;
     }
 
     /**
@@ -87,7 +87,7 @@ class NotificationContext
      */
     public function hasClaim(): bool
     {
-        return $this->claim !== null;
+        return $this->claim instanceof Claim;
     }
 
     /**
@@ -98,7 +98,7 @@ class NotificationContext
     public function hasRequiredContext(array $required): bool
     {
         foreach ($required as $entity) {
-            $method = 'has'.ucfirst($entity);
+            $method = 'has'.ucfirst((string) $entity);
             if (method_exists($this, $method) && ! $this->$method()) {
                 return false;
             }
@@ -122,6 +122,7 @@ class NotificationContext
             if (! isset($value[$k])) {
                 return null;
             }
+
             $value = $value[$k];
         }
 
@@ -175,7 +176,7 @@ class NotificationContext
         ])->find($customerId);
 
         $insurance = null;
-        if ($insuranceId) {
+        if ($insuranceId !== null && $insuranceId !== 0) {
             $insurance = CustomerInsurance::with([
                 'insuranceCompany',
                 'policyType',
@@ -271,12 +272,12 @@ class NotificationContext
      */
     public static function sample(): static
     {
-        $customer = Customer::where('status', true)
+        $customer = Customer::query()->where('status', true)
             ->with(['familyGroup', 'customerType'])
             ->inRandomOrder()
             ->first();
 
-        $insurance = CustomerInsurance::where('status', true)
+        $insurance = CustomerInsurance::query()->where('status', true)
             ->with([
                 'insuranceCompany',
                 'policyType',

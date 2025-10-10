@@ -35,7 +35,7 @@ class SmsService
      * @param  string  $notificationTypeCode  Notification type code (e.g., 'renewal_7_days')
      * @param  NotificationContext|array  $context  Context for template variables (new) or legacy array
      * @param  int|null  $customerId  Optional customer ID for logging and tracking
-     * @return bool  True on successful send, false on template missing or sending error
+     * @return bool True on successful send, false on template missing or sending error
      */
     public function sendTemplatedSms(
         string $to,
@@ -47,7 +47,7 @@ class SmsService
             // Render template
             $message = $this->templateService->render($notificationTypeCode, 'sms', $context);
 
-            if (! $message) {
+            if (in_array($message, [null, '', '0'], true)) {
                 Log::warning('SMS template not found', [
                     'notification_type' => $notificationTypeCode,
                     'channel' => 'sms',
@@ -64,11 +64,11 @@ class SmsService
 
             return $response['success'] ?? false;
 
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Templated SMS sending failed', [
                 'notification_type' => $notificationTypeCode,
                 'to' => $to,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return false;
@@ -92,7 +92,7 @@ class SmsService
      * @param  Customer  $customer  Customer with mobile number and preferences
      * @param  string  $notificationTypeCode  Notification type code
      * @param  NotificationContext|array  $context  Context for template variables
-     * @return bool  True on successful send, false if no mobile or preferences block sending
+     * @return bool True on successful send, false if no mobile or preferences block sending
      */
     public function sendToCustomer(
         Customer $customer,
@@ -145,24 +145,20 @@ class SmsService
      *
      * @param  Customer  $customer  Customer with notification_preferences JSON field
      * @param  string  $notificationTypeCode  Notification type to check
-     * @return bool  True if SMS allowed, false if blocked by preferences
+     * @return bool True if SMS allowed, false if blocked by preferences
      */
     protected function canSendSmsToCustomer(Customer $customer, string $notificationTypeCode): bool
     {
         $preferences = $customer->notification_preferences ?? [];
 
         // Check if SMS channel is enabled for customer
-        if (isset($preferences['channels']) && is_array($preferences['channels'])) {
-            if (! in_array('sms', $preferences['channels'])) {
-                return false;
-            }
+        if (isset($preferences['channels']) && is_array($preferences['channels']) && ! in_array('sms', $preferences['channels'])) {
+            return false;
         }
 
         // Check if customer opted out of this notification type
-        if (isset($preferences['opt_out_types']) && is_array($preferences['opt_out_types'])) {
-            if (in_array($notificationTypeCode, $preferences['opt_out_types'])) {
-                return false;
-            }
+        if (isset($preferences['opt_out_types']) && is_array($preferences['opt_out_types']) && in_array($notificationTypeCode, $preferences['opt_out_types'])) {
+            return false;
         }
 
         // Check quiet hours
@@ -195,16 +191,14 @@ class SmsService
      * services like bit.ly or TinyURL.
      *
      * @param  string  $message  Message potentially containing URLs
-     * @return string  Message with URLs replaced by shortened versions
+     * @return string Message with URLs replaced by shortened versions
      */
     protected function shortenUrlsInMessage(string $message): string
     {
         // Find URLs in message
         $pattern = '/(https?:\/\/[^\s]+)/i';
 
-        return preg_replace_callback($pattern, function ($matches) {
-            return $this->shortenUrl($matches[0]);
-        }, $message);
+        return preg_replace_callback($pattern, fn ($matches): string => $this->shortenUrl($matches[0]), $message);
     }
 
     /**
@@ -222,7 +216,7 @@ class SmsService
      * @param  string  $to  Recipient phone number (with country code)
      * @param  string  $message  Complete message content (no template processing)
      * @param  int|null  $customerId  Optional customer ID for logging
-     * @return bool  True on successful send, false on sending error
+     * @return bool True on successful send, false on sending error
      */
     public function sendPlainSms(string $to, string $message, ?int $customerId = null): bool
     {
@@ -230,10 +224,10 @@ class SmsService
             $response = $this->sendSms($message, $to, $customerId);
 
             return $response['success'] ?? false;
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Plain SMS sending failed', [
                 'to' => $to,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
             ]);
 
             return false;
@@ -258,7 +252,7 @@ class SmsService
      * - Message SID tracking in notification logs
      *
      * @param  string  $messageSid  Provider message identifier (e.g., Twilio SID)
-     * @return array  Status information array (currently returns ['status' => 'unknown'])
+     * @return array Status information array (currently returns ['status' => 'unknown'])
      */
     public function getDeliveryStatus(string $messageSid): array
     {

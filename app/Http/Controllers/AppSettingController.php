@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\AppSetting;
 use App\Services\AppSettingService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 /**
  * App Setting Controller
@@ -14,8 +17,6 @@ use Illuminate\Http\Request;
  */
 class AppSettingController extends AbstractBaseCrudController
 {
-    protected AppSettingService $appSettingService;
-
     protected array $categories = [
         'application' => 'Application',
         'company' => 'Company',
@@ -32,16 +33,15 @@ class AppSettingController extends AbstractBaseCrudController
         'numeric' => 'Numeric',
     ];
 
-    public function __construct(AppSettingService $appSettingService)
+    public function __construct(protected AppSettingService $appSettingService)
     {
-        $this->appSettingService = $appSettingService;
         $this->setupPermissionMiddleware('app-setting');
     }
 
     /**
      * Display a listing of the app settings
      *
-     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     * @return View|RedirectResponse
      */
     public function index(Request $request)
     {
@@ -51,10 +51,10 @@ class AppSettingController extends AbstractBaseCrudController
             // Search filter
             if ($request->filled('search')) {
                 $search = $request->search;
-                $query->where(function ($q) use ($search) {
-                    $q->where('key', 'LIKE', "%{$search}%")
-                        ->orWhere('description', 'LIKE', "%{$search}%")
-                        ->orWhere('category', 'LIKE', "%{$search}%");
+                $query->where(static function ($q) use ($search): void {
+                    $q->where('key', 'LIKE', sprintf('%%%s%%', $search))
+                        ->orWhere('description', 'LIKE', sprintf('%%%s%%', $search))
+                        ->orWhere('category', 'LIKE', sprintf('%%%s%%', $search));
                 });
             }
 
@@ -96,15 +96,15 @@ class AppSettingController extends AbstractBaseCrudController
                 'settings' => $settings,
                 'categories' => $this->categories,
             ]);
-        } catch (\Throwable $th) {
-            return $this->redirectWithError('Failed to load settings: '.$th->getMessage());
+        } catch (\Throwable $throwable) {
+            return $this->redirectWithError('Failed to load settings: '.$throwable->getMessage());
         }
     }
 
     /**
      * Show the form for creating a new app setting
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function create()
     {
@@ -117,7 +117,7 @@ class AppSettingController extends AbstractBaseCrudController
     /**
      * Store a newly created app setting in storage
      *
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function store(Request $request)
     {
@@ -159,9 +159,9 @@ class AppSettingController extends AbstractBaseCrudController
                 'app-settings.index',
                 $this->getSuccessMessage('App Setting', 'created')
             );
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('App Setting', 'create').': '.$th->getMessage()
+                $this->getErrorMessage('App Setting', 'create').': '.$throwable->getMessage()
             )->withInput();
         }
     }
@@ -170,20 +170,20 @@ class AppSettingController extends AbstractBaseCrudController
      * Display the specified app setting
      *
      * @param  int  $id
-     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     * @return View|RedirectResponse
      */
     public function show($id)
     {
         try {
-            $setting = AppSetting::findOrFail($id);
+            $setting = AppSetting::query()->findOrFail($id);
 
             return view('app_settings.show', [
                 'setting' => $setting,
                 'categories' => $this->categories,
                 'types' => $this->types,
             ]);
-        } catch (\Throwable $th) {
-            return $this->redirectWithError('Setting not found: '.$th->getMessage());
+        } catch (\Throwable $throwable) {
+            return $this->redirectWithError('Setting not found: '.$throwable->getMessage());
         }
     }
 
@@ -191,20 +191,20 @@ class AppSettingController extends AbstractBaseCrudController
      * Show the form for editing the specified app setting
      *
      * @param  int  $id
-     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
+     * @return View|RedirectResponse
      */
     public function edit($id)
     {
         try {
-            $setting = AppSetting::findOrFail($id);
+            $setting = AppSetting::query()->findOrFail($id);
 
             return view('app_settings.edit', [
                 'setting' => $setting,
                 'categories' => $this->categories,
                 'types' => $this->types,
             ]);
-        } catch (\Throwable $th) {
-            return $this->redirectWithError('Setting not found: '.$th->getMessage());
+        } catch (\Throwable $throwable) {
+            return $this->redirectWithError('Setting not found: '.$throwable->getMessage());
         }
     }
 
@@ -212,7 +212,7 @@ class AppSettingController extends AbstractBaseCrudController
      * Update the specified app setting in storage
      *
      * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function update(Request $request, $id)
     {
@@ -227,7 +227,7 @@ class AppSettingController extends AbstractBaseCrudController
         ]);
 
         try {
-            $setting = AppSetting::findOrFail($id);
+            $setting = AppSetting::query()->findOrFail($id);
 
             // Update the setting
             $setting->update([
@@ -247,9 +247,9 @@ class AppSettingController extends AbstractBaseCrudController
                 'app-settings.index',
                 $this->getSuccessMessage('App Setting', 'updated')
             );
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('App Setting', 'update').': '.$th->getMessage()
+                $this->getErrorMessage('App Setting', 'update').': '.$throwable->getMessage()
             )->withInput();
         }
     }
@@ -258,9 +258,8 @@ class AppSettingController extends AbstractBaseCrudController
      * Remove the specified app setting from storage (soft delete / mark inactive)
      *
      * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy($id)
+    public function destroy($id): RedirectResponse
     {
         try {
             // Check if user has authorized email domain
@@ -268,8 +267,8 @@ class AppSettingController extends AbstractBaseCrudController
             $authorizedDomains = ['@webmonks.in', '@midastech.in'];
             $isAuthorized = false;
 
-            foreach ($authorizedDomains as $domain) {
-                if (str_ends_with($userEmail, $domain)) {
+            foreach ($authorizedDomains as $authorizedDomain) {
+                if (str_ends_with($userEmail, $authorizedDomain)) {
                     $isAuthorized = true;
                     break;
                 }
@@ -281,7 +280,7 @@ class AppSettingController extends AbstractBaseCrudController
                 );
             }
 
-            $setting = AppSetting::findOrFail($id);
+            $setting = AppSetting::query()->findOrFail($id);
 
             // Mark as inactive instead of deleting
             $setting->update(['is_active' => 0]);
@@ -293,9 +292,9 @@ class AppSettingController extends AbstractBaseCrudController
                 'app-settings.index',
                 $this->getSuccessMessage('App Setting', 'deactivated')
             );
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('App Setting', 'deactivate').': '.$th->getMessage()
+                $this->getErrorMessage('App Setting', 'deactivate').': '.$throwable->getMessage()
             );
         }
     }
@@ -305,12 +304,11 @@ class AppSettingController extends AbstractBaseCrudController
      *
      * @param  int  $id
      * @param  int  $status
-     * @return \Illuminate\Http\RedirectResponse
      */
-    public function updateStatus($id, $status)
+    public function updateStatus($id, $status): RedirectResponse
     {
         try {
-            $setting = AppSetting::findOrFail($id);
+            $setting = AppSetting::query()->findOrFail($id);
             $setting->update(['is_active' => $status]);
 
             // Clear cache
@@ -320,9 +318,9 @@ class AppSettingController extends AbstractBaseCrudController
                 'app-settings.index',
                 $this->getSuccessMessage('App Setting status', 'updated')
             );
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('App Setting status', 'update').': '.$th->getMessage()
+                $this->getErrorMessage('App Setting status', 'update').': '.$throwable->getMessage()
             );
         }
     }
@@ -331,12 +329,12 @@ class AppSettingController extends AbstractBaseCrudController
      * Get decrypted value for encrypted setting (AJAX)
      *
      * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function getDecryptedValue($id)
     {
         try {
-            $setting = AppSetting::findOrFail($id);
+            $setting = AppSetting::query()->findOrFail($id);
 
             if (! $setting->is_encrypted) {
                 return response()->json([
@@ -353,10 +351,10 @@ class AppSettingController extends AbstractBaseCrudController
                 'value' => $decryptedValue,
             ]);
 
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error decrypting value: '.$th->getMessage(),
+                'message' => 'Error decrypting value: '.$throwable->getMessage(),
             ], 500);
         }
     }

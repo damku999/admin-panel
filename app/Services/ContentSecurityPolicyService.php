@@ -3,16 +3,17 @@
 namespace App\Services;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ContentSecurityPolicyService
 {
-    private string $nonce;
+    private readonly string $nonce;
 
-    private array $trustedHosts;
+    private readonly array $trustedHosts;
 
-    private bool $isDevelopment;
+    private readonly bool $isDevelopment;
 
-    private bool $reportOnly;
+    private readonly bool $reportOnly;
 
     public function __construct()
     {
@@ -113,7 +114,7 @@ class ContentSecurityPolicyService
         $sources = ["'self'"];
 
         // Add nonce for inline scripts
-        $sources[] = "'nonce-{$this->nonce}'";
+        $sources[] = sprintf("'nonce-%s'", $this->nonce);
 
         // Add trusted CDNs for specific functionality
         $cdnSources = [
@@ -133,7 +134,7 @@ class ContentSecurityPolicyService
         $sources = array_merge($sources, $cdnSources);
 
         // Add trusted hosts
-        if (! empty($this->trustedHosts)) {
+        if ($this->trustedHosts !== []) {
             $sources = array_merge($sources, $this->trustedHosts);
         }
 
@@ -150,7 +151,7 @@ class ContentSecurityPolicyService
         $sources = ["'self'"];
 
         // Add nonce for inline styles
-        $sources[] = "'nonce-{$this->nonce}'";
+        $sources[] = sprintf("'nonce-%s'", $this->nonce);
 
         // Add trusted style CDNs
         $styleCdns = [
@@ -198,7 +199,7 @@ class ContentSecurityPolicyService
         $includeSubdomains = config('security.hsts_include_subdomains', true);
         $preload = config('security.hsts_preload', false);
 
-        $header = "max-age={$maxAge}";
+        $header = 'max-age='.$maxAge;
 
         if ($includeSubdomains) {
             $header .= '; includeSubDomains';
@@ -234,7 +235,7 @@ class ContentSecurityPolicyService
 
     public function logCspViolation(array $violationData): void
     {
-        \Log::channel('security')->warning('CSP Violation detected', [
+        Log::channel('security')->warning('CSP Violation detected', [
             'violation' => $violationData,
             'user_id' => auth()->id(),
             'ip' => request()->ip(),

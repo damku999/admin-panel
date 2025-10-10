@@ -20,25 +20,18 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
     use WhatsAppApiTrait;
 
     /**
-     * Customer Repository instance
-     */
-    private CustomerRepositoryInterface $customerRepository;
-
-    /**
-     * File Upload Service instance
-     */
-    private FileUploadService $fileUploadService;
-
-    /**
      * Constructor
      */
     public function __construct(
-        CustomerRepositoryInterface $customerRepository,
-        FileUploadService $fileUploadService
-    ) {
-        $this->customerRepository = $customerRepository;
-        $this->fileUploadService = $fileUploadService;
-    }
+        /**
+         * Customer Repository instance
+         */
+        private CustomerRepositoryInterface $customerRepository,
+        /**
+         * File Upload Service instance
+         */
+        private FileUploadService $fileUploadService
+    ) {}
 
     /**
      * Get active customers for WhatsApp marketing
@@ -58,9 +51,7 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
         }
 
         return $this->customerRepository->getCustomersByIds($selectedCustomerIds)
-            ->filter(function ($customer) {
-                return $customer->status && ! empty($customer->mobile_number);
-            });
+            ->filter(fn ($customer): bool => $customer->status && ! empty($customer->mobile_number));
     }
 
     /**
@@ -68,7 +59,7 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
      */
     public function sendMarketingCampaign(array $campaignData): array
     {
-        return $this->executeInTransaction(function () use ($campaignData) {
+        return $this->executeInTransaction(function () use ($campaignData): array {
             $customers = $this->getValidCustomersForMarketing(
                 $campaignData['recipients'],
                 $campaignData['selected_customers'] ?? []
@@ -149,12 +140,10 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
 
         return [
             'status' => 'success',
-            'customers' => $customers->map(function ($customer) {
-                return [
-                    'name' => $customer->name,
-                    'mobile_number' => $customer->mobile_number,
-                ];
-            }),
+            'customers' => $customers->map(fn ($customer): array => [
+                'name' => $customer->name,
+                'mobile_number' => $customer->mobile_number,
+            ]),
             'count' => $customers->count(),
         ];
     }
@@ -176,11 +165,11 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
             ]);
 
             return true;
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Marketing WhatsApp text failed', [
                 'customer_id' => $customerId,
                 'mobile_number' => $mobileNumber,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'sent_by' => auth()->id(),
             ]);
 
@@ -206,12 +195,12 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
             ]);
 
             return true;
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Marketing WhatsApp image failed', [
                 'customer_id' => $customerId,
                 'mobile_number' => $mobileNumber,
                 'image_path' => $imagePath,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'sent_by' => auth()->id(),
             ]);
 
@@ -237,9 +226,9 @@ class MarketingWhatsAppService extends BaseService implements MarketingWhatsAppS
                 'last_campaign_date' => $this->getLastCampaignDate(),
                 'campaigns_this_month' => $this->getCampaignsThisMonth(),
             ];
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Failed to get marketing statistics', [
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'user_id' => auth()->id(),
             ]);
 

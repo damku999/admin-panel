@@ -9,6 +9,8 @@ use App\Http\Requests\UpdateClaimRequest;
 use App\Models\Claim;
 use App\Models\CustomerInsurance;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
@@ -22,17 +24,14 @@ use Illuminate\Support\Facades\Log;
 class ClaimService extends BaseService implements ClaimServiceInterface
 {
     /**
-     * Claim Repository instance
-     */
-    private ClaimRepositoryInterface $claimRepository;
-
-    /**
      * Constructor
      */
-    public function __construct(ClaimRepositoryInterface $claimRepository)
-    {
-        $this->claimRepository = $claimRepository;
-    }
+    public function __construct(
+        /**
+         * Claim Repository instance
+         */
+        private readonly ClaimRepositoryInterface $claimRepository
+    ) {}
 
     /**
      * Retrieve paginated claims with filtering and search capabilities.
@@ -45,7 +44,7 @@ class ClaimService extends BaseService implements ClaimServiceInterface
      * - Insurance type: Vehicle, Health, Property filtering
      *
      * @param  Request  $request  HTTP request with filter and pagination parameters
-     * @return LengthAwarePaginator  Paginated claims with customer and insurance relationships
+     * @return LengthAwarePaginator Paginated claims with customer and insurance relationships
      */
     public function getClaims(Request $request): LengthAwarePaginator
     {
@@ -71,23 +70,23 @@ class ClaimService extends BaseService implements ClaimServiceInterface
      *
      * Transaction ensures claim, documents, stage, and liability are created atomically.
      *
-     * @param  StoreClaimRequest  $request  Validated claim creation request
-     * @return Claim  Newly created claim with all relationships loaded
+     * @param  StoreClaimRequest  $storeClaimRequest  Validated claim creation request
+     * @return Claim Newly created claim with all relationships loaded
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException  If insurance not found
-     * @throws \Illuminate\Database\QueryException  On database constraint violations
+     * @throws ModelNotFoundException If insurance not found
+     * @throws QueryException On database constraint violations
      */
-    public function createClaim(StoreClaimRequest $request): Claim
+    public function createClaim(StoreClaimRequest $storeClaimRequest): Claim
     {
-        return $this->createInTransaction(function () use ($request) {
+        return $this->createInTransaction(static function () use ($storeClaimRequest) {
             // Get customer insurance details
-            $customerInsurance = CustomerInsurance::with('customer')->findOrFail($request->customer_insurance_id);
+            $customerInsurance = CustomerInsurance::with('customer')->findOrFail($storeClaimRequest->customer_insurance_id);
 
             // Generate claim number
             $claimNumber = Claim::generateClaimNumber();
 
             // Create claim
-            $claimData = $request->validated();
+            $claimData = $storeClaimRequest->validated();
             $claimData['claim_number'] = $claimNumber;
             $claimData['customer_id'] = $customerInsurance->customer_id;
 
@@ -96,7 +95,7 @@ class ClaimService extends BaseService implements ClaimServiceInterface
                 $claimData['whatsapp_number'] = $customerInsurance->customer->mobile_number;
             }
 
-            $claim = Claim::create($claimData);
+            $claim = Claim::query()->create($claimData);
 
             // Create default documents based on insurance type
             $claim->createDefaultDocuments();
@@ -140,23 +139,23 @@ class ClaimService extends BaseService implements ClaimServiceInterface
      * Transaction ensures claim and liability detail updates are atomic,
      * maintaining referential integrity across related records.
      *
-     * @param  UpdateClaimRequest  $request  Validated claim update request
+     * @param  UpdateClaimRequest  $updateClaimRequest  Validated claim update request
      * @param  Claim  $claim  Claim instance to update
-     * @return bool  True on successful update
+     * @return bool True on successful update
      *
-     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException  If new insurance not found
-     * @throws \Illuminate\Database\QueryException  On database constraint violations
+     * @throws ModelNotFoundException If new insurance not found
+     * @throws QueryException On database constraint violations
      */
-    public function updateClaim(UpdateClaimRequest $request, Claim $claim): bool
+    public function updateClaim(UpdateClaimRequest $updateClaimRequest, Claim $claim): bool
     {
-        return $this->updateInTransaction(function () use ($request, $claim) {
+        return $this->updateInTransaction(static function () use ($updateClaimRequest, $claim) {
             // Get customer insurance details if changed
-            if ($request->customer_insurance_id !== $claim->customer_insurance_id) {
-                $customerInsurance = CustomerInsurance::with('customer')->findOrFail($request->customer_insurance_id);
-                $updateData = $request->validated();
+            if ($updateClaimRequest->customer_insurance_id !== $claim->customer_insurance_id) {
+                $customerInsurance = CustomerInsurance::with('customer')->findOrFail($updateClaimRequest->customer_insurance_id);
+                $updateData = $updateClaimRequest->validated();
                 $updateData['customer_id'] = $customerInsurance->customer_id;
             } else {
-                $updateData = $request->validated();
+                $updateData = $updateClaimRequest->validated();
             }
 
             // Set WhatsApp number from customer if not provided
@@ -193,9 +192,9 @@ class ClaimService extends BaseService implements ClaimServiceInterface
      *
      * @param  int  $claimId  Claim ID to update
      * @param  bool  $status  New status (true = active, false = inactive)
-     * @return bool  True on successful update
+     * @return bool True on successful update
      *
-     * @throws \Exception  On database errors or if claim not found
+     * @throws \Exception On database errors or if claim not found
      */
     public function updateClaimStatus(int $claimId, bool $status): bool
     {
@@ -212,14 +211,14 @@ class ClaimService extends BaseService implements ClaimServiceInterface
 
             return $updated;
 
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Failed to update claim status', [
                 'claim_id' => $claimId,
                 'status' => $status,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'user_id' => auth()->id(),
             ]);
-            throw $e;
+            throw $exception;
         }
     }
 
@@ -234,9 +233,9 @@ class ClaimService extends BaseService implements ClaimServiceInterface
      * Logs deletion for audit trail with claim number and user context.
      *
      * @param  Claim  $claim  Claim instance to soft delete
-     * @return bool  True on successful soft deletion
+     * @return bool True on successful soft deletion
      *
-     * @throws \Exception  On database errors
+     * @throws \Exception On database errors
      */
     public function deleteClaim(Claim $claim): bool
     {
@@ -253,13 +252,13 @@ class ClaimService extends BaseService implements ClaimServiceInterface
 
             return $deleted;
 
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Failed to delete claim', [
                 'claim_id' => $claim->id,
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'user_id' => auth()->id(),
             ]);
-            throw $e;
+            throw $exception;
         }
     }
 
@@ -283,7 +282,7 @@ class ClaimService extends BaseService implements ClaimServiceInterface
      * without requiring exact matches.
      *
      * @param  string  $searchTerm  Search query (min 3 characters)
-     * @return array  Array of matching policies with customer and insurance details
+     * @return array Array of matching policies with customer and insurance details
      */
     public function searchPolicies(string $searchTerm): array
     {
@@ -296,56 +295,54 @@ class ClaimService extends BaseService implements ClaimServiceInterface
             'insuranceCompany:id,name',
             'policyType:id,name',
         ])
-            ->where(function (Builder $query) use ($searchTerm) {
-                $query->where('policy_no', 'like', "%{$searchTerm}%")
-                    ->orWhere('registration_no', 'like', "%{$searchTerm}%")
-                    ->orWhereHas('customer', function (Builder $customerQuery) use ($searchTerm) {
-                        $customerQuery->where('name', 'like', "%{$searchTerm}%")
-                            ->orWhere('email', 'like', "%{$searchTerm}%")
-                            ->orWhere('mobile_number', 'like', "%{$searchTerm}%");
+            ->where(static function (Builder $builder) use ($searchTerm): void {
+                $builder->where('policy_no', 'like', sprintf('%%%s%%', $searchTerm))
+                    ->orWhere('registration_no', 'like', sprintf('%%%s%%', $searchTerm))
+                    ->orWhereHas('customer', static function (Builder $builder) use ($searchTerm): void {
+                        $builder->where('name', 'like', sprintf('%%%s%%', $searchTerm))
+                            ->orWhere('email', 'like', sprintf('%%%s%%', $searchTerm))
+                            ->orWhere('mobile_number', 'like', sprintf('%%%s%%', $searchTerm));
                     });
             })
             ->where('status', true) // Only active policies
             ->limit(20)
             ->get();
 
-        return $policies->map(function ($policy) {
-            return [
-                'id' => $policy->id,
-                'text' => $this->formatPolicyText($policy),
-                'customer_name' => $policy->customer->name ?? '',
-                'customer_email' => $policy->customer->email ?? '',
-                'customer_mobile' => $policy->customer->mobile_number ?? '',
-                'policy_no' => $policy->policy_no ?? '',
-                'registration_no' => $policy->registration_no ?? '',
-                'insurance_company' => $policy->insuranceCompany->name ?? '',
-                'policy_type' => $policy->policyType->name ?? '',
-                'suggested_insurance_type' => $this->suggestInsuranceType($policy),
-            ];
-        })->toArray();
+        return $policies->map(fn ($policy): array => [
+            'id' => $policy->id,
+            'text' => $this->formatPolicyText($policy),
+            'customer_name' => $policy->customer->name ?? '',
+            'customer_email' => $policy->customer->email ?? '',
+            'customer_mobile' => $policy->customer->mobile_number ?? '',
+            'policy_no' => $policy->policy_no ?? '',
+            'registration_no' => $policy->registration_no ?? '',
+            'insurance_company' => $policy->insuranceCompany->name ?? '',
+            'policy_type' => $policy->policyType->name ?? '',
+            'suggested_insurance_type' => $this->suggestInsuranceType($policy),
+        ])->toArray();
     }
 
     /**
      * Format policy text for display in dropdown.
      */
-    private function formatPolicyText(CustomerInsurance $policy): string
+    private function formatPolicyText(CustomerInsurance $customerInsurance): string
     {
         $parts = [];
 
-        if ($policy->customer) {
-            $parts[] = $policy->customer->name;
+        if ($customerInsurance->customer) {
+            $parts[] = $customerInsurance->customer->name;
         }
 
-        if ($policy->policy_no) {
-            $parts[] = "Policy: {$policy->policy_no}";
+        if ($customerInsurance->policy_no) {
+            $parts[] = 'Policy: '.$customerInsurance->policy_no;
         }
 
-        if ($policy->registration_no) {
-            $parts[] = "Reg: {$policy->registration_no}";
+        if ($customerInsurance->registration_no) {
+            $parts[] = 'Reg: '.$customerInsurance->registration_no;
         }
 
-        if ($policy->insuranceCompany) {
-            $parts[] = $policy->insuranceCompany->name;
+        if ($customerInsurance->insuranceCompany) {
+            $parts[] = $customerInsurance->insuranceCompany->name;
         }
 
         return implode(' - ', $parts);
@@ -354,29 +351,29 @@ class ClaimService extends BaseService implements ClaimServiceInterface
     /**
      * Suggest insurance type based on policy type.
      */
-    private function suggestInsuranceType(CustomerInsurance $policy): string
+    private function suggestInsuranceType(CustomerInsurance $customerInsurance): string
     {
         // Check policy type or other indicators to suggest insurance type
-        $policyTypeName = strtolower($policy->policyType->name ?? '');
+        $policyTypeName = strtolower($customerInsurance->policyType->name ?? '');
 
         // Vehicle insurance indicators
         $vehicleKeywords = ['motor', 'vehicle', 'car', 'bike', 'auto', 'comprehensive', 'third party'];
         foreach ($vehicleKeywords as $keyword) {
-            if (strpos($policyTypeName, $keyword) !== false) {
+            if (str_contains($policyTypeName, $keyword)) {
                 return 'Vehicle';
             }
         }
 
         // Health insurance indicators
         $healthKeywords = ['health', 'medical', 'mediclaim', 'hospital', 'disease'];
-        foreach ($healthKeywords as $keyword) {
-            if (strpos($policyTypeName, $keyword) !== false) {
+        foreach ($healthKeywords as $healthKeyword) {
+            if (str_contains($policyTypeName, $healthKeyword)) {
                 return 'Health';
             }
         }
 
         // If registration number exists, likely vehicle
-        if (! empty($policy->registration_no)) {
+        if (! empty($customerInsurance->registration_no)) {
             return 'Vehicle';
         }
 
@@ -398,16 +395,16 @@ class ClaimService extends BaseService implements ClaimServiceInterface
      * array on errors to prevent dashboard crashes, with error logging
      * for troubleshooting.
      *
-     * @return array  Statistics array with claim counts and percentages, empty on error
+     * @return array Statistics array with claim counts and percentages, empty on error
      */
     public function getClaimStatistics(): array
     {
         try {
             return $this->claimRepository->getClaimStatistics();
 
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             Log::error('Failed to get claim statistics', [
-                'error' => $e->getMessage(),
+                'error' => $exception->getMessage(),
                 'user_id' => auth()->id(),
             ]);
 

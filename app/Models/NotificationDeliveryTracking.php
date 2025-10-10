@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\NotificationDeliveryTracking
@@ -11,24 +13,26 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property int $notification_log_id
  * @property string $status
- * @property \Illuminate\Support\Carbon $tracked_at
+ * @property Carbon $tracked_at
  * @property array|null $provider_status
  * @property array|null $metadata
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\NotificationLog|null $notificationLog
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking query()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereMetadata($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereNotificationLogId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereProviderStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereStatus($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereTrackedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationDeliveryTracking whereUpdatedAt($value)
- * @mixin \Eloquent
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read NotificationLog|null $notificationLog
+ *
+ * @method static Builder|NotificationDeliveryTracking newModelQuery()
+ * @method static Builder|NotificationDeliveryTracking newQuery()
+ * @method static Builder|NotificationDeliveryTracking query()
+ * @method static Builder|NotificationDeliveryTracking whereCreatedAt($value)
+ * @method static Builder|NotificationDeliveryTracking whereId($value)
+ * @method static Builder|NotificationDeliveryTracking whereMetadata($value)
+ * @method static Builder|NotificationDeliveryTracking whereNotificationLogId($value)
+ * @method static Builder|NotificationDeliveryTracking whereProviderStatus($value)
+ * @method static Builder|NotificationDeliveryTracking whereStatus($value)
+ * @method static Builder|NotificationDeliveryTracking whereTrackedAt($value)
+ * @method static Builder|NotificationDeliveryTracking whereUpdatedAt($value)
+ *
+ * @mixin Model
  */
 class NotificationDeliveryTracking extends Model
 {

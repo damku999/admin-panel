@@ -2,8 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\NotificationTemplateFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\NotificationTemplate
@@ -17,33 +23,35 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $sample_output
  * @property bool $is_active
  * @property int|null $updated_by
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read string $category
  * @property-read string $name
  * @property-read string $type
- * @property-read \App\Models\NotificationType|null $notificationType
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\NotificationTemplateTestLog> $testLogs
+ * @property-read NotificationType|null $notificationType
+ * @property-read Collection<int, NotificationTemplateTestLog> $testLogs
  * @property-read int|null $test_logs_count
- * @property-read \App\Models\User|null $updater
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\NotificationTemplateVersion> $versions
+ * @property-read User|null $updater
+ * @property-read Collection<int, NotificationTemplateVersion> $versions
  * @property-read int|null $versions_count
- * @method static \Database\Factories\NotificationTemplateFactory factory($count = null, $state = [])
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate query()
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereAvailableVariables($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereChannel($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereIsActive($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereNotificationTypeId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereSampleOutput($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereSubject($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereTemplateContent($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|NotificationTemplate whereUpdatedBy($value)
- * @mixin \Eloquent
+ *
+ * @method static NotificationTemplateFactory factory($count = null, $state = [])
+ * @method static Builder|NotificationTemplate newModelQuery()
+ * @method static Builder|NotificationTemplate newQuery()
+ * @method static Builder|NotificationTemplate query()
+ * @method static Builder|NotificationTemplate whereAvailableVariables($value)
+ * @method static Builder|NotificationTemplate whereChannel($value)
+ * @method static Builder|NotificationTemplate whereCreatedAt($value)
+ * @method static Builder|NotificationTemplate whereId($value)
+ * @method static Builder|NotificationTemplate whereIsActive($value)
+ * @method static Builder|NotificationTemplate whereNotificationTypeId($value)
+ * @method static Builder|NotificationTemplate whereSampleOutput($value)
+ * @method static Builder|NotificationTemplate whereSubject($value)
+ * @method static Builder|NotificationTemplate whereTemplateContent($value)
+ * @method static Builder|NotificationTemplate whereUpdatedAt($value)
+ * @method static Builder|NotificationTemplate whereUpdatedBy($value)
+ *
+ * @mixin Model
  */
 class NotificationTemplate extends Model
 {
@@ -68,7 +76,7 @@ class NotificationTemplate extends Model
     /**
      * Get the notification type for this template
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function notificationType()
     {
@@ -92,7 +100,7 @@ class NotificationTemplate extends Model
     /**
      * Get updater user
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function updater()
     {
@@ -102,7 +110,7 @@ class NotificationTemplate extends Model
     /**
      * Get version history for this template
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function versions()
     {
@@ -112,7 +120,7 @@ class NotificationTemplate extends Model
     /**
      * Get test logs for this template
      *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return HasMany
      */
     public function testLogs()
     {
@@ -122,7 +130,7 @@ class NotificationTemplate extends Model
     /**
      * Get display name from notification type
      */
-    public function getNameAttribute(): string
+    protected function getNameAttribute(): string
     {
         return $this->notificationType->name ?? 'Unknown';
     }
@@ -130,7 +138,7 @@ class NotificationTemplate extends Model
     /**
      * Get type code from notification type
      */
-    public function getTypeAttribute(): string
+    protected function getTypeAttribute(): string
     {
         return $this->notificationType->code ?? 'unknown';
     }
@@ -138,7 +146,7 @@ class NotificationTemplate extends Model
     /**
      * Get category from notification type
      */
-    public function getCategoryAttribute(): string
+    protected function getCategoryAttribute(): string
     {
         return $this->notificationType->category ?? 'unknown';
     }

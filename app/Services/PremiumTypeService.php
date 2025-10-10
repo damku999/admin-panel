@@ -22,7 +22,7 @@ class PremiumTypeService extends BaseService
         $this->validateVehicleAndLifeInsurance($data);
 
         return $this->createInTransaction(
-            fn () => PremiumType::create($data)
+            fn () => PremiumType::query()->create($data)
         );
     }
 
@@ -71,8 +71,8 @@ class PremiumTypeService extends BaseService
      */
     private function validateVehicleAndLifeInsurance(array $data): void
     {
-        $isVehicle = isset($data['is_vehicle']) ? (bool) $data['is_vehicle'] : false;
-        $isLifeInsurance = isset($data['is_life_insurance_policies']) ? (bool) $data['is_life_insurance_policies'] : false;
+        $isVehicle = isset($data['is_vehicle']) && (bool) $data['is_vehicle'];
+        $isLifeInsurance = isset($data['is_life_insurance_policies']) && (bool) $data['is_life_insurance_policies'];
 
         if ($isVehicle && $isLifeInsurance) {
             throw new \InvalidArgumentException('Both "Is it for Vehicle?" and "Is Life Insurance Policies?" cannot be true at the same time.');

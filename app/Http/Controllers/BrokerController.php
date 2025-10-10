@@ -37,9 +37,9 @@ class BrokerController extends AbstractBaseCrudController
      */
     public function index(Request $request): View
     {
-        $brokers = $this->brokerService->getBrokers($request);
+        $lengthAwarePaginator = $this->brokerService->getBrokers($request);
 
-        return view('brokers.index', ['brokers' => $brokers, 'request' => $request->all()]);
+        return view('brokers.index', ['brokers' => $lengthAwarePaginator, 'request' => $request->all()]);
     }
 
     /**
@@ -58,21 +58,21 @@ class BrokerController extends AbstractBaseCrudController
     /**
      * Store Broker
      *
-     * @param  Request  $request
+     * @param  Request  $storeBrokerRequest
      * @return View Brokers
      *
      * @author Darshan Baraiya
      */
-    public function store(StoreBrokerRequest $request): RedirectResponse
+    public function store(StoreBrokerRequest $storeBrokerRequest): RedirectResponse
     {
         try {
-            $broker = $this->brokerService->createBroker($request->validated());
+            $broker = $this->brokerService->createBroker($storeBrokerRequest->validated());
 
             return $this->redirectWithSuccess('brokers.index',
                 $this->getSuccessMessage('Broker', 'created'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Broker', 'create').': '.$th->getMessage())
+                $this->getErrorMessage('Broker', 'create').': '.$throwable->getMessage())
                 ->withInput();
         }
     }
@@ -91,9 +91,9 @@ class BrokerController extends AbstractBaseCrudController
 
             return $this->redirectWithSuccess('brokers.index',
                 $this->getSuccessMessage('Broker status', 'updated'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Broker status', 'update').': '.$th->getMessage());
+                $this->getErrorMessage('Broker status', 'update').': '.$throwable->getMessage());
         }
     }
 
@@ -115,21 +115,21 @@ class BrokerController extends AbstractBaseCrudController
     /**
      * Update Broker
      *
-     * @param  Request  $request,  Broker $broker
+     * @param  Request  $updateBrokerRequest  ,  Broker $broker
      * @return View Brokers
      *
      * @author Darshan Baraiya
      */
-    public function update(UpdateBrokerRequest $request, Broker $broker): RedirectResponse
+    public function update(UpdateBrokerRequest $updateBrokerRequest, Broker $broker): RedirectResponse
     {
         try {
-            $this->brokerService->updateBroker($broker, $request->validated());
+            $this->brokerService->updateBroker($broker, $updateBrokerRequest->validated());
 
             return $this->redirectWithSuccess('brokers.index',
                 $this->getSuccessMessage('Broker', 'updated'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Broker', 'update').': '.$th->getMessage())
+                $this->getErrorMessage('Broker', 'update').': '.$throwable->getMessage())
                 ->withInput();
         }
     }
@@ -148,9 +148,9 @@ class BrokerController extends AbstractBaseCrudController
 
             return $this->redirectWithSuccess('brokers.index',
                 $this->getSuccessMessage('Broker', 'deleted'));
-        } catch (\Throwable $th) {
+        } catch (\Throwable $throwable) {
             return $this->redirectWithError(
-                $this->getErrorMessage('Broker', 'delete').': '.$th->getMessage());
+                $this->getErrorMessage('Broker', 'delete').': '.$throwable->getMessage());
         }
     }
 
@@ -185,16 +185,14 @@ class BrokerController extends AbstractBaseCrudController
             'relations' => $this->getExportRelations(),
             'order_by' => ['column' => 'created_at', 'direction' => 'desc'],
             'headings' => ['ID', 'Name', 'Email', 'Mobile Number', 'Status', 'Created Date'],
-            'mapping' => function ($model) {
-                return [
-                    $model->id,
-                    $model->name,
-                    $model->email ?? 'N/A',
-                    $model->mobile_number ?? 'N/A',
-                    $model->status ? 'Active' : 'Inactive',
-                    $model->created_at->format('Y-m-d H:i:s'),
-                ];
-            },
+            'mapping' => fn ($model): array => [
+                $model->id,
+                $model->name,
+                $model->email ?? 'N/A',
+                $model->mobile_number ?? 'N/A',
+                $model->status ? 'Active' : 'Inactive',
+                $model->created_at->format('Y-m-d H:i:s'),
+            ],
             'with_mapping' => true,
         ];
     }

@@ -72,6 +72,59 @@
             "@php artisan optimize:clear",
             "@php artisan migrate --seed",
             "npm run dev"
+        ],
+        "test:notifications": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php artisan test tests/Unit/Notification/VariableResolverServiceTest.php --colors",
+            "@php artisan test tests/Unit/Notification/VariableRegistryServiceTest.php --colors",
+            "@php artisan test tests/Unit/Notification/NotificationContextTest.php --colors",
+            "@php artisan test tests/Unit/Notification/TemplateServiceTest.php --colors",
+            "@php artisan test tests/Feature/Notification --colors",
+            "@php artisan test tests/Unit/Notification tests/Feature/Notification --coverage"
+        ],
+        "setup:notifications": [
+            "@php artisan migrate --force",
+            "@php artisan db:seed --class=UnifiedPermissionsSeeder --force",
+            "@php artisan route:clear",
+            "@php artisan view:clear",
+            "@php artisan config:clear",
+            "@php artisan cache:clear"
+        ],
+        "fix": [
+            "@php vendor/bin/pint",
+            "@php artisan optimize:clear"
+        ],
+        "fix:quick": [
+            "@composer dump-autoload -o",
+            "@php artisan cache:clear",
+            "@php artisan config:clear",
+            "@php artisan route:clear",
+            "@php artisan view:clear"
+        ],
+        "analyze": [
+            "@php vendor/bin/pint --test",
+            "@php vendor/bin/phpstan analyse --memory-limit=2G",
+            "@composer audit"
+        ],
+        "analyze:full": [
+            "Composer\\Config::disableProcessTimeout",
+            "@php vendor/bin/pint --test",
+            "@php vendor/bin/phpstan analyse --memory-limit=2G",
+            "@composer audit",
+            "@composer outdated --direct"
+        ],
+        "check": [
+            "@composer dump-autoload -o",
+            "@php artisan cache:clear",
+            "@php artisan config:clear",
+            "@php artisan route:clear",
+            "@php artisan view:clear",
+            "@composer audit"
+        ],
+        "quality:install": [
+            "@composer require laravel/pint --dev",
+            "@composer require phpstan/phpstan --dev",
+            "@composer require nunomaduro/larastan --dev"
         ]
     },
     "extra": {

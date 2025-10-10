@@ -30,7 +30,9 @@
       "Bash(RUN_NOTIFICATION_TESTS.md )",
       "Bash(RUN_SERVICE_TESTS.md )",
       "Bash(TESTING_QUICK_REFERENCE.md)",
-      "Bash(composer:*)"
+      "Bash(composer:*)",
+      "Bash(php vendor/bin/rector process:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

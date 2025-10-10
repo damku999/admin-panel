@@ -1,164 +1,155 @@
-# Code Quality Scripts
+# Development Scripts
 
-## Quick Start Guide
+All development scripts are now managed through Composer for cross-platform compatibility.
 
-### First Time Setup
+## Available Commands
 
-**Install all quality tools:**
+### Testing
+
+**Run Notification Tests**
 ```bash
-scripts\install-quality-tools.bat
+composer test:notifications
 ```
+Runs comprehensive notification system tests with coverage reporting.
 
-This installs:
-- ✓ Laravel Pint (code style auto-fixer)
-- ✓ PHPStan (static analysis)
-- ✓ Larastan (PHPStan for Laravel)
+### Setup & Configuration
 
----
-
-## Available Scripts
-
-### 1. Simple Check (No Installation Required)
+**Setup Notification System**
 ```bash
-scripts\simple-check.bat
+composer setup:notifications
 ```
-**What it does:**
-- Checks PHP syntax errors
-- Clears caches
-- Finds debug statements (dd, dump, var_dump)
-- Security audit
-- Optimizes autoloader
+Configures notification system: runs migrations, seeds permissions, clears caches.
 
-**Use when:** You want a quick check without installing extra tools
+### Code Quality
 
----
-
-### 2. Quick Fix
+**Quick Fix**
 ```bash
-scripts\quick-fix.bat
+composer fix
 ```
-**What it does:**
-- Auto-fixes code style with Laravel Pint
-- Optimizes autoloader
-- Clears all caches
+Auto-fixes code style with Laravel Pint and clears caches.
 
-**Use when:** Before committing code
-
----
-
-### 3. Full Analysis
+**Quick Cache Clear**
 ```bash
-scripts\analyze-and-fix.bat
+composer fix:quick
 ```
-**What it does:**
-- Laravel Pint analysis & auto-fix
-- PHPStan static analysis
-- Security vulnerability check
-- Outdated package check
+Optimizes autoloader and clears all application caches.
 
-**Use when:** Weekly maintenance or before releases
-
----
-
-### 4. Detailed Report
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\full-report.ps1
+**Code Analysis**
+```bash
+composer analyze
 ```
-**What it does:**
-- Generates comprehensive report
-- Saves to `claudedocs/code-quality-report-*.md`
-- Includes statistics, metrics, and recommendations
+Runs Pint (dry-run), PHPStan analysis, and security audit.
 
-**Use when:** You need a saved report for review
+**Full Analysis**
+```bash
+composer analyze:full
+```
+Complete analysis including outdated package check (longer running).
+
+**Simple Check**
+```bash
+composer check
+```
+Optimizes autoloader, clears caches, runs security audit.
+
+### Quality Tools Installation
+
+**Install Quality Tools**
+```bash
+composer quality:install
+```
+Installs Laravel Pint, PHPStan, and Larastan for code quality analysis.
+
+**Install Rector Laravel (Code Refactoring)**
+```bash
+composer require driftingly/rector-laravel --dev
+```
+Automated code refactoring tool for Laravel upgrades and best practices.
 
 ---
 
 ## Recommended Workflow
 
-### Daily
+### Daily Development
 ```bash
-scripts\simple-check.bat
+composer check
 ```
 
 ### Before Each Commit
 ```bash
-scripts\quick-fix.bat
+composer fix
 git add .
 git commit -m "Your message"
 ```
 
-### Weekly
+### Weekly Maintenance
 ```bash
-scripts\analyze-and-fix.bat
+composer analyze:full
 ```
 
-### Monthly
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\full-report.ps1
+### Before Deployment
+```bash
+composer analyze
+composer test:notifications
 ```
 
 ---
 
-## Manual Commands
+## Manual Artisan Commands
 
-If you prefer to run tools individually:
+For direct Laravel command execution:
 
 ```bash
-# Fix code style
-vendor\bin\pint
+# Clear all caches
+php artisan optimize:clear
 
-# Check code style (don't fix)
-vendor\bin\pint --test
+# Run migrations
+php artisan migrate
 
-# Run static analysis
-vendor\bin\phpstan analyse
-
-# Security audit
-composer audit
-
-# Update packages
-composer update
+# Run specific seeder
+php artisan db:seed --class=UnifiedPermissionsSeeder
 
 # Run tests
 php artisan test
-```
 
----
+# Code style fixing
+php artisan pint
+# OR
+./vendor/bin/pint
 
-## Troubleshooting
-
-### "vendor\bin\pint is not recognized"
-**Solution:** Run the installer first:
-```bash
-scripts\install-quality-tools.bat
-```
-
-### "Class not found" errors
-**Solution:** Optimize autoloader:
-```bash
-composer dump-autoload -o
-```
-
-### Scripts won't run
-**Solution:** Make sure you're in the project root directory:
-```bash
-cd C:\wamp64\www\test\admin-panel
+# Static analysis
+./vendor/bin/phpstan analyse
 ```
 
 ---
 
 ## Configuration Files
 
-Created automatically by the installer:
-
 - `phpstan.neon` - PHPStan configuration
 - `pint.json` - Laravel Pint rules
-
-You can customize these files to adjust analysis rules.
+- `composer.json` - All script definitions
 
 ---
 
-## See Also
+## Troubleshooting
 
-- Full guide: `claudedocs/AUTOMATED_ANALYSIS_GUIDE.md`
-- Test documentation: `claudedocs/PEST_PHP_CONVERSION.md`
+### "Command not found" errors
+Ensure you're in the project root directory and have run `composer install`.
+
+### "Class not found" errors
+```bash
+composer dump-autoload -o
+```
+
+### Vendor binaries not accessible
+```bash
+composer install
+```
+
+---
+
+## Additional Resources
+
+- Full project documentation: `claudedocs/PROJECT_DOCUMENTATION.md`
+- Test documentation: `claudedocs/TESTING_QUICK_REFERENCE.md`
+- Architecture guide: `claudedocs/SYSTEM_ARCHITECTURE.md`
